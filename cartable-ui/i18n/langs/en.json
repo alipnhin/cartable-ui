@@ -1,0 +1,96 @@
+{
+  "app": {
+    "title": "Payment Cartable",
+    "description": "Manage and track payment orders",
+    "login": "Login"
+  },
+  "common": {
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "add": "Add",
+      "remove": "Remove",
+      "submit": "Submit",
+      "close": "Close",
+      "filter": "Filter",
+      "search": "Search",
+      "view": "View",
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "labels": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "username": "Username",
+      "phone": "Phone",
+      "address": "Address"
+    },
+    "messages": {
+      "welcome": "Welcome",
+      "loading": "Loading...",
+      "error": "An error occurred",
+      "success": "Operation completed successfully",
+      "confirm": "Are you sure?"
+    }
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "paymentOrders": "Payment Orders",
+    "myCartable": "My Cartable",
+    "accounts": "Accounts Management",
+    "reports": "Advanced Reports",
+    "profile": "Profile",
+    "logout": "Logout",
+    "appTitle": "Payment System",
+    "appSubtitle": "Smart Management"
+  },
+  "userMenu": {
+    "publicProfile": "Public Profile",
+    "myProfile": "My Profile",
+    "myAccount": "My Account",
+    "getStarted": "Get Started",
+    "billing": "Billing",
+    "security": "Security",
+    "membersAndRoles": "Members & Roles",
+    "integrations": "Integrations",
+    "logout": "Logout",
+    "changeLanguage": "Change Language",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode"
+  },
+  "paymentCartable": {
+    "pageTitle": "Payment Orders",
+    "pageSubtitle": "Manage and track payment orders",
+    "newOrder": "New Order",
+    "viewDetails": "View Details",
+    "transactionCount": "Transaction Count",
+    "totalAmount": "Total Amount",
+    "registrationDate": "Registration Date",
+    "status": "Status",
+    "ibanNumber": "IBAN Number",
+    "orderTitle": "Payment Order Title",
+    "actions": "Actions",
+    "accountGroups": {
+      "all": "All Accounts",
+      "operational": "Operational Accounts",
+      "investment": "Investment Accounts",
+      "savings": "Savings Accounts",
+      "foreign": "Foreign Currency Accounts"
+    },
+    "statusLabels": {
+      "waitingForApproval": "Waiting For Approval",
+      "approved": "Approved",
+      "submittedToBank": "Submitted To Bank",
+      "succeeded": "Succeeded",
+      "rejected": "Rejected",
+      "bankRejected": "Bank Rejected",
+      "draft": "Draft",
+      "doneWithError": "Done With Error",
+      "canceled": "Canceled",
+      "expired": "Expired"
+    }
+  }
+}

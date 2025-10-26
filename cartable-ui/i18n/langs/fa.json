@@ -1,0 +1,96 @@
+{
+  "app":{
+    "title":"کارتابل پرداخت",
+    "description":"مدیریت و پیگیری دستورهای پرداخت",
+    "login":"ورود به حساب کاربری"
+  },
+  "common": {
+    "buttons": {
+      "save": "ذخیره",
+      "cancel": "لغو",
+      "delete": "حذف",
+      "edit": "ویرایش",
+      "add": "افزودن",
+      "remove": "حذف کردن",
+      "submit": "ثبت",
+      "close": "بستن",
+      "filter": "فیلتر",
+      "search": "جستجو",
+      "view": "مشاهده",
+      "approve": "تأیید",
+      "reject": "رد"
+    },
+    "labels": {
+      "name": "نام",
+      "email": "ایمیل",
+      "password": "رمز عبور",
+      "username": "نام کاربری",
+      "phone": "تلفن",
+      "address": "آدرس"
+    },
+    "messages": {
+      "welcome": "خوش آمدید",
+      "loading": "در حال بارگذاری...",
+      "error": "خطایی رخ داده است",
+      "success": "عملیات با موفقیت انجام شد",
+      "confirm": "آیا مطمئن هستید؟"
+    }
+  },
+  "navigation": {
+    "dashboard": "داشبورد",
+    "paymentOrders": "دستورهای پرداخت",
+    "myCartable": "کارتابل من",
+    "accounts": "مدیریت حساب‌ها",
+    "reports": "گزارش پیشرفته",
+    "profile": "پروفایل",
+    "logout": "خروج",
+    "appTitle": "سیستم پرداخت",
+    "appSubtitle": "مدیریت هوشمند"
+  },
+  "userMenu": {
+    "publicProfile": "پروفایل عمومی",
+    "myProfile": "پروفایل من",
+    "myAccount": "حساب من",
+    "getStarted": "شروع به کار",
+    "billing": "صورتحساب",
+    "security": "امنیت",
+    "membersAndRoles": "اعضا و نقش‌ها",
+    "integrations": "یکپارچه‌سازی",
+    "logout": "خروج",
+    "changeLanguage": "تغییر زبان",
+    "darkMode": "حالت تاریک",
+    "lightMode": "حالت روشن"
+  },
+  "paymentCartable": {
+    "pageTitle": "دستورهای پرداخت",
+    "pageSubtitle": "مدیریت و پیگیری دستورات پرداخت",
+    "newOrder": "دستور جدید",
+    "viewDetails": "مشاهده جزئیات",
+    "transactionCount": "تعداد تراکنش",
+    "totalAmount": "مبلغ کل",
+    "registrationDate": "تاریخ ثبت",
+    "status": "وضعیت",
+    "ibanNumber": "شماره شبا",
+    "orderTitle": "عنوان دستور پرداخت",
+    "actions": "عملیات",
+    "accountGroups": {
+      "all": "همه حساب‌ها",
+      "operational": "حساب‌های عملیاتی",
+      "investment": "حساب‌های سرمایه‌گذاری",
+      "savings": "حساب‌های پس‌انداز",
+      "foreign": "حساب‌های ارزی"
+    },
+    "statusLabels": {
+      "waitingForApproval": "در انتظار تأیید",
+      "approved": "تأیید شده",
+      "submittedToBank": "ارسال شده به بانک",
+      "succeeded": "انجام شده",
+      "rejected": "عدم تأیید",
+      "bankRejected": "رد شده توسط بانک",
+      "draft": "پیش‌نویس",
+      "doneWithError": "انجام شده با خطا",
+      "canceled": "لغو شده",
+      "expired": "منقضی شده"
+    }
+  }
+}
