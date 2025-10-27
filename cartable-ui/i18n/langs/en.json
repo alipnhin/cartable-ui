@@ -2,7 +2,8 @@
   "app": {
     "title": "Payment Cartable",
     "description": "Manage and track payment orders",
-    "login": "Login"
+    "login": "Login",
+    "version": "version"
   },
   "common": {
     "buttons": {
@@ -18,7 +19,8 @@
       "search": "Search",
       "view": "View",
       "approve": "Approve",
-      "reject": "Reject"
+      "reject": "Reject",
+      "new": "New"
     },
     "labels": {
       "name": "Name",
@@ -92,5 +94,9 @@
       "canceled": "Canceled",
       "expired": "Expired"
     }
+  },
+  "dashboard": {
+    "pageTitle": "Dashbard",
+    "pageSubtitle": "Control and analyz payments"
   }
 }

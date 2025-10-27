@@ -1,8 +1,9 @@
 {
-  "app":{
-    "title":"کارتابل پرداخت",
-    "description":"مدیریت و پیگیری دستورهای پرداخت",
-    "login":"ورود به حساب کاربری"
+  "app": {
+    "title": "کارتابل پرداخت",
+    "description": "مدیریت و پیگیری دستورهای پرداخت",
+    "login": "ورود به حساب کاربری",
+    "version": "نسخه"
   },
   "common": {
     "buttons": {
@@ -18,7 +19,8 @@
       "search": "جستجو",
       "view": "مشاهده",
       "approve": "تأیید",
-      "reject": "رد"
+      "reject": "رد",
+      "new": "جدید"
     },
     "labels": {
       "name": "نام",
@@ -38,10 +40,10 @@
   },
   "navigation": {
     "dashboard": "داشبورد",
-    "paymentOrders": "دستورهای پرداخت",
-    "myCartable": "کارتابل من",
-    "accounts": "مدیریت حساب‌ها",
-    "reports": "گزارش پیشرفته",
+    "paymentOrders": "پرداخت ها",
+    "myCartable": "کارتابل",
+    "accounts": "حساب‌ها",
+    "reports": "گزارش",
     "profile": "پروفایل",
     "logout": "خروج",
     "appTitle": "سیستم پرداخت",
@@ -92,5 +94,9 @@
       "canceled": "لغو شده",
       "expired": "منقضی شده"
     }
+  },
+  "dashboard": {
+    "pageTitle": "داشبورد",
+    "pageSubtitle": "نمای کلی فعالیت‌های مالی"
   }
 }

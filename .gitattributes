@@ -1,0 +1,76 @@
+# =====================================
+# Default behavior
+# =====================================
+* text=auto
+
+# =====================================
+# JavaScript / TypeScript / JSX / TSX
+# =====================================
+*.js     text eol=lf
+*.jsx    text eol=lf
+*.ts     text eol=lf
+*.tsx    text eol=lf
+
+# =====================================
+# JSON / Config files
+# =====================================
+*.json   text eol=lf
+*.yaml   text eol=lf
+*.yml    text eol=lf
+*.toml   text eol=lf
+*.env    text eol=lf
+
+# =====================================
+# HTML / CSS / SCSS / LESS / Tailwind
+# =====================================
+*.html   text eol=lf
+*.css    text eol=lf
+*.scss   text eol=lf
+*.less   text eol=lf
+*.pcss   text eol=lf
+*.postcss text eol=lf
+
+# =====================================
+# Markdown / Docs
+# =====================================
+*.md     text eol=lf
+*.mdx    text eol=lf
+
+# =====================================
+# GitHub / Editor config
+# =====================================
+.gitattributes text eol=lf
+.editorconfig text eol=lf
+.eslintrc* text eol=lf
+.prettierrc* text eol=lf
+.stylelintrc* text eol=lf
+
+# =====================================
+# Images / Media (Binary)
+# =====================================
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.svg    binary
+*.ico    binary
+*.webp   binary
+*.mp4    binary
+*.mp3    binary
+
+# =====================================
+# Fonts / Binary
+# =====================================
+*.woff   binary
+*.woff2  binary
+*.eot    binary
+*.ttf    binary
+*.otf    binary
+
+# =====================================
+# Misc / Other binaries
+# =====================================
+*.zip    binary
+*.tar    binary
+*.gz     binary
+*.pdf    binary

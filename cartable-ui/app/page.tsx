@@ -1,9 +1,10 @@
 "use client";
-import { UserDropdownMenu } from "@/components/common/user-dropdown-menu";
+import { UserDropdownMenu } from "@/components/layout/user-dropdown-menu";
 import { toAbsoluteUrl } from "@/lib/helpers";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
   const { t } = useTranslation();
@@ -28,6 +29,16 @@ export default function Home() {
         {/* محتوای اصلی */}
         <div className="flex min-h-[calc(100vh-120px)] items-center justify-center">
           <div className="w-full max-w-3xl space-y-8 text-center px-4">
+            <div className="flex justify-center px-4 mb-30">
+              <Image
+                src="/media/payments.svg"
+                alt="payment"
+                width={500}
+                height={500}
+                className="w-full max-w-sm h-auto"
+              />
+            </div>
+
             <h1 className="text-4xl font-bold leading-tight tracking-tight text-black dark:text-zinc-50 sm:text-5xl md:text-6xl">
               {t("app.title")}
             </h1>
@@ -38,11 +49,13 @@ export default function Home() {
 
             <div className="flex justify-center pt-4">
               <Button
-                className="w-full sm:w-auto min-w-[200px] text-lg"
+                className="w-full sm:w-auto min-w-[300px] text-lg "
                 size="lg"
                 asChild
               >
-                <Link href="/login">{t("app.login")}</Link>
+                <Link className="py-4" href="/dashboard">
+                  {t("app.login")}
+                </Link>
               </Button>
             </div>
           </div>

@@ -1,327 +1,796 @@
 @import 'tailwindcss';
- 
 @import 'tw-animate-css';
-/* @import "./themes.css"; */
-/** Dark Mode Variant **/
-/* @custom-variant dark (&:is(.dark *)); */
-@custom-variant dark (&:where(.dark, .dark *));
- 
-/** Colors **/
 
+/** Dark Mode Variant **/
+@custom-variant dark (&:where(.dark, .dark *));
+
+/** Colors **/
 @theme inline {
-  --breakpoint-3xl: 1600px;
-  --breakpoint-4xl: 2000px;
-  --font-sans: var(--font-ykan);
-  --font-mono: var(--font-mono);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
-  --color-info: var(--info);
-  --color-info-foreground: var(--info-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-surface: var(--surface);
-  --color-surface-foreground: var(--surface-foreground);
-  --color-code: var(--code);
-  --color-code-foreground: var(--code-foreground);
-  --color-code-highlight: var(--code-highlight);
-  --color-code-number: var(--code-number);
-  --color-selection: var(--selection);
-  --color-selection-foreground: var(--selection-foreground);
+    --breakpoint-3xl: 1600px;
+    --breakpoint-4xl: 2000px;
+    --font-sans: var(--font-ykan);
+    --font-mono: var(--font-mono);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-info: var(--info);
+    --color-info-foreground: var(--info-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-surface: var(--surface);
+    --color-surface-foreground: var(--surface-foreground);
+    --color-code: var(--code);
+    --color-code-foreground: var(--code-foreground);
+    --color-code-highlight: var(--code-highlight);
+    --color-code-number: var(--code-number);
+    --color-selection: var(--selection);
+    --color-selection-foreground: var(--selection-foreground);
 }
 
 :root {
-  --radius: 0.625rem;
-  
-  /* Base Colors - Light & Clean */
-  --background: oklch(0.99 0 0);
-  --foreground: oklch(0.15 0 0);
-  
-  /* Card & Surface - Subtle elevation */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0 0);
-  --surface: oklch(0.98 0 0);
-  --surface-foreground: var(--foreground);
-  
-  /* Brand Primary - Professional Blue for Financial Trust */
-  --primary: oklch(0.55 0.18 240);         /* Rich Blue */
-  --primary-foreground: oklch(0.99 0 0);
-  
-  /* Secondary - Complementary Accent */
-  --secondary: oklch(0.95 0.01 240);       /* Light Blue Tint */
-  --secondary-foreground: oklch(0.25 0 0);
-  
-  /* Muted - Backgrounds & Less Important Content */
-  --muted: oklch(0.96 0 0);
-  --muted-foreground: oklch(0.50 0 0);
-  
-  /* Accent - Call-to-Action & Highlights */
-  --accent: oklch(0.65 0.20 270);          /* Purple - Modern & Energetic */
-  --accent-foreground: oklch(0.99 0 0);
-  
-  /* Status Colors - Essential for Payment System */
-  --success: oklch(0.60 0.15 145);         /* Green - Successful Payments */
-  --success-foreground: oklch(0.99 0 0);
-  
-  --warning: oklch(0.75 0.15 85);          /* Amber - Pending/Review */
-  --warning-foreground: oklch(0.15 0 0);
-  
-  --destructive: oklch(0.60 0.20 25);      /* Red - Failed/Cancelled */
-  --destructive-foreground: oklch(0.99 0 0);
-  
-  --info: oklch(0.60 0.18 220);            /* Light Blue - Information */
-  --info-foreground: oklch(0.99 0 0);
-  
-  /* Borders & Inputs - Subtle & Clean */
-  --border: oklch(0.90 0 0);
-  --input: oklch(0.95 0 0);
-  --ring: oklch(0.55 0.18 240);            /* Focus ring matches primary */
-  
-  /* Chart Colors - Financial Data Visualization */
-  --chart-1: oklch(0.65 0.20 240);         /* Blue - Revenue */
-  --chart-2: oklch(0.60 0.15 145);         /* Green - Profit */
-  --chart-3: oklch(0.65 0.20 270);         /* Purple - Transactions */
-  --chart-4: oklch(0.75 0.15 85);          /* Amber - Pending */
-  --chart-5: oklch(0.60 0.20 25);          /* Red - Expenses */
-  
-  /* Sidebar - Clean & Professional */
-  --sidebar: oklch(0.98 0 0);
-  --sidebar-foreground: oklch(0.20 0 0);
-  --sidebar-primary: oklch(0.55 0.18 240);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.95 0.01 240);
-  --sidebar-accent-foreground: oklch(0.25 0 0);
-  --sidebar-border: oklch(0.92 0 0);
-  --sidebar-ring: oklch(0.55 0.18 240);
-  
-  /* Code Blocks */
-  --code: var(--surface);
-  --code-foreground: var(--surface-foreground);
-  --code-highlight: oklch(0.96 0 0);
-  --code-number: oklch(0.56 0 0);
-  
-  /* Selection */
-  --selection: oklch(0.55 0.18 240);
-  --selection-foreground: oklch(1 0 0);
-  
-  /* Font */
-  --font-ykan: "YekanBakhFaNum", sans-serif;
+    --radius: 1rem;
+    /* Base Colors - Light & Clean matching Bill Split */
+    --background: oklch(0.98 0.005 160);
+    --foreground: oklch(0.20 0.01 160);
+    /* Card & Surface */
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.20 0.01 160);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.20 0.01 160);
+    --surface: oklch(0.99 0 0);
+    --surface-foreground: var(--foreground);
+    /* Brand Primary - Green from Bill Split (#27AE60) */
+    --primary: oklch(0.62 0.15 155);
+    --primary-foreground: oklch(0.99 0 0);
+    /* Secondary */
+    --secondary: oklch(0.96 0.02 155);
+    --secondary-foreground: oklch(0.25 0.02 155);
+    /* Muted */
+    --muted: oklch(0.97 0.005 160);
+    --muted-foreground: oklch(0.50 0.01 160);
+    /* Accent - Light blue (#5DADE2) */
+    --accent: oklch(0.68 0.10 220);
+    --accent-foreground: oklch(0.99 0 0);
+    /* Status Colors */
+    --success: oklch(0.62 0.15 155);
+    --success-foreground: oklch(0.99 0 0);
+    --warning: oklch(0.75 0.12 75);
+    --warning-foreground: oklch(0.15 0 0);
+    --destructive: oklch(0.58 0.18 20);
+    --destructive-foreground: oklch(0.99 0 0);
+    --info: oklch(0.68 0.10 220);
+    --info-foreground: oklch(0.99 0 0);
+    /* Borders & Inputs */
+    --border: oklch(0.93 0.005 160);
+    --input: oklch(0.96 0.005 160);
+    --ring: oklch(0.62 0.15 155);
+    /* Chart Colors */
+    --chart-1: oklch(0.62 0.15 155);
+    --chart-2: oklch(0.68 0.10 220);
+    --chart-3: oklch(0.55 0.12 145);
+    --chart-4: oklch(0.75 0.12 75);
+    --chart-5: oklch(0.58 0.18 20);
+    /* Sidebar */
+    --sidebar: oklch(0.99 0 0);
+    --sidebar-foreground: oklch(0.25 0.01 160);
+    --sidebar-primary: oklch(0.62 0.15 155);
+    --sidebar-primary-foreground: oklch(0.99 0 0);
+    --sidebar-accent: oklch(0.96 0.02 155);
+    --sidebar-accent-foreground: oklch(0.25 0.02 155);
+    --sidebar-border: oklch(0.94 0.005 160);
+    --sidebar-ring: oklch(0.62 0.15 155);
+    /* Code Blocks */
+    --code: var(--surface);
+    --code-foreground: var(--surface-foreground);
+    --code-highlight: oklch(0.97 0.005 160);
+    --code-number: oklch(0.56 0 0);
+    /* Selection */
+    --selection: oklch(0.62 0.15 155);
+    --selection-foreground: oklch(1 0 0);
+    /* Font */
+    --font-ykan: "YekanBakhFaNum", sans-serif;
 }
 
 .dark {
-  /* Base Colors - Dark & Comfortable */
-  --background: oklch(0.12 0 0);
-  --foreground: oklch(0.95 0 0);
-  
-  /* Card & Surface - Elevated Dark */
-  --card: oklch(0.16 0 0);
-  --card-foreground: oklch(0.95 0 0);
-  --popover: oklch(0.18 0 0);
-  --popover-foreground: oklch(0.95 0 0);
-  --surface: oklch(0.14 0 0);
-  --surface-foreground: oklch(0.85 0 0);
-  
-  /* Brand Primary - Bright Blue for Dark Mode */
-  --primary: oklch(0.65 0.20 240);         /* Brighter Blue */
-  --primary-foreground: oklch(0.12 0 0);
-  
-  /* Secondary */
-  --secondary: oklch(0.20 0.01 240);
-  --secondary-foreground: oklch(0.95 0 0);
-  
-  /* Muted */
-  --muted: oklch(0.20 0 0);
-  --muted-foreground: oklch(0.60 0 0);
-  
-  /* Accent */
-  --accent: oklch(0.70 0.22 270);          /* Vibrant Purple */
-  --accent-foreground: oklch(0.12 0 0);
-  
-  /* Status Colors - Adjusted for Dark Mode */
-  --success: oklch(0.65 0.18 145);         /* Brighter Green */
-  --success-foreground: oklch(0.12 0 0);
-  
-  --warning: oklch(0.75 0.18 85);          /* Vibrant Amber */
-  --warning-foreground: oklch(0.12 0 0);
-  
-  --destructive: oklch(0.65 0.22 25);      /* Bright Red */
-  --destructive-foreground: oklch(0.12 0 0);
-  
-  --info: oklch(0.65 0.20 220);            /* Bright Info Blue */
-  --info-foreground: oklch(0.12 0 0);
-  
-  /* Borders & Inputs - Subtle in Dark */
-  --border: oklch(0.25 0 0);
-  --input: oklch(0.22 0 0);
-  --ring: oklch(0.65 0.20 240);
-  
-  /* Chart Colors - Vibrant for Dark Background */
-  --chart-1: oklch(0.68 0.22 240);
-  --chart-2: oklch(0.65 0.18 145);
-  --chart-3: oklch(0.70 0.22 270);
-  --chart-4: oklch(0.75 0.18 85);
-  --chart-5: oklch(0.65 0.22 25);
-  
-  /* Sidebar - Dark Professional */
-  --sidebar: oklch(0.16 0 0);
-  --sidebar-foreground: oklch(0.95 0 0);
-  --sidebar-primary: oklch(0.65 0.20 240);
-  --sidebar-primary-foreground: oklch(0.12 0 0);
-  --sidebar-accent: oklch(0.20 0.01 240);
-  --sidebar-accent-foreground: oklch(0.95 0 0);
-  --sidebar-border: oklch(0.25 0 0);
-  --sidebar-ring: oklch(0.60 0 0);
-  
-  /* Code Blocks - Dark */
-  --code: oklch(0.15 0 0);
-  --code-foreground: oklch(0.75 0 0);
-  --code-highlight: oklch(0.18 0 0);
-  --code-number: oklch(0.70 0 0);
-  
-  /* Selection */
-  --selection: oklch(0.65 0.20 240);
-  --selection-foreground: oklch(0.12 0 0);
+    /* Base Colors - Dark green theme */
+    --background: oklch(0.18 0.02 160);
+    --foreground: oklch(0.95 0.005 160);
+    /* Card & Surface */
+    --card: oklch(0.22 0.015 160);
+    --card-foreground: oklch(0.95 0.005 160);
+    --popover: oklch(0.24 0.015 160);
+    --popover-foreground: oklch(0.95 0.005 160);
+    --surface: oklch(0.20 0.015 160);
+    --surface-foreground: oklch(0.90 0.005 160);
+    /* Brand Primary - Brighter green */
+    --primary: oklch(0.68 0.18 155);
+    --primary-foreground: oklch(0.15 0.02 160);
+    /* Secondary */
+    --secondary: oklch(0.26 0.02 155);
+    --secondary-foreground: oklch(0.95 0.005 160);
+    /* Muted */
+    --muted: oklch(0.24 0.015 160);
+    --muted-foreground: oklch(0.65 0.01 160);
+    /* Accent */
+    --accent: oklch(0.72 0.12 220);
+    --accent-foreground: oklch(0.15 0.02 160);
+    /* Status Colors */
+    --success: oklch(0.68 0.18 155);
+    --success-foreground: oklch(0.15 0.02 160);
+    --warning: oklch(0.78 0.14 75);
+    --warning-foreground: oklch(0.15 0 0);
+    --destructive: oklch(0.62 0.20 20);
+    --destructive-foreground: oklch(0.15 0.02 160);
+    --info: oklch(0.72 0.12 220);
+    --info-foreground: oklch(0.15 0.02 160);
+    /* Borders & Inputs */
+    --border: oklch(0.30 0.02 160);
+    --input: oklch(0.26 0.02 160);
+    --ring: oklch(0.68 0.18 155);
+    /* Chart Colors */
+    --chart-1: oklch(0.68 0.18 155);
+    --chart-2: oklch(0.72 0.12 220);
+    --chart-3: oklch(0.60 0.15 145);
+    --chart-4: oklch(0.78 0.14 75);
+    --chart-5: oklch(0.62 0.20 20);
+    /* Sidebar */
+    --sidebar: oklch(0.20 0.015 160);
+    --sidebar-foreground: oklch(0.95 0.005 160);
+    --sidebar-primary: oklch(0.68 0.18 155);
+    --sidebar-primary-foreground: oklch(0.15 0.02 160);
+    --sidebar-accent: oklch(0.26 0.02 155);
+    --sidebar-accent-foreground: oklch(0.95 0.005 160);
+    --sidebar-border: oklch(0.30 0.02 160);
+    --sidebar-ring: oklch(0.60 0 0);
+    /* Code Blocks */
+    --code: oklch(0.18 0.015 160);
+    --code-foreground: oklch(0.75 0.005 160);
+    --code-highlight: oklch(0.22 0.015 160);
+    --code-number: oklch(0.70 0 0);
+    /* Selection */
+    --selection: oklch(0.68 0.18 155);
+    --selection-foreground: oklch(0.15 0.02 160);
 }
 
 /** Global Styles **/
 @layer base {
-  * {
-    @apply border-border;
-  }
- 
-  *:focus-visible {
-    @apply outline-ring rounded-xs shadow-none outline-2 outline-offset-3 transition-none!;
-  }
+    * {
+        @apply border-border;
+    }
+
+    *:focus-visible {
+        @apply outline-ring rounded-xs shadow-none outline-2 outline-offset-3 transition-none;
+    }
 }
- 
+
 /** Custom Scrollbar **/
 @layer base {
-  ::-webkit-scrollbar {
-    width: 5px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--input);
-    border-radius: 5px;
-  }
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--input) transparent;
-  }
+    ::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--input);
+        border-radius: 5px;
+    }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--input) transparent;
+    }
 }
- 
+
 /** Custom Container **/
 @utility container {
-  margin-inline: auto;
-  padding-inline: 1.5rem;
-  @media (width >= --theme(--breakpoint-sm)) {
-    max-width: none;
-  }
-  @media (width >= 1440px) {
-    padding-inline: 2rem;
-    max-width: 1440px;
-  }
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+
+    @media (width >=--theme(--breakpoint-sm)) {
+        max-width: none;
+    }
+
+    @media (width >=1440px) {
+        padding-inline: 2rem;
+        max-width: 1440px;
+    }
 }
- 
+
 /** Smooth scroll **/
 html {
-  scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
-
-
 
 /* YekanBakhFaNum Font Faces */
 @font-face {
-  font-family: 'YekanBakhFaNum';
-  src: url('/fonts/woff2/YekanBakhFaNum-Black.woff2') format('woff2'),
-       url('/fonts/woff/YekanBakhFaNum-Black.woff') format('woff');
-  font-weight: 900;
-  font-style: normal;
+    font-family: 'YekanBakhFaNum';
+    src: url('/fonts/woff2/YekanBakhFaNum-Black.woff2') format('woff2'), url('/fonts/woff/YekanBakhFaNum-Black.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: 'YekanBakhFaNum';
-  src: url('/fonts/woff2/YekanBakhFaNum-ExtraBlack.woff2') format('woff2'),
-       url('/fonts/woff/YekanBakhFaNum-ExtraBlack.woff') format('woff');
-  font-weight: 950;
-  font-style: normal;
+    font-family: 'YekanBakhFaNum';
+    src: url('/fonts/woff2/YekanBakhFaNum-ExtraBlack.woff2') format('woff2'), url('/fonts/woff/YekanBakhFaNum-ExtraBlack.woff') format('woff');
+    font-weight: 950;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: 'YekanBakhFaNum';
-  src: url('/fonts/woff2/YekanBakhFaNum-ExtraBold.woff2') format('woff2'),
-       url('/fonts/woff/YekanBakhFaNum-ExtraBold.woff') format('woff');
-  font-weight: 800;
-  font-style: normal;
+    font-family: 'YekanBakhFaNum';
+    src: url('/fonts/woff2/YekanBakhFaNum-ExtraBold.woff2') format('woff2'), url('/fonts/woff/YekanBakhFaNum-ExtraBold.woff') format('woff');
+    font-weight: 800;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: 'YekanBakhFaNum';
-  src: url('/fonts/woff2/YekanBakhFaNum-Bold.woff2') format('woff2'),
-       url('/fonts/woff/YekanBakhFaNum-Bold.woff') format('woff');
-  font-weight: 700;
-  font-style: normal;
+    font-family: 'YekanBakhFaNum';
+    src: url('/fonts/woff2/YekanBakhFaNum-Bold.woff2') format('woff2'), url('/fonts/woff/YekanBakhFaNum-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: 'YekanBakhFaNum';
-  src: url('/fonts/woff2/YekanBakhFaNum-SemiBold.woff2') format('woff2'),
-       url('/fonts/woff/YekanBakhFaNum-SemiBold.woff') format('woff');
-  font-weight: 600;
-  font-style: normal;
+    font-family: 'YekanBakhFaNum';
+    src: url('/fonts/woff2/YekanBakhFaNum-SemiBold.woff2') format('woff2'), url('/fonts/woff/YekanBakhFaNum-SemiBold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: 'YekanBakhFaNum';
-  src: url('/fonts/woff2/YekanBakhFaNum-Regular.woff2') format('woff2'),
-       url('/fonts/woff/YekanBakhFaNum-Regular.woff') format('woff');
-  font-weight: 400;
-  font-style: normal;
+    font-family: 'YekanBakhFaNum';
+    src: url('/fonts/woff2/YekanBakhFaNum-Regular.woff2') format('woff2'), url('/fonts/woff/YekanBakhFaNum-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: 'YekanBakhFaNum';
-  src: url('/fonts/woff2/YekanBakhFaNum-Light.woff2') format('woff2'),
-       url('/fonts/woff/YekanBakhFaNum-Light.woff') format('woff');
-  font-weight: 300;
-  font-style: normal;
+    font-family: 'YekanBakhFaNum';
+    src: url('/fonts/woff2/YekanBakhFaNum-Light.woff2') format('woff2'), url('/fonts/woff/YekanBakhFaNum-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+}
+
+/**
+ * Professional Typography System
+ * سیستم تایپوگرافی حرفه‌ای برای کل اپلیکیشن
+ * این کد را در انتهای globals.css اضافه کنید
+ */
+
+/* ==========================================
+   BASE FONT SIZE - Mobile First
+   ========================================== */
+
+html {
+    /* موبایل: 14px */
+    font-size: 14px;
+    scroll-behavior: smooth;
+}
+
+/* Tablet */
+@media (min-width: 640px) {
+    html {
+        font-size: 14px;
+    }
+}
+
+/* Tablet Large */
+@media (min-width: 768px) {
+    html {
+        font-size: 15px;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+/* Large Desktop */
+@media (min-width: 1440px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+/* ==========================================
+   GLOBAL TYPOGRAPHY OVERRIDES
+   ========================================== */
+
+body {
+    font-size: 1rem;
+    /* 14px در موبایل، 16px در دسکتاپ */
+    line-height: 1.5;
+}
+
+/* ==========================================
+   HEADINGS - عناوین
+   ========================================== */
+
+h1,
+.h1 {
+    font-size: 1.5rem;
+    /* 21px موبایل → 24px دسکتاپ */
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+h2,
+.h2 {
+    font-size: 1.25rem;
+    /* 17.5px موبایل → 20px دسکتاپ */
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+}
+
+h3,
+.h3 {
+    font-size: 1.125rem;
+    /* 15.75px موبایل → 18px دسکتاپ */
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+h4,
+.h4 {
+    font-size: 1rem;
+    /* 14px موبایل → 16px دسکتاپ */
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+h5,
+.h5 {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+h6,
+.h6 {
+    font-size: 0.75rem;
+    /* 10.5px موبایل → 12px دسکتاپ */
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+/* Desktop - سایزهای بزرگتر */
+@media (min-width: 1024px) {
+
+    h1,
+    .h1 {
+        font-size: 2rem;
+        /* 32px */
+    }
+
+    h2,
+    .h2 {
+        font-size: 1.5rem;
+        /* 24px */
+    }
+
+    h3,
+    .h3 {
+        font-size: 1.25rem;
+        /* 20px */
+    }
+}
+
+/* ==========================================
+   PARAGRAPH & TEXT
+   ========================================== */
+
+p {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+    line-height: 1.6;
+    margin-bottom: 1em;
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+
+small,
+.text-small {
+    font-size: 0.75rem;
+    /* 10.5px موبایل → 12px دسکتاپ */
+    line-height: 1.5;
+}
+
+/* ==========================================
+   BUTTONS - دکمه‌ها (shadcn/ui)
+   ========================================== */
+
+button,
+.btn,
+[role="button"] {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* Button Sizes */
+.btn-sm,
+button[data-size="sm"] {
+    font-size: 0.75rem;
+    /* 10.5px موبایل → 12px دسکتاپ */
+}
+
+.btn-lg,
+button[data-size="lg"] {
+    font-size: 1rem;
+    /* 14px موبایل → 16px دسکتاپ */
+}
+
+/* ==========================================
+   CARDS - کارت‌ها
+   ==========================================*/
+
+/* Card Title */
+[class*="card"] h3,
+[class*="card"] h4,
+.card-title {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* Card Description */
+.card-description,
+[class*="card"] p {
+    font-size: 0.75rem;
+    /* 10.5px موبایل → 12px دسکتاپ */
+    line-height: 1.5;
+    color: var(--color-muted-foreground);
+}
+
+/* Card Stats/Numbers */
+.card-stat,
+.stat-value,
+[class*="stat"] {
+    font-size: 1.75rem;
+    /* 24.5px موبایل → 28px دسکتاپ */
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+@media (min-width: 1024px) {
+
+    .card-stat,
+    .stat-value {
+        font-size: 2.25rem;
+        /* 36px */
+    }
+}
+
+/* ==========================================
+   LABELS & INPUTS - فرم‌ها
+   ========================================== */
+
+label {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+input,
+textarea,
+select {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+    line-height: 1.5;
+}
+
+input::placeholder,
+textarea::placeholder {
+    font-size: 0.875rem;
+    color: var(--color-muted-foreground);
+}
+
+/* ==========================================
+   NAVIGATION - منو
+   ========================================== */
+
+/* Desktop Sidebar */
+nav a,
+nav button,
+.nav-item {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* Mobile Bottom Navigation */
+@media (max-width: 767px) {
+
+    nav a,
+    nav button,
+    .nav-item {
+        font-size: 0.6875rem;
+        /* 9.625px - خیلی کوچک برای موبایل */
+        font-weight: 500;
+        line-height: 1.2;
+    }
+}
+
+/* ==========================================
+   BADGES & TAGS
+   ========================================== */
+
+.badge,
+[class*="badge"] {
+    font-size: 0.625rem;
+    /* 8.75px موبایل → 10px دسکتاپ */
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+}
+
+/* ==========================================
+   TABLES
+   ========================================== */
+
+table {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+}
+
+thead th {
+    font-size: 0.75rem;
+    /* 10.5px موبایل → 12px دسکتاپ */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ==========================================
+   MODALS & DIALOGS
+   ========================================== */
+
+[role="dialog"] h2,
+[role="alertdialog"] h2,
+.dialog-title {
+    font-size: 1.125rem;
+    /* 15.75px موبایل → 18px دسکتاپ */
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+[role="dialog"] p,
+[role="alertdialog"] p,
+.dialog-description {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+    line-height: 1.5;
+}
+
+/* ==========================================
+   TOASTS & ALERTS
+   ========================================== */
+
+[role="alert"],
+.toast,
+.alert {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+    line-height: 1.5;
+}
+
+.toast-title,
+.alert-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* ==========================================
+   TOOLTIPS
+   ========================================== */
+
+[role="tooltip"],
+.tooltip {
+    font-size: 0.75rem;
+    /* 10.5px موبایل → 12px دسکتاپ */
+    line-height: 1.4;
+}
+
+/* ==========================================
+   DROPDOWNS & MENUS
+   ========================================== */
+
+[role="menu"],
+[role="menuitem"] {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+    line-height: 1.5;
+}
+
+/* ==========================================
+   BREADCRUMBS
+   ========================================== */
+
+.breadcrumb,
+nav[aria-label*="breadcrumb"] {
+    font-size: 0.75rem;
+    /* 10.5px موبایل → 12px دسکتاپ */
+    line-height: 1.5;
+}
+
+/* ==========================================
+   TABS
+   ========================================== */
+
+[role="tab"] {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* ==========================================
+   ACCORDION
+   ========================================== */
+
+[data-radix-accordion-trigger],
+.accordion-trigger {
+    font-size: 0.875rem;
+    /* 12.25px موبایل → 14px دسکتاپ */
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* ==========================================
+   UTILITY CLASSES
+   ========================================== */
+
+/* Text Sizes - با rem برای responsive */
+.text-xs {
+    font-size: 0.75rem !important;
+}
+
+.text-sm {
+    font-size: 0.875rem !important;
+}
+
+.text-base {
+    font-size: 1rem !important;
+}
+
+.text-lg {
+    font-size: 1.125rem !important;
+}
+
+.text-xl {
+    font-size: 1.25rem !important;
+}
+
+.text-2xl {
+    font-size: 1.5rem !important;
+}
+
+.text-3xl {
+    font-size: 1.875rem !important;
+}
+
+.text-4xl {
+    font-size: 2.25rem !important;
+}
+
+/* Line Heights */
+.leading-none {
+    line-height: 1 !important;
+}
+
+.leading-tight {
+    line-height: 1.25 !important;
+}
+
+.leading-snug {
+    line-height: 1.375 !important;
+}
+
+.leading-normal {
+    line-height: 1.5 !important;
+}
+
+.leading-relaxed {
+    line-height: 1.625 !important;
+}
+
+.leading-loose {
+    line-height: 2 !important;
+}
+
+/* Font Weights */
+.font-light {
+    font-weight: 300 !important;
+}
+
+.font-normal {
+    font-weight: 400 !important;
+}
+
+.font-medium {
+    font-weight: 500 !important;
+}
+
+.font-semibold {
+    font-weight: 600 !important;
+}
+
+.font-bold {
+    font-weight: 700 !important;
+}
+
+/* Letter Spacing */
+.tracking-tighter {
+    letter-spacing: -0.05em !important;
+}
+
+.tracking-tight {
+    letter-spacing: -0.025em !important;
+}
+
+.tracking-normal {
+    letter-spacing: 0 !important;
+}
+
+.tracking-wide {
+    letter-spacing: 0.025em !important;
+}
+
+.tracking-wider {
+    letter-spacing: 0.05em !important;
+}
+
+.tracking-widest {
+    letter-spacing: 0.1em !important;
 }

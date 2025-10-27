@@ -97,7 +97,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
 
         {/* Language Submenu with Radio Group */}
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="flex items-center gap-2 [&_[data-slot=dropdown-menu-sub-trigger-indicator]]:hidden hover:[&_[data-slot=badge]]:border-input data-[state=open]:[&_[data-slot=badge]]:border-input">
+          <DropdownMenuSubTrigger className="flex items-center gap-2 **:data-[slot=dropdown-menu-sub-trigger-indicator]:hidden hover:**:data-[slot=badge]:border-input data-[state=open]:**:data-[slot=badge]:border-input">
             <Globe />
             <span className="flex items-center justify-between gap-2 grow relative">
               {t("userMenu.changeLanguage")}
@@ -160,7 +160,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
           </div>
         </DropdownMenuItem>
         <div className="p-2 mt-1">
-          <Button variant="outline" size="sm" className="w-full">
+          <Button size="sm" className="w-full">
             {t("userMenu.logout")}
           </Button>
         </div>

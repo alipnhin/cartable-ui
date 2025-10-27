@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html dir="rtl" suppressHydrationWarning>
+    <html dir="rtl" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={cn("text-base antialiased")}>
         <ThemeProvider>
           <I18nProvider>
