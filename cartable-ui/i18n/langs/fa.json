@@ -20,7 +20,30 @@
       "view": "مشاهده",
       "approve": "تأیید",
       "reject": "رد",
-      "new": "جدید"
+      "new": "جدید",
+      "reset": "بازنشانی",
+      "approveSelected": "تأیید انتخاب شده‌ها",
+      "rejectSelected": "رد انتخاب شده‌ها",
+      "export": "خروجی Excel"
+    },
+    "pagination": {
+      "selectedRows": "ردیف‌های انتخاب‌شده",
+      "pageSize": "تعداد در صفحه",
+      "firstPage": "صفحه اول",
+      "lastPage": "صفحه آخر",
+      "nextPage": "صفحه بعد",
+      "previousPage": "صفحه قبل",
+      "totalCount": "تعداد کل رکوردها",
+      "page": "صفحه",
+      "totalPages": "تعداد صفحات",
+      "totalPerPage": "مجموع در هر صفحه",
+      "showing": "نمایش",
+      "of": "از",
+      "to": "تا",
+      "from": "از",
+      "noData": "داده‌ای برای نمایش وجود ندارد",
+      "loading": "در حال بارگذاری داده‌ها...",
+      "goToPage": "برو به صفحه"
     },
     "labels": {
       "name": "نام",
@@ -30,12 +53,18 @@
       "phone": "تلفن",
       "address": "آدرس"
     },
+    "selectAll": "انتخاب همه",
+    "select": "انتخاب",
+    "actions": "عملیات",
+    "selected": "انتخاب شده",
+    "toggleColumns": "نمایش ستون ها",
     "messages": {
       "welcome": "خوش آمدید",
       "loading": "در حال بارگذاری...",
       "error": "خطایی رخ داده است",
       "success": "عملیات با موفقیت انجام شد",
-      "confirm": "آیا مطمئن هستید؟"
+      "confirm": "آیا مطمئن هستید؟",
+      "notFound": "نتیجه ای یافت نشد"
     }
   },
   "navigation": {
@@ -98,5 +127,58 @@
   "dashboard": {
     "pageTitle": "داشبورد",
     "pageSubtitle": "نمای کلی فعالیت‌های مالی"
+  },
+  "myCartable": {
+    "pageTitle": "کارتابل من",
+    "pageSubtitle": "دستورهای پرداخت در انتظار تأیید شما",
+    "selectedCount": "{{count}} مورد انتخاب شده",
+    "totalOrders": "کل دستورات",
+    "totalTransactions": "کل تراکنش‌ها",
+    "totalAmount": "مبلغ کل (ریال)",
+    "selectedOrders": "انتخاب شده"
+  },
+  "orders": {
+    "orderNumber": "شماره دستور",
+    "accountTitle": "حساب",
+    "paymentType": "نوع پرداخت",
+    "totalAmount": "مبلغ کل",
+    "totalTransactions": "تعداد تراکنش",
+    "transaction": "تراکنش",
+    "status": "وضعیت",
+    "createdDate": "تاریخ",
+    "noOrders": "دستوری یافت نشد"
+  },
+  "filters": {
+    "title": "فیلترها",
+    "search": "جستجو",
+    "searchPlaceholder": "جستجو در شماره دستور یا حساب...",
+    "account": "حساب",
+    "allAccounts": "همه حساب‌ها",
+    "status": "وضعیت",
+    "allStatuses": "همه وضعیت‌ها",
+    "paymentType": "نوع پرداخت",
+    "allTypes": "همه انواع",
+    "reset": "پاک کردن فیلترها"
+  },
+  "status": {
+    "waitingForApproval": "در انتظار تأیید",
+    "approved": "تأیید شده",
+    "submittedToBank": "ارسال شده به بانک",
+    "succeeded": "انجام شده",
+    "rejected": "رد شده"
+  },
+  "paymentType": {
+    "internal": "داخلی",
+    "paya": "پایا",
+    "satna": "ساتنا"
+  },
+  "toast": {
+    "success": "موفقیت",
+    "info": "اطلاع",
+    "orderApproved": "دستور با موفقیت تأیید شد",
+    "orderRejected": "دستور با موفقیت رد شد",
+    "ordersApproved": "{{count}} دستور با موفقیت تأیید شدند",
+    "ordersRejected": "{{count}} دستور با موفقیت رد شدند",
+    "exportStarted": "خروجی Excel در حال آماده‌سازی است"
   }
 }

@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface BreadcrumbItem {
   label: string;
@@ -15,6 +16,7 @@ interface PageHeaderProps {
   description?: string;
   breadcrumbs?: BreadcrumbItem[];
   actions?: ReactNode;
+  badge?: string | number;
   className?: string;
 }
 
@@ -23,6 +25,7 @@ export function PageHeader({
   description,
   breadcrumbs,
   actions,
+  badge,
   className,
 }: PageHeaderProps) {
   const router = useRouter();
@@ -61,7 +64,14 @@ export function PageHeader({
       {/* Title & Description */}
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
-          <h4 className="font-bold tracking-tight ">{title}</h4>
+          <div className="flex items-center gap-2">
+            <h4 className="font-bold tracking-tight">{title}</h4>
+            {badge && (
+              <Badge variant="secondary" className="text-xs">
+                {badge}
+              </Badge>
+            )}
+          </div>
           {description && (
             <p className="text-muted-foreground text-xs">{description}</p>
           )}

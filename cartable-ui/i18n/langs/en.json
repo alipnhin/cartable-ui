@@ -20,7 +20,30 @@
       "view": "View",
       "approve": "Approve",
       "reject": "Reject",
-      "new": "New"
+      "new": "New",
+      "reset": "Reset",
+      "approveSelected": "Approve Selected",
+      "rejectSelected": "Reject Selected",
+      "export": "Export Excel"
+    },
+    "pagination": {
+      "selectedRows": "Selected rows",
+      "pageSize": "Page Size",
+      "firstPage": "First page",
+      "lastPage": "Last page",
+      "nextPage": "Next page",
+      "previousPage": "Previous page",
+      "totalCount": "Total records",
+      "page": "Page",
+      "totalPages": "Total pages",
+      "totalPerPage": "Total per page",
+      "showing": "Showing",
+      "of": "of",
+      "to": "to",
+      "from": "from",
+      "noData": "No records to display",
+      "loading": "Loading data...",
+      "goToPage": "Go to page"
     },
     "labels": {
       "name": "Name",
@@ -30,12 +53,18 @@
       "phone": "Phone",
       "address": "Address"
     },
+    "selectAll": "Select All",
+    "select": "Select",
+    "actions": "Actions",
+    "selected": "Selected",
+    "toggleColumns": "Toggle columns",
     "messages": {
       "welcome": "Welcome",
       "loading": "Loading...",
       "error": "An error occurred",
       "success": "Operation completed successfully",
-      "confirm": "Are you sure?"
+      "confirm": "Are you sure?",
+      "notFound": "Result not found"
     }
   },
   "navigation": {
@@ -96,7 +125,60 @@
     }
   },
   "dashboard": {
-    "pageTitle": "Dashbard",
-    "pageSubtitle": "Control and analyz payments"
+    "pageTitle": "Dashboard",
+    "pageSubtitle": "Control and analyze payments"
+  },
+  "myCartable": {
+    "pageTitle": "My Cartable",
+    "pageSubtitle": "Payment orders pending your approval",
+    "selectedCount": "{{count}} selected",
+    "totalOrders": "Total Orders",
+    "totalTransactions": "Total Transactions",
+    "totalAmount": "Total Amount (Rials)",
+    "selectedOrders": "Selected"
+  },
+  "orders": {
+    "orderNumber": "Order Number",
+    "accountTitle": "Account",
+    "paymentType": "Payment Type",
+    "totalAmount": "Total Amount",
+    "totalTransactions": "Transaction Count",
+    "transaction": "Transaction",
+    "status": "Status",
+    "createdDate": "Date",
+    "noOrders": "No orders found"
+  },
+  "filters": {
+    "title": "Filters",
+    "search": "Search",
+    "searchPlaceholder": "Search in order number or account...",
+    "account": "Account",
+    "allAccounts": "All Accounts",
+    "status": "Status",
+    "allStatuses": "All Statuses",
+    "paymentType": "Payment Type",
+    "allTypes": "All Types",
+    "reset": "Clear Filters"
+  },
+  "status": {
+    "waitingForApproval": "Waiting For Approval",
+    "approved": "Approved",
+    "submittedToBank": "Submitted To Bank",
+    "succeeded": "Succeeded",
+    "rejected": "Rejected"
+  },
+  "paymentType": {
+    "internal": "Internal",
+    "paya": "Paya",
+    "satna": "Satna"
+  },
+  "toast": {
+    "success": "Success",
+    "info": "Info",
+    "orderApproved": "Order approved successfully",
+    "orderRejected": "Order rejected successfully",
+    "ordersApproved": "{{count}} orders approved successfully",
+    "ordersRejected": "{{count}} orders rejected successfully",
+    "exportStarted": "Excel export is being prepared"
   }
 }

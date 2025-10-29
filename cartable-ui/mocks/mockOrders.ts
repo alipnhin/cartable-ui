@@ -12,9 +12,13 @@ import {
   getTransactionsByOrderId,
   calculateOrderTotalAmount,
 } from "./mockTransactions";
-import { generateApproversForOrder, generateSignatureProgressForOrder } from "./mockSigners";
+import {
+  generateApproversForOrder,
+  generateSignatureProgressForOrder,
+} from "./mockSigners";
 import { generateChangeHistoryForOrder } from "./mockChangeHistory";
-import { subtractDays, subtractHours, addHours, now } from "@/lib/date";
+import { subtractDays, addHours, now } from "@/lib/date";
+import { ApproverStatus } from "@/types/signer";
 
 // تابع کمکی برای تولید شماره درخواست
 const generateOrderId = (index: number): string => {
@@ -44,7 +48,7 @@ const orderTitles = [
 
 // وضعیت‌های مختلف با توزیع واقعی
 const statusDistribution: OrderStatus[] = [
-  OrderStatus.WaitingForOwnersApproval,  // 8 عدد
+  OrderStatus.WaitingForOwnersApproval, // 8 عدد
   OrderStatus.WaitingForOwnersApproval,
   OrderStatus.WaitingForOwnersApproval,
   OrderStatus.WaitingForOwnersApproval,
@@ -52,23 +56,23 @@ const statusDistribution: OrderStatus[] = [
   OrderStatus.WaitingForOwnersApproval,
   OrderStatus.WaitingForOwnersApproval,
   OrderStatus.WaitingForOwnersApproval,
-  OrderStatus.OwnersApproved,             // 4 عدد
+  OrderStatus.OwnersApproved, // 4 عدد
   OrderStatus.OwnersApproved,
   OrderStatus.OwnersApproved,
   OrderStatus.OwnersApproved,
-  OrderStatus.SubmittedToBank,            // 4 عدد
+  OrderStatus.SubmittedToBank, // 4 عدد
   OrderStatus.SubmittedToBank,
   OrderStatus.SubmittedToBank,
   OrderStatus.SubmittedToBank,
-  OrderStatus.Succeeded,                  // 5 عدد
+  OrderStatus.Succeeded, // 5 عدد
   OrderStatus.Succeeded,
   OrderStatus.Succeeded,
   OrderStatus.Succeeded,
   OrderStatus.Succeeded,
-  OrderStatus.PartiallySucceeded,         // 2 عدد
+  OrderStatus.PartiallySucceeded, // 2 عدد
   OrderStatus.PartiallySucceeded,
-  OrderStatus.Rejected,                   // 1 عدد
-  OrderStatus.Draft,                      // 1 عدد
+  OrderStatus.Rejected, // 1 عدد
+  OrderStatus.Draft, // 1 عدد
 ];
 
 /**
@@ -80,23 +84,23 @@ export const mockOrders: PaymentOrder[] = [];
 for (let i = 0; i < 25; i++) {
   // انتخاب تصادفی حساب
   const account = mockAccounts[i % mockAccounts.length];
-  
+
   // انتخاب عنوان
   const title = orderTitles[i % orderTitles.length];
-  
+
   // انتخاب وضعیت
   const status = statusDistribution[i];
-  
+
   // تعداد تراکنش‌ها (5 تا 15)
   const transactionCount = 5 + Math.floor(Math.random() * 11);
-  
+
   // تاریخ ایجاد (7 روز گذشته تا امروز)
   const daysAgo = Math.floor(Math.random() * 7);
   const createdAt = subtractDays(now(), daysAgo);
-  
+
   // کاربر ایجادکننده
   const creator = mockUsers[i % mockUsers.length];
-  
+
   const order: PaymentOrder = {
     id: `order-${i + 1}`,
     orderId: generateOrderId(i + 1),
@@ -112,18 +116,29 @@ for (let i = 0; i < 25; i++) {
     createdBy: creator.id,
     createdByName: creator.fullName,
     createdAt: createdAt,
-    updatedAt: status === OrderStatus.Draft ? createdAt : addHours(createdAt, 2 + i),
-    submittedToBankAt: 
-      status === OrderStatus.SubmittedToBank || 
-      status === OrderStatus.Succeeded || 
+    updatedAt:
+      status === OrderStatus.Draft ? createdAt : addHours(createdAt, 2 + i),
+    submittedToBankAt:
+      status === OrderStatus.SubmittedToBank ||
+      status === OrderStatus.Succeeded ||
       status === OrderStatus.PartiallySucceeded
         ? addHours(createdAt, 6)
         : undefined,
     processedAt:
-      status === OrderStatus.Succeeded || status === OrderStatus.PartiallySucceeded
+      status === OrderStatus.Succeeded ||
+      status === OrderStatus.PartiallySucceeded
         ? addHours(createdAt, 24)
         : undefined,
-    description: `${title} - دوره ${daysAgo === 0 ? 'امروز' : `${daysAgo} روز پیش`}`,
+    description: `${title} - دوره ${
+      daysAgo === 0 ? "امروز" : `${daysAgo} روز پیش`
+    }`,
+
+    // فیلدهای اضافی برای UI
+    orderNumber: generateOrderId(i + 1),
+    accountTitle: `${account.bankName} - ${account.accountNumber}`,
+    totalTransactions: transactionCount,
+    createdDate: createdAt,
+    paymentType: i % 3, // 0: داخلی، 1: پایا، 2: ساتنا
   };
 
   mockOrders.push(order);
@@ -144,7 +159,9 @@ for (let i = 0; i < 25; i++) {
 /**
  * تولید جزئیات کامل یک دستور
  */
-export const getOrderDetailById = (orderId: string): PaymentOrderDetail | undefined => {
+export const getOrderDetailById = (
+  orderId: string
+): PaymentOrderDetail | undefined => {
   const order = mockOrders.find((o) => o.id === orderId);
   if (!order) return undefined;
 
@@ -153,35 +170,38 @@ export const getOrderDetailById = (orderId: string): PaymentOrderDetail | undefi
 
   const transactions = getTransactionsByOrderId(order.id);
   const approvers = generateApproversForOrder(order, account);
-  const signatureProgress = generateSignatureProgressForOrder(order, account, approvers);
+  const signatureProgress = generateSignatureProgressForOrder(
+    order,
+    account,
+    approvers
+  );
   const changeHistory = generateChangeHistoryForOrder(order, approvers);
 
   // محاسبه قابلیت‌های عملیاتی برای کاربر فعلی
   const currentUserId = CURRENT_USER.id;
   const isApprover = approvers.some((a) => a.userId === currentUserId);
   const hasApproved = approvers.some(
-    (a) => a.userId === currentUserId && a.hasApproved
+    (a) => a.userId === currentUserId && a.status === ApproverStatus.Approved
   );
-  
+
   const canApprove =
     isApprover &&
     !hasApproved &&
     order.status === OrderStatus.WaitingForOwnersApproval;
-  
+
   const canReject =
     isApprover &&
     !hasApproved &&
     order.status === OrderStatus.WaitingForOwnersApproval;
-  
+
   const canEdit =
-    order.createdBy === currentUserId &&
-    order.status === OrderStatus.Draft;
-  
+    order.createdBy === currentUserId && order.status === OrderStatus.Draft;
+
   const canCancel =
     order.createdBy === currentUserId &&
     (order.status === OrderStatus.Draft ||
       order.status === OrderStatus.WaitingForOwnersApproval);
-  
+
   const canInquiry =
     order.status === OrderStatus.SubmittedToBank ||
     order.status === OrderStatus.Succeeded ||
@@ -194,11 +214,16 @@ export const getOrderDetailById = (orderId: string): PaymentOrderDetail | undefi
     approvers: approvers,
     signatureProgress: signatureProgress,
     approvalSummary: {
-      required: account.minimumSignatureCount,
-      approved: signatureProgress.approved,
-      rejected: signatureProgress.rejected,
-      pending: signatureProgress.pending,
-      isComplete: signatureProgress.isComplete,
+      totalApprovers: approvers.length,
+      approvedCount: approvers.filter(
+        (a) => a.status === ApproverStatus.Approved
+      ).length,
+      rejectedCount: approvers.filter(
+        (a) => a.status === ApproverStatus.Rejected
+      ).length,
+      pendingCount: approvers.filter((a) => a.status === ApproverStatus.Pending)
+        .length,
+      canProceed: signatureProgress.isComplete,
     },
     changeHistory: changeHistory,
     canApprove: canApprove,
@@ -231,7 +256,9 @@ export const getOrdersByAccountId = (accountId: string): PaymentOrder[] => {
 };
 
 // گرفتن دستوراتی که کاربر فعلی باید تأیید کند
-export const getOrdersForApproval = (userId: string = CURRENT_USER.id): PaymentOrder[] => {
+export const getOrdersForApproval = (
+  userId: string = CURRENT_USER.id
+): PaymentOrder[] => {
   return mockOrders.filter((order) => {
     // فقط دستورات در انتظار تأیید
     if (order.status !== OrderStatus.WaitingForOwnersApproval) return false;
@@ -273,9 +300,7 @@ export const filterOrders = (filters: {
 
   // فیلتر تاریخ
   if (filters.fromDate) {
-    filtered = filtered.filter(
-      (order) => order.createdAt >= filters.fromDate!
-    );
+    filtered = filtered.filter((order) => order.createdAt >= filters.fromDate!);
   }
   if (filters.toDate) {
     filtered = filtered.filter((order) => order.createdAt <= filters.toDate!);
@@ -283,10 +308,14 @@ export const filterOrders = (filters: {
 
   // فیلتر مبلغ
   if (filters.minAmount !== undefined) {
-    filtered = filtered.filter((order) => order.totalAmount >= filters.minAmount!);
+    filtered = filtered.filter(
+      (order) => order.totalAmount >= filters.minAmount!
+    );
   }
   if (filters.maxAmount !== undefined) {
-    filtered = filtered.filter((order) => order.totalAmount <= filters.maxAmount!);
+    filtered = filtered.filter(
+      (order) => order.totalAmount <= filters.maxAmount!
+    );
   }
 
   // جستجو

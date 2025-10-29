@@ -5,6 +5,7 @@ import { DirectionProvider } from "@radix-ui/react-direction";
 import { I18nProvider } from "@/providers/i18n-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { TooltipsProvider } from "@/providers/tooltips-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
   children,
@@ -17,7 +18,10 @@ export default function RootLayout({
         <ThemeProvider>
           <I18nProvider>
             <TooltipsProvider>
-              <DirectionProvider dir="rtl">{children}</DirectionProvider>
+              <DirectionProvider dir="rtl">
+                {children}
+                <Toaster />
+              </DirectionProvider>
             </TooltipsProvider>
           </I18nProvider>
         </ThemeProvider>

@@ -28,6 +28,13 @@ export interface PaymentOrder {
   submittedToBankAt?: string;
   processedAt?: string;
   description?: string;
+
+  // فیلدهای اضافی برای UI (computed properties)
+  orderNumber?: string; // alias for orderId
+  accountTitle?: string; // alias for bankName or combination
+  totalTransactions?: number; // alias for numberOfTransactions
+  createdDate?: string; // alias for createdAt
+  paymentType?: number; // نوع پرداخت (0: داخلی، 1: پایا، 2: ساتنا)
 }
 
 export enum OrderStatus {

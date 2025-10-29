@@ -1,8 +1,14 @@
-import { useTranslation as useI18nextTranslation } from 'react-i18next';
+import { useTranslation as useI18nextTranslation } from "react-i18next";
 
-// Re-export useTranslation with proper typing
-export const useTranslation = (namespace?: string) => {
-  return useI18nextTranslation(namespace);
+// Re-export useTranslation with proper typing and locale
+const useTranslation = (namespace?: string) => {
+  const { t, i18n } = useI18nextTranslation(namespace);
+
+  return {
+    t,
+    i18n,
+    locale: i18n.language, // اضافه کردن locale
+  };
 };
 
 // Helper function for typed translation keys
@@ -12,6 +18,7 @@ export const useTypedTranslation = () => {
   return {
     t,
     i18n,
+    locale: i18n.language,
     // Helper functions for common translation patterns
     tApp: (key: string) => t(`app.${key}`),
     tButton: (key: string) => t(`common.buttons.${key}`),
