@@ -1,22 +1,34 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AppLayout, PageHeader } from "@/components/layout";
 import { OrderCard, OrderCardSkeleton } from "./components/order-card";
 import { DataTable } from "./components/data-table";
 import { createColumns } from "./components/columns";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Download } from "lucide-react";
+import { CheckCircle, XCircle, Download, X } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { mockOrders } from "@/mocks/mockOrders";
 import { useToast } from "@/hooks/use-toast";
 import { OrderStatus } from "@/types/order";
+import { OtpDialog } from "@/components/common/otp-dialog";
+import { cn } from "@/lib/utils";
 
 export default function MyCartablePage() {
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
   const { toast } = useToast();
+
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+  const [selectedRowIds, setSelectedRowIds] = useState<Record<string, boolean>>(
+    {}
+  );
+  const [otpDialog, setOtpDialog] = useState<{
+    open: boolean;
+    type: "approve" | "reject";
+    orderIds: string[];
+  }>({ open: false, type: "approve", orderIds: [] });
 
   // فقط دستورات در انتظار تأیید
   const pendingOrders = useMemo(() => {
@@ -26,19 +38,62 @@ export default function MyCartablePage() {
   }, []);
 
   // Handlers
-  const handleApprove = (orderId: string) => {
-    toast({
-      title: t("toast.success"),
-      description: t("toast.orderApproved"),
-      variant: "success",
-    });
+  const handleSingleApprove = (orderId: string) => {
+    setOtpDialog({ open: true, type: "approve", orderIds: [orderId] });
   };
 
-  const handleReject = (orderId: string) => {
+  const handleSingleReject = (orderId: string) => {
+    setOtpDialog({ open: true, type: "reject", orderIds: [orderId] });
+  };
+
+  const handleBulkApprove = () => {
+    const orderIds = isMobile
+      ? selectedOrders
+      : Object.keys(selectedRowIds).filter((id) => selectedRowIds[id]);
+
+    if (orderIds.length === 0) return;
+    setOtpDialog({ open: true, type: "approve", orderIds });
+  };
+
+  const handleBulkReject = () => {
+    const orderIds = isMobile
+      ? selectedOrders
+      : Object.keys(selectedRowIds).filter((id) => selectedRowIds[id]);
+
+    if (orderIds.length === 0) return;
+    setOtpDialog({ open: true, type: "reject", orderIds });
+  };
+
+  const handleCancelSelection = () => {
+    setSelectedOrders([]);
+    setSelectedRowIds({});
+  };
+
+  const handleOtpConfirm = async (otp: string) => {
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    const action = otpDialog.type === "approve" ? "تأیید" : "رد";
+    const count = otpDialog.orderIds.length;
+
     toast({
       title: t("toast.success"),
-      description: t("toast.orderRejected"),
+      description: `${count} دستور با موفقیت ${action} شد`,
       variant: "success",
+    });
+
+    // Clear selection
+    setSelectedOrders([]);
+    setSelectedRowIds({});
+  };
+
+  const handleOtpResend = async () => {
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    toast({
+      title: t("toast.info"),
+      description: t("otp.codeSent"),
+      variant: "info",
     });
   };
 
@@ -50,93 +105,228 @@ export default function MyCartablePage() {
     });
   };
 
+  const handleOrderSelect = (orderId: string) => {
+    setSelectedOrders((prev) =>
+      prev.includes(orderId)
+        ? prev.filter((id) => id !== orderId)
+        : [...prev, orderId]
+    );
+  };
+
+  const handleRowSelectionChange = (newSelection: Record<string, boolean>) => {
+    setSelectedRowIds(newSelection);
+  };
+
   // Create columns with handlers
   const columns = useMemo(
-    () => createColumns(locale, handleApprove, handleReject, t),
+    () => createColumns(locale, handleSingleApprove, handleSingleReject, t),
     [locale]
   );
 
+  const hasSelection = isMobile
+    ? selectedOrders.length > 0
+    : Object.keys(selectedRowIds).filter((id) => selectedRowIds[id]).length > 0;
+
+  const selectedCount = isMobile
+    ? selectedOrders.length
+    : Object.keys(selectedRowIds).filter((id) => selectedRowIds[id]).length;
+
   return (
     <AppLayout>
-      <PageHeader
-        title={t("myCartable.pageTitle")}
-        description={t("myCartable.pageSubtitle")}
-        badge={
-          pendingOrders.length > 0 ? pendingOrders.length.toString() : undefined
-        }
-        actions={
-          pendingOrders.length > 0 && (
-            <Button variant="outline" size="sm" onClick={handleExport}>
-              <Download className="h-4 w-4 me-2" />
-              {t("common.buttons.export")}
+      <div className="space-y-4">
+        <PageHeader
+          title={t("myCartable.pageTitle")}
+          description={t("myCartable.pageSubtitle")}
+          badge={
+            pendingOrders.length > 0
+              ? pendingOrders.length.toString()
+              : undefined
+          }
+          actions={
+            pendingOrders.length > 0 &&
+            !isMobile &&
+            !hasSelection && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:bg-muted/80 transition-colors"
+                onClick={handleExport}
+              >
+                <Download className="h-4 w-4 me-2" />
+                {t("common.buttons.export")}
+              </Button>
+            )
+          }
+        />
+
+        {/* Desktop: Bulk Actions Bar */}
+        {!isMobile && hasSelection && (
+          <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleCancelSelection}
+              className="shrink-0"
+            >
+              <X className="h-4 w-4 me-2" />
+              {t("common.buttons.cancel")}
             </Button>
-          )
-        }
-      />
+            <div className="flex-1 text-sm font-medium">
+              {selectedCount} {t("common.selected")}
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-destructive border-destructive/30"
+              onClick={handleBulkReject}
+            >
+              <XCircle className="h-4 w-4 me-2" />
+              {t("common.buttons.reject")}
+            </Button>
+            <Button
+              size="sm"
+              className="bg-success hover:bg-success/90"
+              onClick={handleBulkApprove}
+            >
+              <CheckCircle className="h-4 w-4 me-2" />
+              {t("common.buttons.approve")}
+            </Button>
+          </div>
+        )}
 
-      {/* Desktop: Table */}
-      {!isMobile ? (
-        <DataTable columns={columns} data={pendingOrders} isLoading={false} />
-      ) : (
-        /* Mobile: Cards */
-        <div className="space-y-3">
-          {pendingOrders.map((order) => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              onApprove={handleApprove}
-              onReject={handleReject}
-            />
-          ))}
-          {pendingOrders.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              {t("orders.noOrders")}
-            </div>
-          )}
-        </div>
-      )}
+        {/* Desktop: Table */}
+        {!isMobile ? (
+          <DataTable
+            columns={columns}
+            data={pendingOrders}
+            isLoading={false}
+            onRowSelectionChange={handleRowSelectionChange}
+          />
+        ) : (
+          /* Mobile: Cards */
+          <div className="space-y-3 pb-24">
+            {pendingOrders.map((order) => (
+              <OrderCard
+                key={order.id}
+                order={order}
+                onApprove={handleSingleApprove}
+                onReject={handleSingleReject}
+                selected={selectedOrders.includes(order.id)}
+                onSelect={handleOrderSelect}
+              />
+            ))}
+            {pendingOrders.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                {t("orders.noOrders")}
+              </div>
+            )}
+          </div>
+        )}
 
-      {/* Stats Summary */}
-      {pendingOrders.length > 0 && (
-        <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-2xl font-bold text-foreground">
-                {pendingOrders.length}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {t("myCartable.totalOrders")}
-              </p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground">
-                {pendingOrders.reduce(
-                  (sum, order) =>
-                    sum +
-                    (order.totalTransactions || order.numberOfTransactions),
-                  0
-                )}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {t("myCartable.totalTransactions")}
-              </p>
-            </div>
-            <div className="col-span-2 md:col-span-1">
-              <p className="text-2xl font-bold text-foreground">
-                {new Intl.NumberFormat("fa-IR").format(
-                  pendingOrders.reduce(
-                    (sum, order) => sum + order.totalAmount,
+        {/* Stats Summary */}
+        {pendingOrders.length > 0 && (
+          <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-2xl font-bold text-foreground">
+                  {pendingOrders.length}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {t("myCartable.totalOrders")}
+                </p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">
+                  {pendingOrders.reduce(
+                    (sum, order) =>
+                      sum +
+                      (order.totalTransactions || order.numberOfTransactions),
                     0
-                  )
-                )}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {t("myCartable.totalAmount")}
-              </p>
+                  )}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {t("myCartable.totalTransactions")}
+                </p>
+              </div>
+              <div className="col-span-2 md:col-span-1">
+                <p className="text-2xl font-bold text-foreground">
+                  {new Intl.NumberFormat("fa-IR").format(
+                    pendingOrders.reduce(
+                      (sum, order) => sum + order.totalAmount,
+                      0
+                    )
+                  )}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {t("myCartable.totalAmount")}
+                </p>
+              </div>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Floating Action Bar for Mobile Selection */}
+      {isMobile && hasSelection && (
+        <div
+          className={cn(
+            "fixed bottom-16 left-0 right-0 z-40 p-4",
+            "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80",
+            "border-t shadow-lg"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleCancelSelection}
+              className="shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <div className="flex-1 text-sm font-medium">
+              {selectedOrders.length} {t("common.selected")}
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-destructive border-destructive/30"
+              onClick={handleBulkReject}
+            >
+              <XCircle className="h-4 w-4 me-2" />
+              {t("common.buttons.reject")}
+            </Button>
+            <Button
+              size="sm"
+              className="bg-success hover:bg-success/90"
+              onClick={handleBulkApprove}
+            >
+              <CheckCircle className="h-4 w-4 me-2" />
+              {t("common.buttons.approve")}
+            </Button>
           </div>
         </div>
       )}
+
+      {/* OTP Dialog */}
+      <OtpDialog
+        open={otpDialog.open}
+        onOpenChange={(open) => setOtpDialog({ ...otpDialog, open })}
+        title={
+          otpDialog.type === "approve"
+            ? t("otp.approveTitle")
+            : t("otp.rejectTitle")
+        }
+        description={
+          otpDialog.orderIds.length === 1
+            ? t("otp.singleOrderDescription")
+            : t("otp.multipleOrdersDescription", {
+                count: otpDialog.orderIds.length,
+              })
+        }
+        onConfirm={handleOtpConfirm}
+        onResend={handleOtpResend}
+      />
     </AppLayout>
   );
 }

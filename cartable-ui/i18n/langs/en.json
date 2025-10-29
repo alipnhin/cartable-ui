@@ -19,6 +19,7 @@
       "search": "Search",
       "view": "View",
       "approve": "Approve",
+      "confirm": "Confirm",
       "reject": "Reject",
       "new": "New",
       "reset": "Reset",
@@ -57,6 +58,7 @@
     "select": "Select",
     "actions": "Actions",
     "selected": "Selected",
+    "account": "account",
     "toggleColumns": "Toggle columns",
     "messages": {
       "welcome": "Welcome",
@@ -180,5 +182,45 @@
     "ordersApproved": "{{count}} orders approved successfully",
     "ordersRejected": "{{count}} orders rejected successfully",
     "exportStarted": "Excel export is being prepared"
+  },
+  "otp": {
+    "enterCode": "Enter verification code",
+    "expiresIn": "Code expires in",
+    "expired": "Code has expired",
+    "resend": "Resend code",
+    "resending": "Sending...",
+    "codeSent": "Verification code sent",
+    "approveTitle": "Approve Payment Order",
+    "rejectTitle": "Reject Payment Order",
+    "singleOrderDescription": "Please enter the code sent to your mobile to confirm the operation",
+    "multipleOrdersDescription": "You are confirming {{count}} payment orders. Please enter the sent code",
+    "confirm": "Confirm"
+  },
+  "accountGroup": {
+    "select": "Select Account Group",
+    "selectGroup": "Account Groups"
+  },
+  "accounts": {
+    "pageTitle": "Accounts Management",
+    "pageSubtitle": "View and manage bank accounts",
+    "addAccount": "Add New Account",
+    "searchPlaceholder": "Search in account number, IBAN or title...",
+    "selectBank": "Bank",
+    "selectStatus": "Status",
+    "accountTitle": "Account Title",
+    "bankName": "Bank Name",
+    "accountNumber": "Account Number",
+    "iban": "IBAN",
+    "balance": "Balance",
+    "minSignatures": "Min. Signatures",
+    "signersCount": "Signers Count",
+    "signatures": "Signatures",
+    "min": "Min",
+    "total": "Total",
+    "accounts": "accounts",
+    "noAccountsFound": "No accounts found",
+    "accountDetails": "Account Details",
+    "editAccount": "Edit Account",
+    "manageSigners": "Manage Signers"
   }
 }

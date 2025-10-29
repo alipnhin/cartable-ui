@@ -13,6 +13,7 @@ import useTranslation from "@/hooks/useTranslation";
 
 export default function DashboardPage() {
   const { t } = useTranslation();
+
   return (
     <AppLayout>
       <PageHeader

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { UserDropdownMenu } from "@/components/layout/user-dropdown-menu";
+import { AccountGroupSwitcher } from "@/components/common/account-group-selector";
 import { toAbsoluteUrl } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 import useTranslation from "@/hooks/useTranslation";
@@ -12,9 +13,18 @@ import useTranslation from "@/hooks/useTranslation";
 interface HeaderProps {
   onMenuToggle?: () => void;
   showMenuButton?: boolean;
+  showAccountGroupSwitcher?: boolean;
+  selectedAccountGroup?: string;
+  onAccountGroupChange?: (groupId: string) => void;
 }
 
-export function Header({ onMenuToggle, showMenuButton = true }: HeaderProps) {
+export function Header({
+  onMenuToggle,
+  showMenuButton = true,
+  showAccountGroupSwitcher = true,
+  selectedAccountGroup,
+  onAccountGroupChange,
+}: HeaderProps) {
   const router = useRouter();
   const isMobile = useIsMobile();
   const { t } = useTranslation();
@@ -39,7 +49,7 @@ export function Header({ onMenuToggle, showMenuButton = true }: HeaderProps) {
 
         {/* Logo & Title */}
         <div
-          className="flex items-center gap-3 cursor-pointer"
+          className="flex items-center gap-3 cursor-pointer shrink-0"
           onClick={() => router.push("/")}
         >
           <div
@@ -68,6 +78,17 @@ export function Header({ onMenuToggle, showMenuButton = true }: HeaderProps) {
 
         {/* Spacer */}
         <div className="flex-1 min-w-0" />
+
+        {/* Account Group Switcher - فقط موبایل */}
+        {showAccountGroupSwitcher && isMobile && (
+          <div className="shrink-0">
+            <AccountGroupSwitcher
+              value={selectedAccountGroup}
+              onChange={onAccountGroupChange}
+              compact
+            />
+          </div>
+        )}
 
         {/* User Menu */}
         <div className="shrink-0">

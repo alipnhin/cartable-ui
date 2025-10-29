@@ -5,14 +5,22 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { mainMenuItems, isRouteActive } from "@/config/navigation";
+import { AccountGroupSwitcher } from "@/components/common/account-group-selector";
 import useTranslation from "@/hooks/useTranslation";
 
 interface SidebarProps {
   isCollapsed: boolean;
   className?: string;
+  selectedAccountGroup?: string;
+  onAccountGroupChange?: (groupId: string) => void;
 }
 
-export function Sidebar({ isCollapsed, className }: SidebarProps) {
+export function Sidebar({
+  isCollapsed,
+  className,
+  selectedAccountGroup,
+  onAccountGroupChange,
+}: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
@@ -95,9 +103,19 @@ export function Sidebar({ isCollapsed, className }: SidebarProps) {
         })}
       </nav>
 
-      {/* Footer - Optional */}
+      {/* Footer */}
       {!isCollapsed && (
-        <div className="border-t p-4">
+        <div className="border-t p-4 space-y-3">
+          {/* Account Group Switcher */}
+          <div className="px-1">
+            <AccountGroupSwitcher
+              value={selectedAccountGroup}
+              onChange={onAccountGroupChange}
+              className="w-full h-11"
+            />
+          </div>
+
+          {/* App Info */}
           <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/50">
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
               <span className="text-xs font-semibold text-primary">ک</span>

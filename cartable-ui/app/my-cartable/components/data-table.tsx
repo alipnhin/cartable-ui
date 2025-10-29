@@ -31,12 +31,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading?: boolean;
+  onRowSelectionChange?: (selection: Record<string, boolean>) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   isLoading = false,
+  onRowSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -45,6 +47,13 @@ export function DataTable<TData, TValue>({
     []
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
+
+  // Notify parent of row selection changes
+  React.useEffect(() => {
+    if (onRowSelectionChange) {
+      onRowSelectionChange(rowSelection);
+    }
+  }, [rowSelection, onRowSelectionChange]);
 
   const table = useReactTable({
     data,

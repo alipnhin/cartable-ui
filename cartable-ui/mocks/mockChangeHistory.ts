@@ -3,7 +3,7 @@
  * تاریخچه تغییرات دستورات
  */
 
-import { ChangeHistoryEntry } from "@/types";
+import { ApproverStatus, ChangeHistoryEntry } from "@/types";
 import { PaymentOrder, OrderStatus, Approver } from "@/types";
 import { addHours } from "@/lib/date";
 
@@ -33,7 +33,7 @@ export const generateChangeHistoryForOrder = (
 
   // 2. تأییدها و ردها
   approvers.forEach((approver, index) => {
-    if (approver.hasApproved && approver.approvedAt) {
+    if (approver.status === ApproverStatus.Approved && approver.approvedAt) {
       history.push({
         id: `ch-${order.id}-approve-${index}`,
         timestamp: approver.approvedAt,
@@ -48,7 +48,7 @@ export const generateChangeHistoryForOrder = (
       });
     }
 
-    if (approver.hasRejected && approver.rejectedAt) {
+    if (approver.status === ApproverStatus.Rejected && approver.rejectedAt) {
       history.push({
         id: `ch-${order.id}-reject-${index}`,
         timestamp: approver.rejectedAt,
@@ -72,7 +72,7 @@ export const generateChangeHistoryForOrder = (
     order.status === OrderStatus.PartiallySucceeded
   ) {
     const lastApproval = approvers
-      .filter((a) => a.hasApproved)
+      .filter((a) => a.status === ApproverStatus.Approved)
       .sort((a, b) => (a.approvedAt! > b.approvedAt! ? -1 : 1))[0];
 
     if (lastApproval && lastApproval.approvedAt) {
@@ -140,7 +140,9 @@ export const generateChangeHistoryForOrder = (
 
   // 6. رد شده
   if (order.status === OrderStatus.Rejected) {
-    const rejection = approvers.find((a) => a.hasRejected);
+    const rejection = approvers.find(
+      (a) => a.status === ApproverStatus.Rejected
+    );
     if (rejection && rejection.rejectedAt) {
       history.push({
         id: `ch-${order.id}-status-rejected`,

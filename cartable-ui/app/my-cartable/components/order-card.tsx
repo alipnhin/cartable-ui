@@ -7,37 +7,124 @@ import {
 } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, XCircle, Eye, Wallet } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  CheckCircle,
+  XCircle,
+  Eye,
+  Wallet,
+  MoreVertical,
+  Check,
+} from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface OrderCardProps {
   order: PaymentOrder;
   onApprove?: (orderId: string) => void;
   onReject?: (orderId: string) => void;
+  selected?: boolean;
+  onSelect?: (orderId: string) => void;
+  showActions?: boolean;
 }
 
-export function OrderCard({ order, onApprove, onReject }: OrderCardProps) {
+export function OrderCard({
+  order,
+  onApprove,
+  onReject,
+  selected = false,
+  onSelect,
+  showActions = true,
+}: OrderCardProps) {
   const { t, locale } = useTranslation();
   const statusBadge = getPaymentStatusBadge(order.status);
   const { variant, icon: Icon, label_fa, label_en } = statusBadge;
 
+  const handleCardClick = () => {
+    if (onSelect) {
+      onSelect(order.id);
+    }
+  };
+
   return (
-    <Card className="overflow-hidden transition-all duration-200 hover:border-muted-foreground/30">
+    <Card
+      className={cn(
+        "overflow-hidden transition-all duration-200 cursor-pointer",
+        selected && "ring-2 ring-primary bg-primary/5",
+        !selected && "hover:border-muted-foreground/30"
+      )}
+      onClick={handleCardClick}
+    >
       <CardContent className="p-4 space-y-3">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
-          <Link
-            href={`/payment-orders/${order.id}`}
-            className="font-semibold text-sm text-foreground hover:text-primary transition-colors line-clamp-1"
-          >
-            {order.title}
-          </Link>
-          <StatusBadge variant={variant} icon={<Icon />}>
-            {locale === "fa" ? label_fa : label_en}
-          </StatusBadge>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {/* Selection indicator */}
+            {selected && (
+              <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                <Check className="w-3 h-3 text-primary-foreground" />
+              </div>
+            )}
+            <Link
+              href={`/payment-orders/${order.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="font-semibold text-sm text-foreground hover:text-primary transition-colors line-clamp-1"
+            >
+              {order.title}
+            </Link>
+          </div>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <StatusBadge variant={variant} icon={<Icon />}>
+              {locale === "fa" ? label_fa : label_en}
+            </StatusBadge>
+            {/* Actions Menu */}
+            {showActions &&
+              order.status === OrderStatus.WaitingForOwnersApproval && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    asChild
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {onApprove && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onApprove(order.id);
+                        }}
+                      >
+                        <CheckCircle className="me-2 h-4 w-4 text-success" />
+                        {t("common.buttons.approve")}
+                      </DropdownMenuItem>
+                    )}
+                    {onReject && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onReject(order.id);
+                        }}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <XCircle className="me-2 h-4 w-4" />
+                        {t("common.buttons.reject")}
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+          </div>
         </div>
 
         {/* Account */}
@@ -66,41 +153,18 @@ export function OrderCard({ order, onApprove, onReject }: OrderCardProps) {
           </div>
         </div>
 
-        {/* Date */}
-        <div className="text-xs text-muted-foreground">
-          {formatDate(order.createdDate || order.createdAt, locale)}
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-2 pt-2">
-          <Button variant="outline" size="sm" className="flex-1" asChild>
-            <Link href={`/payment-orders/${order.id}`}>
-              <Eye className="h-4 w-4 me-2" />
-              {t("common.buttons.view")}
-            </Link>
-          </Button>
-          {order.status === OrderStatus.WaitingForOwnersApproval && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 text-success border-success/30 hover:bg-success/10 dark:hover:bg-success/20"
-                onClick={() => onApprove?.(order.id)}
-              >
-                <CheckCircle className="h-4 w-4 me-2" />
-                {t("common.buttons.approve")}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10 dark:hover:bg-destructive/20"
-                onClick={() => onReject?.(order.id)}
-              >
-                <XCircle className="h-4 w-4 me-2" />
-                {t("common.buttons.reject")}
-              </Button>
-            </>
-          )}
+        {/* Date & View Link */}
+        <div className="flex items-center justify-between">
+          <div className="text-xs text-muted-foreground">
+            {formatDate(order.createdDate || order.createdAt, locale)}
+          </div>
+          <Link
+            href={`/payment-orders/${order.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="text-primary hover:underline text-xs font-medium"
+          >
+            {t("common.buttons.view")}
+          </Link>
         </div>
       </CardContent>
     </Card>

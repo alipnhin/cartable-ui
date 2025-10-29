@@ -14,10 +14,15 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AppLayoutProps {
   children: ReactNode;
+  showAccountGroupSwitcher?: boolean;
 }
 
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({
+  children,
+  showAccountGroupSwitcher = true,
+}: AppLayoutProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [selectedAccountGroup, setSelectedAccountGroup] = useState("all");
   const isMobile = useIsMobile();
 
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
@@ -25,10 +30,22 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="relative min-h-screen bg-background text-foreground flex flex-col">
       {/* Header - بدون ایجاد scroll */}
-      <Header onMenuToggle={toggleSidebar} showMenuButton={!isMobile} />
+      <Header
+        onMenuToggle={toggleSidebar}
+        showMenuButton={!isMobile}
+        showAccountGroupSwitcher={showAccountGroupSwitcher}
+        selectedAccountGroup={selectedAccountGroup}
+        onAccountGroupChange={setSelectedAccountGroup}
+      />
 
       {/* Sidebar (فقط دسکتاپ) */}
-      {!isMobile && <Sidebar isCollapsed={isSidebarCollapsed} />}
+      {!isMobile && (
+        <Sidebar
+          isCollapsed={isSidebarCollapsed}
+          selectedAccountGroup={selectedAccountGroup}
+          onAccountGroupChange={setSelectedAccountGroup}
+        />
+      )}
 
       {/* Main Content - بدون min-height که باعث scroll می‌شود */}
       <main

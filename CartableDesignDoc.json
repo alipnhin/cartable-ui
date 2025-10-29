@@ -1,0 +1,2487 @@
+{
+  "meta": {
+    "project": "کارتابل پرداخت",
+    "version": "2.5 - Unified Final",
+    "lastUpdate": "1404/07/30",
+    "primaryLanguage": "fa",
+    "secondaryLanguage": "en",
+    "status": "Ready for Static Implementation",
+    "implementation_type": "Static with Mock Data",
+    "notes_fa": "مستند نهایی یکپارچه شده با جزئیات کامل PWA، دو زبانه، responsive و mock data برای تست UI/UX",
+    "target_audience": "AI Designer for Implementation"
+  },
+
+  "project_overview": {
+    "description_fa": "کارتابل پرداخت یک سیستم مدیریت و تأیید دستورهای پرداخت است که به صورت PWA پیاده‌سازی می‌شود",
+    "main_goals": [
+      "تجربه کاربری عالی در موبایل (App-like experience)",
+      "نمایش بهینه در دسکتاپ با داشبورد کامل",
+      "پشتیبانی کامل از دو زبان فارسی/انگلیسی با RTL/LTR",
+      "طراحی مدرن، حرفه‌ای و اینترپرایز"
+    ],
+    "implementation_phase": "Phase 1: Static UI with Mock Data",
+    "phase_objective": "ساخت تمام صفحات با دیتای mock برای تست نمایش در موبایل و دسکتاپ و نحوه انجام عملیات‌ها"
+  },
+
+  "technical_architecture": {
+    "pwa_settings": {
+      "enabled": true,
+      "features": [
+        "Offline support (optional for static phase)",
+        "Install prompt",
+        "App-like navigation",
+        "Mobile-optimized gestures"
+      ]
+    },
+    "responsive_strategy": {
+      "mobile": {
+        "breakpoint": "< 768px",
+        "navigation": "Bottom Dock Menu (5 items max)",
+        "layout": "Single column cards",
+        "filters": "Bottom sheet drawer",
+        "modals": "Full screen or bottom drawer",
+        "tables": "Card-based view",
+        "pagination": "Infinite scroll or 'Load More' button"
+      },
+      "desktop": {
+        "breakpoint": "> 768px",
+        "navigation": "Sidebar menu (hamburger collapsible)",
+        "layout": "Dashboard with grid",
+        "filters": "Inline or modal",
+        "modals": "Centered modal",
+        "tables": "Data table with columns",
+        "pagination": "Traditional pagination"
+      }
+    },
+    "navigation_rules": {
+      "mobile_hide": ["hamburger_menu"],
+      "desktop_hide": ["dock_menu"],
+      "accessibility": "Easy reach for mobile (bottom navigation)",
+      "design_quality": "Professional and enterprise-grade"
+    }
+  },
+
+  "i18n_configuration": {
+    "languages": [
+      {
+        "code": "fa",
+        "name": "فارسی",
+        "shortName": "FA",
+        "direction": "rtl",
+        "flag": "/media/flags/iran.svg",
+        "default": true
+      },
+      {
+        "code": "en",
+        "name": "English",
+        "shortName": "EN",
+        "direction": "ltr",
+        "flag": "/media/flags/united-states.svg"
+      }
+    ],
+    "implementation_note": "استفاده از i18next با LanguageDetector و DirectionProvider از Radix UI",
+    "storage": "localStorage with key 'language'",
+    "fallback": "fa",
+    "auto_direction": "زمانی که زبان تغییر می‌کند، direction خودکار تغییر می‌کند (rtl/ltr)"
+  },
+
+  "mock_data_strategy": {
+    "purpose": "ساخت UI استاتیک برای تست و بررسی عملکرد، بدون نیاز به سرویس واقعی",
+    "authentication": {
+      "login_form": "نمایشی - بدون validation واقعی",
+      "otp_form": "نمایشی - بدون ارسال کد واقعی",
+      "behavior": "تأخیر مصنوعی 1-2 ثانیه و نمایش پیام موفقیت"
+    },
+    "operations": {
+      "approve_reject": "نمایشی با تأخیر و پیام",
+      "bank_inquiry": "نمایشی با timeout 2-3 ثانیه",
+      "excel_export": "دانلود فایل mock یا نمایش پیام",
+      "filters_search": "فیلتر کردن دیتای موجود در حافظه"
+    },
+    "data_generation": {
+      "withdrawal_orders": 25,
+      "transactions_per_order": "5 تا 15 (تصادفی)",
+      "bank_accounts": 5,
+      "signers_per_account": "2 تا 5 (تصادفی)",
+      "include_approvers": true,
+      "include_change_history": true,
+      "realistic_dates": "7 روز اخیر تا امروز"
+    },
+    "no_real_services": "هیچ API واقعی فراخوانی نمی‌شود - همه چیز در client-side"
+  },
+
+  "user_roles": [
+    {
+      "id": "dual_role_user",
+      "name_fa": "کاربر با دو نقش",
+      "name_en": "Dual Role User",
+      "description_fa": "یک کاربر که هم امضادار است و هم مدیر کارتابل",
+      "permissions": [
+        "مشاهده_داشبورد",
+        "مشاهده_کارتابل_من",
+        "تأیید_رد_دستورها",
+        "مدیریت_حساب‌ها",
+        "مدیریت_امضاداران",
+        "مشاهده_گزارشات_جامع",
+        "استعلام_از_بانک",
+        "خروجی_اکسل"
+      ],
+      "dockMenu_mobile": [
+        {
+          "id": "dashboard",
+          "title_fa": "داشبورد",
+          "title_en": "Dashboard",
+          "icon": "LayoutDashboard",
+          "route": "/dashboard"
+        },
+        {
+          "id": "my_cartable",
+          "title_fa": "کارتابل من",
+          "title_en": "My Cartable",
+          "icon": "Inbox",
+          "route": "/my-cartable",
+          "badge": "pending_count"
+        },
+        {
+          "id": "payment_orders",
+          "title_fa": "دستورات",
+          "title_en": "Orders",
+          "icon": "FileText",
+          "route": "/payment-orders"
+        },
+        {
+          "id": "reports",
+          "title_fa": "گزارشات",
+          "title_en": "Reports",
+          "icon": "BarChart3",
+          "route": "/reports/transactions"
+        },
+        {
+          "id": "more",
+          "title_fa": "بیشتر",
+          "title_en": "More",
+          "icon": "Menu",
+          "type": "drawer",
+          "items": [
+            {
+              "title_fa": "مدیریت حساب‌ها",
+              "title_en": "Accounts",
+              "route": "/accounts",
+              "icon": "Building"
+            },
+            {
+              "title_fa": "تنظیمات",
+              "title_en": "Settings",
+              "route": "/settings",
+              "icon": "Settings"
+            },
+            {
+              "title_fa": "خروج",
+              "title_en": "Logout",
+              "action": "logout",
+              "icon": "LogOut"
+            }
+          ]
+        }
+      ],
+      "hamburgerMenu_desktop": [
+        {
+          "section_fa": "اصلی",
+          "section_en": "Main",
+          "items": [
+            {
+              "title_fa": "داشبورد",
+              "title_en": "Dashboard",
+              "icon": "LayoutDashboard",
+              "route": "/dashboard"
+            },
+            {
+              "title_fa": "کارتابل من",
+              "title_en": "My Cartable",
+              "icon": "Inbox",
+              "route": "/my-cartable",
+              "badge": "pending_count"
+            }
+          ]
+        },
+        {
+          "section_fa": "مدیریت",
+          "section_en": "Management",
+          "items": [
+            {
+              "title_fa": "دستورات پرداخت",
+              "title_en": "Payment Orders",
+              "icon": "FileText",
+              "route": "/payment-orders"
+            },
+            {
+              "title_fa": "مدیریت حساب‌ها",
+              "title_en": "Accounts",
+              "icon": "Building",
+              "route": "/accounts"
+            }
+          ]
+        },
+        {
+          "section_fa": "گزارشات",
+          "section_en": "Reports",
+          "items": [
+            {
+              "title_fa": "گزارش جامع",
+              "title_en": "Full Report",
+              "icon": "BarChart3",
+              "route": "/reports/transactions"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "account_grouping": {
+    "description_fa": "دراپ‌داون گروه‌بندی حساب‌ها برای فیلتر کردن دستورات و اطلاعات",
+    "location": "فیلتر سراسری در همه صفحات",
+    "functionality": "با انتخاب یک گروه، فقط دستورات و اطلاعات مربوط به حساب‌های آن گروه نمایش داده می‌شود",
+    "implementation": "Dropdown با multi-select در دسکتاپ، Sheet در موبایل",
+    "mock_groups": [
+      {
+        "id": "group_1",
+        "name_fa": "حساب‌های اصلی",
+        "name_en": "Main Accounts",
+        "accounts": ["account_1", "account_2"]
+      },
+      {
+        "id": "group_2",
+        "name_fa": "حساب‌های فرعی",
+        "name_en": "Sub Accounts",
+        "accounts": ["account_3", "account_4", "account_5"]
+      }
+    ]
+  },
+
+  "enums": {
+    "PaymentStatusEnum": {
+      "description_fa": "وضعیت دستور پرداخت - 10 حالت کامل",
+      "type": "number",
+      "values": {
+        "0": {
+          "name": "WaitingForOwnersApproval",
+          "display_fa": "در انتظار تأیید",
+          "display_en": "Waiting For Approval",
+          "color": "warning",
+          "icon": "⏳",
+          "badge_style": "warning"
+        },
+        "1": {
+          "name": "OwnersApproved",
+          "display_fa": "تأیید شده",
+          "display_en": "Approved",
+          "color": "success",
+          "icon": "✅",
+          "badge_style": "success"
+        },
+        "2": {
+          "name": "SubmittedToBank",
+          "display_fa": "ارسال شده به بانک",
+          "display_en": "Submitted To Bank",
+          "color": "info",
+          "icon": "🏦",
+          "badge_style": "info"
+        },
+        "3": {
+          "name": "BankSucceeded",
+          "display_fa": "انجام شده",
+          "display_en": "Succeeded",
+          "color": "success",
+          "icon": "✅",
+          "badge_style": "success"
+        },
+        "4": {
+          "name": "OwnerRejected",
+          "display_fa": "عدم تأیید",
+          "display_en": "Rejected",
+          "color": "danger",
+          "icon": "❌",
+          "badge_style": "danger"
+        },
+        "5": {
+          "name": "BankRejected",
+          "display_fa": "رد شده توسط بانک",
+          "display_en": "Bank Rejected",
+          "color": "danger",
+          "icon": "🚫",
+          "badge_style": "danger"
+        },
+        "6": {
+          "name": "Draft",
+          "display_fa": "پیش‌نویس",
+          "display_en": "Draft",
+          "color": "secondary",
+          "icon": "📝",
+          "badge_style": "secondary"
+        },
+        "7": {
+          "name": "DoneWithError",
+          "display_fa": "انجام شده با خطا",
+          "display_en": "Done With Error",
+          "color": "warning",
+          "icon": "⚠️",
+          "badge_style": "warning"
+        },
+        "8": {
+          "name": "Canceled",
+          "display_fa": "لغو شده",
+          "display_en": "Canceled",
+          "color": "muted",
+          "icon": "🚫",
+          "badge_style": "muted"
+        },
+        "9": {
+          "name": "Expired",
+          "display_fa": "منقضی شده",
+          "display_en": "Expired",
+          "color": "muted",
+          "icon": "⏰",
+          "badge_style": "muted"
+        }
+      }
+    },
+
+    "PaymentItemStatusEnum": {
+      "description_fa": "وضعیت تراکنش",
+      "type": "number",
+      "values": {
+        "0": {
+          "name": "Registered",
+          "display_fa": "ثبت شده",
+          "display_en": "Registered",
+          "color": "secondary",
+          "badge_style": "secondary"
+        },
+        "1": {
+          "name": "WaitForExecution",
+          "display_fa": "در صف پردازش",
+          "display_en": "Wait For Execution",
+          "color": "info",
+          "badge_style": "info"
+        },
+        "2": {
+          "name": "WaitForBank",
+          "display_fa": "ارسال شده به بانک",
+          "display_en": "Wait For Bank",
+          "color": "warning",
+          "badge_style": "warning"
+        },
+        "3": {
+          "name": "BankSucceeded",
+          "display_fa": "انجام شده",
+          "display_en": "Succeeded",
+          "color": "success",
+          "badge_style": "success"
+        },
+        "4": {
+          "name": "BankRejected",
+          "display_fa": "رد شده توسط بانک",
+          "display_en": "Bank Rejected",
+          "color": "danger",
+          "badge_style": "danger"
+        },
+        "5": {
+          "name": "TransactionRollback",
+          "display_fa": "برگشت مبلغ",
+          "display_en": "Rollback",
+          "color": "warning",
+          "badge_style": "warning"
+        },
+        "6": {
+          "name": "Failed",
+          "display_fa": "خطا در ارسال",
+          "display_en": "Failed",
+          "color": "danger",
+          "badge_style": "danger"
+        },
+        "7": {
+          "name": "Canceled",
+          "display_fa": "لغو شده",
+          "display_en": "Canceled",
+          "color": "muted",
+          "badge_style": "muted"
+        },
+        "8": {
+          "name": "Expired",
+          "display_fa": "منقضی شده",
+          "display_en": "Expired",
+          "color": "muted",
+          "badge_style": "muted"
+        }
+      }
+    },
+
+    "ApproveStatus": {
+      "description_fa": "وضعیت تأیید امضادار",
+      "type": "number",
+      "values": {
+        "0": {
+          "name": "WaitForAction",
+          "display_fa": "در انتظار تأیید",
+          "display_en": "Wait For Action",
+          "color": "warning",
+          "badge_style": "warning"
+        },
+        "1": {
+          "name": "Accepted",
+          "display_fa": "تأیید شده",
+          "display_en": "Accepted",
+          "color": "success",
+          "badge_style": "success"
+        },
+        "2": {
+          "name": "Rejected",
+          "display_fa": "رد شده",
+          "display_en": "Rejected",
+          "color": "danger",
+          "badge_style": "danger"
+        }
+      }
+    },
+
+    "BankGatewayUserStatusEnum": {
+      "description_fa": "وضعیت امضادار حساب",
+      "type": "number",
+      "values": {
+        "0": {
+          "name": "EnableRequested",
+          "display_fa": "درخواست فعالسازی",
+          "display_en": "Enable Requested",
+          "badge_style": "info"
+        },
+        "1": {
+          "name": "Enable",
+          "display_fa": "فعال",
+          "display_en": "Enable",
+          "badge_style": "success"
+        },
+        "2": {
+          "name": "Disable",
+          "display_fa": "غیرفعال",
+          "display_en": "Disable",
+          "badge_style": "muted"
+        },
+        "3": {
+          "name": "DisableRequested",
+          "display_fa": "درخواست غیرفعالسازی",
+          "display_en": "Disable Requested",
+          "badge_style": "warning"
+        },
+        "4": {
+          "name": "Rejected",
+          "display_fa": "رد شده",
+          "display_en": "Rejected",
+          "badge_style": "danger"
+        }
+      }
+    },
+
+    "PaymentTypeEnum": {
+      "description_fa": "نوع پرداخت",
+      "type": "number",
+      "values": {
+        "-1": {
+          "name": "Unknown",
+          "display_fa": "نامشخص",
+          "display_en": "Unknown",
+          "color": "muted",
+          "badge_style": "muted"
+        },
+        "0": {
+          "name": "Internal",
+          "display_fa": "داخلی",
+          "display_en": "Internal",
+          "color": "primary",
+          "badge_style": "primary"
+        },
+        "1": {
+          "name": "Paya",
+          "display_fa": "پایا",
+          "display_en": "Paya",
+          "color": "success",
+          "badge_style": "success"
+        },
+        "2": {
+          "name": "Satna",
+          "display_fa": "ساتنا",
+          "display_en": "Satna",
+          "color": "info",
+          "badge_style": "info"
+        }
+      }
+    }
+  },
+
+  "screens": [
+    {
+      "id": "home",
+      "order": 1,
+      "title_fa": "صفحه اصلی",
+      "title_en": "Home",
+      "route": "/",
+      "description_fa": "صفحه ورود با تصویر مرتبط و دکمه ورود",
+      "layout": {
+        "desktop": "centered_full_height",
+        "mobile": "centered_full_height"
+      },
+      "sections": [
+        {
+          "type": "hero",
+          "title_fa": "کارتابل پرداخت",
+          "title_en": "Payment Cartable",
+          "description_fa": "مدیریت و تأیید دستورهای پرداخت با سرعت و امنیت بالا",
+          "description_en": "Manage and approve payment orders with high speed and security",
+          "image": "/media/illustrations/cartable-hero.svg"
+        },
+        {
+          "type": "cta",
+          "button_fa": "ورود به سیستم",
+          "button_en": "Login",
+          "action": "navigate",
+          "target": "/auth/login"
+        }
+      ]
+    },
+
+    {
+      "id": "auth_login",
+      "order": 2,
+      "title_fa": "ورود به سیستم",
+      "title_en": "Login",
+      "route": "/auth/login",
+      "description_fa": "فرم لاگین با username/password، کپچا و OTP - نمایشی و بدون احراز واقعی",
+      "mock_behavior": "تأخیر 1.5 ثانیه، نمایش پیام موفقیت و انتقال به داشبورد",
+      "layout": {
+        "desktop": "centered_card",
+        "mobile": "full_screen"
+      },
+      "sections": [
+        {
+          "type": "login_form",
+          "title_fa": "ورود به حساب کاربری",
+          "title_en": "Login to Your Account",
+          "fields": [
+            {
+              "name": "username",
+              "label_fa": "نام کاربری",
+              "label_en": "Username",
+              "type": "text",
+              "required": true,
+              "validation": "min:3",
+              "mock_value": "admin"
+            },
+            {
+              "name": "password",
+              "label_fa": "رمز عبور",
+              "label_en": "Password",
+              "type": "password",
+              "required": true,
+              "validation": "min:6",
+              "mock_value": "123456"
+            },
+            {
+              "name": "captcha",
+              "label_fa": "کد امنیتی",
+              "label_en": "Captcha",
+              "type": "captcha",
+              "required": true,
+              "mock_image": "/api/captcha.png"
+            }
+          ],
+          "submit_button_fa": "ورود",
+          "submit_button_en": "Login",
+          "mock_response": {
+            "delay": 1500,
+            "success": true,
+            "message_fa": "ورود موفقیت‌آمیز بود",
+            "message_en": "Login successful",
+            "next_step": "show_otp"
+          }
+        },
+        {
+          "type": "otp_verification",
+          "trigger": "after_login_success",
+          "title_fa": "تأیید دو مرحله‌ای",
+          "title_en": "Two-Factor Authentication",
+          "display_type": {
+            "mobile": "drawer_bottom",
+            "desktop": "modal_center"
+          },
+          "fields": [
+            {
+              "name": "otp_code",
+              "label_fa": "کد 6 رقمی",
+              "label_en": "6-Digit Code",
+              "type": "otp",
+              "length": 6,
+              "validity_seconds": 120,
+              "resend_cooldown_seconds": 120
+            }
+          ],
+          "features": [
+            "countdown_timer",
+            "resend_button",
+            "auto_submit_on_complete"
+          ],
+          "mock_response": {
+            "delay": 1000,
+            "success": true,
+            "valid_code": "123456",
+            "message_fa": "ورود موفق",
+            "message_en": "Login successful",
+            "redirect": "/dashboard"
+          }
+        }
+      ],
+      "notes": "OTP در موبایل به صورت Drawer از پایین باز می‌شود"
+    },
+
+    {
+      "id": "dashboard",
+      "order": 3,
+      "title_fa": "داشبورد",
+      "title_en": "Dashboard",
+      "route": "/dashboard",
+      "description_fa": "نمایش کلی آمار تراکنش‌ها با چارت‌های تعاملی و کارت‌های آماری",
+      "layout": {
+        "desktop": "dashboard_grid",
+        "mobile": "single_column"
+      },
+      "sections": [
+        {
+          "type": "global_filter",
+          "title_fa": "فیلتر سراسری",
+          "position": "top",
+          "display": {
+            "desktop": "inline",
+            "mobile": "bottom_sheet"
+          },
+          "fields": [
+            {
+              "name": "accountGroup",
+              "label_fa": "گروه حساب",
+              "label_en": "Account Group",
+              "type": "dropdown",
+              "multi_select": true,
+              "options_source": "mock_account_groups"
+            },
+            {
+              "name": "dateRange",
+              "label_fa": "بازه زمانی",
+              "label_en": "Date Range",
+              "type": "date_range",
+              "default": "last_7_days",
+              "fields": ["fromDate", "toDate"]
+            },
+            {
+              "name": "quickSearch",
+              "label_fa": "جستجو سریع",
+              "label_en": "Quick Search",
+              "type": "text",
+              "placeholder_fa": "جستجو...",
+              "placeholder_en": "Search..."
+            }
+          ]
+        },
+        {
+          "type": "stats_cards",
+          "title_fa": "آمار کلی",
+          "layout": {
+            "desktop": "grid-4-cols",
+            "mobile": "grid-2-cols"
+          },
+          "cards": [
+            {
+              "id": "total_transactions",
+              "title_fa": "کل تراکنش‌ها",
+              "title_en": "Total Transactions",
+              "icon": "📊",
+              "color": "primary",
+              "data": {
+                "count": "totalTransactions",
+                "amount": "totalAmount",
+                "format": "number_currency"
+              }
+            },
+            {
+              "id": "succeeded",
+              "title_fa": "موفق",
+              "title_en": "Succeeded",
+              "icon": "✅",
+              "color": "success",
+              "data": {
+                "count": "succeededTransactions",
+                "amount": "succeededAmount",
+                "percent": "successPercent",
+                "format": "number_currency_percent"
+              }
+            },
+            {
+              "id": "pending",
+              "title_fa": "در انتظار",
+              "title_en": "Pending",
+              "icon": "⏳",
+              "color": "warning",
+              "data": {
+                "count": "pendingTransactions",
+                "amount": "pendingAmount",
+                "percent": "pendingPercent",
+                "format": "number_currency_percent"
+              }
+            },
+            {
+              "id": "failed",
+              "title_fa": "ناموفق",
+              "title_en": "Failed",
+              "icon": "❌",
+              "color": "danger",
+              "data": {
+                "count": "failedTransactions",
+                "amount": "failedAmount",
+                "percent": "failedPercent",
+                "format": "number_currency_percent"
+              }
+            }
+          ]
+        },
+        {
+          "type": "charts_row",
+          "layout": {
+            "desktop": "grid-2-cols",
+            "mobile": "single_column"
+          },
+          "charts": [
+            {
+              "id": "payment_type_chart",
+              "title_fa": "نمودار نوع تراکنش",
+              "title_en": "Payment Type Chart",
+              "chartType": "donut",
+              "dataSource": "paymentTypeSummary",
+              "display": {
+                "data": "count",
+                "tooltip": "totalAmount",
+                "center": "total_count",
+                "legend": "right"
+              },
+              "colors": {
+                "0": "#3b82f6",
+                "1": "#10b981",
+                "2": "#8b5cf6"
+              }
+            },
+            {
+              "id": "status_chart",
+              "title_fa": "نمودار وضعیت تراکنش‌ها",
+              "title_en": "Transaction Status Chart",
+              "chartType": "horizontal_bar",
+              "dataSource": "transactionStatusSummary",
+              "axes": {
+                "x": "transactionCount",
+                "y": "statusTitle"
+              },
+              "tooltip": ["totalAmount", "percent"],
+              "dynamicColors": true
+            }
+          ]
+        },
+        {
+          "type": "chart_full_width",
+          "title_fa": "روند زمانی تراکنش‌ها",
+          "title_en": "Transaction Trend",
+          "chartType": "line",
+          "dataSource": "aggregated_7_days",
+          "axes": {
+            "x": "date",
+            "y": "transactionCount",
+            "y2": "totalAmount"
+          },
+          "lines": [
+            {
+              "id": "total",
+              "label_fa": "کل تراکنش‌ها",
+              "label_en": "Total",
+              "color": "#3b82f6"
+            },
+            {
+              "id": "succeeded",
+              "label_fa": "موفق",
+              "label_en": "Succeeded",
+              "color": "#10b981"
+            }
+          ],
+          "features": ["tooltip", "dots", "gradient_fill"]
+        },
+        {
+          "type": "info_card",
+          "title_fa": "دستورهای بسته شده",
+          "title_en": "Closed Orders",
+          "dataKey": "closedWithdrawalOrders",
+          "icon": "📋",
+          "color": "info"
+        }
+      ],
+      "responsive_notes": "در موبایل: کارت‌ها 2 در هر ردیف، چارت‌ها تک ستونی، فیلتر به صورت drawer از پایین"
+    },
+
+    {
+      "id": "my_cartable",
+      "order": 4,
+      "title_fa": "کارتابل من",
+      "title_en": "My Cartable",
+      "route": "/my-cartable",
+      "description_fa": "لیست دستورهای پرداختی که این کاربر باید بررسی و تأیید/رد کند",
+      "layout": {
+        "desktop": "table_view",
+        "mobile": "card_view"
+      },
+      "sections": [
+        {
+          "type": "filter_bar",
+          "display": {
+            "desktop": "inline",
+            "mobile": "bottom_sheet"
+          },
+          "fields": [
+            {
+              "name": "accountFilter",
+              "label_fa": "حساب",
+              "label_en": "Account",
+              "type": "dropdown"
+            },
+            {
+              "name": "search",
+              "label_fa": "جستجو",
+              "label_en": "Search",
+              "type": "text"
+            },
+            {
+              "name": "statusFilter",
+              "label_fa": "وضعیت",
+              "label_en": "Status",
+              "type": "multi_select"
+            }
+          ]
+        },
+        {
+          "type": "action_bar",
+          "actions": [
+            {
+              "id": "batch_approve",
+              "label_fa": "تأیید گروهی",
+              "label_en": "Batch Approve",
+              "icon": "CheckCircle",
+              "color": "success",
+              "requiresSelection": true,
+              "requiresOTP": true,
+              "display": {
+                "mobile": "drawer_bottom",
+                "desktop": "modal_center"
+              },
+              "mock_behavior": {
+                "delay": 2000,
+                "success_message_fa": "دستورها با موفقیت تأیید شدند",
+                "success_message_en": "Orders approved successfully"
+              }
+            },
+            {
+              "id": "batch_reject",
+              "label_fa": "رد گروهی",
+              "label_en": "Batch Reject",
+              "icon": "XCircle",
+              "color": "danger",
+              "requiresSelection": true,
+              "requiresOTP": true,
+              "display": {
+                "mobile": "drawer_bottom",
+                "desktop": "modal_center"
+              },
+              "mock_behavior": {
+                "delay": 2000,
+                "success_message_fa": "دستورها رد شدند",
+                "success_message_en": "Orders rejected"
+              }
+            }
+          ]
+        },
+        {
+          "type": "data_view",
+          "selectable": true,
+          "desktop_view": {
+            "type": "table",
+            "columns": [
+              {
+                "id": "checkbox",
+                "type": "checkbox",
+                "width": "50px"
+              },
+              {
+                "id": "orderId",
+                "label_fa": "شماره درخواست",
+                "label_en": "Order ID",
+                "sortable": true
+              },
+              {
+                "id": "title",
+                "label_fa": "عنوان",
+                "label_en": "Title",
+                "sortable": true
+              },
+              {
+                "id": "account",
+                "label_fa": "حساب مبدا",
+                "label_en": "Source Account",
+                "format": "title + accountNumber"
+              },
+              {
+                "id": "totalAmount",
+                "label_fa": "مبلغ کل",
+                "label_en": "Total Amount",
+                "format": "currency",
+                "sortable": true
+              },
+              {
+                "id": "numberOfTransactions",
+                "label_fa": "تعداد تراکنش",
+                "label_en": "Transaction Count",
+                "sortable": true
+              },
+              {
+                "id": "status",
+                "label_fa": "وضعیت",
+                "label_en": "Status",
+                "format": "badge",
+                "sortable": true
+              },
+              {
+                "id": "createdDateTime",
+                "label_fa": "تاریخ ثبت",
+                "label_en": "Created Date",
+                "format": "date_time",
+                "sortable": true
+              },
+              {
+                "id": "actions",
+                "label_fa": "عملیات",
+                "label_en": "Actions",
+                "type": "actions",
+                "items": ["view", "approve", "reject"]
+              }
+            ]
+          },
+          "mobile_view": {
+            "type": "cards",
+            "card_layout": [
+              {
+                "section": "header",
+                "fields": ["orderId", "status_badge"]
+              },
+              {
+                "section": "body",
+                "fields": [
+                  "title",
+                  "account",
+                  "totalAmount",
+                  "numberOfTransactions",
+                  "createdDateTime"
+                ]
+              },
+              {
+                "section": "footer",
+                "actions": ["checkbox", "view", "approve", "reject"]
+              }
+            ]
+          },
+          "pagination": {
+            "type": "server_side",
+            "desktop": "traditional",
+            "mobile": "load_more_or_infinite_scroll",
+            "pageSize": 10
+          }
+        }
+      ],
+      "business_rules": [
+        "فقط دستورهای با وضعیت WaitingForOwnersApproval نمایش داده می‌شود",
+        "کاربر فقط روی دستورهایی که در لیست approvers است می‌تواند عمل کند",
+        "عملیات گروهی: یک OTP برای کل لیست انتخاب شده",
+        "OTP validity: 120 ثانیه"
+      ],
+      "otp_modal_drawer": {
+        "display": {
+          "mobile": "drawer_from_bottom",
+          "desktop": "modal_center"
+        },
+        "title_fa": "تأیید عملیات",
+        "title_en": "Confirm Operation",
+        "fields": [
+          {
+            "name": "otp_code",
+            "type": "otp",
+            "length": 6,
+            "validity": 120,
+            "resend_cooldown": 120
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "payment_orders_list",
+      "order": 5,
+      "title_fa": "لیست دستورهای پرداخت",
+      "title_en": "Payment Orders List",
+      "route": "/payment-orders",
+      "description_fa": "لیست تمام دستورهای پرداخت با فیلترهای پیشرفته",
+      "layout": {
+        "desktop": "table_view",
+        "mobile": "card_view"
+      },
+      "sections": [
+        {
+          "type": "advanced_filter",
+          "display": {
+            "desktop": "inline_expandable",
+            "mobile": "bottom_sheet"
+          },
+          "fields": [
+            {
+              "name": "bankGatewayId",
+              "label_fa": "حساب",
+              "label_en": "Account",
+              "type": "dropdown"
+            },
+            {
+              "name": "status",
+              "label_fa": "وضعیت",
+              "label_en": "Status",
+              "type": "multi_select",
+              "options_source": "PaymentStatusEnum"
+            },
+            {
+              "name": "orderId",
+              "label_fa": "شماره درخواست",
+              "label_en": "Order ID",
+              "type": "text"
+            },
+            {
+              "name": "dateRange",
+              "label_fa": "بازه زمانی",
+              "label_en": "Date Range",
+              "type": "date_range",
+              "fields": ["fromDate", "toDate"]
+            },
+            {
+              "name": "trackingId",
+              "label_fa": "کد رهگیری",
+              "label_en": "Tracking ID",
+              "type": "text"
+            },
+            {
+              "name": "name",
+              "label_fa": "عنوان",
+              "label_en": "Title",
+              "type": "text",
+              "search_type": "full_text"
+            }
+          ]
+        },
+        {
+          "type": "data_view",
+          "desktop_view": {
+            "type": "table",
+            "columns": [
+              {
+                "id": "orderId",
+                "label_fa": "شماره درخواست",
+                "label_en": "Order ID",
+                "sortable": true
+              },
+              {
+                "id": "name",
+                "label_fa": "عنوان",
+                "label_en": "Title",
+                "sortable": true
+              },
+              {
+                "id": "account",
+                "label_fa": "حساب مبدا",
+                "label_en": "Source Account",
+                "format": "title + accountNumber"
+              },
+              {
+                "id": "totalAmount",
+                "label_fa": "مبلغ کل",
+                "label_en": "Total Amount",
+                "format": "currency",
+                "sortable": true
+              },
+              {
+                "id": "numberOfTransactions",
+                "label_fa": "تعداد تراکنش",
+                "label_en": "Transaction Count",
+                "sortable": true
+              },
+              {
+                "id": "status",
+                "label_fa": "وضعیت",
+                "label_en": "Status",
+                "format": "badge",
+                "sortable": true
+              },
+              {
+                "id": "createdDateTime",
+                "label_fa": "تاریخ ثبت",
+                "label_en": "Created Date",
+                "format": "date_time",
+                "sortable": true
+              },
+              {
+                "id": "actions",
+                "label_fa": "عملیات",
+                "label_en": "Actions",
+                "type": "actions",
+                "items": ["view"]
+              }
+            ]
+          },
+          "mobile_view": {
+            "type": "cards",
+            "card_layout": [
+              {
+                "section": "header",
+                "fields": ["orderId", "status_badge"]
+              },
+              {
+                "section": "body",
+                "fields": [
+                  "name",
+                  "account",
+                  "totalAmount",
+                  "numberOfTransactions",
+                  "createdDateTime"
+                ]
+              },
+              {
+                "section": "footer",
+                "actions": ["view"]
+              }
+            ]
+          },
+          "pagination": {
+            "type": "server_side",
+            "desktop": "traditional",
+            "mobile": "load_more_or_infinite_scroll",
+            "pageSize": 10
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "payment_order_detail",
+      "order": 6,
+      "title_fa": "جزئیات دستور پرداخت",
+      "title_en": "Payment Order Detail",
+      "route": "/payment-orders/:id",
+      "description_fa": "نمایش کامل اطلاعات یک دستور پرداخت با تمام جزئیات",
+      "layout": {
+        "desktop": "multi_section",
+        "mobile": "stacked_sections"
+      },
+      "sections": [
+        {
+          "type": "header_info",
+          "title_fa": "اطلاعات پایه",
+          "title_en": "Basic Information",
+          "fields": [
+            {
+              "label_fa": "شماره درخواست",
+              "label_en": "Order ID",
+              "key": "orderId",
+              "format": "text"
+            },
+            {
+              "label_fa": "عنوان",
+              "label_en": "Title",
+              "key": "title",
+              "format": "text"
+            },
+            {
+              "label_fa": "توضیحات",
+              "label_en": "Description",
+              "key": "description",
+              "format": "text"
+            },
+            {
+              "label_fa": "وضعیت",
+              "label_en": "Status",
+              "key": "status",
+              "format": "badge"
+            },
+            {
+              "label_fa": "کد رهگیری",
+              "label_en": "Tracking ID",
+              "key": "trackingId",
+              "format": "text"
+            },
+            {
+              "label_fa": "تاریخ ثبت",
+              "label_en": "Created Date",
+              "key": "createdDateTime",
+              "format": "date_time"
+            },
+            {
+              "label_fa": "آخرین بروزرسانی",
+              "label_en": "Last Update",
+              "key": "updatedDateTime",
+              "format": "date_time"
+            }
+          ]
+        },
+        {
+          "type": "account_info",
+          "title_fa": "اطلاعات حساب مبدا",
+          "title_en": "Source Account Information",
+          "fields": [
+            {
+              "label_fa": "عنوان حساب",
+              "label_en": "Account Title",
+              "key": "gatewayTitle"
+            },
+            {
+              "label_fa": "نام بانک",
+              "label_en": "Bank Name",
+              "key": "bankName"
+            },
+            {
+              "label_fa": "شماره حساب",
+              "label_en": "Account Number",
+              "key": "accountNumber"
+            },
+            {
+              "label_fa": "شماره شبا",
+              "label_en": "IBAN",
+              "key": "sourceIban",
+              "format": "iban"
+            }
+          ]
+        },
+        {
+          "type": "summary_stats",
+          "title_fa": "خلاصه آمار",
+          "title_en": "Summary",
+          "layout": {
+            "desktop": "grid-3-cols",
+            "mobile": "grid-2-cols"
+          },
+          "cards": [
+            {
+              "title_fa": "مبلغ کل",
+              "title_en": "Total Amount",
+              "dataKey": "totalAmount",
+              "format": "currency",
+              "color": "primary"
+            },
+            {
+              "title_fa": "تعداد تراکنش",
+              "title_en": "Transaction Count",
+              "dataKey": "numberOfTransactions",
+              "format": "number",
+              "color": "info"
+            },
+            {
+              "title_fa": "وضعیت",
+              "title_en": "Status",
+              "dataKey": "status",
+              "format": "badge"
+            }
+          ]
+        },
+        {
+          "type": "approvers_section",
+          "title_fa": "امضاداران",
+          "title_en": "Signers",
+          "layout": "timeline",
+          "display_fields": [
+            {
+              "label_fa": "نام و نام خانوادگی",
+              "label_en": "Full Name",
+              "key": "fullName"
+            },
+            {
+              "label_fa": "کد کاربری",
+              "label_en": "User ID",
+              "key": "userId"
+            },
+            {
+              "label_fa": "وضعیت",
+              "label_en": "Status",
+              "key": "status",
+              "format": "badge"
+            },
+            {
+              "label_fa": "تاریخ افزودن",
+              "label_en": "Created Date",
+              "key": "createdDateTime",
+              "format": "date_time"
+            },
+            {
+              "label_fa": "عملیات",
+              "label_en": "Actions",
+              "type": "actions",
+              "items": ["toggle_status", "view_history"]
+            }
+          ]
+        }
+      ],
+      "business_rules": [
+        "minimumSignature نباید از تعداد امضاداران فعال بیشتر باشد",
+        "غیرفعال کردن امضادار سابقه را پاک نمی‌کند",
+        "افزودن امضادار از لیست کاربران مجاز"
+      ]
+    },
+
+    {
+      "id": "transaction_report",
+      "order": 9,
+      "title_fa": "گزارش جامع تراکنش‌ها",
+      "title_en": "Transaction Report",
+      "route": "/reports/transactions",
+      "description_fa": "گزارش کامل تمام تراکنش‌ها با فیلترهای پیشرفته",
+      "layout": {
+        "desktop": "table_view",
+        "mobile": "card_view"
+      },
+      "sections": [
+        {
+          "type": "advanced_filter",
+          "display": {
+            "desktop": "inline_expandable",
+            "mobile": "bottom_sheet"
+          },
+          "fields": [
+            {
+              "name": "bankGatewayId",
+              "label_fa": "حساب",
+              "label_en": "Account",
+              "type": "dropdown"
+            },
+            {
+              "name": "fromDate",
+              "label_fa": "از تاریخ (ثبت)",
+              "label_en": "From Date (Created)",
+              "type": "date"
+            },
+            {
+              "name": "toDate",
+              "label_fa": "تا تاریخ (ثبت)",
+              "label_en": "To Date (Created)",
+              "type": "date"
+            },
+            {
+              "name": "transferFromDate",
+              "label_fa": "از تاریخ (انتقال)",
+              "label_en": "From Date (Transfer)",
+              "type": "date"
+            },
+            {
+              "name": "transferToDate",
+              "label_fa": "تا تاریخ (انتقال)",
+              "label_en": "To Date (Transfer)",
+              "type": "date"
+            },
+            {
+              "name": "nationalCode",
+              "label_fa": "کد ملی",
+              "label_en": "National Code",
+              "type": "text"
+            },
+            {
+              "name": "destinationIban",
+              "label_fa": "شبای مقصد",
+              "label_en": "Destination IBAN",
+              "type": "text"
+            },
+            {
+              "name": "status",
+              "label_fa": "وضعیت",
+              "label_en": "Status",
+              "type": "multi_select",
+              "options_source": "PaymentItemStatusEnum"
+            },
+            {
+              "name": "paymentType",
+              "label_fa": "نوع پرداخت",
+              "label_en": "Payment Type",
+              "type": "multi_select",
+              "options_source": "PaymentTypeEnum"
+            },
+            {
+              "name": "orderId",
+              "label_fa": "شماره درخواست",
+              "label_en": "Order ID",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "type": "action_bar",
+          "actions": [
+            {
+              "id": "export_excel",
+              "label_fa": "خروجی اکسل",
+              "label_en": "Export Excel",
+              "icon": "Download",
+              "color": "primary",
+              "mock_behavior": {
+                "delay": 3000,
+                "success_message_fa": "فایل در حال دانلود است",
+                "success_message_en": "File is downloading"
+              }
+            }
+          ]
+        },
+        {
+          "type": "data_view",
+          "desktop_view": {
+            "type": "table",
+            "columns": [
+              {
+                "id": "destinationAccountOwner",
+                "label_fa": "صاحب حساب مقصد",
+                "label_en": "Destination Owner"
+              },
+              {
+                "id": "nationalCode",
+                "label_fa": "کد ملی",
+                "label_en": "National Code"
+              },
+              {
+                "id": "destinationIban",
+                "label_fa": "شبای مقصد",
+                "label_en": "Destination IBAN"
+              },
+              {
+                "id": "bankName",
+                "label_fa": "نام بانک",
+                "label_en": "Bank Name"
+              },
+              {
+                "id": "accountNumber",
+                "label_fa": "شماره حساب",
+                "label_en": "Account Number"
+              },
+              {
+                "id": "orderId",
+                "label_fa": "شماره درخواست",
+                "label_en": "Order ID"
+              },
+              {
+                "id": "amount",
+                "label_fa": "مبلغ",
+                "label_en": "Amount",
+                "format": "currency"
+              },
+              {
+                "id": "status",
+                "label_fa": "وضعیت",
+                "label_en": "Status",
+                "format": "badge"
+              },
+              {
+                "id": "paymentType",
+                "label_fa": "نوع پرداخت",
+                "label_en": "Payment Type",
+                "format": "badge"
+              },
+              {
+                "id": "createdDateTime",
+                "label_fa": "تاریخ ثبت",
+                "label_en": "Created Date",
+                "format": "date_time"
+              },
+              {
+                "id": "transferDateTime",
+                "label_fa": "تاریخ انتقال",
+                "label_en": "Transfer Date",
+                "format": "date_time"
+              }
+            ]
+          },
+          "mobile_view": {
+            "type": "cards",
+            "card_layout": [
+              {
+                "section": "header",
+                "fields": ["orderId", "status_badge"]
+              },
+              {
+                "section": "body",
+                "fields": [
+                  "destinationAccountOwner",
+                  "destinationIban",
+                  "amount",
+                  "paymentType",
+                  "createdDateTime"
+                ]
+              }
+            ]
+          },
+          "pagination": {
+            "type": "server_side",
+            "desktop": "traditional",
+            "mobile": "load_more_or_infinite_scroll",
+            "pageSize": 10
+          },
+          "features": [
+            "large_dataset_support",
+            "virtual_scrolling_option"
+          ]
+        }
+      ]
+    }
+  ],
+
+  "dataModels": {
+    "BankAccount": {
+      "fields": {
+        "id": "uuid",
+        "bankId": "uuid",
+        "bankName": "string",
+        "title": "string",
+        "bankCode": "string",
+        "shebaNumber": "string",
+        "accountNumber": "string",
+        "isAccountNumberRequierd": "boolean",
+        "batchSize": "number",
+        "isEnable": "boolean",
+        "hasCartable": "boolean",
+        "minimumSignature": "number",
+        "createdDateTime": "datetime",
+        "users": "BankAccountUser[]"
+      }
+    },
+    "BankAccountUser": {
+      "fields": {
+        "userId": "uuid",
+        "fullName": "string",
+        "status": "number (BankGatewayUserStatusEnum)",
+        "createdDateTime": "datetime"
+      }
+    },
+    "WithdrawalOrder": {
+      "fields": {
+        "id": "uuid",
+        "orderId": "string",
+        "providerCode": "number",
+        "trackingId": "string",
+        "name": "string",
+        "description": "string",
+        "sourceIban": "string",
+        "bankGatewayId": "uuid",
+        "tenantId": "uuid",
+        "bankCode": "string",
+        "bankName": "string",
+        "gatewayTitle": "string",
+        "accountNumber": "string",
+        "totalAmount": "string",
+        "numberOfTransactions": "string",
+        "status": "number (PaymentStatusEnum)",
+        "createdDateTime": "datetime",
+        "updatedDateTime": "datetime",
+        "approvers": "Approver[]",
+        "changeHistory": "ChangeHistory[]",
+        "transactions": "Transaction[]"
+      }
+    },
+    "Approver": {
+      "fields": {
+        "userId": "uuid",
+        "approverName": "string",
+        "status": "number (ApproveStatus)",
+        "createdDateTime": "datetime"
+      }
+    },
+    "Transaction": {
+      "fields": {
+        "id": "uuid",
+        "withdrawalOrderId": "uuid",
+        "orderId": "string",
+        "destinationAccountOwner": "string",
+        "nationalCode": "string",
+        "destinationIban": "string",
+        "amount": "string",
+        "paymentType": "number (PaymentTypeEnum)",
+        "status": "number (PaymentItemStatusEnum)",
+        "createdDateTime": "datetime",
+        "transferDateTime": "datetime"
+      }
+    },
+    "ChangeHistory": {
+      "fields": {
+        "status": "number",
+        "statusTitle": "string",
+        "description": "string",
+        "createdDateTime": "datetime"
+      }
+    },
+    "DashboardResponse": {
+      "fields": {
+        "totalTransactions": "number",
+        "totalAmount": "number",
+        "succeededTransactions": "number",
+        "succeededAmount": "number",
+        "successPercent": "number",
+        "pendingTransactions": "number",
+        "pendingAmount": "number",
+        "pendingPercent": "number",
+        "failedTransactions": "number",
+        "failedAmount": "number",
+        "failedPercent": "number",
+        "closedWithdrawalOrders": "number",
+        "transactionStatusSummary": "Array<{status, statusTitle, transactionCount, totalAmount, percent}>",
+        "paymentTypeSummary": "Array<{paymentType, paymentTypeTitle, count, totalAmount}>"
+      }
+    }
+  },
+
+  "businessRules": [
+    {
+      "id": "br_minimum_signers",
+      "title_fa": "حداقل تعداد تأیید",
+      "description_fa": "تا زمانی که تعداد تأییدهای معتبر < minimumSignature، دستور به بانک ارسال نخواهد شد. پس از رسیدن به حداقل، خودکار ارسال می‌شود.",
+      "impact_fa": "UI باید تعداد تأییدهای باقی‌مانده را نمایش دهد"
+    },
+    {
+      "id": "br_otp_policy",
+      "title_fa": "سیاست OTP",
+      "description_fa": "برای عملیات تأیید/رد OTP لازم است. یک OTP برای کل عملیات گروهی (شناسه‌های دستورها با مقدار تأیید/رد ارسال می‌شود).",
+      "settings": {
+        "validity": 120,
+        "resendCooldown": 120,
+        "display_mobile": "drawer_from_bottom",
+        "display_desktop": "modal_center"
+      },
+      "mock_implementation": "نمایشی - بدون ارسال واقعی کد"
+    },
+    {
+      "id": "br_audit_history",
+      "title_fa": "تاریخچه تغییرات",
+      "description_fa": "هر تغییر وضعیت یا ویرایش در changeHistory ذخیره می‌شود.",
+      "impact_fa": "تب تاریخچه در جزئیات دستور و تراکنش"
+    },
+    {
+      "id": "br_export",
+      "title_fa": "خروجی اکسل",
+      "description_fa": "خروجی اکسل از سرور دریافت می‌شود. نیازی به تولید در front-end نیست.",
+      "impact_fa": "دکمه export فایل را از API دانلود می‌کند",
+      "mock_implementation": "تأخیر 2-3 ثانیه و نمایش پیام یا دانلود فایل mock"
+    },
+    {
+      "id": "br_bank_inquiry",
+      "title_fa": "استعلام بانک",
+      "description_fa": "استعلام دستور یا تراکنش: در صورت موفقیت داده‌ها refresh می‌شوند، در صورت خطا پیام نمایش داده می‌شود.",
+      "timeout": 120,
+      "mock_implementation": "تأخیر 3 ثانیه و نمایش پیام موفقیت"
+    },
+    {
+      "id": "br_auto_submit",
+      "title_fa": "ارسال خودکار به بانک",
+      "description_fa": "زمانی که تعداد تأییدها به minimumSignature برسد، دستور خودکار به وضعیت OwnersApproved و سپس SubmittedToBank تغییر می‌کند.",
+      "impact_fa": "نیازی به دکمه ارسال دستی نیست"
+    },
+    {
+      "id": "br_mobile_drawers",
+      "title_fa": "Drawer در موبایل",
+      "description_fa": "تمام تأیید عملیات‌ها و فرم OTP در موبایل باید به صورت Drawer از پایین باز شود",
+      "impact_fa": "استفاده از Bottom Sheet برای Modal‌ها در موبایل"
+    }
+  ],
+
+  "uiSettings": {
+    "theme": {
+      "style": "modern_enterprise",
+      "primaryColor": "#3b82f6",
+      "successColor": "#10b981",
+      "warningColor": "#f59e0b",
+      "dangerColor": "#ef4444",
+      "infoColor": "#06b6d4",
+      "secondaryColor": "#6b7280",
+      "mutedColor": "#9ca3af"
+    },
+    "typography": {
+      "fontFamily_fa": "BYekan, Vazirmatn",
+      "fontFamily_en": "Inter, sans-serif",
+      "sizes": {
+        "heading1": "2rem",
+        "heading2": "1.5rem",
+        "heading3": "1.25rem",
+        "body": "1rem",
+        "small": "0.875rem"
+      }
+    },
+    "locale": {
+      "default": "fa",
+      "supported": ["fa", "en"],
+      "auto_direction": true
+    },
+    "dateFormat": {
+      "calendar": "shamsi",
+      "format": "YYYY/MM/DD",
+      "time": "HH:mm",
+      "library": "moment-jalaali"
+    },
+    "currencyFormat": {
+      "unit": "ریال",
+      "separator": ",",
+      "example": "120,000,000 ریال",
+      "decimals": 0
+    },
+    "darkMode": {
+      "enabled": true,
+      "default": "light",
+      "toggle_available": true
+    },
+    "responsiveness": {
+      "breakpoints": {
+        "mobile": "< 768px",
+        "tablet": "768px - 1024px",
+        "desktop": "> 1024px"
+      },
+      "mobileFirst": true,
+      "touch_optimized": true
+    },
+    "navigation": {
+      "desktop": {
+        "type": "sidebar_hamburger",
+        "collapsible": true,
+        "width": "260px",
+        "collapsed_width": "60px"
+      },
+      "mobile": {
+        "type": "bottom_dock",
+        "position": "fixed_bottom",
+        "maxItems": 5,
+        "height": "64px"
+      }
+    },
+    "components": {
+      "badges": {
+        "rounded": true,
+        "uppercase": false,
+        "size": "medium"
+      },
+      "buttons": {
+        "rounded": "medium",
+        "size": "medium",
+        "elevation": "slight"
+      },
+      "cards": {
+        "rounded": "large",
+        "elevation": "medium",
+        "padding": "medium"
+      },
+      "modals": {
+        "desktop": "centered",
+        "mobile": "drawer_bottom",
+        "backdrop": "blur"
+      }
+    }
+  },
+
+  "techStack": {
+    "frontend": {
+      "framework": "Next.js 14+ (App Router)",
+      "language": "TypeScript",
+      "uiLibrary": ["Shadcn/ui", "Radix UI", "Tailwind CSS"],
+      "stateManagement": "React Hooks + Context API (Zustand optional)",
+      "charts": "Recharts",
+      "dateHandling": "moment-jalaali",
+      "icons": "Lucide React",
+      "forms": "React Hook Form + Zod",
+      "i18n": "i18next + react-i18next"
+    },
+    "backend": {
+      "framework": "ASP.NET Core",
+      "apiStyle": "RESTful",
+      "note": "در فاز 1 استفاده نمی‌شود - فقط mock data"
+    },
+    "design": {
+      "reference": "Metronic v9.3",
+      "componentLibrary": "Shadcn/ui",
+      "designSystem": "Modern Enterprise"
+    },
+    "pwa": {
+      "enabled": true,
+      "manifest": true,
+      "serviceWorker": "optional for phase 1",
+      "installable": true
+    }
+  },
+
+  "mockDataSettings": {
+    "purpose": "تست UI/UX و نحوه عملکرد بدون نیاز به سرویس واقعی",
+    "defaultWithdrawalOrders": 25,
+    "transactionsPerOrder": {
+      "min": 5,
+      "max": 15
+    },
+    "bankAccounts": 5,
+    "signersPerAccount": {
+      "min": 2,
+      "max": 5
+    },
+    "includeApprovers": true,
+    "includeChangeHistory": true,
+    "simulateLargeDataset": true,
+    "dateRange": "last_7_days_to_today",
+    "realistic_names": true,
+    "realistic_amounts": true,
+    "varied_statuses": true,
+    "mock_delays": {
+      "short": "500-1000ms",
+      "medium": "1500-2000ms",
+      "long": "2500-3500ms"
+    }
+  },
+
+  "apiEndpoints": {
+    "note": "این endpoint‌ها در فاز 1 استفاده نمی‌شوند - فقط برای مرجع آینده",
+    "auth": {
+      "login": "POST /api/auth/login",
+      "verifyOtp": "POST /api/auth/verify-otp",
+      "resendOtp": "POST /api/auth/resend-otp"
+    },
+    "dashboard": {
+      "getStats": "GET /api/dashboard/stats?bankGatewayId=&fromDate=&toDate="
+    },
+    "paymentOrders": {
+      "list": "POST /api/withdrawal-orders/list",
+      "detail": "GET /api/withdrawal-orders/{id}",
+      "approve": "POST /api/withdrawal-orders/{id}/approve",
+      "reject": "POST /api/withdrawal-orders/{id}/reject",
+      "batchApprove": "POST /api/withdrawal-orders/batch-approve",
+      "batchReject": "POST /api/withdrawal-orders/batch-reject",
+      "bankInquiry": "POST /api/withdrawal-orders/{id}/inquiry"
+    },
+    "transactions": {
+      "list": "POST /api/transactions/list",
+      "detail": "GET /api/transactions/{id}",
+      "inquiry": "POST /api/transactions/{id}/inquiry",
+      "exportExcel": "POST /api/transactions/export"
+    },
+    "accounts": {
+      "list": "GET /api/bank-accounts",
+      "detail": "GET /api/bank-accounts/{id}",
+      "create": "POST /api/bank-accounts",
+      "update": "PUT /api/bank-accounts/{id}",
+      "updateMinimumSigners": "PUT /api/bank-accounts/{id}/minimum-signers",
+      "addSigner": "POST /api/bank-accounts/{id}/signers",
+      "toggleSigner": "PUT /api/bank-accounts/{id}/signers/{userId}/toggle"
+    },
+    "reports": {
+      "transactions": "POST /api/reports/transactions",
+      "exportTransactions": "POST /api/reports/transactions/export"
+    }
+  },
+
+  "implementationPhases": {
+    "phase1_current": {
+      "title": "Static UI with Mock Data",
+      "objective": "ساخت تمام صفحات با دیتای mock برای تست UI/UX",
+      "screens_priority": [
+        "home",
+        "auth_login",
+        "dashboard",
+        "my_cartable",
+        "payment_orders_list",
+        "payment_order_detail",
+        "accounts_list",
+        "account_detail",
+        "transaction_report"
+      ],
+      "deliverables": [
+        "تمام صفحات responsive (mobile + desktop)",
+        "Navigation کامل (dock menu + hamburger)",
+        "دو زبانه با RTL/LTR",
+        "تمام عملیات با mock behavior",
+        "تست کامل در موبایل و دسکتاپ"
+      ],
+      "no_real_services": true,
+      "no_authentication": true
+    },
+    "phase2_future": {
+      "title": "API Integration",
+      "objective": "اتصال به سرویس‌های واقعی",
+      "tasks": [
+        "پیاده‌سازی authentication واقعی",
+        "اتصال به API endpoints",
+        "مدیریت خطا و loading states",
+        "پیاده‌سازی caching",
+        "بهینه‌سازی performance"
+      ]
+    }
+  },
+
+  "validationRules": {
+    "login": {
+      "username": "required|min:3",
+      "password": "required|min:6",
+      "captcha": "required"
+    },
+    "otp": {
+      "code": "required|digits:6"
+    },
+    "account": {
+      "title": "required|max:100",
+      "accountNumber": "required|digits:10-16",
+      "sheba": "required|starts_with:IR|length:26",
+      "minimumSignature": "required|integer|min:1|max:signers_count"
+    },
+    "filter": {
+      "dateRange": "fromDate <= toDate",
+      "pageNumber": "integer|min:1",
+      "pageSize": "integer|min:10|max:100"
+    }
+  },
+
+  "errorHandling": {
+    "network": {
+      "timeout": "اتصال به سرور برقرار نشد. لطفاً دوباره تلاش کنید.",
+      "serverError": "خطای سرور. لطفاً با پشتیبانی تماس بگیرید.",
+      "unauthorized": "دسترسی غیرمجاز. لطفاً دوباره وارد شوید."
+    },
+    "validation": {
+      "required": "این فیلد الزامی است",
+      "invalidFormat": "فرمت وارد شده صحیح نیست",
+      "minLength": "حداقل {min} کاراکتر",
+      "maxLength": "حداکثر {max} کاراکتر"
+    },
+    "business": {
+      "insufficientSigners": "تعداد تأییدها کافی نیست",
+      "expiredOtp": "کد تأیید منقضی شده است",
+      "invalidOtp": "کد تأیید نامعتبر است",
+      "accountDisabled": "حساب غیرفعال است",
+      "orderAlreadyProcessed": "این دستور قبلاً پردازش شده است"
+    },
+    "mock_errors": {
+      "note": "در فاز 1، خطاها به صورت نمایشی شبیه‌سازی می‌شوند"
+    }
+  },
+
+  "accessibility": {
+    "standards": "WCAG 2.1 Level AA",
+    "features": [
+      "Keyboard navigation",
+      "Screen reader support",
+      "Focus indicators",
+      "ARIA labels",
+      "Color contrast (4.5:1 minimum)",
+      "Touch target size (44x44px minimum for mobile)"
+    ]
+  },
+
+  "performance": {
+    "targets": {
+      "firstContentfulPaint": "< 1.5s",
+      "timeToInteractive": "< 3s",
+      "largestContentfulPaint": "< 2.5s"
+    },
+    "optimizations": [
+      "Code splitting",
+      "Lazy loading",
+      "Image optimization",
+      "Bundle size optimization",
+      "Virtual scrolling for large lists"
+    ]
+  },
+
+  "testing_strategy": {
+    "phase1_focus": [
+      "Visual regression testing",
+      "Responsive layout testing",
+      "RTL/LTR direction testing",
+      "Navigation flow testing",
+      "Mock interaction testing",
+      "Cross-browser compatibility"
+    ],
+    "devices_to_test": [
+      "iPhone 12/13/14 (iOS Safari)",
+      "Samsung Galaxy S21/S22 (Chrome)",
+      "iPad (Safari)",
+      "Desktop Chrome",
+      "Desktop Firefox",
+      "Desktop Safari"
+    ]
+  },
+
+  "implementation_notes": {
+    "for_ai_designer": [
+      "این سند برای پیاده‌سازی UI استاتیک با mock data است",
+      "هیچ سرویس واقعی فراخوانی نشود",
+      "تمام عملیات با تأخیر مصنوعی و پیام‌های mock",
+      "تمرکز روی تست تجربه کاربری در موبایل و دسکتاپ",
+      "احراز هویت فقط نمایشی - بدون امنیت واقعی",
+      "در موبایل تمام Modal‌ها به Drawer تبدیل شوند",
+      "فیلترها در موبایل به صورت Bottom Sheet",
+      "Navigation در دسکتاپ Hamburger و در موبایل Dock",
+      "استفاده از تمام 10 وضعیت PaymentStatusEnum",
+      "دیتای mock باید واقع‌گرایانه باشد",
+      "تاریخ‌ها شمسی و به فارسی",
+      "مبالغ با جداکننده هزارگان",
+      "طراحی مدرن و حرفه‌ای enterprise-grade"
+    ]
+  }
+}
+              "label_fa": "نام امضادار",
+              "label_en": "Signer Name",
+              "key": "approverName"
+            },
+            {
+              "label_fa": "وضعیت",
+              "label_en": "Status",
+              "key": "status",
+              "format": "icon_badge"
+            },
+            {
+              "label_fa": "تاریخ تأیید/رد",
+              "label_en": "Action Date",
+              "key": "createdDateTime",
+              "format": "date_time"
+            }
+          ],
+          "show_minimum_signers": true,
+          "minimum_signers_label_fa": "حداقل تأیید مورد نیاز",
+          "minimum_signers_label_en": "Minimum Required Approvals"
+        },
+        {
+          "type": "transactions_section",
+          "title_fa": "لیست تراکنش‌ها",
+          "title_en": "Transactions List",
+          "features": [
+            {
+              "type": "filter",
+              "fields": ["status", "paymentType", "search"]
+            },
+            {
+              "type": "pagination",
+              "desktop": "traditional",
+              "mobile": "load_more"
+            },
+            {
+              "type": "export_excel",
+              "label_fa": "خروجی اکسل",
+              "label_en": "Export Excel",
+              "mock_behavior": {
+                "delay": 2000,
+                "success_message_fa": "فایل در حال دانلود است",
+                "success_message_en": "File is downloading"
+              }
+            },
+            {
+              "type": "view_detail",
+              "display": {
+                "mobile": "full_screen",
+                "desktop": "modal"
+              }
+            }
+          ],
+          "desktop_view": {
+            "type": "table",
+            "columns": [
+              {
+                "id": "rowNumber",
+                "label_fa": "ردیف",
+                "label_en": "#"
+              },
+              {
+                "id": "destinationAccountOwner",
+                "label_fa": "صاحب حساب مقصد",
+                "label_en": "Destination Owner"
+              },
+              {
+                "id": "destinationIban",
+                "label_fa": "شبای مقصد",
+                "label_en": "Destination IBAN"
+              },
+              {
+                "id": "amount",
+                "label_fa": "مبلغ",
+                "label_en": "Amount",
+                "format": "currency"
+              },
+              {
+                "id": "paymentType",
+                "label_fa": "نوع پرداخت",
+                "label_en": "Payment Type",
+                "format": "badge"
+              },
+              {
+                "id": "status",
+                "label_fa": "وضعیت",
+                "label_en": "Status",
+                "format": "badge"
+              },
+              {
+                "id": "createdDateTime",
+                "label_fa": "تاریخ ثبت",
+                "label_en": "Created Date",
+                "format": "date_time"
+              },
+              {
+                "id": "actions",
+                "label_fa": "عملیات",
+                "label_en": "Actions",
+                "items": ["view", "inquire"]
+              }
+            ]
+          },
+          "mobile_view": {
+            "type": "cards",
+            "compact": true
+          }
+        },
+        {
+          "type": "change_history",
+          "title_fa": "تاریخچه تغییرات",
+          "title_en": "Change History",
+          "display_fields": [
+            {
+              "label_fa": "وضعیت",
+              "label_en": "Status",
+              "key": "status",
+              "format": "badge"
+            },
+            {
+              "label_fa": "توضیحات",
+              "label_en": "Description",
+              "key": "description"
+            },
+            {
+              "label_fa": "تاریخ",
+              "label_en": "Date",
+              "key": "createdDateTime",
+              "format": "date_time"
+            }
+          ],
+          "sort_order": "desc"
+        }
+      ],
+      "actions": [
+        {
+          "id": "approve",
+          "label_fa": "تأیید",
+          "label_en": "Approve",
+          "icon": "CheckCircle",
+          "color": "success",
+          "visible_condition": "status=WaitingForOwnersApproval AND user_is_approver",
+          "requiresOTP": true,
+          "display": {
+            "mobile": "drawer_bottom",
+            "desktop": "modal_center"
+          },
+          "mock_behavior": {
+            "delay": 2000,
+            "success_message_fa": "دستور با موفقیت تأیید شد",
+            "success_message_en": "Order approved successfully"
+          }
+        },
+        {
+          "id": "reject",
+          "label_fa": "رد",
+          "label_en": "Reject",
+          "icon": "XCircle",
+          "color": "danger",
+          "visible_condition": "status=WaitingForOwnersApproval AND user_is_approver",
+          "requiresOTP": true,
+          "display": {
+            "mobile": "drawer_bottom",
+            "desktop": "modal_center"
+          },
+          "mock_behavior": {
+            "delay": 2000,
+            "success_message_fa": "دستور رد شد",
+            "success_message_en": "Order rejected"
+          }
+        },
+        {
+          "id": "bank_inquiry",
+          "label_fa": "استعلام از بانک",
+          "label_en": "Bank Inquiry",
+          "icon": "RefreshCw",
+          "color": "info",
+          "visible_condition": "status=SubmittedToBank",
+          "mock_behavior": {
+            "delay": 3000,
+            "timeout": 120,
+            "success_message_fa": "استعلام با موفقیت انجام شد",
+            "success_message_en": "Inquiry completed successfully"
+          }
+        },
+        {
+          "id": "export_transactions",
+          "label_fa": "خروجی اکسل تراکنش‌ها",
+          "label_en": "Export Transactions",
+          "icon": "Download",
+          "color": "primary",
+          "visible_condition": "always",
+          "mock_behavior": {
+            "delay": 2000,
+            "success_message_fa": "فایل در حال دانلود است",
+            "success_message_en": "File is downloading"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "accounts_list",
+      "order": 7,
+      "title_fa": "مدیریت حساب‌ها",
+      "title_en": "Accounts Management",
+      "route": "/accounts",
+      "description_fa": "لیست حساب‌های بانکی و مدیریت آن‌ها",
+      "layout": {
+        "desktop": "table_view",
+        "mobile": "card_view"
+      },
+      "sections": [
+        {
+          "type": "action_bar",
+          "actions": [
+            {
+              "id": "add_account",
+              "label_fa": "افزودن حساب جدید",
+              "label_en": "Add New Account",
+              "icon": "Plus",
+              "color": "primary",
+              "mock_behavior": {
+                "action": "show_form",
+                "success_message_fa": "حساب با موفقیت اضافه شد",
+                "success_message_en": "Account added successfully"
+              }
+            }
+          ]
+        },
+        {
+          "type": "filter_bar",
+          "display": {
+            "desktop": "inline",
+            "mobile": "bottom_sheet"
+          },
+          "fields": [
+            {
+              "name": "search",
+              "label_fa": "جستجو",
+              "label_en": "Search",
+              "type": "text",
+              "placeholder_fa": "شماره حساب یا عنوان",
+              "placeholder_en": "Account number or title"
+            },
+            {
+              "name": "bank",
+              "label_fa": "بانک",
+              "label_en": "Bank",
+              "type": "dropdown"
+            },
+            {
+              "name": "status",
+              "label_fa": "وضعیت",
+              "label_en": "Status",
+              "type": "dropdown",
+              "options": ["فعال", "غیرفعال"]
+            }
+          ]
+        },
+        {
+          "type": "data_view",
+          "desktop_view": {
+            "type": "table",
+            "columns": [
+              {
+                "id": "title",
+                "label_fa": "عنوان",
+                "label_en": "Title"
+              },
+              {
+                "id": "bankName",
+                "label_fa": "نام بانک",
+                "label_en": "Bank Name"
+              },
+              {
+                "id": "accountNumber",
+                "label_fa": "شماره حساب",
+                "label_en": "Account Number"
+              },
+              {
+                "id": "sheba",
+                "label_fa": "شبا",
+                "label_en": "IBAN",
+                "format": "iban"
+              },
+              {
+                "id": "isEnable",
+                "label_fa": "وضعیت",
+                "label_en": "Status",
+                "type": "toggle"
+              },
+              {
+                "id": "minimumSignature",
+                "label_fa": "حداقل تأیید",
+                "label_en": "Min. Signatures"
+              },
+              {
+                "id": "signers_count",
+                "label_fa": "تعداد امضادار",
+                "label_en": "Signers Count"
+              },
+              {
+                "id": "actions",
+                "label_fa": "عملیات",
+                "label_en": "Actions",
+                "items": ["view", "edit", "manage_signers"]
+              }
+            ]
+          },
+          "mobile_view": {
+            "type": "cards",
+            "card_layout": [
+              {
+                "section": "header",
+                "fields": ["title", "status_badge"]
+              },
+              {
+                "section": "body",
+                "fields": [
+                  "bankName",
+                  "accountNumber",
+                  "sheba",
+                  "minimumSignature",
+                  "signers_count"
+                ]
+              },
+              {
+                "section": "footer",
+                "actions": ["view", "edit", "manage_signers"]
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "account_detail",
+      "order": 8,
+      "title_fa": "جزئیات حساب بانکی",
+      "title_en": "Account Detail",
+      "route": "/accounts/:id",
+      "description_fa": "نمایش و ویرایش اطلاعات حساب و مدیریت امضاداران",
+      "layout": {
+        "desktop": "multi_section",
+        "mobile": "stacked_sections"
+      },
+      "sections": [
+        {
+          "type": "info_section",
+          "title_fa": "اطلاعات حساب",
+          "title_en": "Account Information",
+          "editable": true,
+          "fields": [
+            {
+              "name": "title",
+              "label_fa": "عنوان حساب",
+              "label_en": "Account Title",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "bankName",
+              "label_fa": "نام بانک",
+              "label_en": "Bank Name",
+              "type": "text",
+              "readonly": true
+            },
+            {
+              "name": "bankCode",
+              "label_fa": "کد بانک",
+              "label_en": "Bank Code",
+              "type": "text",
+              "readonly": true
+            },
+            {
+              "name": "accountNumber",
+              "label_fa": "شماره حساب",
+              "label_en": "Account Number",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "sheba",
+              "label_fa": "شماره شبا",
+              "label_en": "IBAN",
+              "type": "text",
+              "format": "iban",
+              "required": true
+            },
+            {
+              "name": "isEnable",
+              "label_fa": "وضعیت",
+              "label_en": "Status",
+              "type": "toggle"
+            },
+            {
+              "name": "minimumSignature",
+              "label_fa": "حداقل تعداد تأیید",
+              "label_en": "Minimum Signatures",
+              "type": "number",
+              "min": 1,
+              "editable": true,
+              "validation": "max:active_signers_count"
+            },
+            {
+              "name": "createdDateTime",
+              "label_fa": "تاریخ ایجاد",
+              "label_en": "Created Date",
+              "type": "date",
+              "readonly": true
+            }
+          ]
+        },
+        {
+          "type": "signers_section",
+          "title_fa": "امضاداران",
+          "title_en": "Signers",
+          "features": [
+            {
+              "type": "add_signer",
+              "label_fa": "افزودن امضادار",
+              "label_en": "Add Signer",
+              "input_type": "autocomplete",
+              "source": "users_list",
+              "mock_behavior": {
+                "delay": 1000,
+                "success_message_fa": "امضادار اضافه شد",
+                "success_message_en": "Signer added"
+              }
+            },
+            {
+              "type": "toggle_signer",
+              "label_fa": "فعال/غیرفعال",
+              "label_en": "Enable/Disable"
+            },
+            {
+              "type": "view_history",
+              "label_fa": "تاریخچه",
+              "label_en": "History"
+            }
+          ],
+          "display_fields": [
+            {
+              
+              

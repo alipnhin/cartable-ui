@@ -26,7 +26,7 @@ export function DataTableViewOptions<TData>({
         <Button
           variant="outline"
           size="sm"
-          className="ml-auto hidden h-8 lg:flex"
+          className="ml-auto hidden h-8 lg:flex hover:bg-muted/80 transition-colors"
         >
           <Settings2 />
           {t("common.buttons.view")}
