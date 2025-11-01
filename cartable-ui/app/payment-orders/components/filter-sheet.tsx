@@ -150,135 +150,216 @@ export function FilterSheet({
           onChange={(e) =>
             setLocalFilters({ ...localFilters, search: e.target.value })
           }
-          className="h-10"
+          className={cn("h-10", isMobile && "h-12 text-base")}
         />
       </div>
 
       {/* Account Combobox */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">{t("filters.account")}</Label>
-        <Popover open={accountOpen} onOpenChange={setAccountOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={accountOpen}
-              className="w-full justify-between h-10"
-            >
+        {isMobile ? (
+          <button
+            onClick={() => setAccountOpen(true)}
+            className="w-full flex items-center justify-between h-12 px-4 rounded-lg border border-input bg-background text-start text-base"
+          >
+            <span className="truncate">
               {selectedAccount
                 ? selectedAccount.accountTitle
                 : t("filters.allAccounts")}
-              <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-100 p-0" align="start">
-            <Command>
-              <CommandInput placeholder={t("filters.search")} />
-              <CommandList>
-                <CommandEmpty>موردی یافت نشد</CommandEmpty>
-                <CommandGroup>
-                  <CommandItem
-                    value="all"
-                    onSelect={() => {
-                      setLocalFilters({ ...localFilters, accountId: "all" });
-                      setAccountOpen(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "me-2 h-4 w-4",
-                        localFilters.accountId === "all" ||
-                          !localFilters.accountId
-                          ? "opacity-100"
-                          : "opacity-0"
-                      )}
-                    />
-                    {t("filters.allAccounts")}
-                  </CommandItem>
-                  {mockAccounts.map((account) => (
+            </span>
+            <ChevronsUpDown className="ms-2 h-5 w-5 shrink-0 opacity-50" />
+          </button>
+        ) : (
+          <Popover open={accountOpen} onOpenChange={setAccountOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={accountOpen}
+                className="w-full justify-between h-10"
+              >
+                {selectedAccount
+                  ? selectedAccount.accountTitle
+                  : t("filters.allAccounts")}
+                <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-100 p-0" align="start">
+              <Command>
+                <CommandInput placeholder={t("filters.search")} />
+                <CommandList>
+                  <CommandEmpty>موردی یافت نشد</CommandEmpty>
+                  <CommandGroup>
                     <CommandItem
-                      key={account.id}
-                      value={account.id}
+                      value="all"
                       onSelect={() => {
-                        setLocalFilters({
-                          ...localFilters,
-                          accountId: account.id,
-                        });
+                        setLocalFilters({ ...localFilters, accountId: "all" });
                         setAccountOpen(false);
                       }}
                     >
                       <Check
                         className={cn(
                           "me-2 h-4 w-4",
-                          localFilters.accountId === account.id
+                          localFilters.accountId === "all" ||
+                            !localFilters.accountId
                             ? "opacity-100"
                             : "opacity-0"
                         )}
                       />
-                      {account.accountTitle}
+                      {t("filters.allAccounts")}
                     </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+                    {mockAccounts.map((account) => (
+                      <CommandItem
+                        key={account.id}
+                        value={account.id}
+                        onSelect={() => {
+                          setLocalFilters({
+                            ...localFilters,
+                            accountId: account.id,
+                          });
+                          setAccountOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "me-2 h-4 w-4",
+                            localFilters.accountId === account.id
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        {account.accountTitle}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
+
+      {/* Mobile Drawer for Account Selection */}
+      {isMobile && (
+        <Drawer open={accountOpen} onOpenChange={setAccountOpen}>
+          <DrawerContent className="max-h-[70vh]">
+            <DrawerHeader>
+              <DrawerTitle>{t("filters.account")}</DrawerTitle>
+            </DrawerHeader>
+            <div className="overflow-y-auto p-4 space-y-2">
+              <button
+                onClick={() => {
+                  setLocalFilters({ ...localFilters, accountId: "all" });
+                  setAccountOpen(false);
+                }}
+                className={cn(
+                  "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
+                  (localFilters.accountId === "all" || !localFilters.accountId)
+                    ? "bg-primary/10 text-primary"
+                    : "hover:bg-muted"
+                )}
+              >
+                {(localFilters.accountId === "all" || !localFilters.accountId) && (
+                  <Check className="h-5 w-5" />
+                )}
+                <span className="flex-1">{t("filters.allAccounts")}</span>
+              </button>
+              {mockAccounts.map((account) => (
+                <button
+                  key={account.id}
+                  onClick={() => {
+                    setLocalFilters({
+                      ...localFilters,
+                      accountId: account.id,
+                    });
+                    setAccountOpen(false);
+                  }}
+                  className={cn(
+                    "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
+                    localFilters.accountId === account.id
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-muted"
+                  )}
+                >
+                  {localFilters.accountId === account.id && (
+                    <Check className="h-5 w-5" />
+                  )}
+                  <span className="flex-1">{account.accountTitle}</span>
+                </button>
+              ))}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
 
       {/* Status Multi-select Combobox */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">{t("filters.status")}</Label>
-        <Popover open={statusOpen} onOpenChange={setStatusOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={statusOpen}
-              className="w-full justify-between h-10"
-            >
-              <span className="truncate">
-                {localFilters.status.length > 0
-                  ? `${localFilters.status.length} مورد انتخاب شده`
-                  : t("filters.allStatuses")}
-              </span>
-              <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-100 p-0" align="start">
-            <Command>
-              <CommandInput placeholder={t("filters.search")} />
-              <CommandList>
-                <CommandEmpty>موردی یافت نشد</CommandEmpty>
-                <CommandGroup>
-                  {statusOptions.map((option) => {
-                    const isSelected = localFilters.status.includes(
-                      option.value
-                    );
-                    return (
-                      <CommandItem
-                        key={option.value}
-                        value={option.value}
-                        onSelect={() => handleStatusToggle(option.value)}
-                      >
-                        <div
-                          className={cn(
-                            "me-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                            isSelected
-                              ? "bg-primary text-primary-foreground"
-                              : "opacity-50 [&_svg]:invisible"
-                          )}
+        {isMobile ? (
+          <button
+            onClick={() => setStatusOpen(true)}
+            className="w-full flex items-center justify-between h-12 px-4 rounded-lg border border-input bg-background text-start text-base"
+          >
+            <span className="truncate">
+              {localFilters.status.length > 0
+                ? `${localFilters.status.length} مورد انتخاب شده`
+                : t("filters.allStatuses")}
+            </span>
+            <ChevronsUpDown className="ms-2 h-5 w-5 shrink-0 opacity-50" />
+          </button>
+        ) : (
+          <Popover open={statusOpen} onOpenChange={setStatusOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={statusOpen}
+                className="w-full justify-between h-10"
+              >
+                <span className="truncate">
+                  {localFilters.status.length > 0
+                    ? `${localFilters.status.length} مورد انتخاب شده`
+                    : t("filters.allStatuses")}
+                </span>
+                <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-100 p-0" align="start">
+              <Command>
+                <CommandInput placeholder={t("filters.search")} />
+                <CommandList>
+                  <CommandEmpty>موردی یافت نشد</CommandEmpty>
+                  <CommandGroup>
+                    {statusOptions.map((option) => {
+                      const isSelected = localFilters.status.includes(
+                        option.value
+                      );
+                      return (
+                        <CommandItem
+                          key={option.value}
+                          value={option.value}
+                          onSelect={() => handleStatusToggle(option.value)}
                         >
-                          <Check className="h-3 w-3" />
-                        </div>
-                        {option.label}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+                          <div
+                            className={cn(
+                              "me-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                              isSelected
+                                ? "bg-primary text-primary-foreground"
+                                : "opacity-50 [&_svg]:invisible"
+                            )}
+                          >
+                            <Check className="h-3 w-3" />
+                          </div>
+                          {option.label}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        )}
         {/* Selected Status Badges */}
         {localFilters.status.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
@@ -302,6 +383,46 @@ export function FilterSheet({
         )}
       </div>
 
+      {/* Mobile Drawer for Status Selection */}
+      {isMobile && (
+        <Drawer open={statusOpen} onOpenChange={setStatusOpen}>
+          <DrawerContent className="max-h-[70vh]">
+            <DrawerHeader>
+              <DrawerTitle>{t("filters.status")}</DrawerTitle>
+            </DrawerHeader>
+            <div className="overflow-y-auto p-4 space-y-2">
+              {statusOptions.map((option) => {
+                const isSelected = localFilters.status.includes(option.value);
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => handleStatusToggle(option.value)}
+                    className={cn(
+                      "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
+                      isSelected
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-muted"
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "flex h-5 w-5 items-center justify-center rounded border",
+                        isSelected
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "border-input"
+                      )}
+                    >
+                      {isSelected && <Check className="h-4 w-4" />}
+                    </div>
+                    <span className="flex-1">{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+
       {/* Date Range */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
@@ -312,7 +433,7 @@ export function FilterSheet({
             onChange={(e) =>
               setLocalFilters({ ...localFilters, dateFrom: e.target.value })
             }
-            className="h-10"
+            className={cn("h-10", isMobile && "h-12 text-base")}
           />
         </div>
         <div className="space-y-2">
@@ -323,17 +444,24 @@ export function FilterSheet({
             onChange={(e) =>
               setLocalFilters({ ...localFilters, dateTo: e.target.value })
             }
-            className="h-10"
+            className={cn("h-10", isMobile && "h-12 text-base")}
           />
         </div>
       </div>
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4 border-t">
-        <Button variant="outline" className="flex-1" onClick={handleReset}>
+        <Button
+          variant="outline"
+          className={cn("flex-1", isMobile && "h-12 text-base")}
+          onClick={handleReset}
+        >
           {t("filters.reset")}
         </Button>
-        <Button className="flex-1" onClick={handleApply}>
+        <Button
+          className={cn("flex-1", isMobile && "h-12 text-base")}
+          onClick={handleApply}
+        >
           اعمال فیلتر
           {activeFiltersCount > 0 && (
             <Badge variant="secondary" className="ms-2 bg-white/20 text-white">

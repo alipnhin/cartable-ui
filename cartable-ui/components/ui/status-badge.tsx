@@ -3,9 +3,12 @@
  * نمایش وضعیت با رنگ و آیکون مناسب
  */
 
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { OrderStatus } from "@/types";
+import { OrderStatus, TransactionStatus } from "@/types";
+import { useTranslation } from "react-i18next";
 import {
   FileText,
   Hourglass,
@@ -69,7 +72,6 @@ export function StatusBadge({
   );
 }
 
-// Helper function to get badge variant from status enum
 // Helper function to get badge variant from OrderStatus enum
 export function getPaymentStatusBadge(status: OrderStatus): {
   variant: BadgeVariant;
@@ -146,6 +148,12 @@ export function getPaymentStatusBadge(status: OrderStatus): {
       label_en: "Expired",
       icon: AlarmClockOff,
     },
+    [OrderStatus.OwnerRejected]: {
+      variant: "danger",
+      label_fa: "",
+      label_en: "",
+      icon: "symbol",
+    },
   };
 
   return (
@@ -153,6 +161,64 @@ export function getPaymentStatusBadge(status: OrderStatus): {
       variant: "default",
       label_fa: "نامشخص",
       label_en: "Unknown",
+      icon: HelpCircle,
+    }
+  );
+}
+
+// Helper function to get badge variant from TransactionStatus enum
+export function getTransactionStatusBadge(status: TransactionStatus): {
+  variant: BadgeVariant;
+  icon: React.ElementType;
+} {
+  const statusMap: Record<
+    TransactionStatus,
+    {
+      variant: BadgeVariant;
+      icon: React.ElementType;
+    }
+  > = {
+    [TransactionStatus.Registered]: {
+      variant: "muted",
+      icon: FileText,
+    },
+    [TransactionStatus.Canceled]: {
+      variant: "warning",
+      icon: Clock,
+    },
+    [TransactionStatus.BankSucceeded]: {
+      variant: "success",
+      icon: CheckCircle2,
+    },
+    [TransactionStatus.WaitForExecution]: {
+      variant: "info",
+      icon: Banknote,
+    },
+    [TransactionStatus.WaitForBank]: {
+      variant: "default",
+      icon: CheckCircle2,
+    },
+    [TransactionStatus.Failed]: {
+      variant: "danger",
+      icon: XCircle,
+    },
+    [TransactionStatus.BankRejected]: {
+      variant: "danger",
+      icon: Ban,
+    },
+    [TransactionStatus.Expired]: {
+      variant: "muted",
+      icon: XCircle,
+    },
+    [TransactionStatus.TransactionRollback]: {
+      variant: "muted",
+      icon: "symbol",
+    },
+  };
+
+  return (
+    statusMap[status] || {
+      variant: "default",
       icon: HelpCircle,
     }
   );
@@ -182,5 +248,58 @@ export function getPaymentTypeBadge(type: number | undefined): {
       label_fa: "نامشخص",
       label_en: "Unknown",
     }
+  );
+}
+
+// Wrapper Component for TransactionStatus
+interface TransactionStatusBadgeProps {
+  status: TransactionStatus;
+  size?: "sm" | "default";
+  className?: string;
+}
+
+export function TransactionStatusBadge({
+  status,
+  size = "default",
+  className,
+}: TransactionStatusBadgeProps) {
+  const { t } = useTranslation();
+  const statusInfo = getTransactionStatusBadge(status);
+  const Icon = statusInfo.icon;
+
+  return (
+    <StatusBadge
+      variant={statusInfo.variant}
+      icon={<Icon className={size === "sm" ? "h-3 w-3" : "h-4 w-4"} />}
+      className={className}
+    >
+      {t(`transactionStatus.${status}`)}
+    </StatusBadge>
+  );
+}
+
+// Wrapper Component for OrderStatus
+interface OrderStatusBadgeProps {
+  status: OrderStatus;
+  size?: "sm" | "default";
+  className?: string;
+}
+
+export function OrderStatusBadge({
+  status,
+  size = "default",
+  className,
+}: OrderStatusBadgeProps) {
+  const statusInfo = getPaymentStatusBadge(status);
+  const Icon = statusInfo.icon;
+
+  return (
+    <StatusBadge
+      variant={statusInfo.variant}
+      icon={<Icon className={size === "sm" ? "h-3 w-3" : "h-4 w-4"} />}
+      className={className}
+    >
+      {statusInfo.label_fa}
+    </StatusBadge>
   );
 }

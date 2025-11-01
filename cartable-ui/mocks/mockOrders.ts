@@ -92,7 +92,7 @@ for (let i = 0; i < 25; i++) {
   const status = statusDistribution[i];
 
   // تعداد تراکنش‌ها (5 تا 15)
-  const transactionCount = 5 + Math.floor(Math.random() * 11);
+  const transactionCount = 50 + Math.floor(Math.random() * 100);
 
   // تاریخ ایجاد (7 روز گذشته تا امروز)
   const daysAgo = Math.floor(Math.random() * 7);
@@ -224,7 +224,6 @@ export const getOrderDetailById = (
       ).length,
       pendingCount: approvers.filter((a) => a.status === ApproverStatus.Pending)
         .length,
-      canProceed: signatureProgress.isComplete,
     },
     changeHistory: changeHistory,
     canApprove: canApprove,

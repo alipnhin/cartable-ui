@@ -3,10 +3,10 @@
  * امضاکنندگان و تأییدکنندگان
  */
 
-import { Approver, SignatureProgress, ApprovalSummary } from "@/types";
+import { Approver, SignatureProgress, ApprovalSummary, ApproverStatus } from "@/types";
 import { Account, PaymentOrder, OrderStatus } from "@/types";
 import { getUserById } from "./mockUsers";
-import { subtractHours, addHours } from "@/lib/date";
+import {  addHours } from "@/lib/date";
 
 /**
  * تولید لیست تأییدکنندگان برای یک دستور
@@ -38,7 +38,7 @@ export const generateApproversForOrder = (
       if (index === 0) {
         hasApproved = true;
         approvedAt = addHours(order.createdAt, 1);
-        comment = "تأیید می‌شود";
+        comment = "دستور پرداخت تائید شد";
       }
       // اگر minimumSignature بیشتر از 2 باشد، نفر دوم هم تأیید کرده
       if (account.minimumSignatureCount > 2 && index === 1) {
@@ -53,7 +53,7 @@ export const generateApproversForOrder = (
       } else if (index === 1) {
         hasRejected = true;
         rejectedAt = addHours(order.createdAt, 3);
-        comment = "مدارک ناقص است";
+        comment = "دستور پرداخت رد شد";
       }
     } else {
       // سایر وضعیت‌ها - حداقل تعداد لازم تأیید کرده‌اند
@@ -67,16 +67,11 @@ export const generateApproversForOrder = (
     const approver: Approver = {
       userId: user.id,
       fullName: user.fullName,
-      role: user.role,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      avatar: user.avatar,
-      hasApproved: hasApproved,
-      hasRejected: hasRejected,
-      approvedAt: approvedAt,
-      rejectedAt: rejectedAt,
+      status: ApproverStatus.Approved,
+      createdDateTime: approvedAt,
       comment: comment,
-      order: index + 1,
+      userName:user.email,
+      id:"1"
     };
 
     approvers.push(approver);
@@ -93,19 +88,16 @@ export const generateSignatureProgressForOrder = (
   account: Account,
   approvers: Approver[]
 ): SignatureProgress => {
-  const approved = approvers.filter((a) => a.hasApproved).length;
-  const rejected = approvers.filter((a) => a.hasRejected).length;
-  const pending = approvers.length - approved - rejected;
+  const approved = approvers.filter((a) => a.status==ApproverStatus.Approved).length;
+  const rejected = approvers.filter((a) => a.status==ApproverStatus.Rejected).length;
+  const pending = approvers.filter((a) => a.status==ApproverStatus.Pending).length;
 
   return {
     required: account.minimumSignatureCount,
-    approved: approved,
-    rejected: rejected,
-    pending: pending,
-    total: approvers.length,
+    completed: approved,
+    remaining: pending,
     percentage: Math.round((approved / account.minimumSignatureCount) * 100),
     isComplete: approved >= account.minimumSignatureCount,
-    canProceed: approved >= account.minimumSignatureCount && rejected === 0,
   };
 };
 
@@ -116,16 +108,16 @@ export const calculateApprovalSummary = (
   account: Account,
   approvers: Approver[]
 ): ApprovalSummary => {
-  const approved = approvers.filter((a) => a.hasApproved).length;
-  const rejected = approvers.filter((a) => a.hasRejected).length;
-  const pending = approvers.length - approved - rejected;
+  const approved = approvers.filter((a) => a.status==ApproverStatus.Approved).length;
+  const rejected = approvers.filter((a) => a.status==ApproverStatus.Rejected).length;
+  const pending = approvers.filter((a) => a.status==ApproverStatus.Pending).length;
 
   return {
-    required: account.minimumSignatureCount,
-    approved: approved,
-    rejected: rejected,
-    pending: pending,
-    isComplete: approved >= account.minimumSignatureCount,
+    approvedCount: approved,
+    rejectedCount: rejected,
+    pendingCount: pending,
+    totalApprovers: approvers.length,
+    
   };
 };
 
@@ -147,7 +139,7 @@ export const canUserApprove = (
   // قبلاً تأیید یا رد نکرده باشد
   const approver = approvers.find((a) => a.userId === userId);
   if (!approver) return false;
-  if (approver.hasApproved || approver.hasRejected) return false;
+  if (approver.status==ApproverStatus.Approved || approver.status==ApproverStatus.Rejected) return false;
 
   return true;
 };

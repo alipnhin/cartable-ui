@@ -9,18 +9,13 @@ export interface Signer {
   userName: string;
   fullName: string;
   role: SignerRole;
-  order: number; // ترتیب امضا
-  isRequired: boolean; // آیا امضا الزامی است؟
   phoneNumber?: string;
-  email?: string;
 }
 
 export enum SignerRole {
-  FirstSigner = "first_signer", // امضای اول
-  SecondSigner = "second_signer", // امضای دوم
-  ThirdSigner = "third_signer", // امضای سوم
-  AdditionalSigner = "additional_signer", // امضای اضافی
-}
+  Approver = "Approver", // امضای اول
+  Manager = "Manager", // امضای دوم
+ }
 
 export interface Approver {
   id: string;
@@ -28,10 +23,8 @@ export interface Approver {
   userName: string;
   fullName: string;
   status: ApproverStatus;
-  approvedAt?: string;
-  rejectedAt?: string;
+  createdDateTime?: string;
   comment?: string;
-  ipAddress?: string;
 }
 
 export enum ApproverStatus {
@@ -53,5 +46,4 @@ export interface ApprovalSummary {
   approvedCount: number;
   rejectedCount: number;
   pendingCount: number;
-  canProceed: boolean; // آیا می‌توان ادامه داد؟
 }

@@ -270,40 +270,47 @@ export default function MyCartablePage() {
       {isMobile && hasSelection && (
         <div
           className={cn(
-            "fixed bottom-16 left-0 right-0 z-40 p-4",
+            "fixed bottom-22 left-0 right-0 z-40 p-4",
             "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80",
             "border-t shadow-lg"
           )}
         >
-          <div className="flex items-center gap-3">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleCancelSelection}
-              className="shrink-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-            <div className="flex-1 text-sm font-medium">
-              {selectedOrders.length} {t("common.selected")}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 text-sm font-medium min-w-0">
+                <span className="truncate">
+                  {selectedOrders.length} {t("common.selected")}
+                </span>
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleCancelSelection}
+                className="shrink-0 h-8 w-8 p-0"
+              >
+                <X className="h-5 w-5" />
+              </Button>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-destructive border-destructive/30"
-              onClick={handleBulkReject}
-            >
-              <XCircle className="h-4 w-4 me-2" />
-              {t("common.buttons.reject")}
-            </Button>
-            <Button
-              size="sm"
-              className="bg-success hover:bg-success/90"
-              onClick={handleBulkApprove}
-            >
-              <CheckCircle className="h-4 w-4 me-2" />
-              {t("common.buttons.approve")}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                size="lg"
+                variant="destructive"
+                className=" flex-1  flex items-center justify-center gap-2"
+                onClick={handleBulkReject}
+              >
+                <XCircle className="h-5 w-5" />
+                <span className="truncate">{t("common.buttons.reject")}</span>
+              </Button>
+              <Button
+                size="lg"
+                variant="primary"
+                className=" flex-1  flex items-center justify-center gap-2"
+                onClick={handleBulkApprove}
+              >
+                <CheckCircle className="h-5 w-5" />
+                <span className="truncate">{t("common.buttons.approve")}</span>
+              </Button>
+            </div>
           </div>
         </div>
       )}

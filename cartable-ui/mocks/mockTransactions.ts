@@ -3,13 +3,27 @@
  * داده‌های نمونه تراکنش‌ها
  */
 
-import { Transaction, TransactionStatus } from "@/types";
+import { PaymentMethodEnum, Transaction, TransactionReasonEnum, TransactionStatus } from "@/types";
 import { subtractDays, addHours, now } from "@/lib/date";
 
-// تابع کمکی برای تولید شماره تراکنش تصادفی
-const generateTransactionNumber = (index: number): string => {
-  const random = Math.floor(100000 + Math.random() * 900000);
-  return `TRX${random}${index}`;
+// تابع کمکی برای تولید کد ملی تصادفی
+const generateNationalId = (): string => {
+  // تولید 9 رقم اول تصادفی (به جز حالت‌های تکراری مثل 000000000)
+  let digits = Array.from({ length: 9 }, () =>
+    Math.floor(Math.random() * 10)
+  );
+
+  // جلوگیری از حالت‌هایی مثل تمام صفر یا تمام عدد تکراری
+  if (new Set(digits).size === 1) {
+    digits[8] = (digits[8] + 1) % 10;
+  }
+
+  // محاسبه رقم کنترل طبق الگوریتم رسمی ثبت احوال
+  const sum = digits.reduce((acc, digit, i) => acc + digit * (10 - i), 0);
+  const remainder = sum % 11;
+  const controlDigit = remainder < 2 ? remainder : 11 - remainder;
+
+  return [...digits, controlDigit].join("");
 };
 
 // تابع کمکی برای تولید شماره حساب مقصد تصادفی
@@ -41,6 +55,16 @@ const beneficiaryNames = [
   "شرکت مهندسی مشاور",
   "سازمان آب و برق",
   "شرکت تعاونی کارگران",
+  "علی رضایی",
+  "سارا احمدی",
+  "محمد موسوی",
+  "فاطمه کاظمی",
+  "حسین صادقی",
+  "زهرا محمدی",
+  "رضا کریمی",
+  "مینا یوسفی",
+  "احمد نوری",
+  "سمیه حسینی",
 ];
 
 // مبالغ متنوع
@@ -75,43 +99,45 @@ export const generateTransactionsForOrder = (
     // تعیین وضعیت بر اساس وضعیت دستور
     let status: TransactionStatus;
     if (orderStatus === "draft" || orderStatus === "waiting_for_owners_approval") {
-      status = TransactionStatus.Pending;
+      status = TransactionStatus.WaitForExecution;
     } else if (orderStatus === "owners_approved") {
-      status = TransactionStatus.Approved;
+      status = TransactionStatus.WaitForExecution;
     } else if (orderStatus === "submitted_to_bank") {
-      status = i % 5 === 0 ? TransactionStatus.Processing : TransactionStatus.Submitted;
+      status =  TransactionStatus.WaitForBank;
     } else if (orderStatus === "succeeded") {
-      status = TransactionStatus.Succeeded;
+      status = TransactionStatus.BankSucceeded;
     } else if (orderStatus === "partially_succeeded") {
-      status = i % 4 === 0 ? TransactionStatus.Failed : TransactionStatus.Succeeded;
+      status = i % 4 === 0 ? TransactionStatus.Failed : TransactionStatus.BankSucceeded;
     } else if (orderStatus === "rejected" || orderStatus === "bank_rejected") {
-      status = TransactionStatus.Rejected;
+      status = TransactionStatus.BankRejected;
     } else {
-      status = TransactionStatus.Pending;
+      status = TransactionStatus.WaitForExecution;
     }
 
     const transaction: Transaction = {
       id: `trx-${orderId}-${i + 1}`,
       orderId: orderId,
-      transactionNumber: generateTransactionNumber(i),
-      beneficiaryName: randomName,
-      beneficiaryAccountNumber: generateDestinationAccount(),
-      beneficiarySheba: generateSheba(),
-      beneficiaryBankName: ["بانک ملی", "بانک صادرات", "بانک ملت", "بانک تجارت", "بانک پاسارگاد"][Math.floor(Math.random() * 5)],
+      nationalCode: generateNationalId(),
+      ownerName: randomName,
+      accountNumber: generateDestinationAccount(),
+      destinationIban: generateSheba(),
+      bankName: ["بانک ملی", "بانک صادرات", "بانک ملت", "بانک تجارت", "بانک پاسارگاد"][Math.floor(Math.random() * 5)],
       amount: randomAmount,
-      currency: "IRR",
       description: `پرداخت بابت ${randomName}`,
       status: status,
-      createdAt: orderCreatedAt,
-      processedAt: status === TransactionStatus.Succeeded || status === TransactionStatus.Failed 
-        ? addHours(orderCreatedAt, 24 + i) 
+      createdDateTime: orderCreatedAt,
+      UpdatedDateTime: status === TransactionStatus.BankSucceeded || status === TransactionStatus.Failed
+        ? addHours(orderCreatedAt, 24 + i)
         : undefined,
-      trackingNumber: status === TransactionStatus.Succeeded 
+      trackingId: status === TransactionStatus.BankSucceeded
         ? `${Math.floor(100000000000 + Math.random() * 900000000000)}`
         : undefined,
-      failureReason: status === TransactionStatus.Failed 
+      providerMessage: status === TransactionStatus.Failed
         ? ["موجودی ناکافی", "خطا در اتصال به بانک", "حساب مقصد نامعتبر"][Math.floor(Math.random() * 3)]
         : undefined,
+      roweNumber: i,
+      paymentType: getRandomEnumValue(PaymentMethodEnum),
+      reasonCode: getRandomEnumValue(TransactionReasonEnum)
     };
 
     transactions.push(transaction);
@@ -126,6 +152,13 @@ export const mockTransactions: Transaction[] = [];
 /**
  * Helper Functions
  */
+const getRandomEnumValue = <T extends { [key: string]: string }>(
+  enumObj: T
+): T[keyof T] => {
+  const values = Object.values(enumObj) as T[keyof T][];
+  const index = Math.floor(Math.random() * values.length);
+  return values[index];
+};
 
 // گرفتن تراکنش با ID
 export const getTransactionById = (transactionId: string): Transaction | undefined => {
@@ -151,7 +184,7 @@ export const calculateOrderTotalAmount = (orderId: string): number => {
 // محاسبه تعداد تراکنش‌های موفق یک دستور
 export const countSuccessfulTransactions = (orderId: string): number => {
   const transactions = getTransactionsByOrderId(orderId);
-  return transactions.filter((t) => t.status === TransactionStatus.Succeeded).length;
+  return transactions.filter((t) => t.status === TransactionStatus.BankSucceeded).length;
 };
 
 // محاسبه تعداد تراکنش‌های ناموفق یک دستور

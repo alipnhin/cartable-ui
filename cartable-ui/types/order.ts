@@ -42,6 +42,7 @@ export enum OrderStatus {
   Draft = "draft", // پیش‌نویس
   WaitingForOwnersApproval = "waiting_for_owners_approval", // در انتظار تأیید صاحبان امضا
   OwnersApproved = "owners_approved", // تأیید شده توسط صاحبان امضا
+  OwnerRejected = "ownerRejected",
   SubmittedToBank = "submitted_to_bank", // ارسال شده به بانک
   Succeeded = "succeeded", // انجام شده
   PartiallySucceeded = "partially_succeeded", // انجام شده با خطا

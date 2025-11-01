@@ -3,6 +3,9 @@
  * انواع مشترک و پایه‌ای که در سراسر برنامه استفاده می‌شوند
  */
 
+import { OrderStatus } from "./order";
+import { TransactionStatus } from "./transaction";
+
 // Pagination
 export interface Pagination {
   pageNumber: number;
@@ -100,18 +103,11 @@ export interface FileUpload {
 // Change History Entry
 export interface ChangeHistoryEntry {
   id: string;
-  timestamp: string;
-  userId: string;
+  description: string;
+  createdDateTime: string;
+  title: string;
   userName: string;
-  action: string; // created, approved, rejected, status_changed, etc.
-  actionLabel_fa: string;
-  actionLabel_en: string;
-  description_fa: string;
-  description_en: string;
-  field?: string;
-  oldValue?: any;
-  newValue?: any;
-  comment?: string;
+  Status: OrderStatus; 
 }
 
 export type ChangeAction =

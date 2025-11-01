@@ -44,6 +44,9 @@ function I18nProvider({ children }: I18nProviderProps) {
             caches: ['localStorage'],
             lookupLocalStorage: 'language',
           },
+          
+          // Set default language to Farsi
+          lng: 'fa',
 
           react: {
             useSuspense: false, // Important for Next.js SSR

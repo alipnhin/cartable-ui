@@ -3,7 +3,7 @@
  * تاریخچه تغییرات دستورات
  */
 
-import { ApproverStatus, ChangeHistoryEntry } from "@/types";
+import { ApproverStatus, ChangeHistoryEntry, TransactionStatus } from "@/types";
 import { PaymentOrder, OrderStatus, Approver } from "@/types";
 import { addHours } from "@/lib/date";
 
@@ -19,47 +19,34 @@ export const generateChangeHistoryForOrder = (
   // 1. ایجاد دستور
   history.push({
     id: `ch-${order.id}-1`,
-    timestamp: order.createdAt,
-    userId: order.createdBy,
+    createdDateTime: order.createdAt,
     userName: order.createdByName,
-    action: "created",
-    actionLabel_fa: "ایجاد دستور",
-    actionLabel_en: "Order Created",
-    description_fa: `دستور پرداخت ایجاد شد`,
-    description_en: `Payment order created`,
-    oldValue: undefined,
-    newValue: order.status,
+    Status: OrderStatus.WaitingForOwnersApproval,
+    title: "ایجاد دستور",
+    description: `دستور پرداخت ایجاد شد`
   });
 
   // 2. تأییدها و ردها
   approvers.forEach((approver, index) => {
-    if (approver.status === ApproverStatus.Approved && approver.approvedAt) {
+    if (approver.status === ApproverStatus.Approved && approver.createdDateTime) {
       history.push({
         id: `ch-${order.id}-approve-${index}`,
-        timestamp: approver.approvedAt,
-        userId: approver.userId,
+        createdDateTime: approver.createdDateTime,
         userName: approver.fullName,
-        action: "approved",
-        actionLabel_fa: "تأیید",
-        actionLabel_en: "Approved",
-        description_fa: `دستور توسط ${approver.fullName} تأیید شد`,
-        description_en: `Order approved by ${approver.fullName}`,
-        comment: approver.comment,
+        title: "تأیید",
+        description: `دستور توسط ${approver.fullName} تأیید شد`,
+        Status: OrderStatus.OwnersApproved,
       });
     }
 
-    if (approver.status === ApproverStatus.Rejected && approver.rejectedAt) {
+    if (approver.status === ApproverStatus.Rejected && approver.createdDateTime) {
       history.push({
         id: `ch-${order.id}-reject-${index}`,
-        timestamp: approver.rejectedAt,
-        userId: approver.userId,
+        createdDateTime: approver.createdDateTime,
         userName: approver.fullName,
-        action: "rejected",
-        actionLabel_fa: "رد",
-        actionLabel_en: "Rejected",
-        description_fa: `دستور توسط ${approver.fullName} رد شد`,
-        description_en: `Order rejected by ${approver.fullName}`,
-        comment: approver.comment,
+        title: "رد",
+        description: `دستور توسط ${approver.fullName} رد شد`,
+        Status: OrderStatus.OwnerRejected,
       });
     }
   });
@@ -73,21 +60,16 @@ export const generateChangeHistoryForOrder = (
   ) {
     const lastApproval = approvers
       .filter((a) => a.status === ApproverStatus.Approved)
-      .sort((a, b) => (a.approvedAt! > b.approvedAt! ? -1 : 1))[0];
+      .sort((a, b) => (a.createdDateTime! > b.createdDateTime! ? -1 : 1))[0];
 
-    if (lastApproval && lastApproval.approvedAt) {
+    if (lastApproval && lastApproval.createdDateTime) {
       history.push({
         id: `ch-${order.id}-status-approved`,
-        timestamp: addHours(lastApproval.approvedAt, 0.5),
-        userId: "system",
-        userName: "سیستم",
-        action: "status_changed",
-        actionLabel_fa: "تغییر وضعیت",
-        actionLabel_en: "Status Changed",
-        description_fa: "وضعیت به 'تأیید شده' تغییر یافت",
-        description_en: "Status changed to 'Approved'",
-        oldValue: OrderStatus.WaitingForOwnersApproval,
-        newValue: OrderStatus.OwnersApproved,
+        createdDateTime: addHours(lastApproval.createdDateTime, 0.5),
+        userName: "علی پناهیان",
+        title: "تغییر وضعیت",
+        description: "وضعیت به 'تأیید شده' تغییر یافت",
+        Status: OrderStatus.OwnersApproved,
       });
     }
   }
@@ -96,16 +78,11 @@ export const generateChangeHistoryForOrder = (
   if (order.submittedToBankAt) {
     history.push({
       id: `ch-${order.id}-submitted`,
-      timestamp: order.submittedToBankAt,
-      userId: "system",
-      userName: "سیستم",
-      action: "submitted_to_bank",
-      actionLabel_fa: "ارسال به بانک",
-      actionLabel_en: "Submitted to Bank",
-      description_fa: "دستور به سیستم بانک ارسال شد",
-      description_en: "Order submitted to bank system",
-      oldValue: OrderStatus.OwnersApproved,
-      newValue: OrderStatus.SubmittedToBank,
+      createdDateTime: order.submittedToBankAt,
+      userName: "علی پناهیان",
+      title: "ارسال به بانک",
+      description: "دستور به علی پناهیان بانک ارسال شد",
+      Status: OrderStatus.SubmittedToBank,
     });
   }
 
@@ -113,28 +90,20 @@ export const generateChangeHistoryForOrder = (
   if (order.processedAt) {
     let newStatus = order.status;
     let description_fa = "";
-    let description_en = "";
 
     if (order.status === OrderStatus.Succeeded) {
       description_fa = "تمام تراکنش‌ها با موفقیت انجام شد";
-      description_en = "All transactions completed successfully";
     } else if (order.status === OrderStatus.PartiallySucceeded) {
       description_fa = "برخی تراکنش‌ها با خطا مواجه شدند";
-      description_en = "Some transactions failed";
     }
 
     history.push({
       id: `ch-${order.id}-processed`,
-      timestamp: order.processedAt,
-      userId: "system",
-      userName: "سیستم",
-      action: "processed",
-      actionLabel_fa: "پردازش شده",
-      actionLabel_en: "Processed",
-      description_fa: description_fa,
-      description_en: description_en,
-      oldValue: OrderStatus.SubmittedToBank,
-      newValue: newStatus,
+      createdDateTime: order.processedAt,
+      userName: "علی پناهیان",
+      title: "پردازش شده",
+      description: description_fa,
+      Status: newStatus,
     });
   }
 
@@ -143,25 +112,20 @@ export const generateChangeHistoryForOrder = (
     const rejection = approvers.find(
       (a) => a.status === ApproverStatus.Rejected
     );
-    if (rejection && rejection.rejectedAt) {
+    if (rejection && rejection.createdDateTime) {
       history.push({
         id: `ch-${order.id}-status-rejected`,
-        timestamp: addHours(rejection.rejectedAt, 0.5),
-        userId: "system",
-        userName: "سیستم",
-        action: "status_changed",
-        actionLabel_fa: "تغییر وضعیت",
-        actionLabel_en: "Status Changed",
-        description_fa: "وضعیت به 'عدم تأیید' تغییر یافت",
-        description_en: "Status changed to 'Rejected'",
-        oldValue: OrderStatus.WaitingForOwnersApproval,
-        newValue: OrderStatus.Rejected,
+        createdDateTime: addHours(rejection.createdDateTime, 0.5),
+        userName: "علی پناهیان",
+        title: "تغییر وضعیت",
+        description: "وضعیت به 'عدم تأیید' تغییر یافت",
+        Status: OrderStatus.Rejected,
       });
     }
   }
 
   // مرتب‌سازی بر اساس زمان
-  history.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+  history.sort((a, b) => (a.createdDateTime > b.createdDateTime ? 1 : -1));
 
   return history;
 };

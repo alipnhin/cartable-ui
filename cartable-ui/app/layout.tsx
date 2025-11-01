@@ -6,6 +6,7 @@ import { I18nProvider } from "@/providers/i18n-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { TooltipsProvider } from "@/providers/tooltips-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { PWAInstaller } from "@/components/common/pwa-installer";
 import localFont from "next/font/local";
 const yekanBakh = localFont({
   src: [
@@ -55,8 +56,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html dir="rtl" suppressHydrationWarning data-scroll-behavior="smooth">
-      <body className={(cn("text-base antialiased"), `${yekanBakh.variable}`)}>
+    <html
+      dir="rtl"
+      className="light"
+      lang="fa"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+    >
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#27ae60" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="کارتابل" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        />
+      </head>
+      <body className={(cn("text-base antialiased "), `${yekanBakh.variable}`)}>
+        <PWAInstaller />
         <ThemeProvider>
           <I18nProvider>
             <TooltipsProvider>

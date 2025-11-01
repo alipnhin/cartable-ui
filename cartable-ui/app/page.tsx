@@ -53,7 +53,7 @@ export default function Home() {
                 size="lg"
                 asChild
               >
-                <Link className="py-4" href="/dashboard">
+                <Link className="py-4" href="/login">
                   {t("app.login")}
                 </Link>
               </Button>

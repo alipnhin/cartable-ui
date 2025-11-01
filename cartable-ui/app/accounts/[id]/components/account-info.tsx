@@ -80,7 +80,7 @@ export function AccountInfo({ account }: AccountInfoProps) {
     },
     {
       label: t("accounts.balance"),
-      value: formatCurrency(account.balance, locale),
+      value: formatCurrency(account.balance ?? 0, locale),
       icon: Wallet,
       highlight: true,
     },
@@ -101,7 +101,7 @@ export function AccountInfo({ account }: AccountInfoProps) {
     },
     {
       label: "آخرین به‌روزرسانی",
-      value: formatDate(account.updatedAt, locale),
+      value: formatDate(account.updatedAt ?? "", locale),
       icon: Calendar,
     },
   ];

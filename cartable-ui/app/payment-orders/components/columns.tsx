@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { PaymentOrder, OrderStatus } from "@/types/order";
 import { formatCurrency, formatDate } from "@/lib/helpers";
+import Link from "next/link";
+import {
+  getPaymentStatusBadge,
+  StatusBadge,
+} from "@/components/ui/status-badge";
 
 export const createColumns = (
   locale: string,
@@ -67,6 +72,10 @@ export const createColumns = (
         label: t("paymentCartable.statusLabels.expired"),
         variant: "outline",
       },
+      [OrderStatus.OwnerRejected]: {
+        label: "",
+        variant: "primary",
+      },
     };
 
     const statusInfo = statusMap[status];
@@ -117,7 +126,16 @@ export const createColumns = (
     {
       accessorKey: "status",
       header: t("orders.status"),
-      cell: ({ row }) => getStatusBadge(row.original.status),
+      cell: ({ row }) => {
+        const statusBadge = getPaymentStatusBadge(row.original.status);
+        const { variant, icon: Icon, label_fa, label_en } = statusBadge;
+
+        return (
+          <StatusBadge variant={variant} icon={<Icon />}>
+            {locale === "fa" ? label_fa : label_en}
+          </StatusBadge>
+        );
+      },
       enableSorting: true,
     },
     {
@@ -136,13 +154,11 @@ export const createColumns = (
       id: "actions",
       header: t("common.actions"),
       cell: ({ row }) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onView?.(row.original.id)}
-        >
-          <Eye className="h-4 w-4 me-2" />
-          {t("common.buttons.view")}
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/payment-orders/${row.original.id}`}>
+            <Eye className="h-4 w-4 me-2" />
+            {t("common.buttons.view")}
+          </Link>
         </Button>
       ),
       enableSorting: false,

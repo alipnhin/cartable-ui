@@ -55,8 +55,14 @@ function FloatingBottomDock({
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden">
-      {/* Background با shadow بهتر */}
-      <div className="relative h-20 bg-card/95 backdrop-blur-md border-t border-border/50 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.3)]">
+      {/* Background با shadow بهتر + safe area برای iOS */}
+      <div
+        className="relative bg-card/95 backdrop-blur-md border-t border-border/50 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.3)]"
+        style={{
+          paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
+          height: "calc(6rem + env(safe-area-inset-bottom))",
+        }}
+      >
         {/* Menu Items */}
         <div className="flex h-full items-end justify-around pb-3">
           {dockMenuItems.map((item, index) => {
@@ -74,8 +80,8 @@ function FloatingBottomDock({
                 key={item.title}
                 onClick={() => router.push(item.route)}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-1.5 px-3 py-2 transition-all duration-200",
-                  "active:scale-95",
+                  "relative flex flex-col items-center justify-center gap-1.5 px-3 py-2 transition-all duration-300 ease-out",
+                  "active:scale-95 hover:scale-105",
                   isActive ? "text-primary" : "text-muted-foreground"
                 )}
               >
@@ -83,7 +89,7 @@ function FloatingBottomDock({
                 <div className="relative">
                   <Icon
                     className={cn(
-                      "h-6 w-6 transition-all duration-200",
+                      "h-6 w-6 transition-all duration-300 ease-out",
                       isActive && "scale-110"
                     )}
                   />
@@ -100,14 +106,14 @@ function FloatingBottomDock({
                 {/* Label */}
                 <span
                   className={cn(
-                    "text-[11px] font-medium transition-all duration-200",
-                    isActive && "font-semibold"
+                    "text-[11px] font-medium transition-all duration-300 ease-out",
+                    isActive && "font-semibold scale-105"
                   )}
                 >
                   {t(`navigation.${item.title}`)}
                 </span>
 
-                {/* Active Indicator - Dot به جای خط */}
+                {/* Active Indicator - Dot با انیمیشن */}
                 {isActive && (
                   <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary animate-pulse" />
                 )}
@@ -154,7 +160,13 @@ function ClassicBottomDock() {
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden">
-      <div className="relative h-16 bg-card/95 backdrop-blur-md border-t border-border/50 shadow-[0_-2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_-2px_12px_rgba(0,0,0,0.25)]">
+      <div
+        className="relative bg-card/95 backdrop-blur-md border-t border-border/50 shadow-[0_-2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_-2px_12px_rgba(0,0,0,0.25)]"
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom)",
+          height: "calc(6rem + env(safe-area-inset-bottom))",
+        }}
+      >
         <div className="flex h-full items-center justify-around px-2">
           {dockMenuItems.map((item) => {
             const isActive = isRouteActive(pathname, item.route);
@@ -165,7 +177,7 @@ function ClassicBottomDock() {
                 key={item.title}
                 onClick={() => router.push(item.route)}
                 className={cn(
-                  "relative flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200",
+                  "relative flex items-center gap-2 px-4 mb-6 py-2 rounded-lg transition-all duration-200",
                   "active:scale-95",
                   isActive
                     ? "bg-primary/10 text-primary"
