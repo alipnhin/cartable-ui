@@ -7,43 +7,31 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import { TooltipsProvider } from "@/providers/tooltips-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { PWAInstaller } from "@/components/common/pwa-installer";
+import { AppSplashLoader } from "@/components/common/app-splash-loader";
+import { OfflineIndicator } from "@/components/common/offline-indicator";
 import localFont from "next/font/local";
+import { useEffect } from "react";
+
 const yekanBakh = localFont({
   src: [
-    {
-      path: "../public/fonts/woff2/YekanBakhFaNum-Light.woff2",
-      weight: "300",
-      style: "normal",
-    },
+    { path: "../public/fonts/woff2/YekanBakhFaNum-Light.woff2", weight: "300" },
     {
       path: "../public/fonts/woff2/YekanBakhFaNum-Regular.woff2",
       weight: "400",
-      style: "normal",
     },
     {
       path: "../public/fonts/woff2/YekanBakhFaNum-SemiBold.woff2",
       weight: "600",
-      style: "normal",
     },
-    {
-      path: "../public/fonts/woff2/YekanBakhFaNum-Bold.woff2",
-      weight: "700",
-      style: "normal",
-    },
+    { path: "../public/fonts/woff2/YekanBakhFaNum-Bold.woff2", weight: "700" },
     {
       path: "../public/fonts/woff2/YekanBakhFaNum-ExtraBold.woff2",
       weight: "800",
-      style: "normal",
     },
-    {
-      path: "../public/fonts/woff2/YekanBakhFaNum-Black.woff2",
-      weight: "900",
-      style: "normal",
-    },
+    { path: "../public/fonts/woff2/YekanBakhFaNum-Black.woff2", weight: "900" },
     {
       path: "../public/fonts/woff2/YekanBakhFaNum-ExtraBlack.woff2",
       weight: "950",
-      style: "normal",
     },
   ],
   variable: "--font-yekanbakh",
@@ -52,9 +40,28 @@ const yekanBakh = localFont({
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
+  // pinch zoom
+  useEffect(() => {
+    const disableZoom = (e: TouchEvent) => {
+      if (e.touches.length > 1) e.preventDefault();
+    };
+    document.addEventListener("touchmove", disableZoom, { passive: false });
+    return () => document.removeEventListener("touchmove", disableZoom);
+  }, []);
+
+  // double-tap zoom
+  useEffect(() => {
+    let lastTouchEnd = 0;
+    const handler = (e: TouchEvent) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) e.preventDefault();
+      lastTouchEnd = now;
+    };
+    document.addEventListener("touchend", handler, false);
+    return () => document.removeEventListener("touchend", handler);
+  }, []);
+
   return (
     <html
       dir="rtl"
@@ -75,7 +82,9 @@ export default function RootLayout({
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
         />
       </head>
-      <body className={(cn("text-base antialiased "), `${yekanBakh.variable}`)}>
+      <body className={cn("text-base antialiased", yekanBakh.variable)}>
+        <AppSplashLoader />
+        <OfflineIndicator />
         <PWAInstaller />
         <ThemeProvider>
           <I18nProvider>

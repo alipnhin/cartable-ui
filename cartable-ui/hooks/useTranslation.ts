@@ -1,13 +1,14 @@
 import { useTranslation as useI18nextTranslation } from "react-i18next";
 
-// Re-export useTranslation with proper typing and locale
+// Enhanced useTranslation with locale
 const useTranslation = (namespace?: string) => {
-  const { t, i18n } = useI18nextTranslation(namespace);
-
+  const { t, i18n, ready } = useI18nextTranslation(namespace);
+  
   return {
     t,
     i18n,
-    locale: i18n.language, // اضافه کردن locale
+    ready,
+    locale: i18n.language,
   };
 };
 

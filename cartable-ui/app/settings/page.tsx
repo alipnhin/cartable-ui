@@ -58,7 +58,7 @@ export default function SettingsPage() {
       toast({
         title: t("common.error"),
         description: t("settings.passwordMismatch"),
-        variant: "destructive",
+        variant: "error",
       });
       return;
     }

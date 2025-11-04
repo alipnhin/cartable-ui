@@ -43,6 +43,9 @@ interface FilterSheetProps {
   filters: {
     status: OrderStatus[];
     search: string;
+    orderTitle: string;
+    orderNumber: string;
+    trackingId: string;
     dateFrom: string;
     dateTo: string;
     accountId: string;
@@ -130,6 +133,9 @@ export function FilterSheet({
 
   const activeFiltersCount =
     localFilters.status.length +
+    (localFilters.orderTitle ? 1 : 0) +
+    (localFilters.orderNumber ? 1 : 0) +
+    (localFilters.trackingId ? 1 : 0) +
     (localFilters.search ? 1 : 0) +
     (localFilters.dateFrom ? 1 : 0) +
     (localFilters.dateTo ? 1 : 0) +
@@ -141,7 +147,46 @@ export function FilterSheet({
 
   const FilterContent = () => (
     <div className="space-y-6">
-      {/* Search */}
+      {/* عنوان دستور پرداخت */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">عنوان دستور پرداخت</Label>
+        <Input
+          placeholder="جستجو بر اساس عنوان..."
+          value={localFilters.orderTitle}
+          onChange={(e) =>
+            setLocalFilters({ ...localFilters, orderTitle: e.target.value })
+          }
+          className={cn("h-10", isMobile && "h-12 text-base")}
+        />
+      </div>
+
+      {/* شماره دستور پرداخت */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">شماره دستور پرداخت</Label>
+        <Input
+          placeholder="مثال: 1001..."
+          value={localFilters.orderNumber}
+          onChange={(e) =>
+            setLocalFilters({ ...localFilters, orderNumber: e.target.value })
+          }
+          className={cn("h-10", isMobile && "h-12 text-base")}
+        />
+      </div>
+
+      {/* کد رهگیری */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">کد رهگیری</Label>
+        <Input
+          placeholder="جستجو بر اساس کد رهگیری..."
+          value={localFilters.trackingId}
+          onChange={(e) =>
+            setLocalFilters({ ...localFilters, trackingId: e.target.value })
+          }
+          className={cn("h-10", isMobile && "h-12 text-base")}
+        />
+      </div>
+
+      {/* Search - جستجوی عمومی */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">{t("filters.search")}</Label>
         <Input

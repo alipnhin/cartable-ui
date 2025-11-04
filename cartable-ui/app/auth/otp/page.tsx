@@ -18,7 +18,7 @@ import {
   FieldLegend,
 } from "@/components/ui/field";
 
-import useTranslation from "@/hooks/useTranslation";
+import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 

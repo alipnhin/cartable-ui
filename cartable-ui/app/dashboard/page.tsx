@@ -1,8 +1,3 @@
-/**
- * Enhanced Dashboard Page
- * استفاده از کامپوننت‌های shadcn/ui با استایل‌های inline
- */
-
 "use client";
 
 import { AppLayout, PageHeader } from "@/components/layout";

@@ -8,3 +8,4 @@ export { Header } from "./Header";
 export { Sidebar } from "./Sidebar";
 export { BottomDock } from "./BottomDock";
 export { PageHeader } from "./PageHeader";
+export { DetailLayout } from "./DetailLayout";

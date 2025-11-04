@@ -13,7 +13,8 @@ export interface Transaction {
   nationalCode: string;
   accountNumber: string;
   destinationIban: string;
-  bankName:string;
+  bankName: string;
+  bankCode: string;
   ownerName: string;
   description?: string;
   trackingId?: string; // کد پیگیری بانک
@@ -196,7 +197,6 @@ export const validateTransaction = (
   } else if (!/^IR\d{24}$/.test(transaction.destinationIban)) {
     errors.push("فرمت شماره شبا صحیح نیست");
   }
-
 
   return {
     isValid: errors.length === 0,

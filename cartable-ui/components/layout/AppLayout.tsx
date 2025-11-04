@@ -1,8 +1,3 @@
-/**
- * Fixed AppLayout Component
- * Layout اصلاح شده بدون ایجاد scroll اضافی
- */
-
 "use client";
 
 import { ReactNode, useState } from "react";

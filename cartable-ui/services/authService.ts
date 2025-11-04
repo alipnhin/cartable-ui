@@ -5,7 +5,6 @@
 import { User, ApiResponse } from "@/types";
 import { getUserByUsername, CURRENT_USER } from "@/mocks";
 
-
 // تاخیر شبیه‌سازی شده
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -39,6 +38,8 @@ export const login = async (
   if (!username || username.length < 3) {
     return {
       success: false,
+      data: { requireOTP: false, message: "" },
+      timestamp: new Date().toISOString(),
       message: "نام کاربری باید حداقل 3 کاراکتر باشد",
     };
   }
@@ -46,6 +47,8 @@ export const login = async (
   if (!password || password.length < 6) {
     return {
       success: false,
+      data: { requireOTP: false, message: "" },
+      timestamp: new Date().toISOString(),
       message: "رمز عبور باید حداقل 6 کاراکتر باشد",
     };
   }
@@ -53,6 +56,8 @@ export const login = async (
   if (!captcha) {
     return {
       success: false,
+      data: { requireOTP: false, message: "" },
+      timestamp: new Date().toISOString(),
       message: "لطفاً کد امنیتی را وارد کنید",
     };
   }
@@ -62,6 +67,8 @@ export const login = async (
   if (!user) {
     return {
       success: false,
+      data: { requireOTP: false, message: "" },
+      timestamp: new Date().toISOString(),
       message: "نام کاربری یا رمز عبور اشتباه است",
     };
   }
@@ -70,6 +77,8 @@ export const login = async (
   if (!user.isActive) {
     return {
       success: false,
+      data: { requireOTP: false, message: "" },
+      timestamp: new Date().toISOString(),
       message: "حساب کاربری شما غیرفعال است",
     };
   }
@@ -81,6 +90,7 @@ export const login = async (
 
   return {
     success: true,
+    timestamp: new Date().toISOString(),
     data: {
       requireOTP: true,
       message: "کد تأیید به شماره موبایل شما ارسال شد",
@@ -102,6 +112,8 @@ export const verifyOTP = async (
   if (!otpCode || otpCode.length !== 6) {
     return {
       success: false,
+      data: { user: CURRENT_USER, token: "" },
+      timestamp: new Date().toISOString(),
       message: "کد تأیید باید 6 رقم باشد",
     };
   }
@@ -110,6 +122,8 @@ export const verifyOTP = async (
   if (otpCode !== VALID_OTP_CODE) {
     return {
       success: false,
+      data: { user: CURRENT_USER, token: "" },
+      timestamp: new Date().toISOString(),
       message: "کد تأیید نامعتبر است",
     };
   }
@@ -144,6 +158,7 @@ export const verifyOTP = async (
       user: user,
       token: token,
     },
+    timestamp: new Date().toISOString(),
     message: "ورود موفق",
   };
 };
@@ -151,7 +166,9 @@ export const verifyOTP = async (
 /**
  * ارسال مجدد کد OTP
  */
-export const resendOTP = async (): Promise<ApiResponse<{ message: string }>> => {
+export const resendOTP = async (): Promise<
+  ApiResponse<{ message: string }>
+> => {
   // تاخیر شبیه‌سازی (1 ثانیه)
   await delay(1000);
 
@@ -160,6 +177,7 @@ export const resendOTP = async (): Promise<ApiResponse<{ message: string }>> => 
     data: {
       message: "کد تأیید مجدداً ارسال شد",
     },
+    timestamp: new Date().toISOString(),
     message: "کد تأیید مجدداً ارسال شد",
   };
 };
@@ -181,6 +199,8 @@ export const logout = async (): Promise<ApiResponse<void>> => {
   return {
     success: true,
     message: "خروج موفق",
+    timestamp: new Date().toISOString(),
+    data: undefined,
   };
 };
 

@@ -26,6 +26,9 @@ export default function PaymentOrdersPage() {
   const [filters, setFilters] = useState({
     status: [] as OrderStatus[],
     search: "",
+    orderTitle: "",
+    orderNumber: "",
+    trackingId: "",
     dateFrom: "",
     dateTo: "",
     accountId: "",
@@ -40,7 +43,31 @@ export default function PaymentOrdersPage() {
       result = result.filter((order) => filters.status.includes(order.status));
     }
 
-    // Filter by search
+    // Filter by order title
+    if (filters.orderTitle) {
+      const titleLower = filters.orderTitle.toLowerCase();
+      result = result.filter((order) =>
+        order.accountTitle?.toLowerCase().includes(titleLower)
+      );
+    }
+
+    // Filter by order number
+    if (filters.orderNumber) {
+      const numberLower = filters.orderNumber.toLowerCase();
+      result = result.filter((order) =>
+        order.orderNumber?.toLowerCase().includes(numberLower)
+      );
+    }
+
+    // Filter by tracking ID
+    if (filters.trackingId) {
+      const trackingLower = filters.trackingId.toLowerCase();
+      result = result.filter((order) =>
+        order.orderNumber?.toLowerCase().includes(trackingLower)
+      );
+    }
+
+    // Filter by general search
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       result = result.filter(
@@ -118,6 +145,9 @@ export default function PaymentOrdersPage() {
     setFilters({
       status: [],
       search: "",
+      orderTitle: "",
+      orderNumber: "",
+      trackingId: "",
       dateFrom: "",
       dateTo: "",
       accountId: "",
@@ -152,6 +182,9 @@ export default function PaymentOrdersPage() {
 
   const activeFiltersCount =
     filters.status.length +
+    (filters.orderTitle ? 1 : 0) +
+    (filters.orderNumber ? 1 : 0) +
+    (filters.trackingId ? 1 : 0) +
     (filters.search ? 1 : 0) +
     (filters.dateFrom ? 1 : 0) +
     (filters.dateTo ? 1 : 0) +
