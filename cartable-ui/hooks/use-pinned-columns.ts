@@ -21,8 +21,11 @@ export function usePinnedColumns(tableId: string) {
       const newPinned = prev.includes(columnId)
         ? prev.filter((id) => id !== columnId)
         : [...prev, columnId];
-      
-      localStorage.setItem(`pinned-columns-${tableId}`, JSON.stringify(newPinned));
+
+      localStorage.setItem(
+        `pinned-columns-${tableId}`,
+        JSON.stringify(newPinned)
+      );
       return newPinned;
     });
   };

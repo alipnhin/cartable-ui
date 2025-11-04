@@ -17,27 +17,29 @@ const sizeClasses = {
   xl: "h-16 w-16",
 };
 
-export function BankLogo({ 
-  bankCode, 
-  size = "md", 
+export function BankLogo({
+  bankCode,
+  size = "md",
   className,
-  showName = false 
+  showName = false,
 }: BankLogoProps) {
   const logo = getBankLogo(bankCode);
   const name = getBankName(bankCode);
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <div className={cn(
-        "relative rounded overflow-hidden flex-shrink-0",
-        sizeClasses[size]
-      )}>
+      <div
+        className={cn(
+          "relative rounded overflow-hidden flex-shrink-0",
+          sizeClasses[size]
+        )}
+      >
         <img
           src={logo}
           alt={name}
           className="object-contain w-full h-full"
           onError={(e) => {
-            e.currentTarget.src = '/assets/media/bank-logos/default.png';
+            e.currentTarget.src = "/assets/media/bank-logos/default.png";
           }}
         />
       </div>
