@@ -158,6 +158,8 @@
     "transactionsList": "لیست تراکنش‌ها",
     "approvers": "امضاکنندگان",
     "approversShort": "امضا",
+    "statistics": "اطلاعات آماری",
+    "statisticsShort": "آمار",
     "history": "تاریخچه",
     "historyShort": "تاریخچه",
     "changeHistory": "تاریخچه تغییرات",
@@ -177,13 +179,41 @@
     "inquiryError": "خطا در انجام استعلام",
     "exportSuccess": "فایل با موفقیت دانلود شد"
   },
+  "statistics": {
+    "statusChart": "نمودار وضعیت‌ها",
+    "statusDetails": "جزئیات وضعیت‌ها",
+    "statusBreakdown": "تفکیک کامل وضعیت تراکنش‌ها",
+    "financialSummary": "خلاصه مالی",
+    "totalTransactionAmount": "مبلغ کل تراکنش",
+    "successfulAmount": "مبلغ موفق",
+    "failedAmount": "مبلغ ناموفق",
+    "pendingAmount": "مبلغ در انتظار",
+    "averageTransaction": "میانگین تراکنش",
+    "successRate": "نرخ موفقیت",
+    "totalTransactions": "کل تراکنش‌ها",
+    "paymentTypes": "انواع پرداخت",
+    "paymentTypeDistribution": "توزیع روش‌های پرداخت",
+    "timeStatistics": "تاریخچه زمانی",
+    "timelineInformation": "اطلاعات زمان‌بندی تراکنش‌ها",
+    "firstTransaction": "اولین تراکنش ثبت شد",
+    "lastTransaction": "آخرین تراکنش ثبت شد",
+    "lastStatusUpdate": "آخرین بروزرسانی وضعیت",
+    "averageProcessingTime": "میانگین زمان پردازش",
+    "minutes": "دقیقه",
+    "transactionReason": "علت پرداخت",
+    "succeeded": "موفق",
+    "failed": "ناموفق",
+    "pending": "در انتظار",
+    "rial": "ریال"
+  },
   "transactions": {
     "ownerName": "نام ذینفع",
     "iban": "شماره شبا",
     "amount": "مبلغ",
+    "createdDateTime": "تاریخ ثبت",
     "description": "توضیحات",
     "trackingId": "شماره پیگیری",
-    "transactionReason":"علت پرداخت",
+    "transactionReason": "علت پرداخت",
     "transactionReasons": {
       "unknown": "نامشخص",
       "salaryDeposit": "واریز حقوق",
@@ -206,14 +236,25 @@
       "stuffsPurchase": "خرید کالا",
       "servicesPurchase": "خرید خدمات"
     },
-    "paymentType":"نوع تراکنش",
+    "paymentType": "نوع تراکنش",
     "paymentTypes": {
-    "unknown": "نامشخص",
-    "internal": "داخلی",
-    "paya": "پایا",
-    "satna": "ساتنا",
-    "card": "کارت به کارت"
-  }
+      "unknown": "نامشخص",
+      "internal": "داخلی",
+      "paya": "پایا",
+      "satna": "ساتنا",
+      "card": "کارت به کارت"
+    },
+    "statusLabels": {
+      "registered": "ثبت شده",
+      "waitForBank": "در صف پردازش بانک",
+      "waitForExecution": "در انتظار تائید بانک",
+      "bankSucceeded": "تراکنش انجام شده",
+      "bankRejected": "رد شده توسط بانک",
+      "transactionRollback": "برگشت مبلغ به حساب مبدا",
+      "failed": "خطا در ارسال به بانک",
+      "canceled": "لغو شده",
+      "expired": "منقضی شده"
+    }
   },
   "approvers": {
     "signatureProgress": "پیشرفت امضا",
@@ -321,7 +362,7 @@
     "failed": "ناموفق",
     "BankRejected": "رد شده",
     "canceled": "لغو شده",
-    "waitForExecution":"در صف پردازش"
+    "waitForExecution": "در صف پردازش"
   },
   "toast": {
     "success": "موفقیت",

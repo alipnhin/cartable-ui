@@ -8,10 +8,12 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Transaction } from "@/types/transaction";
-import { formatCurrency, formatDate } from "@/lib/utils";
 import { BankLogo } from "@/components/common/bank-logo";
 import { PaymentTypeIcon } from "@/components/common/payment-type-icon";
 import { getBankCodeFromIban } from "@/lib/bank-logos";
+import { TransactionStatusBadge } from "@/components/ui/status-badge";
+import { formatCurrency, formatDate } from "@/lib/helpers";
+import useTranslation from "@/hooks/useTranslation";
 
 interface TransactionDetailDialogProps {
   transaction: Transaction | null;
@@ -19,56 +21,14 @@ interface TransactionDetailDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const statusConfig = {
-  BankSucceeded: {
-    label: "تراکنش انجام شده",
-    color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  },
-  BankRejected: {
-    label: "رد شده توسط بانک",
-    color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  },
-  Failed: {
-    label: "ناموفق",
-    color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  },
-  Canceled: {
-    label: "لغو شده",
-    color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
-  },
-  Expired: {
-    label: "منقضی شده",
-    color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
-  },
-  WaitForExecution: {
-    label: "در انتظار اجرا",
-    color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  },
-  WaitForBank: {
-    label: "در صف پردازش بانک",
-    color:
-      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-  },
-  Registered: {
-    label: "ثبت شده",
-    color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
-  },
-  TransactionRollback: {
-    label: "برگشت مبلغ",
-    color:
-      "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-  },
-};
-
 export function TransactionDetailDialog({
   transaction,
   open,
   onOpenChange,
 }: TransactionDetailDialogProps) {
   if (!transaction) return null;
-
-  const status = statusConfig[transaction.status] || statusConfig.Registered;
-  const bankCode = getBankCodeFromIban(transaction.beneficiaryIban);
+  const { t, locale } = useTranslation();
+  const bankCode = getBankCodeFromIban(transaction.destinationIban);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -80,8 +40,7 @@ export function TransactionDetailDialog({
         <div className="space-y-6">
           {/* Status and Type */}
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <Badge className={status.color}>{status.label}</Badge>
-            <PaymentTypeIcon type={transaction.paymentType} showLabel />
+            <TransactionStatusBadge status={transaction.status} size="sm" />
           </div>
 
           {/* Amount */}
@@ -90,7 +49,7 @@ export function TransactionDetailDialog({
               مبلغ تراکنش
             </div>
             <div className="text-2xl font-bold text-primary">
-              {formatCurrency(transaction.amount)} ریال
+              {formatCurrency(transaction.amount, locale)}
             </div>
           </div>
 
@@ -103,7 +62,7 @@ export function TransactionDetailDialog({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <div className="text-sm text-muted-foreground mb-1">
-                  نام و نام خانوادگی
+                  {t("transactions.ownerName")}
                 </div>
                 <div className="font-medium">{transaction.ownerName}</div>
               </div>
@@ -111,7 +70,7 @@ export function TransactionDetailDialog({
               {transaction.nationalCode && (
                 <div>
                   <div className="text-sm text-muted-foreground mb-1">
-                    کد ملی
+                    {t("transactions.nationalCode")}
                   </div>
                   <div className="font-medium font-mono">
                     {transaction.nationalCode}
@@ -121,7 +80,7 @@ export function TransactionDetailDialog({
 
               <div className="md:col-span-2">
                 <div className="text-sm text-muted-foreground mb-1">
-                  شماره شبا
+                  {t("transactions.iban")}
                 </div>
                 <div className="font-medium font-mono text-sm break-all">
                   {transaction.destinationIban}
@@ -146,7 +105,7 @@ export function TransactionDetailDialog({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <div className="text-sm text-muted-foreground mb-1">
-                  شماره تراکنش
+                  {t("transactions.orderId")}
                 </div>
                 <div className="font-medium font-mono text-sm break-all">
                   {transaction.id}
@@ -156,7 +115,7 @@ export function TransactionDetailDialog({
               {transaction.trackingId && (
                 <div>
                   <div className="text-sm text-muted-foreground mb-1">
-                    کد رهگیری بانک
+                    {t("transactions.trackingId")}
                   </div>
                   <div className="font-medium font-mono text-sm">
                     {transaction.trackingId}
@@ -166,7 +125,7 @@ export function TransactionDetailDialog({
 
               <div>
                 <div className="text-sm text-muted-foreground mb-1">
-                  تاریخ ثبت
+                  {t("transactions.createdDateTime")}
                 </div>
                 <div className="font-medium">
                   {formatDate(transaction.createdDateTime)}
@@ -176,7 +135,7 @@ export function TransactionDetailDialog({
               {transaction.description && (
                 <div className="md:col-span-2">
                   <div className="text-sm text-muted-foreground mb-1">
-                    توضیحات
+                    {t("transactions.description")}
                   </div>
                   <div className="font-medium">{transaction.description}</div>
                 </div>

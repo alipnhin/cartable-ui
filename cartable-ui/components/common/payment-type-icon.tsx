@@ -3,6 +3,7 @@
 import { PaymentMethodEnum } from "@/types/transaction";
 import { Building2, Waves, Zap, CreditCard, HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "../ui/badge";
 
 interface PaymentTypeIconProps {
   type: PaymentMethodEnum;
@@ -15,56 +16,53 @@ const paymentTypeConfig = {
     icon: HelpCircle,
     label: "نامشخص",
     color: "text-gray-600",
-    bgColor: "bg-gray-100",
+    variant: "secondary",
   },
   internal: {
     icon: Building2,
     label: "داخلی",
     color: "text-green-600",
-    bgColor: "bg-green-100",
+    variant: "success",
   },
   paya: {
     icon: Waves,
     label: "پایا",
     color: "text-blue-600",
-    bgColor: "bg-blue-100",
+    variant: "info",
   },
   satna: {
     icon: Zap,
     label: "ساتنا",
     color: "text-purple-600",
-    bgColor: "bg-purple-100",
+    variant: "primary",
   },
   card: {
     icon: CreditCard,
     label: "کارت به کارت",
     color: "text-orange-600",
-    bgColor: "bg-orange-100",
+    variant: "destructive",
   },
 } as const;
 
 export function PaymentTypeIcon({
   type,
   className,
-  showLabel = false,
+  showLabel = true,
 }: PaymentTypeIconProps) {
   const config = paymentTypeConfig[type] || paymentTypeConfig.unknown;
   const Icon = config.icon;
 
   if (showLabel) {
     return (
-      <div className={cn("flex items-center gap-2", className)}>
-        <div className={cn("p-1.5 rounded", config.bgColor)}>
-          <Icon className={cn("h-4 w-4", config.color)} />
-        </div>
-        <span className="text-sm font-medium">{config.label}</span>
-      </div>
+      <Badge variant={config.variant} appearance="light">
+        <Icon /> {config.label}
+      </Badge>
     );
   }
 
   return (
-    <div className={cn("p-1.5 rounded", config.bgColor, className)}>
-      <Icon className={cn("h-4 w-4", config.color)} />
-    </div>
+    <Badge variant={config.variant} appearance="light">
+      <Icon />
+    </Badge>
   );
 }

@@ -3,11 +3,9 @@
 import { Approver, SignatureProgress, ApprovalSummary } from "@/types/signer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDate } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
-import { CheckCircle, XCircle, Clock, Users, TrendingUp } from "lucide-react";
+import { CheckCircle, XCircle, Clock } from "lucide-react";
 import { ApproverStatus } from "@/types/signer";
 
 interface OrderDetailApproversProps {
@@ -21,16 +19,16 @@ export function OrderDetailApprovers({
   signatureProgress,
   approvalSummary,
 }: OrderDetailApproversProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const getStatusIcon = (status: ApproverStatus) => {
     switch (status) {
       case ApproverStatus.Approved:
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
+        return <CheckCircle className="h-5 w-5 text-success" />;
       case ApproverStatus.Rejected:
-        return <XCircle className="h-5 w-5 text-red-600" />;
+        return <XCircle className="h-5 w-5 text-destructive" />;
       case ApproverStatus.Pending:
-        return <Clock className="h-5 w-5 text-orange-500" />;
+        return <Clock className="h-5 w-5 text-warning" />;
     }
   };
 
@@ -38,7 +36,7 @@ export function OrderDetailApprovers({
     switch (status) {
       case ApproverStatus.Approved:
         return (
-          <Badge variant="secondary" className="bg-green-600">
+          <Badge className="bg-success text-white hover:bg-success/90">
             {t("approvers.approved")}
           </Badge>
         );
@@ -46,162 +44,98 @@ export function OrderDetailApprovers({
         return <Badge variant="destructive">{t("approvers.rejected")}</Badge>;
       case ApproverStatus.Pending:
         return (
-          <Badge variant="secondary" className="bg-orange-100 text-orange-700">
+          <Badge className="bg-warning text-warning-foreground hover:bg-warning/90">
             {t("approvers.pending")}
           </Badge>
         );
     }
   };
 
-  const progressPercentage =
-    (approvalSummary.approvedCount / approvalSummary.totalApprovers) * 100;
+  const getBorderColor = (status: ApproverStatus) => {
+    switch (status) {
+      case ApproverStatus.Approved:
+        return "border-success";
+      case ApproverStatus.Rejected:
+        return "border-destructive";
+      case ApproverStatus.Pending:
+        return "border-warning";
+      default:
+        return "border-border";
+    }
+  };
 
   return (
-    <>
-      <div className="space-y-6">
-        {/* خلاصه امضا */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              {t("approvers.signatureProgress")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Progress value={progressPercentage} className="flex-1" />
-              <span className="text-sm font-medium whitespace-nowrap">
-                {approvalSummary.approvedCount} /{" "}
-                {approvalSummary.totalApprovers}
-              </span>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {approvers.map((approver) => (
+        <Card
+          key={approver.userId}
+          className={`border-2 ${getBorderColor(
+            approver.status
+          )} transition-all hover:shadow-lg`}
+        >
+          <CardContent className="p-6">
+            {/* بخش بالا: نام و یوزرنیم */}
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-bold text-foreground mb-1">
+                {approver.fullName} - {approver.userName}
+              </h3>
+              <Badge variant="secondary" className="text-xs">
+                امضادار مجاز
+              </Badge>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-3 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  {t("approvers.total")}
-                </p>
-                <p className="text-2xl font-bold mt-1">
-                  {approvalSummary.totalApprovers}
-                </p>
-              </div>
-              <div className="p-3 bg-green-50 rounded-lg">
-                <p className="text-sm text-green-700">
-                  {t("approvers.approved")}
-                </p>
-                <p className="text-2xl font-bold text-green-700 mt-1">
-                  {approvalSummary.approvedCount}
-                </p>
-              </div>
-              <div className="p-3 bg-orange-50 rounded-lg">
-                <p className="text-sm text-orange-700">
-                  {t("approvers.pending")}
-                </p>
-                <p className="text-2xl font-bold text-orange-700 mt-1">
-                  {approvalSummary.pendingCount}
-                </p>
-              </div>
-              <div className="p-3 bg-red-50 rounded-lg">
-                <p className="text-sm text-red-700">
-                  {t("approvers.rejected")}
-                </p>
-                <p className="text-2xl font-bold text-red-700 mt-1">
-                  {approvalSummary.rejectedCount}
-                </p>
-              </div>
+            {/* بخش وسط: وضعیت */}
+            <div className="flex justify-center mb-4">
+              {getStatusBadge(approver.status)}
             </div>
 
-            {signatureProgress.isComplete && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm text-green-700 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  {t("approvers.signatureComplete")}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* لیست امضاکنندگان */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              {t("approvers.approversList")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {approvers.map((approver, index) => (
-                <div
-                  key={approver.userId}
-                  className="flex items-start gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  {/* آواتار و شماره */}
-                  <div className="flex items-center gap-3">
-                    <div className="flex flex-col items-center">
-                      <span className="text-xs text-muted-foreground mb-1">
-                        {index + 1}
-                      </span>
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback>
-                          {approver.fullName
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
+            {/* بخش پایین: جزئیات */}
+            <div className="text-center">
+              {approver.status !== ApproverStatus.Pending ? (
+                <>
+                  <div className="flex items-center justify-center gap-2 text-sm mb-1">
+                    {getStatusIcon(approver.status)}
+                    <span className="font-medium">
+                      {approver.status === ApproverStatus.Approved
+                        ? t("approvers.approved")
+                        : t("approvers.rejected")}
+                    </span>
                   </div>
-
-                  {/* اطلاعات */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <p className="font-medium">{approver.fullName}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {approver.userName}
-                        </p>
-                      </div>
-                      {getStatusBadge(approver.status)}
+                  {approver.createdDateTime && (
+                    <div className="text-xs text-muted-foreground">
+                      {formatDate(approver.createdDateTime, locale)}
+                      <span className="mx-1">-</span>
+                      {new Date(approver.createdDateTime).toLocaleTimeString(
+                        locale,
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
                     </div>
-
-                    {/* جزئیات امضا */}
-                    {approver.status !== ApproverStatus.Pending && (
-                      <div className="text-sm text-muted-foreground space-y-1">
-                        {approver.createdDateTime && (
-                          <div className="flex items-center gap-2">
-                            {getStatusIcon(approver.status)}
-                            <span>
-                              {approver.status === ApproverStatus.Approved
-                                ? t("approvers.approvedAt")
-                                : t("approvers.rejectedAt")}
-                              : {formatDate(approver.createdDateTime)}
-                            </span>
-                          </div>
-                        )}
-                        {approver.comment && (
-                          <p className="text-xs bg-muted p-2 rounded mt-2">
-                            {approver.comment}
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    {/* اگر pending است */}
-                    {approver.status === ApproverStatus.Pending && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        {t("approvers.waitingForApproval")}
-                      </div>
-                    )}
+                  )}
+                  {approver.comment && (
+                    <div className="mt-3 p-2 bg-muted rounded text-xs text-start">
+                      <span className="font-medium">نظر: </span>
+                      {approver.comment}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-center gap-2 text-sm mb-1 text-warning">
+                    {getStatusIcon(approver.status)}
+                    <span className="font-medium">منتظر بررسی</span>
                   </div>
-                </div>
-              ))}
+                  <div className="text-xs text-muted-foreground">
+                    در انتظار تأیید یا رد
+                  </div>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
-      </div>
-    </>
+      ))}
+    </div>
   );
 }

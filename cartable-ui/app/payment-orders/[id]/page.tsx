@@ -3,14 +3,14 @@
 import { useParams } from "next/navigation";
 import { getOrderDetailById } from "@/mocks/mockOrders";
 import { OrderDetailHeader } from "./components/order-detail-header";
-import { OrderDetailInfo } from "./components/order-detail-info";
 import { OrderDetailTransactions } from "./components/order-detail-transactions";
 import { OrderDetailApprovers } from "./components/order-detail-approvers";
 import { OrderDetailHistory } from "./components/order-detail-history";
+import { OrderDetailStatistics } from "./components/order-detail-statistics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import useTranslation from "@/hooks/useTranslation";
-import { ArrowRight, FileText, Users, History } from "lucide-react";
+import { ArrowRight, FileText, Users, History, BarChart3 } from "lucide-react";
 import Link from "next/link";
 
 export default function PaymentOrderDetailPage() {
@@ -41,67 +41,100 @@ export default function PaymentOrderDetailPage() {
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-6">
-      {/* Header با دکمه‌های عملیاتی */}
+      {/* Header با کارت‌های آماری */}
       <OrderDetailHeader order={orderDetail} />
 
-      {/* اطلاعات اصلی دستور */}
-      <OrderDetailInfo order={orderDetail} />
-
       {/* تب‌های جزئیات */}
-      <Tabs
-        defaultValue="transactions"
-        className="w-full text-muted-foreground"
-      >
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="transactions" className="gap-2">
-            <FileText className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {t("paymentOrders.transactions")}
-            </span>
-            <span className="sm:hidden">
-              {t("paymentOrders.transactionsShort")}
-            </span>
-            <span className="text-xs bg-primary/10 px-2 py-0.5 rounded">
-              {orderDetail.transactions.length}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="approvers" className="gap-2">
-            <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {t("paymentOrders.approvers")}
-            </span>
-            <span className="sm:hidden">
-              {t("paymentOrders.approversShort")}
-            </span>
-            <span className="text-xs bg-primary/10 px-2 py-0.5 rounded">
-              {orderDetail.approvers.length}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="history" className="gap-2">
-            <History className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {t("paymentOrders.history")}
-            </span>
-            <span className="sm:hidden">{t("paymentOrders.historyShort")}</span>
-          </TabsTrigger>
-        </TabsList>
+      <Card className="border-0 shadow-sm">
+        <div className="border-b bg-card">
+          <Tabs defaultValue="statistics" className="w-full">
+            <TabsList className="w-full justify-center bg-transparent h-auto p-4 gap-3 flex-wrap">
+              <TabsTrigger
+                value="statistics"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {t("paymentOrders.statistics")}
+                </span>
+                <span className="sm:hidden">
+                  {t("paymentOrders.statisticsShort")}
+                </span>
+              </TabsTrigger>
 
-        <TabsContent value="transactions" className="mt-6">
-          <OrderDetailTransactions transactions={orderDetail.transactions} />
-        </TabsContent>
+              <TabsTrigger
+                value="transactions"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
+              >
+                <FileText className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {t("paymentOrders.transactions")}
+                </span>
+                <span className="sm:hidden">
+                  {t("paymentOrders.transactionsShort")}
+                </span>
+                <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
+                  {orderDetail.transactions.length}
+                </span>
+              </TabsTrigger>
 
-        <TabsContent value="approvers" className="mt-6">
-          <OrderDetailApprovers
-            approvers={orderDetail.approvers}
-            signatureProgress={orderDetail.signatureProgress}
-            approvalSummary={orderDetail.approvalSummary}
-          />
-        </TabsContent>
+              <TabsTrigger
+                value="approvers"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
+              >
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {t("paymentOrders.approvers")}
+                </span>
+                <span className="sm:hidden">
+                  {t("paymentOrders.approversShort")}
+                </span>
+                <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
+                  {orderDetail.approvers.length}
+                </span>
+              </TabsTrigger>
 
-        <TabsContent value="history" className="mt-6">
-          <OrderDetailHistory changeHistory={orderDetail.changeHistory} />
-        </TabsContent>
-      </Tabs>
+              <TabsTrigger
+                value="history"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
+              >
+                <History className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {t("paymentOrders.history")}
+                </span>
+                <span className="sm:hidden">
+                  {t("paymentOrders.historyShort")}
+                </span>
+                <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
+                  {orderDetail.changeHistory.length}
+                </span>
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="p-6">
+              <TabsContent value="statistics" className="mt-0">
+                <OrderDetailStatistics order={orderDetail} />
+              </TabsContent>
+
+              <TabsContent value="transactions" className="mt-0">
+                <OrderDetailTransactions transactions={orderDetail.transactions} />
+              </TabsContent>
+
+              <TabsContent value="approvers" className="mt-0">
+                <OrderDetailApprovers
+                  approvers={orderDetail.approvers}
+                  signatureProgress={orderDetail.signatureProgress}
+                  approvalSummary={orderDetail.approvalSummary}
+                />
+              </TabsContent>
+
+              <TabsContent value="history" className="mt-0">
+                <OrderDetailHistory changeHistory={orderDetail.changeHistory} />
+              </TabsContent>
+            </div>
+          </Tabs>
+        </div>
+      </Card>
     </div>
   );
 }

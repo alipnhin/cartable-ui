@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,12 +17,12 @@ import {
   FieldLabel,
   FieldLegend,
 } from "@/components/ui/field";
-
-import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import useTranslation from "@/hooks/useTranslation";
 
-export default function OTPPage() {
+// کامپوننت داخلی که useSearchParams را استفاده می‌کند
+function OTPForm() {
   const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -33,6 +33,7 @@ export default function OTPPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(120);
   const [canResend, setCanResend] = useState(false);
+
   useEffect(() => {
     if (timeLeft === 0) {
       setCanResend(true);
@@ -54,7 +55,6 @@ export default function OTPPage() {
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // انتقال فوکوس به input بعدی
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -82,7 +82,7 @@ export default function OTPPage() {
   };
 
   const handleVerify = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // جلوگیری از ریلود صفحه
+    e.preventDefault();
 
     const otpCode = otp.join("");
     if (otpCode.length !== 6) {
@@ -97,7 +97,6 @@ export default function OTPPage() {
     setIsLoading(true);
 
     try {
-      // شبیه‌سازی API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       toast({
@@ -202,7 +201,7 @@ export default function OTPPage() {
                 <FieldGroup>
                   <Button
                     type="submit"
-                    disabled={isLoading || otp.length !== 6}
+                    disabled={isLoading || otp.join("").length !== 6}
                   >
                     {isLoading ? t("common.loading") : t("auth.verify")}
                   </Button>
@@ -225,5 +224,20 @@ export default function OTPPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+// کامپوننت اصلی صفحه با Suspense
+export default function OTPPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-svh w-full items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      }
+    >
+      <OTPForm />
+    </Suspense>
   );
 }

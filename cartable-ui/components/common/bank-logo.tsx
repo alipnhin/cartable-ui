@@ -39,7 +39,7 @@ export function BankLogo({
           alt={name}
           className="object-contain w-full h-full"
           onError={(e) => {
-            e.currentTarget.src = "/assets/media/bank-logos/default.png";
+            e.currentTarget.src = "/media/bank-logos/999.png";
           }}
         />
       </div>

@@ -13,12 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Filter, X } from "lucide-react";
-import { TransactionStatus, PaymentType } from "@/types/transaction";
+import { TransactionStatus, PaymentMethodEnum } from "@/types/transaction";
 
 interface TransactionsFilterProps {
   filters: {
     status: TransactionStatus[];
-    paymentType: PaymentType[];
+    paymentType: PaymentMethodEnum[];
     search: string;
     beneficiaryName: string;
     iban: string;
@@ -86,7 +86,7 @@ export function TransactionsFilter({
     }));
   };
 
-  const togglePaymentType = (type: PaymentType) => {
+  const togglePaymentType = (type: PaymentMethodEnum) => {
     setLocalFilters((prev) => ({
       ...prev,
       paymentType: prev.paymentType.includes(type)
@@ -175,7 +175,7 @@ export function TransactionsFilter({
                     localFilters.status.includes(
                       option.value as TransactionStatus
                     )
-                      ? "default"
+                      ? "primary"
                       : "outline"
                   }
                   className="cursor-pointer"
@@ -197,13 +197,15 @@ export function TransactionsFilter({
                   key={option.value}
                   variant={
                     localFilters.paymentType.includes(
-                      option.value as PaymentType
+                      option.value as PaymentMethodEnum
                     )
-                      ? "default"
+                      ? "primary"
                       : "outline"
                   }
                   className="cursor-pointer"
-                  onClick={() => togglePaymentType(option.value as PaymentType)}
+                  onClick={() =>
+                    togglePaymentType(option.value as PaymentMethodEnum)
+                  }
                 >
                   {option.label}
                 </Badge>

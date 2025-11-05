@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import {
   Transaction,
   TransactionStatus,
-  PaymentType,
+  PaymentMethodEnum,
 } from "@/types/transaction";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { TransactionStatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
-import { Download, Eye, ChevronDown } from "lucide-react";
+import { Download, Eye, ChevronDown, Filter } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { TransactionsFilter } from "./transactions-filter";
 import { TransactionDetailDialog } from "./transaction-detail-dialog";
@@ -42,7 +42,7 @@ export function OrderDetailTransactions({
 
   const [filters, setFilters] = useState({
     status: [] as TransactionStatus[],
-    paymentType: [] as PaymentType[],
+    paymentType: [] as PaymentMethodEnum[],
     search: "",
     beneficiaryName: "",
     iban: "",
@@ -58,50 +58,44 @@ export function OrderDetailTransactions({
   const filteredTransactions = useMemo(() => {
     let result = [...transactions];
 
-    // فیلتر جستجوی عمومی
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       result = result.filter(
         (tx) =>
-          tx.beneficiaryName?.toLowerCase().includes(searchLower) ||
-          tx.beneficiaryIban?.toLowerCase().includes(searchLower) ||
-          tx.bankTrackingCode?.toLowerCase().includes(searchLower)
+          tx.ownerName?.toLowerCase().includes(searchLower) ||
+          tx.destinationIban?.toLowerCase().includes(searchLower) ||
+          tx.trackingId?.toLowerCase().includes(searchLower)
       );
     }
 
-    // فیلتر نام ذینفع
     if (filters.beneficiaryName) {
       const nameLower = filters.beneficiaryName.toLowerCase();
       result = result.filter((tx) =>
-        tx.beneficiaryName?.toLowerCase().includes(nameLower)
+        tx.ownerName?.toLowerCase().includes(nameLower)
       );
     }
 
-    // فیلتر شبا
     if (filters.iban) {
       const ibanLower = filters.iban.toLowerCase();
       result = result.filter((tx) =>
-        tx.beneficiaryIban?.toLowerCase().includes(ibanLower)
+        tx.destinationIban?.toLowerCase().includes(ibanLower)
       );
     }
 
-    // فیلتر کد رهگیری
     if (filters.trackingCode) {
       const trackingLower = filters.trackingCode.toLowerCase();
       result = result.filter((tx) =>
-        tx.bankTrackingCode?.toLowerCase().includes(trackingLower)
+        tx.trackingId?.toLowerCase().includes(trackingLower)
       );
     }
 
-    // فیلتر وضعیت
     if (filters.status.length > 0) {
       result = result.filter((tx) => filters.status.includes(tx.status));
     }
 
-    // فیلتر نوع تراکنش
     if (filters.paymentType.length > 0) {
-      result = result.filter((tx) =>
-        filters.paymentType.includes(tx.paymentType)
+      result = result.filter(
+        (tx) => tx.paymentType && filters.paymentType.includes(tx.paymentType)
       );
     }
 
@@ -143,16 +137,7 @@ export function OrderDetailTransactions({
   };
 
   const handleExport = () => {
-    // Export logic
     console.log("Exporting transactions...");
-  };
-
-  const paymentTypeLabels: Record<PaymentType, string> = {
-    Internal: "داخلی",
-    Paya: "پایا",
-    Satna: "ساتنا",
-    CardToCard: "کارت به کارت",
-    Unknown: "نامشخص",
   };
 
   return (
@@ -173,36 +158,49 @@ export function OrderDetailTransactions({
                 }}
                 onReset={handleResetFilters}
               />
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                <Download className="h-4 w-4 me-2" />
-                {!isMobile && "خروجی"}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                {!isMobile && "خروجی Excel"}
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           {isMobile ? (
-            // نمایش کارتی در موبایل
+            // نمایش کارتی در موبایل - براساس طراحی اصلی
             <div className="space-y-3">
-              {paginatedTransactions.map((transaction, index) => {
+              {paginatedTransactions.map((transaction) => {
                 const bankCode = getBankCodeFromIban(
-                  transaction.beneficiaryIban
+                  transaction.destinationIban
                 );
                 return (
                   <Card
                     key={transaction.id}
-                    className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+                    className="p-4 hover:shadow-md transition-shadow cursor-pointer border"
                     onClick={() => handleViewDetails(transaction)}
                   >
                     <div className="space-y-3">
+                      {/* ردیف اول: لوگو، نام و وضعیت */}
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
                           {bankCode && (
-                            <BankLogo bankCode={bankCode} size="sm" />
+                            <div className="flex-shrink-0">
+                              <BankLogo bankCode={bankCode} size="sm" />
+                            </div>
                           )}
-                          <span className="text-sm font-medium">
-                            {transaction.beneficiaryName}
-                          </span>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm truncate">
+                              {transaction.ownerName}
+                            </div>
+                            <div className="text-xs text-muted-foreground font-mono truncate">
+                              {transaction.destinationIban}
+                            </div>
+                          </div>
                         </div>
                         <TransactionStatusBadge
                           status={transaction.status}
@@ -210,38 +208,53 @@ export function OrderDetailTransactions({
                         />
                       </div>
 
-                      <div className="text-sm space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">مبلغ:</span>
-                          <span className="font-bold text-primary">
-                            {formatCurrency(transaction.amount, locale)} ریال
-                          </span>
+                      {/* جداکننده */}
+                      <div className="border-t"></div>
+
+                      {/* ردیف دوم: جزئیات */}
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <div className="text-muted-foreground text-xs mb-1">
+                            مبلغ:
+                          </div>
+                          <div className="font-bold text-primary">
+                            {formatCurrency(transaction.amount, locale)}
+                          </div>
                         </div>
 
-                        <div className="flex justify-between items-center">
-                          <span className="text-muted-foreground">نوع:</span>
+                        <div>
+                          <div className="text-muted-foreground text-xs mb-1">
+                            نوع:
+                          </div>
                           <PaymentTypeIcon
-                            type={transaction.paymentType}
+                            type={
+                              transaction.paymentType ||
+                              PaymentMethodEnum.Unknown
+                            }
                             showLabel
                           />
                         </div>
+                      </div>
 
-                        {transaction.bankTrackingCode && (
-                          <div className="flex justify-between">
+                      {/* ردیف سوم: کد رهگیری */}
+                      {transaction.trackingId && (
+                        <div className="pt-2 border-t">
+                          <div className="flex items-center justify-between text-xs">
                             <span className="text-muted-foreground">
                               کد رهگیری:
                             </span>
-                            <span className="font-mono text-xs">
-                              {transaction.bankTrackingCode}
+                            <span className="font-mono font-medium">
+                              {transaction.trackingId}
                             </span>
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </Card>
                 );
               })}
 
+              {/* دکمه نمایش بیشتر */}
               {hasMore && (
                 <Button
                   variant="outline"
@@ -261,12 +274,13 @@ export function OrderDetailTransactions({
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-12">#</TableHead>
-                      <TableHead>بانک</TableHead>
-                      <TableHead>نام ذینفع</TableHead>
+                      <TableHead>نام و نام خانوادگی</TableHead>
+                      <TableHead>کد ملی</TableHead>
                       <TableHead>شماره شبا</TableHead>
-                      <TableHead>مبلغ</TableHead>
-                      <TableHead>نوع</TableHead>
-                      <TableHead>کد رهگیری</TableHead>
+                      <TableHead>مبلغ تراکنش</TableHead>
+                      <TableHead>علت تراکنش</TableHead>
+                      <TableHead>نوع تراکنش</TableHead>
+                      <TableHead>کد رهگیری بانک</TableHead>
                       <TableHead>وضعیت</TableHead>
                       <TableHead className="text-center">عملیات</TableHead>
                     </TableRow>
@@ -274,32 +288,63 @@ export function OrderDetailTransactions({
                   <TableBody>
                     {paginatedTransactions.map((transaction, index) => {
                       const bankCode = getBankCodeFromIban(
-                        transaction.beneficiaryIban
+                        transaction.destinationIban
                       );
                       return (
-                        <TableRow key={transaction.id}>
+                        <TableRow
+                          key={transaction.id}
+                          className="hover:bg-muted/50"
+                        >
                           <TableCell className="font-medium">
                             {index + 1}
                           </TableCell>
+                          <TableCell className="font-medium">
+                            {transaction.ownerName}
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {transaction.nationalCode || "-"}
+                          </TableCell>
                           <TableCell>
-                            {bankCode && (
-                              <BankLogo bankCode={bankCode} size="sm" />
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center flex-shrink-0">
+                                {bankCode && (
+                                  <BankLogo bankCode={bankCode} size="sm" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-mono text-xs">
+                                  {transaction.destinationIban}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {transaction.accountNumber}
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium">
+                              {formatCurrency(transaction.amount, locale)}
+                              <span className="text-xs text-muted-foreground ms-1"></span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            {t(
+                              `transactions.transactionReasons.${
+                                transaction.reasonCode || "unknown"
+                              }`
                             )}
                           </TableCell>
-                          <TableCell className="font-medium">
-                            {transaction.beneficiaryName}
-                          </TableCell>
-                          <TableCell className="font-mono text-xs">
-                            {transaction.beneficiaryIban}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {formatCurrency(transaction.amount, locale)}
-                          </TableCell>
                           <TableCell>
-                            <PaymentTypeIcon type={transaction.paymentType} />
+                            <PaymentTypeIcon
+                              type={
+                                transaction.paymentType ||
+                                PaymentMethodEnum.Unknown
+                              }
+                              showLabel
+                            />
                           </TableCell>
                           <TableCell className="font-mono text-xs">
-                            {transaction.bankTrackingCode || "-"}
+                            {transaction.trackingId || "-"}
                           </TableCell>
                           <TableCell>
                             <TransactionStatusBadge
@@ -312,6 +357,7 @@ export function OrderDetailTransactions({
                               variant="ghost"
                               size="sm"
                               onClick={() => handleViewDetails(transaction)}
+                              className="h-8 w-8 p-0"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -335,8 +381,21 @@ export function OrderDetailTransactions({
           )}
 
           {filteredTransactions.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              {t("common.noResults")}
+            <div className="text-center py-12">
+              <div className="text-muted-foreground mb-2">
+                {t("common.noResults")}
+              </div>
+              {Object.values(filters).some((v) =>
+                Array.isArray(v) ? v.length > 0 : v
+              ) && (
+                <Button
+                  variant="secondary"
+                  onClick={handleResetFilters}
+                  size="sm"
+                >
+                  پاک کردن فیلترها
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
