@@ -212,44 +212,59 @@ export const createColumns = (
         <div className="text-center font-semibold">{t("common.actions")}</div>
       ),
       cell: ({ row }) => (
-        <div className="flex items-center justify-center gap-1">
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
+        <div className="flex items-center justify-center gap-2">
+          {/* دکمه مشاهده */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 w-9 p-0"
+            asChild
+            title={t("common.buttons.view")}
+          >
             <Link href={`/payment-orders/${row.original.id}`}>
               <Eye className="h-4 w-4" />
-              <span className="sr-only"> {t("common.buttons.view")}</span>
+              <span className="sr-only">{t("common.buttons.view")}</span>
             </Link>
           </Button>
+
+          {/* دکمه‌های تأیید/رد فقط برای دستورات در انتظار */}
           {row.original.status === OrderStatus.WaitingForOwnersApproval && (
             <>
+              {/* دکمه تأیید */}
               <Button
-                variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
+                className="h-9 px-3 gap-2 bg-success hover:bg-success/90 text-white"
                 onClick={(e) => {
                   e.stopPropagation();
                   onApprove(row.original.id);
                 }}
+                title={t("common.buttons.approve")}
               >
                 <CheckCircle className="h-4 w-4" />
-                <span className="sr-only">{t("common.buttons.approve")}</span>
+                <span className="hidden xl:inline">{t("common.buttons.approve")}</span>
+                <span className="sr-only xl:not-sr-only">{t("common.buttons.approve")}</span>
               </Button>
+
+              {/* دکمه رد */}
               <Button
-                variant="ghost"
+                variant="destructive"
                 size="sm"
-                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                className="h-9 px-3 gap-2"
                 onClick={(e) => {
                   e.stopPropagation();
                   onReject(row.original.id);
                 }}
+                title={t("common.buttons.reject")}
               >
                 <XCircle className="h-4 w-4" />
-                <span className="sr-only">{t("common.buttons.reject")}</span>
+                <span className="hidden xl:inline">{t("common.buttons.reject")}</span>
+                <span className="sr-only xl:not-sr-only">{t("common.buttons.reject")}</span>
               </Button>
             </>
           )}
         </div>
       ),
-      size: 120,
+      size: 180,
     },
   ];
 };

@@ -6,7 +6,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Eye, Edit, Users } from "lucide-react";
+import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -112,27 +112,18 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
                 </TableCell>
                 <TableCell>
                   <div
-                    className="flex justify-center gap-2"
+                    className="flex justify-center"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Button
+                      variant="outline"
                       size="sm"
-                      variant="ghost"
+                      className="h-9 px-3 gap-2"
                       onClick={() => router.push(`/accounts/${account.id}`)}
+                      title={t("common.buttons.view")}
                     >
                       <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() =>
-                        router.push(`/accounts/${account.id}?tab=signers`)
-                      }
-                    >
-                      <Users className="h-4 w-4" />
+                      <span className="hidden xl:inline">{t("common.buttons.view")}</span>
                     </Button>
                   </div>
                 </TableCell>

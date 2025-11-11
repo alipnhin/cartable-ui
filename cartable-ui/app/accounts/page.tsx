@@ -60,18 +60,6 @@ export default function AccountsPage() {
       <PageHeader
         title={t("accounts.pageTitle")}
         description={t("accounts.pageSubtitle")}
-        actions={
-          <Button
-            className="hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
-            style={{
-              boxShadow:
-                "0 2px 8px rgba(39,174,96,0.25), 0 1px 4px rgba(39,174,96,0.15)",
-            }}
-          >
-            <Plus className="me-2 h-4 w-4" />
-            {t("accounts.addAccount")}
-          </Button>
-        }
       />
 
       {/* فیلترها */}

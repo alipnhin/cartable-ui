@@ -30,7 +30,7 @@ export function Header({
   const { t } = useTranslation();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-card/95 backdrop-blur-md supports-backdrop-filter:bg-card/80">
+    <header className="z-40 w-full border-b bg-card flex-shrink-0">
       <div className="flex h-16 items-center px-4 gap-4">
         {showMenuButton && !isMobile && (
           <Button

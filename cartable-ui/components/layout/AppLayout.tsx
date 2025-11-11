@@ -23,8 +23,8 @@ export function AppLayout({
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground flex flex-col">
-      {/* Header - بدون ایجاد scroll */}
+    <div className="relative h-screen bg-background text-foreground flex flex-col overflow-hidden">
+      {/* Header - Fixed در بالا */}
       <Header
         onMenuToggle={toggleSidebar}
         showMenuButton={!isMobile}
@@ -33,28 +33,29 @@ export function AppLayout({
         onAccountGroupChange={setSelectedAccountGroup}
       />
 
-      {/* Sidebar (فقط دسکتاپ) */}
-      {!isMobile && (
-        <Sidebar
-          isCollapsed={isSidebarCollapsed}
-          selectedAccountGroup={selectedAccountGroup}
-          onAccountGroupChange={setSelectedAccountGroup}
-        />
-      )}
-
-      {/* Main Content - بدون min-height که باعث scroll می‌شود */}
-      <main
-        className={cn(
-          "flex-1 overflow-x-hidden transition-[margin] duration-300 ease-in-out",
-          isMobile ? "pb-20" : "pb-0", // فضای bottom nav
-          !isMobile && "md:ms-64",
-          !isMobile && isSidebarCollapsed && "md:ms-16"
+      {/* Container برای Sidebar و Main */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar (فقط دسکتاپ) - Fixed */}
+        {!isMobile && (
+          <Sidebar
+            isCollapsed={isSidebarCollapsed}
+            selectedAccountGroup={selectedAccountGroup}
+            onAccountGroupChange={setSelectedAccountGroup}
+          />
         )}
-      >
-        <div className="px-4 md:px-6 py-6">{children}</div>
-      </main>
 
-      {/* Bottom Dock (فقط موبایل) */}
+        {/* Main Content - Scrollable */}
+        <main
+          className={cn(
+            "flex-1 overflow-y-auto overflow-x-hidden",
+            isMobile ? "pb-20" : "pb-0", // فضای bottom nav
+          )}
+        >
+          <div className="px-4 md:px-6 py-6">{children}</div>
+        </main>
+      </div>
+
+      {/* Bottom Dock (فقط موبایل) - Fixed در پایین */}
       {isMobile && <BottomDock mode="classic" />}
     </div>
   );
