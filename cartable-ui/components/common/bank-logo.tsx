@@ -5,12 +5,13 @@ import { getBankLogo, getBankName } from "@/lib/bank-logos";
 
 interface BankLogoProps {
   bankCode: string;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   className?: string;
   showName?: boolean;
 }
 
 const sizeClasses = {
+  xs: "h-4 w-4",
   sm: "h-6 w-6",
   md: "h-8 w-8",
   lg: "h-12 w-12",

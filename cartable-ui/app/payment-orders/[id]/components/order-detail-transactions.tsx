@@ -428,9 +428,9 @@ export function OrderDetailTransactions({
                   transaction.destinationIban
                 );
                 return (
-                  <Card
+                  <div
                     key={transaction.id}
-                    className="p-4 hover:shadow-md transition-shadow cursor-pointer"
+                    className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow cursor-pointer"
                     onClick={() => handleViewDetails(transaction)}
                   >
                     <div className="space-y-3">
@@ -495,7 +495,7 @@ export function OrderDetailTransactions({
                         </>
                       )}
                     </div>
-                  </Card>
+                  </div>
                 );
               })}
 
