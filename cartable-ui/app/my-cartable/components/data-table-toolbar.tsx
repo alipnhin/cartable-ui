@@ -76,7 +76,7 @@ export function DataTableToolbar<TData>({
       <div className="text-sm text-muted-foreground">
         {table.getFilteredSelectedRowModel().rows.length} از{" "}
         {table.getFilteredRowModel().rows.length} {t("common.selected")}
-        <DataTableViewOptions table={table} />
+        {/* <DataTableViewOptions table={table} /> */}
       </div>
     </div>
   );

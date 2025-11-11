@@ -30,6 +30,7 @@ import {
   ChevronRight,
   Filter as FilterIcon,
   X,
+  Search,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -153,9 +154,7 @@ export function OrderDetailTransactions({
           comparison = a.status.localeCompare(b.status);
           break;
         case "paymentType":
-          comparison = (a.paymentType || "").localeCompare(
-            b.paymentType || ""
-          );
+          comparison = (a.paymentType || "").localeCompare(b.paymentType || "");
           break;
       }
 
@@ -249,43 +248,47 @@ export function OrderDetailTransactions({
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg">
+      <Card className="shadow-sm overflow-hidden">
+        {/* Card Content */}
+        <CardContent className="p-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border-b bg-muted/20">
+            {/* Title & Count */}
+            <div className="flex items-baseline gap-3">
+              <CardTitle className="text-xl">
                 {t("paymentOrders.transactionsList")}
               </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
+              <span className="text-sm text-muted-foreground">
                 {filteredAndSortedTransactions.length} تراکنش
-              </p>
+              </span>
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
+
+            {/* Actions */}
+            <div className="flex gap-2 w-full sm:w-auto ms-auto">
               {/* Search */}
-              <input
-                type="text"
-                placeholder="جستجو..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="flex-1 sm:w-48 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
+              <div className="relative flex-1 sm:w-64">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="جستجو در تراکنش‌ها..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full pr-10 pl-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                />
+              </div>
 
               {/* Filter Button */}
               <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button variant="outline" className="gap-2 relative">
                     <FilterIcon className="h-4 w-4" />
                     {!isMobile && "فیلتر"}
                     {activeFiltersCount > 0 && (
-                      <Badge
-                        variant="destructive"
-                        className="h-5 w-5 p-0 flex items-center justify-center text-xs"
-                      >
+                      <span className="absolute -top-1 -left-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium">
                         {activeFiltersCount}
-                      </Badge>
+                      </span>
                     )}
                   </Button>
                 </SheetTrigger>
@@ -372,7 +375,6 @@ export function OrderDetailTransactions({
               {/* Export */}
               <Button
                 variant="outline"
-                size="sm"
                 onClick={handleExport}
                 className="gap-2"
               >
@@ -384,7 +386,7 @@ export function OrderDetailTransactions({
 
           {/* Active Filters Display */}
           {activeFiltersCount > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t">
+            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
               {statusFilter.map((status) => {
                 const option = statusOptions.find(
                   (opt) => opt.value === status
@@ -393,7 +395,7 @@ export function OrderDetailTransactions({
                   <Badge
                     key={status}
                     variant="secondary"
-                    className="gap-1 cursor-pointer"
+                    className="gap-1.5 cursor-pointer hover:bg-secondary/80 transition-colors"
                     onClick={() => handleStatusToggle(status)}
                   >
                     {option?.label}
@@ -407,7 +409,7 @@ export function OrderDetailTransactions({
                   <Badge
                     key={type}
                     variant="secondary"
-                    className="gap-1 cursor-pointer"
+                    className="gap-1.5 cursor-pointer hover:bg-secondary/80 transition-colors"
                     onClick={() => handleTypeToggle(type)}
                   >
                     {option?.label}
@@ -415,14 +417,20 @@ export function OrderDetailTransactions({
                   </Badge>
                 );
               })}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleResetFilters}
+                className="h-7 text-xs"
+              >
+                پاک کردن همه
+              </Button>
             </div>
           )}
-        </CardHeader>
 
-        <CardContent>
           {isMobile ? (
             // Mobile Cards View
-            <div className="space-y-3">
+            <div className="p-4 space-y-3">
               {paginatedTransactions.map((transaction) => {
                 const bankCode = getBankCodeFromIban(
                   transaction.destinationIban
@@ -438,14 +446,14 @@ export function OrderDetailTransactions({
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           {bankCode && (
                             <div className="flex-shrink-0">
-                              <BankLogo bankCode={bankCode} size="xs" />
+                              <BankLogo bankCode={bankCode} size="sm" />
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm truncate">
+                            <div className="font-medium truncate">
                               {transaction.ownerName}
                             </div>
-                            <div className="text-xs text-muted-foreground font-mono truncate">
+                            <div className="text-xs text-muted-foreground font-mono truncate mt-1">
                               {transaction.destinationIban}
                             </div>
                           </div>
@@ -458,7 +466,7 @@ export function OrderDetailTransactions({
 
                       <div className="border-t" />
 
-                      <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
                           <div className="text-muted-foreground text-xs mb-1">
                             مبلغ:
@@ -499,6 +507,23 @@ export function OrderDetailTransactions({
                 );
               })}
 
+              {paginatedTransactions.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="text-muted-foreground mb-3">
+                    {t("common.noResults")}
+                  </div>
+                  {activeFiltersCount > 0 && (
+                    <Button
+                      variant="outline"
+                      onClick={handleResetFilters}
+                      size="sm"
+                    >
+                      پاک کردن فیلترها
+                    </Button>
+                  )}
+                </div>
+              )}
+
               {filteredAndSortedTransactions.length > 0 && (
                 <MobilePagination
                   currentPage={currentPage}
@@ -510,120 +535,132 @@ export function OrderDetailTransactions({
           ) : (
             // Desktop Table
             <>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">#</TableHead>
-                      <TableHead
-                        className="cursor-pointer select-none hover:bg-muted/50"
-                        onClick={() => handleSort("ownerName")}
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-12">#</TableHead>
+                    <TableHead
+                      className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                      onClick={() => handleSort("ownerName")}
+                    >
+                      <div className="flex items-center gap-2">
+                        نام و نام خانوادگی
+                        <SortIcon field="ownerName" />
+                      </div>
+                    </TableHead>
+                    <TableHead>شماره شبا</TableHead>
+                    <TableHead
+                      className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                      onClick={() => handleSort("amount")}
+                    >
+                      <div className="flex items-center gap-2">
+                        مبلغ
+                        <SortIcon field="amount" />
+                      </div>
+                    </TableHead>
+                    <TableHead
+                      className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                      onClick={() => handleSort("paymentType")}
+                    >
+                      <div className="flex items-center gap-2">
+                        نوع
+                        <SortIcon field="paymentType" />
+                      </div>
+                    </TableHead>
+                    <TableHead
+                      className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                      onClick={() => handleSort("status")}
+                    >
+                      <div className="flex items-center gap-2">
+                        وضعیت
+                        <SortIcon field="status" />
+                      </div>
+                    </TableHead>
+                    <TableHead className="w-16 text-left">عملیات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedTransactions.map((transaction, index) => {
+                    const bankCode = getBankCodeFromIban(
+                      transaction.destinationIban
+                    );
+                    return (
+                      <TableRow
+                        key={transaction.id}
+                        className="hover:bg-muted/30 transition-colors"
                       >
-                        <div className="flex items-center gap-2">
-                          نام و نام خانوادگی
-                          <SortIcon field="ownerName" />
-                        </div>
-                      </TableHead>
-                      <TableHead>شماره شبا</TableHead>
-                      <TableHead
-                        className="cursor-pointer select-none hover:bg-muted/50"
-                        onClick={() => handleSort("amount")}
-                      >
-                        <div className="flex items-center gap-2">
-                          مبلغ
-                          <SortIcon field="amount" />
-                        </div>
-                      </TableHead>
-                      <TableHead
-                        className="cursor-pointer select-none hover:bg-muted/50"
-                        onClick={() => handleSort("paymentType")}
-                      >
-                        <div className="flex items-center gap-2">
-                          نوع
-                          <SortIcon field="paymentType" />
-                        </div>
-                      </TableHead>
-                      <TableHead>کد رهگیری</TableHead>
-                      <TableHead
-                        className="cursor-pointer select-none hover:bg-muted/50"
-                        onClick={() => handleSort("status")}
-                      >
-                        <div className="flex items-center gap-2">
-                          وضعیت
-                          <SortIcon field="status" />
-                        </div>
-                      </TableHead>
-                      <TableHead className="text-center">عملیات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedTransactions.map((transaction, index) => {
-                      const bankCode = getBankCodeFromIban(
-                        transaction.destinationIban
-                      );
-                      return (
-                        <TableRow key={transaction.id}>
-                          <TableCell className="font-medium text-muted-foreground">
-                            {startIndex + index + 1}
-                          </TableCell>
-                          <TableCell className="font-semibold">
-                            {transaction.ownerName}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {bankCode && (
-                                <BankLogo bankCode={bankCode} size="xs" />
-                              )}
-                              <span className="font-mono text-xs">
-                                {transaction.destinationIban}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <span className="font-bold text-primary">
-                              {formatCurrency(transaction.amount, locale)}
+                        <TableCell className="text-muted-foreground text-sm">
+                          {startIndex + index + 1}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {transaction.ownerName}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {bankCode && (
+                              <BankLogo bankCode={bankCode} size="xs" />
+                            )}
+                            <span className="font-mono text-xs text-muted-foreground">
+                              {transaction.destinationIban}
                             </span>
-                          </TableCell>
-                          <TableCell>
-                            <PaymentTypeIcon
-                              type={
-                                transaction.paymentType ||
-                                PaymentMethodEnum.Unknown
-                              }
-                              showLabel
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <span className="font-mono text-xs">
-                              {transaction.trackingId || "-"}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <TransactionStatusBadge
-                              status={transaction.status}
-                              size="sm"
-                            />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleViewDetails(transaction)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="font-semibold">
+                            {formatCurrency(transaction.amount, locale)}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <PaymentTypeIcon
+                            type={
+                              transaction.paymentType ||
+                              PaymentMethodEnum.Unknown
+                            }
+                            showLabel
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <TransactionStatusBadge
+                            status={transaction.status}
+                            size="sm"
+                          />
+                        </TableCell>
+                        <TableCell className="text-left">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewDetails(transaction)}
+                            className="h-8 w-8 p-0 hover:bg-primary/10"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+
+              {paginatedTransactions.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="text-muted-foreground mb-3">
+                    {t("common.noResults")}
+                  </div>
+                  {activeFiltersCount > 0 && (
+                    <Button
+                      variant="outline"
+                      onClick={handleResetFilters}
+                      size="sm"
+                    >
+                      پاک کردن فیلترها
+                    </Button>
+                  )}
+                </div>
+              )}
 
               {/* Desktop Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center justify-between p-4 border-t bg-muted/20">
                   <div className="text-sm text-muted-foreground">
                     نمایش {startIndex + 1} تا{" "}
                     {Math.min(endIndex, filteredAndSortedTransactions.length)}{" "}
@@ -658,9 +695,9 @@ export function OrderDetailTransactions({
                             )}
                             <button
                               onClick={() => handlePageChange(page)}
-                              className={`px-3 py-1 text-sm rounded-md transition-all ${
+                              className={`min-w-[32px] h-8 px-3 text-sm rounded-md transition-all font-medium ${
                                 currentPage === page
-                                  ? "bg-primary text-primary-foreground font-semibold"
+                                  ? "bg-primary text-primary-foreground shadow-sm"
                                   : "text-muted-foreground hover:bg-muted"
                               }`}
                             >
@@ -684,24 +721,6 @@ export function OrderDetailTransactions({
                 </div>
               )}
             </>
-          )}
-
-          {/* Empty State */}
-          {filteredAndSortedTransactions.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-muted-foreground mb-2">
-                {t("common.noResults")}
-              </div>
-              {activeFiltersCount > 0 && (
-                <Button
-                  variant="outline"
-                  onClick={handleResetFilters}
-                  size="sm"
-                >
-                  پاک کردن فیلترها
-                </Button>
-              )}
-            </div>
           )}
         </CardContent>
       </Card>
