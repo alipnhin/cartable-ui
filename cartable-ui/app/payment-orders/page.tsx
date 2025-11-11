@@ -14,6 +14,7 @@ import { mockOrders } from "@/mocks/mockOrders";
 import { useToast } from "@/hooks/use-toast";
 import { OrderStatus } from "@/types/order";
 import { useRouter } from "next/navigation";
+import { MobilePagination } from "@/components/common/mobile-pagination";
 
 export default function PaymentOrdersPage() {
   const { t, locale } = useTranslation();
@@ -163,16 +164,21 @@ export default function PaymentOrdersPage() {
   };
 
   // Mobile pagination
-  const [visibleCount, setVisibleCount] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+
   const visibleOrders = isMobile
-    ? filteredOrders.slice(0, visibleCount)
+    ? filteredOrders.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
     : filteredOrders;
 
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + 10);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  const hasMore = isMobile && visibleCount < filteredOrders.length;
 
   // Create columns
   const columns = useMemo(
