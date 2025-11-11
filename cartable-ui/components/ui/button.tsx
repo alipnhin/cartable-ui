@@ -17,7 +17,7 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/90 data-[state=open]:bg-secondary/90",
         outline:
-          "bg-card text-foreground border-2 border-muted-foreground/25 font-semibold hover:bg-primary/5 hover:border-primary hover:text-primary data-[state=open]:bg-primary/5 data-[state=open]:border-primary",
+          "bg-card text-foreground border border-border font-medium hover:bg-accent hover:border-accent-foreground/20 data-[state=open]:bg-accent data-[state=open]:border-accent-foreground/20",
         dashed:
           "text-accent-foreground border border-input border-dashed bg-background hover:bg-accent hover:text-accent-foreground data-[state=open]:text-accent-foreground",
         ghost:
@@ -39,11 +39,11 @@ const buttonVariants = cva(
         dashed: "",
       },
       size: {
-        lg: "h-10 px-4 text-sm gap-1.5 [&_svg:not([class*=size-])]:size-4",
-        md: "h-9 px-3 gap-1.5 text-sm [&_svg:not([class*=size-])]:size-4",
-        sm: "h-8 px-2.5 gap-1.25 text-xs [&_svg:not([class*=size-])]:size-3.5",
-        xs: "h-7 px-2 gap-1 text-xs [&_svg:not([class*=size-])]:size-3.5",
-        icon: "size-9 [&_svg:not([class*=size-])]:size-4 shrink-0",
+        lg: "h-10 px-4 text-sm gap-1.5 max-md:h-12 [&_svg:not([class*=size-])]:size-4",
+        md: "h-9 px-3 gap-1.5 text-sm max-md:h-12 [&_svg:not([class*=size-])]:size-4",
+        sm: "h-8 px-2.5 gap-1.25 text-xs max-md:h-10 [&_svg:not([class*=size-])]:size-3.5",
+        xs: "h-7 px-2 gap-1 text-xs max-md:h-9 [&_svg:not([class*=size-])]:size-3.5",
+        icon: "size-9 max-md:size-12 [&_svg:not([class*=size-])]:size-4 shrink-0",
       },
       autoHeight: {
         true: "",
@@ -151,7 +151,7 @@ const buttonVariants = cva(
         variant: "outline",
         mode: "default",
         appearance: "default",
-        className: "shadow-xs shadow-black/5",
+        className: "",
       },
       {
         variant: "dashed",
@@ -187,7 +187,7 @@ const buttonVariants = cva(
         variant: "outline",
         mode: "icon",
         appearance: "default",
-        className: "shadow-xs shadow-black/5",
+        className: "",
       },
       {
         variant: "dashed",
