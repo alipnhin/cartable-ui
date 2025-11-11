@@ -10,7 +10,6 @@ import { PWAInstaller } from "@/components/common/pwa-installer";
 import { AppSplashLoader } from "@/components/common/app-splash-loader";
 import { OfflineIndicator } from "@/components/common/offline-indicator";
 import localFont from "next/font/local";
-import { useEffect } from "react";
 
 const yekanBakh = localFont({
   src: [
@@ -41,27 +40,6 @@ const yekanBakh = localFont({
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // pinch zoom
-  useEffect(() => {
-    const disableZoom = (e: TouchEvent) => {
-      if (e.touches.length > 1) e.preventDefault();
-    };
-    document.addEventListener("touchmove", disableZoom, { passive: false });
-    return () => document.removeEventListener("touchmove", disableZoom);
-  }, []);
-
-  // double-tap zoom
-  useEffect(() => {
-    let lastTouchEnd = 0;
-    const handler = (e: TouchEvent) => {
-      const now = Date.now();
-      if (now - lastTouchEnd <= 300) e.preventDefault();
-      lastTouchEnd = now;
-    };
-    document.addEventListener("touchend", handler, false);
-    return () => document.removeEventListener("touchend", handler);
-  }, []);
-
   return (
     <html
       dir="rtl"
@@ -79,7 +57,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover"
         />
       </head>
       <body className={cn("text-base antialiased", yekanBakh.variable)}>
