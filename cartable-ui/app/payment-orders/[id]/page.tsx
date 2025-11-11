@@ -114,31 +114,19 @@ export default function PaymentOrderDetailPage() {
 
         {/* Tab Contents - هر کدام در Card مستقل */}
         <TabsContent value="statistics" className="mt-0">
-          <Card className="p-6">
-            <OrderDetailStatistics order={orderDetail} />
-          </Card>
+          <OrderDetailStatistics order={orderDetail} />
         </TabsContent>
 
         <TabsContent value="transactions" className="mt-0">
-          <Card className="p-6">
-            <OrderDetailTransactions transactions={orderDetail.transactions} />
-          </Card>
+          <OrderDetailTransactions transactions={orderDetail.transactions} />
         </TabsContent>
 
         <TabsContent value="approvers" className="mt-0">
-          <Card className="p-6">
-            <OrderDetailApprovers
-              approvers={orderDetail.approvers}
-              signatureProgress={orderDetail.signatureProgress}
-              approvalSummary={orderDetail.approvalSummary}
-            />
-          </Card>
+          <OrderDetailApprovers approvers={orderDetail.approvers} />
         </TabsContent>
 
         <TabsContent value="history" className="mt-0">
-          <Card className="p-6">
-            <OrderDetailHistory changeHistory={orderDetail.changeHistory} />
-          </Card>
+          <OrderDetailHistory changeHistory={orderDetail.changeHistory} />
         </TabsContent>
       </Tabs>
     </div>
