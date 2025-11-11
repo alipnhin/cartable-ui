@@ -23,6 +23,7 @@
       "reject": "رد",
       "new": "جدید",
       "reset": "بازنشانی",
+      "apply": "اعمال",
       "approveSelected": "تأیید انتخاب شده‌ها",
       "rejectSelected": "رد انتخاب شده‌ها",
       "export": "خروجی Excel"
@@ -82,7 +83,8 @@
     "status": "وضعیت",
     "showing": "نمایش",
     "of": "از",
-    "million": "میلیون"
+    "million": "میلیون",
+    "selectDate": "انتخاب تاریخ"
   },
   "navigation": {
     "dashboard": "داشبورد",
@@ -336,7 +338,8 @@
     "allTypes": "همه انواع",
     "reset": "پاک کردن فیلترها",
     "advancedFilters": "فیلترهای پیشرفته",
-    "activeFilters": "فیلتر فعال"
+    "activeFilters": "فیلتر فعال",
+    "clearAll": "پاک کردن همه"
   },
   "status": {
     "waitingForApproval": "در انتظار تأیید",

@@ -25,6 +25,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { PersianDatePicker } from "@/components/ui/persian-datepicker";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Search, Filter, X, Calendar, DollarSign, CheckSquare } from "lucide-react";
@@ -131,28 +132,24 @@ export function TransactionFilters({
             <Label htmlFor="fromDate" className="text-sm text-muted-foreground">
               {t("reports.fromDate")}
             </Label>
-            <Input
-              id="fromDate"
-              type="date"
+            <PersianDatePicker
               value={localFilters.fromDate}
-              onChange={(e) =>
-                setLocalFilters({ ...localFilters, fromDate: e.target.value })
+              onChange={(date) =>
+                setLocalFilters({ ...localFilters, fromDate: date })
               }
-              className="w-full"
+              placeholder={t("reports.fromDate")}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="toDate" className="text-sm text-muted-foreground">
               {t("reports.toDate")}
             </Label>
-            <Input
-              id="toDate"
-              type="date"
+            <PersianDatePicker
               value={localFilters.toDate}
-              onChange={(e) =>
-                setLocalFilters({ ...localFilters, toDate: e.target.value })
+              onChange={(date) =>
+                setLocalFilters({ ...localFilters, toDate: date })
               }
-              className="w-full"
+              placeholder={t("reports.toDate")}
             />
           </div>
         </div>
