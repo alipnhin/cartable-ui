@@ -28,12 +28,12 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 start-0 z-40 mt-16 hidden h-[calc(100vh-4rem)] flex-col border-e bg-card text-foreground transition-all duration-300 md:flex",
+        "hidden h-full flex-col border-e bg-card text-foreground transition-all duration-300 md:flex flex-shrink-0",
         isCollapsed ? "w-16" : "w-64",
         className
       )}
     >
-      <nav className="flex-1 space-y-1 overflow-y-auto p-3 mt-10">
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {mainMenuItems.map((item) => {
           const isActive = isRouteActive(pathname, item.route);
           const Icon = item.icon;

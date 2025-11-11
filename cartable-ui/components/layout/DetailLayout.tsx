@@ -57,11 +57,13 @@ export function DetailLayout({ children, backUrl, title }: DetailLayoutProps) {
 
   // Desktop Layout
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar isCollapsed={false} />
-      <div className="flex-1 flex flex-col">
+    <div className="flex h-screen bg-background overflow-hidden">
+      <div className="flex flex-col flex-1">
         <Header />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar isCollapsed={false} />
+          <main className="flex-1 overflow-y-auto">{children}</main>
+        </div>
       </div>
     </div>
   );
