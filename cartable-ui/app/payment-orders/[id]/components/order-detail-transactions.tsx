@@ -6,34 +6,39 @@ import {
   TransactionStatus,
   PaymentMethodEnum,
 } from "@/types/transaction";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { TransactionStatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
-import { Download, Eye, ChevronDown, Filter } from "lucide-react";
+import {
+  Download,
+  Eye,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { TransactionsFilter } from "./transactions-filter";
 import { TransactionDetailDialog } from "./transaction-detail-dialog";
 import { BankLogo } from "@/components/common/bank-logo";
 import { PaymentTypeIcon } from "@/components/common/payment-type-icon";
 import { getBankCodeFromIban } from "@/lib/bank-logos";
 import { MobilePagination } from "@/components/common/mobile-pagination";
+import "@/styles/global-v2.css";
 
 interface OrderDetailTransactionsProps {
   transactions: Transaction[];
 }
 
 const ITEMS_PER_PAGE_MOBILE = 10;
-const ITEMS_PER_PAGE_DESKTOP = 25;
+const ITEMS_PER_PAGE_DESKTOP = 15;
+
+type SortField = "ownerName" | "amount" | "status" | "paymentType";
+type SortDirection = "asc" | "desc";
 
 export function OrderDetailTransactions({
   transactions,
@@ -41,89 +46,139 @@ export function OrderDetailTransactions({
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
 
-  const [filters, setFilters] = useState({
-    status: [] as TransactionStatus[],
-    paymentType: [] as PaymentMethodEnum[],
-    search: "",
-    beneficiaryName: "",
-    iban: "",
-    trackingCode: "",
-  });
-
+  // State
+  const [statusFilter, setStatusFilter] = useState<TransactionStatus[]>([]);
+  const [typeFilter, setTypeFilter] = useState<PaymentMethodEnum[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState<SortField>("ownerName");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // فیلتر تراکنش‌ها
-  const filteredTransactions = useMemo(() => {
+  // Filter Options
+  const statusOptions = [
+    {
+      value: TransactionStatus.BankSucceeded,
+      label: t("status.succeeded"),
+      color: "success",
+    },
+    {
+      value: TransactionStatus.WaitForExecution,
+      label: t("status.pending"),
+      color: "warning",
+    },
+    {
+      value: TransactionStatus.WaitForBank,
+      label: t("status.pending"),
+      color: "info",
+    },
+    {
+      value: TransactionStatus.Failed,
+      label: t("status.failed"),
+      color: "danger",
+    },
+    {
+      value: TransactionStatus.BankRejected,
+      label: t("status.bankRejected"),
+      color: "danger",
+    },
+  ];
+
+  const typeOptions = [
+    {
+      value: PaymentMethodEnum.Internal,
+      label: t("paymentType.internal"),
+    },
+    { value: PaymentMethodEnum.Paya, label: t("paymentType.paya") },
+    { value: PaymentMethodEnum.Satna, label: t("paymentType.satna") },
+  ];
+
+  // Filter and Sort Logic
+  const filteredAndSortedTransactions = useMemo(() => {
     let result = [...transactions];
 
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       result = result.filter(
         (tx) =>
-          tx.ownerName?.toLowerCase().includes(searchLower) ||
-          tx.destinationIban?.toLowerCase().includes(searchLower) ||
-          tx.trackingId?.toLowerCase().includes(searchLower)
+          tx.ownerName?.toLowerCase().includes(query) ||
+          tx.destinationIban?.toLowerCase().includes(query) ||
+          tx.trackingId?.toLowerCase().includes(query) ||
+          tx.nationalCode?.toLowerCase().includes(query)
       );
     }
 
-    if (filters.beneficiaryName) {
-      const nameLower = filters.beneficiaryName.toLowerCase();
-      result = result.filter((tx) =>
-        tx.ownerName?.toLowerCase().includes(nameLower)
-      );
+    // Apply status filter
+    if (statusFilter.length > 0) {
+      result = result.filter((tx) => statusFilter.includes(tx.status));
     }
 
-    if (filters.iban) {
-      const ibanLower = filters.iban.toLowerCase();
-      result = result.filter((tx) =>
-        tx.destinationIban?.toLowerCase().includes(ibanLower)
-      );
-    }
-
-    if (filters.trackingCode) {
-      const trackingLower = filters.trackingCode.toLowerCase();
-      result = result.filter((tx) =>
-        tx.trackingId?.toLowerCase().includes(trackingLower)
-      );
-    }
-
-    if (filters.status.length > 0) {
-      result = result.filter((tx) => filters.status.includes(tx.status));
-    }
-
-    if (filters.paymentType.length > 0) {
+    // Apply type filter
+    if (typeFilter.length > 0) {
       result = result.filter(
-        (tx) => tx.paymentType && filters.paymentType.includes(tx.paymentType)
+        (tx) => tx.paymentType && typeFilter.includes(tx.paymentType)
       );
     }
+
+    // Apply sorting
+    result.sort((a, b) => {
+      let comparison = 0;
+
+      switch (sortField) {
+        case "ownerName":
+          comparison = (a.ownerName || "").localeCompare(b.ownerName || "");
+          break;
+        case "amount":
+          comparison = a.amount - b.amount;
+          break;
+        case "status":
+          comparison = a.status.localeCompare(b.status);
+          break;
+        case "paymentType":
+          comparison = (a.paymentType || "").localeCompare(
+            b.paymentType || ""
+          );
+          break;
+      }
+
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
 
     return result;
-  }, [transactions, filters]);
+  }, [
+    transactions,
+    searchQuery,
+    statusFilter,
+    typeFilter,
+    sortField,
+    sortDirection,
+  ]);
 
-  // صفحه‌بندی
+  // Pagination
   const itemsPerPage = isMobile
     ? ITEMS_PER_PAGE_MOBILE
     : ITEMS_PER_PAGE_DESKTOP;
-  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const totalPages = Math.ceil(
+    filteredAndSortedTransactions.length / itemsPerPage
+  );
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedTransactions = filteredAndSortedTransactions.slice(
+    startIndex,
+    endIndex
+  );
 
-  // برای موبایل: صفحه‌بندی با prev/next
-  // برای دسکتاپ: نمایش تجمعی (load more)
-  const paginatedTransactions = isMobile
-    ? filteredTransactions.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-      )
-    : filteredTransactions.slice(0, currentPage * itemsPerPage);
-
-  const hasMore = currentPage < totalPages;
-  const remainingCount =
-    filteredTransactions.length - paginatedTransactions.length;
-
-  const handleLoadMore = () => {
-    setCurrentPage((prev) => prev + 1);
+  // Handlers
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
   };
 
   const handlePageChange = (page: number) => {
@@ -131,15 +186,26 @@ export function OrderDetailTransactions({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleStatusToggle = (status: TransactionStatus) => {
+    setStatusFilter((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status]
+    );
+    setCurrentPage(1);
+  };
+
+  const handleTypeToggle = (type: PaymentMethodEnum) => {
+    setTypeFilter((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+    setCurrentPage(1);
+  };
+
   const handleResetFilters = () => {
-    setFilters({
-      status: [],
-      paymentType: [],
-      search: "",
-      beneficiaryName: "",
-      iban: "",
-      trackingCode: "",
-    });
+    setStatusFilter([]);
+    setTypeFilter([]);
+    setSearchQuery("");
     setCurrentPage(1);
   };
 
@@ -152,52 +218,133 @@ export function OrderDetailTransactions({
     console.log("Exporting transactions...");
   };
 
+  const activeFiltersCount =
+    statusFilter.length + typeFilter.length + (searchQuery ? 1 : 0);
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-3.5 w-3.5 opacity-40" />;
+    }
+    return sortDirection === "asc" ? (
+      <ArrowUp className="h-3.5 w-3.5" />
+    ) : (
+      <ArrowDown className="h-3.5 w-3.5" />
+    );
+  };
+
   return (
     <>
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <CardTitle className="text-lg">
-              {t("paymentOrders.transactionsList")} (
-              {filteredTransactions.length})
-            </CardTitle>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <TransactionsFilter
-                filters={filters}
-                onFiltersChange={(newFilters) => {
-                  setFilters(newFilters);
-                  setCurrentPage(1);
-                }}
-                onReset={handleResetFilters}
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExport}
-                className="gap-2"
-              >
-                <Download className="h-4 w-4" />
-                {!isMobile && "خروجی Excel"}
-              </Button>
-            </div>
+      <div className="space-y-4 premium-animate-fade-in">
+        {/* Header & Search */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="premium-heading-2">
+              {t("paymentOrders.transactionsList")}
+            </h2>
+            <p className="premium-body-sm mt-1">
+              {filteredAndSortedTransactions.length} {t("reports.transactions")}
+            </p>
           </div>
-        </CardHeader>
-        <CardContent>
-          {isMobile ? (
-            // نمایش کارتی در موبایل - براساس طراحی اصلی
-            <div className="space-y-3">
-              {paginatedTransactions.map((transaction) => {
-                const bankCode = getBankCodeFromIban(
-                  transaction.destinationIban
-                );
-                return (
-                  <Card
-                    key={transaction.id}
-                    className="p-4 hover:shadow-md transition-shadow cursor-pointer border"
-                    onClick={() => handleViewDetails(transaction)}
-                  >
+          <div className="flex gap-2 w-full sm:w-auto">
+            <input
+              type="text"
+              placeholder="جستجو در نام، شبا، کد رهگیری..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="flex-1 sm:w-64 px-4 py-2 text-sm border border-[var(--premium-border-light)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--premium-primary)] bg-[var(--premium-surface-1)]"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              {!isMobile && "Excel"}
+            </Button>
+          </div>
+        </div>
+
+        {/* Premium Filters */}
+        <div className="premium-filter-group">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="premium-caption">فیلتر براساس:</span>
+
+            {/* Status Filters */}
+            <div className="flex flex-wrap gap-2">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleStatusToggle(option.value)}
+                  className={`premium-filter-chip ${
+                    statusFilter.includes(option.value) ? "active" : ""
+                  }`}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      option.color === "success"
+                        ? "bg-[var(--premium-success)]"
+                        : option.color === "warning"
+                          ? "bg-[var(--premium-warning)]"
+                          : option.color === "danger"
+                            ? "bg-[var(--premium-danger)]"
+                            : "bg-[var(--premium-info)]"
+                    }`}
+                  />
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="premium-divider-vertical h-6" />
+
+            {/* Type Filters */}
+            <div className="flex flex-wrap gap-2">
+              {typeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleTypeToggle(option.value)}
+                  className={`premium-filter-chip ${
+                    typeFilter.includes(option.value) ? "active" : ""
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            {activeFiltersCount > 0 && (
+              <>
+                <div className="premium-divider-vertical h-6" />
+                <button
+                  onClick={handleResetFilters}
+                  className="text-sm text-[var(--premium-slate-600)] hover:text-[var(--premium-danger)] transition-colors flex items-center gap-1"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  پاک کردن همه
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Table or Cards */}
+        {isMobile ? (
+          // Mobile Cards View
+          <div className="space-y-3">
+            {paginatedTransactions.map((transaction) => {
+              const bankCode = getBankCodeFromIban(transaction.destinationIban);
+              return (
+                <Card
+                  key={transaction.id}
+                  className="premium-card cursor-pointer"
+                  onClick={() => handleViewDetails(transaction)}
+                >
+                  <CardContent className="p-4">
                     <div className="space-y-3">
-                      {/* ردیف اول: لوگو، نام و وضعیت */}
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           {bankCode && (
@@ -220,20 +367,17 @@ export function OrderDetailTransactions({
                         />
                       </div>
 
-                      {/* جداکننده */}
-                      <div className="border-t"></div>
+                      <div className="premium-divider" />
 
-                      {/* ردیف دوم: جزئیات */}
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
                           <div className="text-muted-foreground text-xs mb-1">
                             مبلغ:
                           </div>
-                          <div className="font-bold text-primary">
+                          <div className="font-bold text-[var(--premium-primary)]">
                             {formatCurrency(transaction.amount, locale)}
                           </div>
                         </div>
-
                         <div>
                           <div className="text-muted-foreground text-xs mb-1">
                             نوع:
@@ -248,9 +392,9 @@ export function OrderDetailTransactions({
                         </div>
                       </div>
 
-                      {/* ردیف سوم: کد رهگیری */}
                       {transaction.trackingId && (
-                        <div className="pt-2 border-t">
+                        <>
+                          <div className="premium-divider" />
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-muted-foreground">
                               کد رهگیری:
@@ -259,156 +403,223 @@ export function OrderDetailTransactions({
                               {transaction.trackingId}
                             </span>
                           </div>
-                        </div>
+                        </>
                       )}
                     </div>
-                  </Card>
-                );
-              })}
+                  </CardContent>
+                </Card>
+              );
+            })}
 
-              {/* صفحه‌بندی موبایل */}
-              {filteredTransactions.length > 0 && (
-                <MobilePagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                />
-              )}
-            </div>
-          ) : (
-            // نمایش جدولی در دسکتاپ
-            <>
-              <div className="rounded-md border overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">#</TableHead>
-                      <TableHead>نام و نام خانوادگی</TableHead>
-                      <TableHead>کد ملی</TableHead>
-                      <TableHead>شماره شبا</TableHead>
-                      <TableHead>مبلغ تراکنش</TableHead>
-                      <TableHead>علت تراکنش</TableHead>
-                      <TableHead>نوع تراکنش</TableHead>
-                      <TableHead>کد رهگیری بانک</TableHead>
-                      <TableHead>وضعیت</TableHead>
-                      <TableHead className="text-center">عملیات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedTransactions.map((transaction, index) => {
-                      const bankCode = getBankCodeFromIban(
-                        transaction.destinationIban
-                      );
-                      return (
-                        <TableRow
-                          key={transaction.id}
-                          className="hover:bg-muted/50"
+            {filteredAndSortedTransactions.length > 0 && (
+              <MobilePagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </div>
+        ) : (
+          // Desktop Premium Table
+          <div className="premium-table-container premium-scrollbar">
+            <table className="premium-table">
+              <thead>
+                <tr>
+                  <th className="w-12">#</th>
+                  <th
+                    className="sortable"
+                    onClick={() => handleSort("ownerName")}
+                  >
+                    <div className="flex items-center gap-2">
+                      نام و نام خانوادگی
+                      <SortIcon field="ownerName" />
+                    </div>
+                  </th>
+                  <th>شماره شبا</th>
+                  <th
+                    className="sortable"
+                    onClick={() => handleSort("amount")}
+                  >
+                    <div className="flex items-center gap-2">
+                      مبلغ
+                      <SortIcon field="amount" />
+                    </div>
+                  </th>
+                  <th
+                    className="sortable"
+                    onClick={() => handleSort("paymentType")}
+                  >
+                    <div className="flex items-center gap-2">
+                      نوع
+                      <SortIcon field="paymentType" />
+                    </div>
+                  </th>
+                  <th>کد رهگیری</th>
+                  <th
+                    className="sortable"
+                    onClick={() => handleSort("status")}
+                  >
+                    <div className="flex items-center gap-2">
+                      وضعیت
+                      <SortIcon field="status" />
+                    </div>
+                  </th>
+                  <th className="text-center">عملیات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedTransactions.map((transaction, index) => {
+                  const bankCode = getBankCodeFromIban(
+                    transaction.destinationIban
+                  );
+                  return (
+                    <tr key={transaction.id}>
+                      <td className="font-medium text-[var(--premium-slate-500)]">
+                        {startIndex + index + 1}
+                      </td>
+                      <td className="font-semibold">
+                        {transaction.ownerName}
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          {bankCode && (
+                            <BankLogo bankCode={bankCode} size="xs" />
+                          )}
+                          <span className="font-mono text-xs">
+                            {transaction.destinationIban}
+                          </span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="font-bold text-[var(--premium-primary)]">
+                          {formatCurrency(transaction.amount, locale)}
+                        </span>
+                      </td>
+                      <td>
+                        <PaymentTypeIcon
+                          type={
+                            transaction.paymentType ||
+                            PaymentMethodEnum.Unknown
+                          }
+                          showLabel
+                        />
+                      </td>
+                      <td>
+                        <span className="font-mono text-xs">
+                          {transaction.trackingId || "-"}
+                        </span>
+                      </td>
+                      <td>
+                        <TransactionStatusBadge
+                          status={transaction.status}
+                          size="sm"
+                        />
+                      </td>
+                      <td className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewDetails(transaction)}
+                          className="h-8 w-8 p-0 hover:bg-[var(--premium-surface-2)]"
                         >
-                          <TableCell className="font-medium">
-                            {index + 1}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {transaction.ownerName}
-                          </TableCell>
-                          <TableCell className="font-mono text-xs">
-                            {transaction.nationalCode || "-"}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center flex-shrink-0">
-                                {bankCode && (
-                                  <BankLogo bankCode={bankCode} size="sm" />
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-mono text-xs">
-                                  {transaction.destinationIban}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {transaction.accountNumber}
-                                </div>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-medium">
-                              {formatCurrency(transaction.amount, locale)}
-                              <span className="text-xs text-muted-foreground ms-1"></span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-xs">
-                            {t(
-                              `transactions.transactionReasons.${
-                                transaction.reasonCode || "unknown"
-                              }`
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <PaymentTypeIcon
-                              type={
-                                transaction.paymentType ||
-                                PaymentMethodEnum.Unknown
-                              }
-                              showLabel
-                            />
-                          </TableCell>
-                          <TableCell className="font-mono text-xs">
-                            {transaction.trackingId || "-"}
-                          </TableCell>
-                          <TableCell>
-                            <TransactionStatusBadge
-                              status={transaction.status}
-                              size="sm"
-                            />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleViewDetails(transaction)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
 
-              {hasMore && (
-                <div className="mt-4 text-center">
-                  <Button variant="outline" onClick={handleLoadMore}>
-                    <ChevronDown className="h-4 w-4 me-2" />
-                    نمایش بیشتر ({remainingCount} مورد باقیمانده)
+            {/* Desktop Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between p-4 border-t border-[var(--premium-border-light)] bg-[var(--premium-surface-2)]">
+                <div className="text-sm text-[var(--premium-slate-600)]">
+                  نمایش {startIndex + 1} تا{" "}
+                  {Math.min(endIndex, filteredAndSortedTransactions.length)} از{" "}
+                  {filteredAndSortedTransactions.length} تراکنش
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="gap-1"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                    قبلی
+                  </Button>
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(
+                        (page) =>
+                          page === 1 ||
+                          page === totalPages ||
+                          Math.abs(page - currentPage) <= 1
+                      )
+                      .map((page, index, array) => (
+                        <>
+                          {index > 0 && array[index - 1] !== page - 1 && (
+                            <span
+                              key={`ellipsis-${page}`}
+                              className="px-2 text-[var(--premium-slate-400)]"
+                            >
+                              ...
+                            </span>
+                          )}
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            className={`px-3 py-1 text-sm rounded-md transition-all ${
+                              currentPage === page
+                                ? "bg-[var(--premium-primary)] text-white font-semibold"
+                                : "text-[var(--premium-slate-600)] hover:bg-[var(--premium-surface-3)]"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        </>
+                      ))}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="gap-1"
+                  >
+                    بعدی
+                    <ChevronLeft className="h-4 w-4" />
                   </Button>
                 </div>
-              )}
-            </>
-          )}
+              </div>
+            )}
+          </div>
+        )}
 
-          {filteredTransactions.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-muted-foreground mb-2">
+        {/* Empty State */}
+        {filteredAndSortedTransactions.length === 0 && (
+          <div className="premium-card-flat">
+            <CardContent className="py-12 text-center">
+              <div className="text-[var(--premium-slate-400)] mb-2">
                 {t("common.noResults")}
               </div>
-              {Object.values(filters).some((v) =>
-                Array.isArray(v) ? v.length > 0 : v
-              ) && (
+              {activeFiltersCount > 0 && (
                 <Button
-                  variant="secondary"
+                  variant="outline"
                   onClick={handleResetFilters}
                   size="sm"
                 >
                   پاک کردن فیلترها
                 </Button>
               )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </div>
+        )}
+      </div>
 
       <TransactionDetailDialog
         transaction={selectedTransaction}
