@@ -34,6 +34,7 @@ import {
   Download,
   ArrowUpDown,
 } from "lucide-react";
+import { MobilePagination } from "@/components/common/mobile-pagination";
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -90,6 +91,11 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
   const handlePageSizeChange = (newSize: string) => {
     setPageSize(Number(newSize));
     setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (isMobile) {
@@ -154,60 +160,13 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
           ))}
 
           {/* Pagination موبایل */}
-          <div className="flex items-center justify-between gap-2 pt-4">
-            <Select
-              value={pageSize.toString()}
-              onValueChange={handlePageSizeChange}
-            >
-              <SelectTrigger className="w-24">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="20">20</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="100">100</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div className="flex gap-1">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage(1)}
-                disabled={currentPage === 1}
-              >
-                <ChevronsRight className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <div className="flex items-center px-3 text-sm">
-                {currentPage} / {totalPages}
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage(totalPages)}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronsLeft className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          {transactions.length > 0 && (
+            <MobilePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
         </CardContent>
       </Card>
     );
