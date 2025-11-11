@@ -270,16 +270,12 @@ export default function PaymentOrdersPage() {
               {t("orders.noOrders")}
             </div>
           )}
-          {hasMore && (
-            <div className="flex justify-center pt-4">
-              <Button
-                variant="outline"
-                onClick={handleLoadMore}
-                className="w-full"
-              >
-                نمایش بیشتر ({filteredOrders.length - visibleCount} مورد)
-              </Button>
-            </div>
+          {totalPages > 1 && (
+            <MobilePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           )}
         </div>
       )}
