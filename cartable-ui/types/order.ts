@@ -5,7 +5,7 @@
 
 import { Account } from "./account";
 import { ChangeHistoryEntry } from "./common";
-import { Approver, SignatureProgress, ApprovalSummary } from "./signer";
+import { OrderApprover } from "./signer";
 import { Transaction } from "./transaction";
 
 export interface PaymentOrder {
@@ -55,9 +55,7 @@ export enum OrderStatus {
 export interface PaymentOrderDetail extends PaymentOrder {
   account: Account;
   transactions: Transaction[];
-  approvers: Approver[];
-  signatureProgress: SignatureProgress;
-  approvalSummary: ApprovalSummary;
+  approvers: OrderApprover[];
   changeHistory: ChangeHistoryEntry[];
   canApprove: boolean; // آیا کاربر فعلی می‌تواند تأیید کند؟
   canReject: boolean; // آیا کاربر فعلی می‌تواند رد کند؟

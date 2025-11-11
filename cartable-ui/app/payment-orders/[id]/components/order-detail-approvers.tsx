@@ -1,48 +1,42 @@
 "use client";
 
-import { Approver, SignatureProgress, ApprovalSummary } from "@/types/signer";
+import { OrderApprover } from "@/types/signer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
-import { ApproverStatus } from "@/types/signer";
+import { OrderApproveStatus } from "@/types/signer";
 
 interface OrderDetailApproversProps {
-  approvers: Approver[];
-  signatureProgress: SignatureProgress;
-  approvalSummary: ApprovalSummary;
+  approvers: OrderApprover[];
 }
 
-export function OrderDetailApprovers({
-  approvers,
-  signatureProgress,
-  approvalSummary,
-}: OrderDetailApproversProps) {
+export function OrderDetailApprovers({ approvers }: OrderDetailApproversProps) {
   const { t, locale } = useTranslation();
 
-  const getStatusIcon = (status: ApproverStatus) => {
+  const getStatusIcon = (status: OrderApproveStatus) => {
     switch (status) {
-      case ApproverStatus.Approved:
+      case OrderApproveStatus.Accepted:
         return <CheckCircle className="h-5 w-5 text-success" />;
-      case ApproverStatus.Rejected:
+      case OrderApproveStatus.Rejected:
         return <XCircle className="h-5 w-5 text-destructive" />;
-      case ApproverStatus.Pending:
+      case OrderApproveStatus.WaitForAction:
         return <Clock className="h-5 w-5 text-warning" />;
     }
   };
 
-  const getStatusBadge = (status: ApproverStatus) => {
+  const getStatusBadge = (status: OrderApproveStatus) => {
     switch (status) {
-      case ApproverStatus.Approved:
+      case OrderApproveStatus.Accepted:
         return (
           <Badge className="bg-success text-white hover:bg-success/90">
             {t("approvers.approved")}
           </Badge>
         );
-      case ApproverStatus.Rejected:
+      case OrderApproveStatus.Rejected:
         return <Badge variant="destructive">{t("approvers.rejected")}</Badge>;
-      case ApproverStatus.Pending:
+      case OrderApproveStatus.WaitForAction:
         return (
           <Badge className="bg-warning text-warning-foreground hover:bg-warning/90">
             {t("approvers.pending")}
@@ -51,13 +45,13 @@ export function OrderDetailApprovers({
     }
   };
 
-  const getBorderColor = (status: ApproverStatus) => {
+  const getBorderColor = (status: OrderApproveStatus) => {
     switch (status) {
-      case ApproverStatus.Approved:
+      case OrderApproveStatus.Accepted:
         return "border-success";
-      case ApproverStatus.Rejected:
+      case OrderApproveStatus.Rejected:
         return "border-destructive";
-      case ApproverStatus.Pending:
+      case OrderApproveStatus.WaitForAction:
         return "border-warning";
       default:
         return "border-border";
@@ -68,7 +62,7 @@ export function OrderDetailApprovers({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {approvers.map((approver) => (
         <Card
-          key={approver.userId}
+          key={approver.signerId}
           className={`border-2 ${getBorderColor(
             approver.status
           )} transition-all hover:shadow-lg`}
@@ -77,7 +71,7 @@ export function OrderDetailApprovers({
             {/* بخش بالا: نام و یوزرنیم */}
             <div className="text-center mb-4">
               <h3 className="text-lg font-bold text-foreground mb-1">
-                {approver.fullName} - {approver.userName}
+                {approver.approverName}
               </h3>
               <Badge variant="secondary" className="text-xs">
                 امضادار مجاز
@@ -91,12 +85,12 @@ export function OrderDetailApprovers({
 
             {/* بخش پایین: جزئیات */}
             <div className="text-center">
-              {approver.status !== ApproverStatus.Pending ? (
+              {approver.status !== OrderApproveStatus.WaitForAction ? (
                 <>
                   <div className="flex items-center justify-center gap-2 text-sm mb-1">
                     {getStatusIcon(approver.status)}
                     <span className="font-medium">
-                      {approver.status === ApproverStatus.Approved
+                      {approver.status === OrderApproveStatus.Accepted
                         ? t("approvers.approved")
                         : t("approvers.rejected")}
                     </span>
@@ -112,12 +106,6 @@ export function OrderDetailApprovers({
                           minute: "2-digit",
                         }
                       )}
-                    </div>
-                  )}
-                  {approver.comment && (
-                    <div className="mt-3 p-2 bg-muted rounded text-xs text-start">
-                      <span className="font-medium">نظر: </span>
-                      {approver.comment}
                     </div>
                   )}
                 </>

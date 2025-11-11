@@ -12,13 +12,10 @@ import {
   getTransactionsByOrderId,
   calculateOrderTotalAmount,
 } from "./mockTransactions";
-import {
-  generateApproversForOrder,
-  generateSignatureProgressForOrder,
-} from "./mockSigners";
+import { generateApproversForOrder } from "./mockSigners";
 import { generateChangeHistoryForOrder } from "./mockChangeHistory";
 import { subtractDays, addHours, now } from "@/lib/date";
-import { ApproverStatus } from "@/types/signer";
+import { OrderApproveStatus } from "@/types/signer";
 
 // تابع کمکی برای تولید شماره درخواست
 const generateOrderId = (index: number): string => {
@@ -59,8 +56,8 @@ const statusDistribution: OrderStatus[] = [
   OrderStatus.OwnersApproved, // 4 عدد
   OrderStatus.OwnersApproved,
   OrderStatus.OwnersApproved,
-  OrderStatus.OwnersApproved,
-  OrderStatus.SubmittedToBank, // 4 عدد
+  OrderStatus.OwnerRejected,
+  OrderStatus.OwnerRejected, // 4 عدد
   OrderStatus.SubmittedToBank,
   OrderStatus.SubmittedToBank,
   OrderStatus.SubmittedToBank,
@@ -92,7 +89,7 @@ for (let i = 0; i < 25; i++) {
   const status = statusDistribution[i];
 
   // تعداد تراکنش‌ها (5 تا 15)
-  const transactionCount = 50 + Math.floor(Math.random() * 100);
+  const transactionCount = 50 + Math.floor(Math.random() * 10);
 
   // تاریخ ایجاد (7 روز گذشته تا امروز)
   const daysAgo = Math.floor(Math.random() * 7);
@@ -171,18 +168,14 @@ export const getOrderDetailById = (
 
   const transactions = getTransactionsByOrderId(order.id);
   const approvers = generateApproversForOrder(order, account);
-  const signatureProgress = generateSignatureProgressForOrder(
-    order,
-    account,
-    approvers
-  );
   const changeHistory = generateChangeHistoryForOrder(order, approvers);
 
   // محاسبه قابلیت‌های عملیاتی برای کاربر فعلی
   const currentUserId = CURRENT_USER.id;
-  const isApprover = approvers.some((a) => a.userId === currentUserId);
+  const isApprover = approvers.some((a) => a.signerId === currentUserId);
   const hasApproved = approvers.some(
-    (a) => a.userId === currentUserId && a.status === ApproverStatus.Approved
+    (a) =>
+      a.signerId === currentUserId && a.status === OrderApproveStatus.Accepted
   );
 
   const canApprove =
@@ -213,18 +206,6 @@ export const getOrderDetailById = (
     account: account,
     transactions: transactions,
     approvers: approvers,
-    signatureProgress: signatureProgress,
-    approvalSummary: {
-      totalApprovers: approvers.length,
-      approvedCount: approvers.filter(
-        (a) => a.status === ApproverStatus.Approved
-      ).length,
-      rejectedCount: approvers.filter(
-        (a) => a.status === ApproverStatus.Rejected
-      ).length,
-      pendingCount: approvers.filter((a) => a.status === ApproverStatus.Pending)
-        .length,
-    },
     changeHistory: changeHistory,
     canApprove: canApprove,
     canReject: canReject,

@@ -22,6 +22,7 @@ import {
   BanknoteX,
   AlarmClockOff,
   UserRoundCheck,
+  UserRoundX,
 } from "lucide-react";
 
 export type BadgeVariant =
@@ -150,9 +151,9 @@ export function getPaymentStatusBadge(status: OrderStatus): {
     },
     [OrderStatus.OwnerRejected]: {
       variant: "danger",
-      label_fa: "",
-      label_en: "",
-      icon: "symbol",
+      label_fa: "عدم تائید",
+      label_en: "Owner Rejected",
+      icon: UserRoundX,
     },
   };
 

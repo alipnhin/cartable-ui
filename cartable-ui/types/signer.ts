@@ -8,42 +8,30 @@ export interface Signer {
   userId: string;
   userName: string;
   fullName: string;
-  role: SignerRole;
-  phoneNumber?: string;
-}
-
-export enum SignerRole {
-  Approver = "Approver", // امضای اول
-  Manager = "Manager", // امضای دوم
- }
-
-export interface Approver {
-  id: string;
-  userId: string;
-  userName: string;
-  fullName: string;
-  status: ApproverStatus;
+  status: SignerStatus;
   createdDateTime?: string;
-  comment?: string;
+  bankGatewayId: string;
 }
 
-export enum ApproverStatus {
-  Pending = "pending", // در انتظار تأیید
-  Approved = "approved", // تأیید شده
-  Rejected = "rejected", // رد شده
+export interface OrderApprover {
+  id: string;
+  signerId: string;
+  approverName: string;
+  status: OrderApproveStatus;
+  createdDateTime?: string;
+  orderId: string;
 }
 
-export interface SignatureProgress {
-  required: number; // تعداد امضای مورد نیاز
-  completed: number; // تعداد امضای انجام شده
-  remaining: number; // تعداد امضای باقیمانده
-  percentage: number; // درصد پیشرفت
-  isComplete: boolean; // آیا تعداد امضا کامل شده؟
+export enum SignerStatus {
+  EnableRequested = "enableRequested",
+  Enable = "enable",
+  Disable = "disable",
+  DisableRequested = "disableRequested",
+  Rejected = "rejected",
 }
 
-export interface ApprovalSummary {
-  totalApprovers: number;
-  approvedCount: number;
-  rejectedCount: number;
-  pendingCount: number;
+export enum OrderApproveStatus {
+  WaitForAction = "waitForAction",
+  Accepted = "accepted",
+  Rejected = "rejected",
 }
