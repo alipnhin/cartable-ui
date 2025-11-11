@@ -3,8 +3,12 @@
  * تاریخچه تغییرات دستورات
  */
 
-import { ApproverStatus, ChangeHistoryEntry, TransactionStatus } from "@/types";
-import { PaymentOrder, OrderStatus, Approver } from "@/types";
+import {
+  OrderApproveStatus,
+  ChangeHistoryEntry,
+  TransactionStatus,
+} from "@/types";
+import { PaymentOrder, OrderStatus, OrderApprover } from "@/types";
 import { addHours } from "@/lib/date";
 
 /**
@@ -12,7 +16,7 @@ import { addHours } from "@/lib/date";
  */
 export const generateChangeHistoryForOrder = (
   order: PaymentOrder,
-  approvers: Approver[]
+  approvers: OrderApprover[]
 ): ChangeHistoryEntry[] => {
   const history: ChangeHistoryEntry[] = [];
 
@@ -23,29 +27,35 @@ export const generateChangeHistoryForOrder = (
     userName: order.createdByName,
     Status: OrderStatus.WaitingForOwnersApproval,
     title: "ایجاد دستور",
-    description: `دستور پرداخت ایجاد شد`
+    description: `دستور پرداخت ایجاد شد`,
   });
 
   // 2. تأییدها و ردها
   approvers.forEach((approver, index) => {
-    if (approver.status === ApproverStatus.Approved && approver.createdDateTime) {
+    if (
+      approver.status === OrderApproveStatus.Accepted &&
+      approver.createdDateTime
+    ) {
       history.push({
         id: `ch-${order.id}-approve-${index}`,
         createdDateTime: approver.createdDateTime,
-        userName: approver.fullName,
+        userName: approver.approverName,
         title: "تأیید",
-        description: `دستور توسط ${approver.fullName} تأیید شد`,
+        description: `دستور توسط ${approver.approverName} تأیید شد`,
         Status: OrderStatus.OwnersApproved,
       });
     }
 
-    if (approver.status === ApproverStatus.Rejected && approver.createdDateTime) {
+    if (
+      approver.status === OrderApproveStatus.Rejected &&
+      approver.createdDateTime
+    ) {
       history.push({
         id: `ch-${order.id}-reject-${index}`,
         createdDateTime: approver.createdDateTime,
-        userName: approver.fullName,
+        userName: approver.approverName,
         title: "رد",
-        description: `دستور توسط ${approver.fullName} رد شد`,
+        description: `دستور توسط ${approver.approverName} رد شد`,
         Status: OrderStatus.OwnerRejected,
       });
     }
@@ -59,7 +69,7 @@ export const generateChangeHistoryForOrder = (
     order.status === OrderStatus.PartiallySucceeded
   ) {
     const lastApproval = approvers
-      .filter((a) => a.status === ApproverStatus.Approved)
+      .filter((a) => a.status === OrderApproveStatus.Accepted)
       .sort((a, b) => (a.createdDateTime! > b.createdDateTime! ? -1 : 1))[0];
 
     if (lastApproval && lastApproval.createdDateTime) {
@@ -110,7 +120,7 @@ export const generateChangeHistoryForOrder = (
   // 6. رد شده
   if (order.status === OrderStatus.Rejected) {
     const rejection = approvers.find(
-      (a) => a.status === ApproverStatus.Rejected
+      (a) => a.status === OrderApproveStatus.Rejected
     );
     if (rejection && rejection.createdDateTime) {
       history.push({

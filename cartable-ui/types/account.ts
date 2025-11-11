@@ -38,11 +38,11 @@ export interface Account {
 // Account Group (برای دسته‌بندی حساب‌ها)
 export interface AccountGroup {
   id: string;
-  name_fa: string;
-  name_en: string;
-  description_fa?: string;
+  name: string;
+  description?: string;
   color?: string;
   accountIds: string[];
+  icon?: string;
 }
 
 export enum AccountGroup_OLD {
@@ -75,53 +75,6 @@ export interface AccountStatistics {
   lastTransactionDate?: string;
 }
 
-// Account Groups for filtering
-export interface AccountGroupInfo {
-  code: AccountGroup;
-  name_fa: string;
-  name_en: string;
-  icon?: string;
-  color?: string;
-}
-
-export const ACCOUNT_GROUPS: AccountGroup[] = [
-  {
-    id: "operational",
-    name_fa: "حساب‌های عملیاتی",
-    name_en: "Operational Accounts",
-    color: "blue",
-    accountIds: [],
-  },
-  {
-    id: "Investment",
-    name_fa: "حساب‌های سرمایه‌گذاری",
-    name_en: "Investment Accounts",
-    color: "green",
-    accountIds: [],
-  },
-  {
-    id: "Savings",
-    name_fa: "حساب‌های پس‌انداز",
-    name_en: "Savings Accounts",
-    color: "purple",
-    accountIds: [],
-  },
-  {
-    id: "Foreign",
-    name_fa: "حساب‌های ارزی",
-    name_en: "Foreign Accounts",
-    color: "orange",
-    accountIds: [],
-  },
-  {
-    id: "Other",
-    name_fa: "سایر",
-    name_en: "Other",
-    color: "gray",
-    accountIds: [],
-  },
-];
-
 // Bank List
 export interface Bank {
   code: string;
@@ -132,9 +85,9 @@ export interface Bank {
 
 export const IRANIAN_BANKS: Bank[] = [
   { code: "017", name_fa: "بانک ملی ایران", name_en: "Bank Melli Iran" },
-  { code: "018", name_fa: "بانک صنعت و معدن", name_en: "Bank Sanat O Madan" },
-  { code: "019", name_fa: "بانک سپه", name_en: "Bank Sepah" },
-  { code: "011", name_fa: "بانک صادرات ایران", name_en: "Bank Saderat Iran" },
+  { code: "018", name_fa: "بانک تجارت", name_en: "Bank Tejarat" },
+  { code: "015", name_fa: "بانک سپه", name_en: "Bank Sepah" },
+  { code: "019", name_fa: "بانک صادرات ایران", name_en: "Bank Saderat Iran" },
   { code: "012", name_fa: "بانک ملت", name_en: "Bank Mellat" },
   { code: "016", name_fa: "بانک کشاورزی", name_en: "Bank Keshavarzi" },
   { code: "021", name_fa: "بانک پست بانک", name_en: "Post Bank" },

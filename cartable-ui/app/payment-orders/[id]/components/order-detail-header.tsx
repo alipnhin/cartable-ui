@@ -18,7 +18,7 @@ import { formatCurrency, formatDate } from "@/lib/helpers";
 import { getBankCodeFromIban, getBankLogo } from "@/lib/bank-logos";
 import Image from "next/image";
 import { TransactionStatus } from "@/types/transaction";
-import { ApproverStatus } from "@/types/signer";
+import { OrderApproveStatus } from "@/types/signer";
 
 interface OrderDetailHeaderProps {
   order: PaymentOrderDetail;
@@ -34,7 +34,7 @@ export function OrderDetailHeader({ order }: OrderDetailHeaderProps) {
     ).length;
 
     const approvedCount = order.approvers.filter(
-      (a) => a.status === ApproverStatus.Approved
+      (a) => a.status === OrderApproveStatus.Accepted
     ).length;
     const totalApprovers = order.approvers.length;
 
