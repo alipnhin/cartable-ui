@@ -7,14 +7,14 @@ import { Input, InputWrapper } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
@@ -23,9 +23,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { PersianDatePicker } from "@/components/ui/persian-datepicker";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Search, Filter, X, Calendar } from "lucide-react";
+import { Search, Filter, X, Calendar, DollarSign, CheckSquare } from "lucide-react";
 import { useState } from "react";
 
 interface TransactionFiltersProps {
@@ -76,194 +79,322 @@ export function TransactionFilters({
   };
 
   const activeFiltersCount =
-    (filters.status.length > 0 ? 1 : 0) +
+    filters.status.length +
     (filters.fromDate ? 1 : 0) +
     (filters.toDate ? 1 : 0) +
     (filters.minAmount > 0 ? 1 : 0) +
     (filters.maxAmount > 0 ? 1 : 0);
 
   const filterContent = (
-    <div className="space-y-4">
-      {/* وضعیت */}
-      <div>
-        <label className="text-sm font-medium mb-2 block">
-          {t("filters.status")}
-        </label>
-        <div className="space-y-2">
+    <div className="space-y-6">
+      {/* بخش وضعیت */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <CheckSquare className="h-4 w-4 text-muted-foreground" />
+          <Label className="text-base font-semibold">
+            {t("filters.status")}
+          </Label>
+        </div>
+        <Separator />
+        <div className="space-y-3">
           {statusOptions.map((option) => (
-            <div key={option.value} className="flex items-center gap-2">
+            <div
+              key={option.value}
+              className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted/50 transition-colors"
+            >
               <Checkbox
+                id={`status-${option.value}`}
                 checked={localFilters.status.includes(option.value)}
                 onCheckedChange={() => handleStatusToggle(option.value)}
               />
-              <span className="text-sm">{option.label}</span>
+              <Label
+                htmlFor={`status-${option.value}`}
+                className="text-sm font-normal cursor-pointer flex-1"
+              >
+                {option.label}
+              </Label>
             </div>
           ))}
         </div>
       </div>
 
-      {/* بازه تاریخ */}
-      <div>
-        <label className="text-sm font-medium mb-2 block">
-          {t("reports.dateRange")}
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          <Input
-            type="date"
-            value={localFilters.fromDate}
-            onChange={(e) =>
-              setLocalFilters({ ...localFilters, fromDate: e.target.value })
-            }
-            placeholder={t("reports.fromDate")}
-          />
-          <Input
-            type="date"
-            value={localFilters.toDate}
-            onChange={(e) =>
-              setLocalFilters({ ...localFilters, toDate: e.target.value })
-            }
-            placeholder={t("reports.toDate")}
-          />
+      {/* بخش بازه تاریخ */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Label className="text-base font-semibold">
+            {t("reports.dateRange")}
+          </Label>
+        </div>
+        <Separator />
+        <div className="space-y-3">
+          <div className="space-y-2">
+            <Label htmlFor="fromDate" className="text-sm text-muted-foreground">
+              {t("reports.fromDate")}
+            </Label>
+            <PersianDatePicker
+              value={localFilters.fromDate}
+              onChange={(date) =>
+                setLocalFilters({ ...localFilters, fromDate: date })
+              }
+              placeholder={t("reports.fromDate")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="toDate" className="text-sm text-muted-foreground">
+              {t("reports.toDate")}
+            </Label>
+            <PersianDatePicker
+              value={localFilters.toDate}
+              onChange={(date) =>
+                setLocalFilters({ ...localFilters, toDate: date })
+              }
+              placeholder={t("reports.toDate")}
+            />
+          </div>
         </div>
       </div>
 
-      {/* بازه مبلغ */}
-      <div>
-        <label className="text-sm font-medium mb-2 block">
-          {t("reports.amountRange")}
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          <Input
-            type="number"
-            value={localFilters.minAmount || ""}
-            onChange={(e) =>
-              setLocalFilters({
-                ...localFilters,
-                minAmount: Number(e.target.value),
-              })
-            }
-            placeholder={t("reports.minAmount")}
-          />
-          <Input
-            type="number"
-            value={localFilters.maxAmount || ""}
-            onChange={(e) =>
-              setLocalFilters({
-                ...localFilters,
-                maxAmount: Number(e.target.value),
-              })
-            }
-            placeholder={t("reports.maxAmount")}
-          />
+      {/* بخش بازه مبلغ */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <Label className="text-base font-semibold">
+            {t("reports.amountRange")}
+          </Label>
+        </div>
+        <Separator />
+        <div className="space-y-3">
+          <div className="space-y-2">
+            <Label htmlFor="minAmount" className="text-sm text-muted-foreground">
+              {t("reports.minAmount")}
+            </Label>
+            <Input
+              id="minAmount"
+              type="number"
+              value={localFilters.minAmount || ""}
+              onChange={(e) =>
+                setLocalFilters({
+                  ...localFilters,
+                  minAmount: Number(e.target.value),
+                })
+              }
+              placeholder="0"
+              className="w-full"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="maxAmount" className="text-sm text-muted-foreground">
+              {t("reports.maxAmount")}
+            </Label>
+            <Input
+              id="maxAmount"
+              type="number"
+              value={localFilters.maxAmount || ""}
+              onChange={(e) =>
+                setLocalFilters({
+                  ...localFilters,
+                  maxAmount: Number(e.target.value),
+                })
+              }
+              placeholder="0"
+              className="w-full"
+            />
+          </div>
         </div>
       </div>
     </div>
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between gap-4">
-          <CardTitle className="text-lg">{t("filters.title")}</CardTitle>
-          {activeFiltersCount > 0 && (
-            <Badge variant="secondary">
-              {activeFiltersCount} {t("filters.activeFilters")}
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <InputWrapper>
-          <Search />
-          <Input
-            placeholder={t("filters.searchPlaceholder")}
-            value={filters.search}
-            onChange={(e) =>
-              onFiltersChange({ ...filters, search: e.target.value })
-            }
-            className="pe-10"
-          />
-        </InputWrapper>
-        {/* فیلترهای پیشرفته */}
-        <div className="flex gap-2">
-          {isMobile ? (
-            <Drawer>
-              <DrawerTrigger asChild>
-                <Button variant="outline" className="flex-1">
-                  <Filter className="h-4 w-4 me-2" />
-                  {t("filters.advancedFilters")}
+    <div className="space-y-4">
+      {/* جستجو و دکمه فیلتر */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <InputWrapper>
+                <Search className="h-4 w-4" />
+                <Input
+                  placeholder={t("filters.searchPlaceholder")}
+                  value={filters.search}
+                  onChange={(e) =>
+                    onFiltersChange({ ...filters, search: e.target.value })
+                  }
+                  className="pe-10"
+                />
+              </InputWrapper>
+            </div>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size={isMobile ? "md" : "default"}
+                  className="gap-2 min-w-fit"
+                >
+                  <Filter className="h-4 w-4" />
+                  {!isMobile && t("filters.advancedFilters")}
                   {activeFiltersCount > 0 && (
-                    <Badge variant="secondary" className="ms-2">
+                    <span className="ms-1 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full min-w-[20px] text-center">
                       {activeFiltersCount}
-                    </Badge>
+                    </span>
                   )}
                 </Button>
-              </DrawerTrigger>
-              <DrawerContent>
-                <DrawerHeader>
-                  <DrawerTitle>{t("filters.advancedFilters")}</DrawerTitle>
-                </DrawerHeader>
-                <div className="px-4 max-h-[60vh] overflow-y-auto">
-                  {filterContent}
-                </div>
-                <DrawerFooter className="flex-row gap-2">
+              </SheetTrigger>
+              <SheetContent
+                side="left"
+                className="w-full sm:max-w-md overflow-y-auto"
+              >
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2">
+                    <Filter className="h-5 w-5" />
+                    {t("filters.advancedFilters")}
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="py-6">{filterContent}</div>
+                <SheetFooter className="flex-col sm:flex-row gap-2">
                   <Button
                     variant="outline"
                     onClick={handleResetFilters}
-                    className="flex-1"
+                    className="flex-1 gap-2"
                   >
+                    <X className="h-4 w-4" />
                     {t("filters.reset")}
                   </Button>
-                  <DrawerClose asChild>
-                    <Button onClick={handleApplyFilters} className="flex-1">
-                      {t("common.buttons.filter")}
+                  <SheetClose asChild>
+                    <Button onClick={handleApplyFilters} className="flex-1 gap-2">
+                      <Filter className="h-4 w-4" />
+                      {t("common.buttons.apply")}
                     </Button>
-                  </DrawerClose>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer>
-          ) : (
-            <>
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                {filterContent}
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={handleResetFilters}>
-                  <X className="h-4 w-4 me-2" />
-                  {t("filters.reset")}
-                </Button>
-                <Button onClick={handleApplyFilters}>
-                  <Filter className="h-4 w-4 me-2" />
-                  {t("common.buttons.filter")}
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* نمایش فیلترهای فعال */}
-        {filters.status.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {filters.status.map((status) => {
-              const option = statusOptions.find((opt) => opt.value === status);
-              return (
-                <Badge key={status} variant="secondary">
-                  {option?.label}
-                  <X
-                    className="ms-1 h-3 w-3 cursor-pointer"
-                    onClick={() => {
-                      onFiltersChange({
-                        ...filters,
-                        status: filters.status.filter((s) => s !== status),
-                      });
-                    }}
-                  />
-                </Badge>
-              );
-            })}
+                  </SheetClose>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* نمایش فیلترهای فعال */}
+      {activeFiltersCount > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground shrink-0">
+                <Filter className="h-4 w-4" />
+                {t("filters.activeFilters")}:
+              </div>
+              <div className="flex flex-wrap gap-2 flex-1">
+                {/* وضعیت‌های فعال */}
+                {filters.status.map((status) => {
+                  const option = statusOptions.find((opt) => opt.value === status);
+                  return (
+                    <Badge
+                      key={status}
+                      variant="secondary"
+                      className="gap-1 hover:bg-secondary/80 transition-colors"
+                    >
+                      {option?.label}
+                      <button
+                        onClick={() => {
+                          onFiltersChange({
+                            ...filters,
+                            status: filters.status.filter((s) => s !== status),
+                          });
+                        }}
+                        className="hover:bg-muted rounded-full p-0.5 transition-colors"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  );
+                })}
+
+                {/* تاریخ از */}
+                {filters.fromDate && (
+                  <Badge
+                    variant="secondary"
+                    className="gap-1 hover:bg-secondary/80 transition-colors"
+                  >
+                    {t("reports.fromDate")}: {filters.fromDate}
+                    <button
+                      onClick={() => {
+                        onFiltersChange({ ...filters, fromDate: "" });
+                      }}
+                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+
+                {/* تاریخ تا */}
+                {filters.toDate && (
+                  <Badge
+                    variant="secondary"
+                    className="gap-1 hover:bg-secondary/80 transition-colors"
+                  >
+                    {t("reports.toDate")}: {filters.toDate}
+                    <button
+                      onClick={() => {
+                        onFiltersChange({ ...filters, toDate: "" });
+                      }}
+                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+
+                {/* حداقل مبلغ */}
+                {filters.minAmount > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="gap-1 hover:bg-secondary/80 transition-colors"
+                  >
+                    {t("reports.minAmount")}: {filters.minAmount.toLocaleString("fa-IR")}
+                    <button
+                      onClick={() => {
+                        onFiltersChange({ ...filters, minAmount: 0 });
+                      }}
+                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+
+                {/* حداکثر مبلغ */}
+                {filters.maxAmount > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="gap-1 hover:bg-secondary/80 transition-colors"
+                  >
+                    {t("reports.maxAmount")}: {filters.maxAmount.toLocaleString("fa-IR")}
+                    <button
+                      onClick={() => {
+                        onFiltersChange({ ...filters, maxAmount: 0 });
+                      }}
+                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+
+                {/* دکمه پاک کردن همه */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResetFilters}
+                  className="h-6 text-xs hover:bg-muted"
+                >
+                  {t("filters.clearAll")}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }

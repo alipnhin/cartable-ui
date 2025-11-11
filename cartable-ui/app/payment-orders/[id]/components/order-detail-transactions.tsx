@@ -26,6 +26,7 @@ import { TransactionDetailDialog } from "./transaction-detail-dialog";
 import { BankLogo } from "@/components/common/bank-logo";
 import { PaymentTypeIcon } from "@/components/common/payment-type-icon";
 import { getBankCodeFromIban } from "@/lib/bank-logos";
+import { MobilePagination } from "@/components/common/mobile-pagination";
 
 interface OrderDetailTransactionsProps {
   transactions: Transaction[];
@@ -107,16 +108,27 @@ export function OrderDetailTransactions({
     ? ITEMS_PER_PAGE_MOBILE
     : ITEMS_PER_PAGE_DESKTOP;
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-  const paginatedTransactions = filteredTransactions.slice(
-    0,
-    currentPage * itemsPerPage
-  );
+
+  // برای موبایل: صفحه‌بندی با prev/next
+  // برای دسکتاپ: نمایش تجمعی (load more)
+  const paginatedTransactions = isMobile
+    ? filteredTransactions.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
+    : filteredTransactions.slice(0, currentPage * itemsPerPage);
+
   const hasMore = currentPage < totalPages;
   const remainingCount =
     filteredTransactions.length - paginatedTransactions.length;
 
   const handleLoadMore = () => {
     setCurrentPage((prev) => prev + 1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleResetFilters = () => {
@@ -254,16 +266,13 @@ export function OrderDetailTransactions({
                 );
               })}
 
-              {/* دکمه نمایش بیشتر */}
-              {hasMore && (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleLoadMore}
-                >
-                  <ChevronDown className="h-4 w-4 me-2" />
-                  نمایش بیشتر ({remainingCount} مورد باقیمانده)
-                </Button>
+              {/* صفحه‌بندی موبایل */}
+              {filteredTransactions.length > 0 && (
+                <MobilePagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               )}
             </div>
           ) : (

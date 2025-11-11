@@ -671,3 +671,114 @@ main {
     font-size: 16px;
   }
 }
+
+/* Persian DatePicker Custom Styles */
+.persian-datepicker-wrapper .custom-calendar {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  font-family: var(--font-yekanbakh), sans-serif;
+  direction: rtl;
+}
+
+.persian-datepicker-wrapper .Calendar__monthYear {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+.persian-datepicker-wrapper .Calendar__yearSelectorItem,
+.persian-datepicker-wrapper .Calendar__monthSelectorItem {
+  color: hsl(var(--foreground));
+}
+
+.persian-datepicker-wrapper .Calendar__yearSelectorItem:hover,
+.persian-datepicker-wrapper .Calendar__monthSelectorItem:hover {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.persian-datepicker-wrapper .Calendar__yearSelectorItem.-active,
+.persian-datepicker-wrapper .Calendar__monthSelectorItem.-active {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.persian-datepicker-wrapper .Calendar__day {
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  transition: all 150ms ease-in-out;
+}
+
+.persian-datepicker-wrapper .Calendar__day:hover {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+.persian-datepicker-wrapper .Calendar__day.-ltr {
+  direction: ltr;
+}
+
+.persian-datepicker-wrapper .Calendar__day.-selected,
+.persian-datepicker-wrapper .custom-selected-day {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  font-weight: 600;
+}
+
+.persian-datepicker-wrapper .Calendar__day.-selectedStart,
+.persian-datepicker-wrapper .Calendar__day.-selectedEnd {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+.persian-datepicker-wrapper .Calendar__day.-selectedBetween {
+  background: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+.persian-datepicker-wrapper .Calendar__day.-today,
+.persian-datepicker-wrapper .custom-today {
+  border: 2px solid hsl(var(--primary));
+  background: hsl(var(--background));
+  color: hsl(var(--primary));
+}
+
+.persian-datepicker-wrapper .Calendar__day.-weekend {
+  color: hsl(var(--destructive));
+}
+
+.persian-datepicker-wrapper .Calendar__day.-disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.persian-datepicker-wrapper .Calendar__weekDays {
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+
+.persian-datepicker-wrapper .Calendar__section.-hiddenNext,
+.persian-datepicker-wrapper .Calendar__section.-hiddenPrevious {
+  opacity: 0.5;
+}
+
+.persian-datepicker-wrapper .Calendar__monthArrow {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+}
+
+.persian-datepicker-wrapper .Calendar__monthArrow:hover {
+  background: hsl(var(--muted));
+}
+
+.persian-datepicker-wrapper .Calendar__monthArrowWrapper.-right {
+  transform: rotate(180deg);
+}
+
+/* Dark mode support */
+.dark .persian-datepicker-wrapper .custom-calendar {
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
