@@ -416,7 +416,13 @@
     "editAccount": "ویرایش حساب",
     "manageSigners": "مدیریت امضاداران",
     "accountInfo": "اطلاعات حساب",
-    "signers": "امضاداران"
+    "signers": "امضاداران",
+    "addSigner": "افزودن امضادار",
+    "selectUser": "انتخاب کاربر برای امضادار شدن",
+    "searchUserPlaceholder": "نام، ایمیل یا نقش کاربر را جستجو کنید...",
+    "requestActivation": "درخواست فعال‌سازی",
+    "requestDeactivation": "درخواست غیرفعال‌سازی",
+    "minSignaturesHelp": "حداقل امضای مورد نیاز برای تأیید دستورات پرداخت را مشخص کنید"
   },
   "auth": {
     "welcomeBack": "خوش آمدید",
