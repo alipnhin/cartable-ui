@@ -45,96 +45,102 @@ export default function PaymentOrderDetailPage() {
       <OrderDetailHeader order={orderDetail} />
 
       {/* تب‌های جزئیات */}
-      <Card className="border-0 shadow-sm">
-        <div className="border-b bg-card">
-          <Tabs defaultValue="statistics" className="w-full">
-            <TabsList className="w-full justify-center bg-transparent h-auto p-4 gap-3 flex-wrap">
-              <TabsTrigger
-                value="statistics"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
-              >
-                <BarChart3 className="h-4 w-4" />
-                <span className="hidden sm:inline">
-                  {t("paymentOrders.statistics")}
-                </span>
-                <span className="sm:hidden">
-                  {t("paymentOrders.statisticsShort")}
-                </span>
-              </TabsTrigger>
+      <Tabs defaultValue="statistics" className="w-full space-y-6">
+        {/* Tab Navigation */}
+        <div className="rounded-lg border bg-card p-4">
+          <TabsList className="w-full justify-center bg-transparent h-auto gap-3 flex-wrap">
+            <TabsTrigger
+              value="statistics"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {t("paymentOrders.statistics")}
+              </span>
+              <span className="sm:hidden">
+                {t("paymentOrders.statisticsShort")}
+              </span>
+            </TabsTrigger>
 
-              <TabsTrigger
-                value="transactions"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
-              >
-                <FileText className="h-4 w-4" />
-                <span className="hidden sm:inline">
-                  {t("paymentOrders.transactions")}
-                </span>
-                <span className="sm:hidden">
-                  {t("paymentOrders.transactionsShort")}
-                </span>
-                <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
-                  {orderDetail.transactions.length}
-                </span>
-              </TabsTrigger>
+            <TabsTrigger
+              value="transactions"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
+            >
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {t("paymentOrders.transactions")}
+              </span>
+              <span className="sm:hidden">
+                {t("paymentOrders.transactionsShort")}
+              </span>
+              <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
+                {orderDetail.transactions.length}
+              </span>
+            </TabsTrigger>
 
-              <TabsTrigger
-                value="approvers"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
-              >
-                <Users className="h-4 w-4" />
-                <span className="hidden sm:inline">
-                  {t("paymentOrders.approvers")}
-                </span>
-                <span className="sm:hidden">
-                  {t("paymentOrders.approversShort")}
-                </span>
-                <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
-                  {orderDetail.approvers.length}
-                </span>
-              </TabsTrigger>
+            <TabsTrigger
+              value="approvers"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
+            >
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {t("paymentOrders.approvers")}
+              </span>
+              <span className="sm:hidden">
+                {t("paymentOrders.approversShort")}
+              </span>
+              <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
+                {orderDetail.approvers.length}
+              </span>
+            </TabsTrigger>
 
-              <TabsTrigger
-                value="history"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
-              >
-                <History className="h-4 w-4" />
-                <span className="hidden sm:inline">
-                  {t("paymentOrders.history")}
-                </span>
-                <span className="sm:hidden">
-                  {t("paymentOrders.historyShort")}
-                </span>
-                <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
-                  {orderDetail.changeHistory.length}
-                </span>
-              </TabsTrigger>
-            </TabsList>
-
-            <div className="p-6">
-              <TabsContent value="statistics" className="mt-0">
-                <OrderDetailStatistics order={orderDetail} />
-              </TabsContent>
-
-              <TabsContent value="transactions" className="mt-0">
-                <OrderDetailTransactions transactions={orderDetail.transactions} />
-              </TabsContent>
-
-              <TabsContent value="approvers" className="mt-0">
-                <OrderDetailApprovers
-                  approvers={orderDetail.approvers}
-                  signatureProgress={orderDetail.signatureProgress}
-                  approvalSummary={orderDetail.approvalSummary}
-                />
-              </TabsContent>
-
-              <TabsContent value="history" className="mt-0">
-                <OrderDetailHistory changeHistory={orderDetail.changeHistory} />
-              </TabsContent>
-            </div>
-          </Tabs>
+            <TabsTrigger
+              value="history"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
+            >
+              <History className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {t("paymentOrders.history")}
+              </span>
+              <span className="sm:hidden">
+                {t("paymentOrders.historyShort")}
+              </span>
+              <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
+                {orderDetail.changeHistory.length}
+              </span>
+            </TabsTrigger>
+          </TabsList>
         </div>
-      </Card>
+
+        {/* Tab Contents - هر کدام در Card مستقل */}
+        <TabsContent value="statistics" className="mt-0">
+          <Card className="p-6">
+            <OrderDetailStatistics order={orderDetail} />
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="transactions" className="mt-0">
+          <Card className="p-6">
+            <OrderDetailTransactions transactions={orderDetail.transactions} />
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="approvers" className="mt-0">
+          <Card className="p-6">
+            <OrderDetailApprovers
+              approvers={orderDetail.approvers}
+              signatureProgress={orderDetail.signatureProgress}
+              approvalSummary={orderDetail.approvalSummary}
+            />
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="history" className="mt-0">
+          <Card className="p-6">
+            <OrderDetailHistory changeHistory={orderDetail.changeHistory} />
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
