@@ -154,7 +154,11 @@ export const createColumns = (
       id: "actions",
       header: t("common.actions"),
       cell: ({ row }) => (
-        <Button variant="outline" size="sm" asChild>
+        <Button
+          variant="outline"
+          className="hover:bg-muted/80 transition-colors"
+          asChild
+        >
           <Link href={`/payment-orders/${row.original.id}`}>
             <Eye className="h-4 w-4 me-2" />
             {t("common.buttons.view")}

@@ -17,7 +17,7 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/90 data-[state=open]:bg-secondary/90",
         outline:
-          "bg-card text-foreground border border-border font-medium hover:bg-accent hover:border-accent-foreground/20 data-[state=open]:bg-accent data-[state=open]:border-accent-foreground/20",
+          "bg-background text-accent-foreground border border-input hover:bg-accent data-[state=open]:bg-accent",
         dashed:
           "text-accent-foreground border border-input border-dashed bg-background hover:bg-accent hover:text-accent-foreground data-[state=open]:text-accent-foreground",
         ghost:
@@ -39,24 +39,23 @@ const buttonVariants = cva(
         dashed: "",
       },
       size: {
-        lg: "h-10 px-4 text-sm gap-1.5 max-md:h-12 [&_svg:not([class*=size-])]:size-4",
-        md: "h-9 px-3 gap-1.5 text-sm max-md:h-12 [&_svg:not([class*=size-])]:size-4",
-        sm: "h-8 px-2.5 gap-1.25 text-xs max-md:h-10 [&_svg:not([class*=size-])]:size-3.5",
-        xs: "h-7 px-2 gap-1 text-xs max-md:h-9 [&_svg:not([class*=size-])]:size-3.5",
-        icon: "size-9 max-md:size-12 [&_svg:not([class*=size-])]:size-4 shrink-0",
+        lg: "h-10 rounded-md px-4 text-sm gap-1.5 [&_svg:not([class*=size-])]:size-4",
+        md: "h-8.5 rounded-md px-3 gap-1.5 text-[0.8125rem] leading-(--text-sm--line-height) [&_svg:not([class*=size-])]:size-4",
+        sm: "h-7 rounded-md px-2.5 gap-1.25 text-xs [&_svg:not([class*=size-])]:size-3.5",
+        icon: "size-8.5 rounded-md [&_svg:not([class*=size-])]:size-4 shrink-0",
       },
       autoHeight: {
         true: "",
         false: "",
       },
-      radius: {
-        md: "rounded-md",
-        full: "rounded-full",
+      shape: {
+        default: "",
+        circle: "rounded-full",
       },
       mode: {
         default:
           "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        icon: "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 shrink-0",
+        icon: "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         link: "text-primary h-auto p-0 bg-transparent rounded-none hover:bg-transparent data-[state=open]:bg-transparent",
         input: `
             justify-start font-normal hover:bg-background [&_svg]:transition-colors [&_svg]:hover:text-foreground data-[state=open]:bg-background 
@@ -73,6 +72,7 @@ const buttonVariants = cva(
       },
     },
     compoundVariants: [
+      // Icons opacity for default mode
       {
         variant: "ghost",
         mode: "default",
@@ -83,7 +83,7 @@ const buttonVariants = cva(
         variant: "outline",
         mode: "default",
         className:
-          "[&_svg:not([role=img]):not([class*=text-]):not([class*=opacity-])]:opacity-60 hover:[&_svg:not([role=img]):not([class*=text-])]:text-primary",
+          "[&_svg:not([role=img]):not([class*=text-]):not([class*=opacity-])]:opacity-60",
       },
       {
         variant: "dashed",
@@ -97,6 +97,8 @@ const buttonVariants = cva(
         className:
           "[&_svg:not([role=img]):not([class*=text-]):not([class*=opacity-])]:opacity-60",
       },
+
+      // Icons opacity for default mode
       {
         variant: "outline",
         mode: "input",
@@ -109,26 +111,25 @@ const buttonVariants = cva(
         className:
           "[&_svg:not([role=img]):not([class*=text-]):not([class*=opacity-])]:opacity-60",
       },
-      {
-        size: "xs",
-        autoHeight: true,
-        className: "h-auto min-h-7",
-      },
+
+      // Auto height
       {
         size: "md",
         autoHeight: true,
-        className: "h-auto min-h-9",
+        className: "h-auto min-h-8.5",
       },
       {
         size: "sm",
         autoHeight: true,
-        className: "h-auto min-h-8",
+        className: "h-auto min-h-7",
       },
       {
         size: "lg",
         autoHeight: true,
         className: "h-auto min-h-10",
       },
+
+      // Shadow support
       {
         variant: "primary",
         mode: "default",
@@ -151,7 +152,7 @@ const buttonVariants = cva(
         variant: "outline",
         mode: "default",
         appearance: "default",
-        className: "",
+        className: "shadow-xs shadow-black/5",
       },
       {
         variant: "dashed",
@@ -165,6 +166,8 @@ const buttonVariants = cva(
         appearance: "default",
         className: "shadow-xs shadow-black/5",
       },
+
+      // Shadow support
       {
         variant: "primary",
         mode: "icon",
@@ -187,7 +190,7 @@ const buttonVariants = cva(
         variant: "outline",
         mode: "icon",
         appearance: "default",
-        className: "",
+        className: "shadow-xs shadow-black/5",
       },
       {
         variant: "dashed",
@@ -201,6 +204,8 @@ const buttonVariants = cva(
         appearance: "default",
         className: "shadow-xs shadow-black/5",
       },
+
+      // Link
       {
         variant: "primary",
         mode: "link",
@@ -229,6 +234,7 @@ const buttonVariants = cva(
         className:
           "font-medium text-primary hover:text-primary/90 [&_svg]:opacity-60 underline underline-offset-4 decoration-dashed decoration-1",
       },
+
       {
         variant: "inverse",
         mode: "link",
@@ -257,6 +263,7 @@ const buttonVariants = cva(
         className:
           "font-medium text-inherit [&_svg:not([role=img]):not([class*=text-])]:opacity-60 underline underline-offset-4 decoration-dashed decoration-1",
       },
+
       {
         variant: "foreground",
         mode: "link",
@@ -285,6 +292,8 @@ const buttonVariants = cva(
         className:
           "font-medium text-foreground [&_svg:not([role=img]):not([class*=text-])]:opacity-60 underline underline-offset-4 decoration-dashed decoration-1",
       },
+
+      // Ghost
       {
         variant: "primary",
         appearance: "ghost",
@@ -302,30 +311,29 @@ const buttonVariants = cva(
         mode: "icon",
         className: "text-muted-foreground",
       },
+
+      // Size
       {
-        size: "xs",
+        size: "sm",
         mode: "icon",
         className: "w-7 h-7 p-0 [[&_svg:not([class*=size-])]:size-3.5",
       },
       {
-        size: "sm",
-        mode: "icon",
-        className: "w-8 h-8 p-0 [[&_svg:not([class*=size-])]:size-3.5",
-      },
-      {
         size: "md",
         mode: "icon",
-        className: "w-9 h-9 p-0 [&_svg:not([class*=size-])]:size-4",
+        className: "w-8.5 h-8.5 p-0 [&_svg:not([class*=size-])]:size-4",
       },
       {
         size: "icon",
-        className: "w-9 h-9 p-0 [&_svg:not([class*=size-])]:size-4",
+        className: "w-8.5 h-8.5 p-0 [&_svg:not([class*=size-])]:size-4",
       },
       {
         size: "lg",
         mode: "icon",
         className: "w-10 h-10 p-0 [&_svg:not([class*=size-])]:size-4",
       },
+
+      // Input mode
       {
         mode: "input",
         placeholder: true,
@@ -355,7 +363,7 @@ const buttonVariants = cva(
       variant: "primary",
       mode: "default",
       size: "md",
-      radius: "md",
+      shape: "default",
       appearance: "default",
     },
   }
@@ -365,7 +373,7 @@ function Button({
   className,
   selected,
   variant,
-  radius,
+  shape,
   appearance,
   mode,
   size,
@@ -388,7 +396,7 @@ function Button({
         buttonVariants({
           variant,
           size,
-          radius,
+          shape,
           appearance,
           mode,
           autoHeight,
@@ -406,7 +414,7 @@ function Button({
 }
 
 interface ButtonArrowProps extends React.SVGProps<SVGSVGElement> {
-  icon?: LucideIcon;
+  icon?: LucideIcon; // Allows passing any Lucide icon
 }
 
 function ButtonArrow({

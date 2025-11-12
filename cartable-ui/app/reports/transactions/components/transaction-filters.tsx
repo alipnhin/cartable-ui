@@ -28,7 +28,14 @@ import { Separator } from "@/components/ui/separator";
 import { PersianDatePicker } from "@/components/ui/persian-datepicker";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Search, Filter, X, Calendar, DollarSign, CheckSquare } from "lucide-react";
+import {
+  Search,
+  Filter,
+  X,
+  Calendar,
+  DollarSign,
+  CheckSquare,
+} from "lucide-react";
 import { useState } from "react";
 
 interface TransactionFiltersProps {
@@ -166,7 +173,10 @@ export function TransactionFilters({
         <Separator />
         <div className="space-y-3">
           <div className="space-y-2">
-            <Label htmlFor="minAmount" className="text-sm text-muted-foreground">
+            <Label
+              htmlFor="minAmount"
+              className="text-sm text-muted-foreground"
+            >
               {t("reports.minAmount")}
             </Label>
             <Input
@@ -184,7 +194,10 @@ export function TransactionFilters({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="maxAmount" className="text-sm text-muted-foreground">
+            <Label
+              htmlFor="maxAmount"
+              className="text-sm text-muted-foreground"
+            >
               {t("reports.maxAmount")}
             </Label>
             <Input
@@ -229,7 +242,7 @@ export function TransactionFilters({
               <SheetTrigger asChild>
                 <Button
                   variant="outline"
-                  size={isMobile ? "md" : "default"}
+                  size={isMobile ? "md" : "sm"}
                   className="gap-2 min-w-fit"
                 >
                   <Filter className="h-4 w-4" />
@@ -262,7 +275,10 @@ export function TransactionFilters({
                     {t("filters.reset")}
                   </Button>
                   <SheetClose asChild>
-                    <Button onClick={handleApplyFilters} className="flex-1 gap-2">
+                    <Button
+                      onClick={handleApplyFilters}
+                      className="flex-1 gap-2"
+                    >
                       <Filter className="h-4 w-4" />
                       {t("common.buttons.apply")}
                     </Button>
@@ -286,7 +302,9 @@ export function TransactionFilters({
               <div className="flex flex-wrap gap-2 flex-1">
                 {/* وضعیت‌های فعال */}
                 {filters.status.map((status) => {
-                  const option = statusOptions.find((opt) => opt.value === status);
+                  const option = statusOptions.find(
+                    (opt) => opt.value === status
+                  );
                   return (
                     <Badge
                       key={status}
@@ -351,7 +369,8 @@ export function TransactionFilters({
                     variant="secondary"
                     className="gap-1 hover:bg-secondary/80 transition-colors"
                   >
-                    {t("reports.minAmount")}: {filters.minAmount.toLocaleString("fa-IR")}
+                    {t("reports.minAmount")}:{" "}
+                    {filters.minAmount.toLocaleString("fa-IR")}
                     <button
                       onClick={() => {
                         onFiltersChange({ ...filters, minAmount: 0 });
@@ -369,7 +388,8 @@ export function TransactionFilters({
                     variant="secondary"
                     className="gap-1 hover:bg-secondary/80 transition-colors"
                   >
-                    {t("reports.maxAmount")}: {filters.maxAmount.toLocaleString("fa-IR")}
+                    {t("reports.maxAmount")}:{" "}
+                    {filters.maxAmount.toLocaleString("fa-IR")}
                     <button
                       onClick={() => {
                         onFiltersChange({ ...filters, maxAmount: 0 });

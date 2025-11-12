@@ -84,8 +84,10 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex flex-col gap-4">
-      <DataTableToolbar table={table} />
       <div className="overflow-hidden rounded-lg border bg-card">
+        <div className="p-4 border-b">
+          <DataTableToolbar table={table} />
+        </div>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -93,6 +95,7 @@ export function DataTable<TData, TValue>({
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
+                      className="bg-muted/40 font-bold"
                       key={header.id}
                       colSpan={header.colSpan}
                       style={{ width: header.getSize() }}

@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { OrderStatus } from "@/types/order";
 import { OtpDialog } from "@/components/common/otp-dialog";
 import { cn } from "@/lib/utils";
+import { IStatisticsItems, Statistics } from "./components/statistics";
 
 export default function MyCartablePage() {
   const { t, locale } = useTranslation();
@@ -131,6 +132,27 @@ export default function MyCartablePage() {
     ? selectedOrders.length
     : Object.keys(selectedRowIds).filter((id) => selectedRowIds[id]).length;
 
+  const items: IStatisticsItems = [
+    {
+      number: `${pendingOrders.length}`,
+      label: `${t("myCartable.totalOrders")}`,
+    },
+    {
+      number: `${pendingOrders.reduce(
+        (sum, order) =>
+          sum + (order.totalTransactions || order.numberOfTransactions),
+        0
+      )}`,
+      label: `${t("myCartable.totalTransactions")}`,
+    },
+    {
+      number: `${new Intl.NumberFormat("fa-IR").format(
+        pendingOrders.reduce((sum, order) => sum + order.totalAmount, 0)
+      )}`,
+      label: `${t("myCartable.totalAmount")}`,
+    },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-4">
@@ -146,25 +168,22 @@ export default function MyCartablePage() {
             pendingOrders.length > 0 &&
             !isMobile &&
             !hasSelection && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="hover:bg-muted/80 transition-colors"
-                onClick={handleExport}
-              >
-                <Download className="h-4 w-4 me-2" />
+              <Button variant="mono" onClick={handleExport}>
+                <Download className="" />
                 {t("common.buttons.export")}
               </Button>
             )
           }
         />
 
-        {/* Desktop: Bulk Actions Bar */}
+        <div className="col-span-1 lg:col-span-3">
+          <Statistics items={items} />
+        </div>
+
         {!isMobile && hasSelection && (
           <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border">
             <Button
-              size="sm"
-              variant="ghost"
+              variant="mono"
               onClick={handleCancelSelection}
               className="shrink-0"
             >
@@ -176,8 +195,8 @@ export default function MyCartablePage() {
             </div>
             <Button
               size="sm"
-              variant="outline"
-              className="text-destructive border-destructive/30"
+              variant="destructive"
+              className="px-4"
               onClick={handleBulkReject}
             >
               <XCircle className="h-4 w-4 me-2" />
@@ -185,7 +204,8 @@ export default function MyCartablePage() {
             </Button>
             <Button
               size="sm"
-              className="bg-success hover:bg-success/90"
+              variant="primary"
+              className=""
               onClick={handleBulkApprove}
             >
               <CheckCircle className="h-4 w-4 me-2" />
@@ -220,48 +240,6 @@ export default function MyCartablePage() {
                 {t("orders.noOrders")}
               </div>
             )}
-          </div>
-        )}
-
-        {/* Stats Summary */}
-        {pendingOrders.length > 0 && (
-          <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold text-foreground">
-                  {pendingOrders.length}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {t("myCartable.totalOrders")}
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">
-                  {pendingOrders.reduce(
-                    (sum, order) =>
-                      sum +
-                      (order.totalTransactions || order.numberOfTransactions),
-                    0
-                  )}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {t("myCartable.totalTransactions")}
-                </p>
-              </div>
-              <div className="col-span-2 md:col-span-1">
-                <p className="text-2xl font-bold text-foreground">
-                  {new Intl.NumberFormat("fa-IR").format(
-                    pendingOrders.reduce(
-                      (sum, order) => sum + order.totalAmount,
-                      0
-                    )
-                  )}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {t("myCartable.totalAmount")}
-                </p>
-              </div>
-            </div>
           </div>
         )}
       </div>

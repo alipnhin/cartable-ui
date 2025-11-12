@@ -10,7 +10,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Mail, Phone, Shield, Calendar, CheckCircle2, XCircle } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  Shield,
+  Calendar,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { formatDate } from "@/lib/helpers";
 
@@ -93,7 +100,7 @@ export function SignerCard({ signer, onRequestStatusChange }: SignerCardProps) {
               )}
             </Badge>
             <Button
-              variant={signer.isActive ? "destructive" : "default"}
+              variant={signer.isActive ? "destructive" : "outline"}
               size="sm"
               className="flex-1"
               onClick={() => onRequestStatusChange(signer.id, signer.isActive)}

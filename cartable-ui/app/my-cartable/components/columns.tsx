@@ -217,13 +217,15 @@ export const createColumns = (
           <Button
             variant="outline"
             size="sm"
-            className="h-9 w-9 p-0"
+            className=""
             asChild
             title={t("common.buttons.view")}
           >
             <Link href={`/payment-orders/${row.original.id}`}>
               <Eye className="h-4 w-4" />
-              <span className="sr-only">{t("common.buttons.view")}</span>
+              <span className="sr-only xl:not-sr-only">
+                {t("common.buttons.view")}
+              </span>
             </Link>
           </Button>
 
@@ -233,7 +235,7 @@ export const createColumns = (
               {/* دکمه تأیید */}
               <Button
                 size="sm"
-                className="h-9 px-3 gap-2 bg-success hover:bg-success/90 text-white"
+                variant="primary"
                 onClick={(e) => {
                   e.stopPropagation();
                   onApprove(row.original.id);
@@ -241,15 +243,16 @@ export const createColumns = (
                 title={t("common.buttons.approve")}
               >
                 <CheckCircle className="h-4 w-4" />
-                <span className="hidden xl:inline">{t("common.buttons.approve")}</span>
-                <span className="sr-only xl:not-sr-only">{t("common.buttons.approve")}</span>
+                <span className="sr-only xl:not-sr-only">
+                  {t("common.buttons.approve")}
+                </span>
               </Button>
 
               {/* دکمه رد */}
               <Button
                 variant="destructive"
                 size="sm"
-                className="h-9 px-3 gap-2"
+                className=" gap-2"
                 onClick={(e) => {
                   e.stopPropagation();
                   onReject(row.original.id);
@@ -257,8 +260,9 @@ export const createColumns = (
                 title={t("common.buttons.reject")}
               >
                 <XCircle className="h-4 w-4" />
-                <span className="hidden xl:inline">{t("common.buttons.reject")}</span>
-                <span className="sr-only xl:not-sr-only">{t("common.buttons.reject")}</span>
+                <span className="sr-only xl:not-sr-only">
+                  {t("common.buttons.reject")}
+                </span>
               </Button>
             </>
           )}
