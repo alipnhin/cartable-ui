@@ -41,7 +41,7 @@ export function SignerCard({ signer, onRequestStatusChange }: SignerCardProps) {
     <Card className="p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start gap-4">
         {/* Avatar */}
-        <Avatar className="w-14 h-14 flex-shrink-0">
+        <Avatar className="w-14 h-14 shrink-0">
           <AvatarImage src={signer.avatar} alt={signer.fullName} />
           <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
             {getInitials(signer.fullName)}
@@ -65,18 +65,18 @@ export function SignerCard({ signer, onRequestStatusChange }: SignerCardProps) {
           <div className="space-y-1.5 mb-3">
             {signer.email && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Mail className="h-3.5 w-3.5 flex-shrink-0" />
+                <Mail className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">{signer.email}</span>
               </div>
             )}
             {signer.phoneNumber && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Phone className="h-3.5 w-3.5 flex-shrink-0" />
+                <Phone className="h-3.5 w-3.5 shrink-0" />
                 <span className="font-mono">{signer.phoneNumber}</span>
               </div>
             )}
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+              <Calendar className="h-3.5 w-3.5 shrink-0" />
               <span>عضو از {formatDate(signer.createdAt, locale)}</span>
             </div>
           </div>
@@ -85,7 +85,7 @@ export function SignerCard({ signer, onRequestStatusChange }: SignerCardProps) {
           <div className="flex items-center gap-2 pt-3 border-t">
             <Badge
               variant={signer.isActive ? "success" : "secondary"}
-              className="gap-1 flex-shrink-0"
+              className="gap-1 shrink-0"
             >
               {signer.isActive ? (
                 <>

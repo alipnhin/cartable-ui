@@ -31,7 +31,7 @@ export function BankLogo({
     <div className={cn("flex items-center gap-2", className)}>
       <div
         className={cn(
-          "relative rounded overflow-hidden flex-shrink-0",
+          "relative rounded overflow-hidden shrink-0",
           sizeClasses[size]
         )}
       >

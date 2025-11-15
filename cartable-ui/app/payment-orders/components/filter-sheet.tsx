@@ -299,14 +299,13 @@ export function FilterSheet({
                 }}
                 className={cn(
                   "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
-                  (localFilters.accountId === "all" || !localFilters.accountId)
+                  localFilters.accountId === "all" || !localFilters.accountId
                     ? "bg-primary/10 text-primary"
                     : "hover:bg-muted"
                 )}
               >
-                {(localFilters.accountId === "all" || !localFilters.accountId) && (
-                  <Check className="h-5 w-5" />
-                )}
+                {(localFilters.accountId === "all" ||
+                  !localFilters.accountId) && <Check className="h-5 w-5" />}
                 <span className="flex-1">{t("filters.allAccounts")}</span>
               </button>
               {mockAccounts.map((account) => (
@@ -359,7 +358,8 @@ export function FilterSheet({
                 variant="outline"
                 role="combobox"
                 aria-expanded={statusOpen}
-                className="w-full justify-between h-10"
+                size="lg"
+                className="w-full justify-between"
               >
                 <span className="truncate">
                   {localFilters.status.length > 0
@@ -498,13 +498,13 @@ export function FilterSheet({
       <div className="flex gap-3 pt-4 border-t">
         <Button
           variant="outline"
-          className={cn("flex-1", isMobile && "h-12 text-base")}
+          className={cn("flex-1", isMobile && "text-base")}
           onClick={handleReset}
         >
           {t("filters.reset")}
         </Button>
         <Button
-          className={cn("flex-1", isMobile && "h-12 text-base")}
+          className={cn("flex-1", isMobile && " text-base")}
           onClick={handleApply}
         >
           اعمال فیلتر

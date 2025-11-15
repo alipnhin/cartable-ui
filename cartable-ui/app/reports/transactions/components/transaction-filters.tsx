@@ -248,7 +248,7 @@ export function TransactionFilters({
                   <Filter className="h-4 w-4" />
                   {!isMobile && t("filters.advancedFilters")}
                   {activeFiltersCount > 0 && (
-                    <span className="ms-1 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full min-w-[20px] text-center">
+                    <span className="ms-1 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full min-w-5 text-center">
                       {activeFiltersCount}
                     </span>
                   )}

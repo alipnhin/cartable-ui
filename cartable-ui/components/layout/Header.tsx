@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -52,19 +53,13 @@ export function Header({
           className="flex items-center gap-3 cursor-pointer shrink-0"
           onClick={() => router.push("/")}
         >
-          <div
-            className={cn(
-              "h-10 w-10 rounded-xl bg-linear-to-br from-primary to-primary/80 shrink-0",
-              "flex items-center justify-center",
-              "transition-all duration-200 hover:scale-105"
-            )}
-            style={{
-              boxShadow:
-                "0 2px 8px rgba(39,174,96,0.25), 0 1px 4px rgba(39,174,96,0.15)",
-            }}
-          >
-            <span className="text-primary-foreground font-bold text-xl">ک</span>
-          </div>
+          <Image
+            src={toAbsoluteUrl("/media/logo.png")}
+            alt="App Logo"
+            width={40}
+            height={40}
+            className="object-contain"
+          />
 
           <div className="hidden sm:block">
             <h1 className="text-lg font-bold text-foreground hover:text-primary transition-colors">

@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency, formatDate } from "@/lib/helpers";
+import { getBankCodeFromIban } from "@/lib/bank-logos";
+import { BankLogo } from "@/components/common/bank-logo";
 
 export const createColumns = (
   locale: string,
@@ -51,6 +53,46 @@ export const createColumns = (
       size: 40,
     },
     {
+      accessorKey: "accountTitle",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="h-8 px-2 hover:bg-transparent font-semibold"
+          >
+            {t("orders.accountTitle")}
+            {column.getIsSorted() === "desc" ? (
+              <ArrowDown />
+            ) : column.getIsSorted() === "asc" ? (
+              <ArrowUp />
+            ) : (
+              <ChevronsUpDown />
+            )}
+          </Button>
+        );
+      },
+
+      cell: ({ row }) => {
+        const bankCode = getBankCodeFromIban(row.original.accountSheba);
+        return (
+          <div className="flex items-center grow gap-2.5">
+            {row.original.accountSheba && (
+              <BankLogo bankCode={bankCode} size="md" />
+            )}
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-mono hover:text-primary-active mb-px">
+                {row.original.accountTitle}
+              </span>
+              <span className="text-xs font-normal text-secondary-foreground leading-3">
+                {row.original.accountNumber}
+              </span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: "orderNumber",
       header: ({ column }) => {
         return (
@@ -80,32 +122,7 @@ export const createColumns = (
       ),
       size: 150,
     },
-    {
-      accessorKey: "accountTitle",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-8 px-2 hover:bg-transparent font-semibold"
-          >
-            {t("orders.accountTitle")}
-            {column.getIsSorted() === "desc" ? (
-              <ArrowDown />
-            ) : column.getIsSorted() === "asc" ? (
-              <ArrowUp />
-            ) : (
-              <ChevronsUpDown />
-            )}
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="max-w-[200px] truncate text-muted-foreground">
-          {row.original.accountTitle}
-        </div>
-      ),
-    },
+
     {
       accessorKey: "totalAmount",
       header: ({ column }) => {

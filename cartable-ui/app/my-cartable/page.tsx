@@ -168,7 +168,7 @@ export default function MyCartablePage() {
             pendingOrders.length > 0 &&
             !isMobile &&
             !hasSelection && (
-              <Button variant="mono" onClick={handleExport}>
+              <Button variant="outline" onClick={handleExport}>
                 <Download className="" />
                 {t("common.buttons.export")}
               </Button>
@@ -183,18 +183,18 @@ export default function MyCartablePage() {
         {!isMobile && hasSelection && (
           <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border">
             <Button
-              variant="mono"
+              mode="icon"
+              variant="outline"
+              size="icon"
+              className="rounded-full"
               onClick={handleCancelSelection}
-              className="shrink-0"
             >
-              <X className="h-4 w-4 me-2" />
-              {t("common.buttons.cancel")}
+              <X className="" />
             </Button>
             <div className="flex-1 text-sm font-medium">
               {selectedCount} {t("common.selected")}
             </div>
             <Button
-              size="sm"
               variant="destructive"
               className="px-4"
               onClick={handleBulkReject}
@@ -202,12 +202,7 @@ export default function MyCartablePage() {
               <XCircle className="h-4 w-4 me-2" />
               {t("common.buttons.reject")}
             </Button>
-            <Button
-              size="sm"
-              variant="primary"
-              className=""
-              onClick={handleBulkApprove}
-            >
+            <Button variant="primary" className="" onClick={handleBulkApprove}>
               <CheckCircle className="h-4 w-4 me-2" />
               {t("common.buttons.approve")}
             </Button>
@@ -249,7 +244,7 @@ export default function MyCartablePage() {
         <div
           className={cn(
             "fixed bottom-22 left-0 right-0 z-40 p-4",
-            "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80",
+            "bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80",
             "border-t shadow-lg"
           )}
         >

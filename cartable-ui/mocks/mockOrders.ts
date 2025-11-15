@@ -132,7 +132,7 @@ for (let i = 0; i < 25; i++) {
 
     // فیلدهای اضافی برای UI
     orderNumber: generateOrderId(i + 1),
-    accountTitle: `${account.bankName} - ${account.accountNumber}`,
+    accountTitle: `${account.accountTitle}`,
     totalTransactions: transactionCount,
     createdDate: createdAt,
     createdDateTime: createdAt,

@@ -205,25 +205,25 @@ export default function PaymentOrdersPage() {
           <div className="flex gap-2">
             <Button
               variant="outline"
-              size={isMobile ? "sm" : "md"}
+              mode="default"
               onClick={() => setShowFilters(true)}
               className="hover:bg-muted/80 transition-colors"
             >
-              <Filter className="h-4 w-4 me-2" />
+              <Filter className="" />
               {t("common.buttons.filter")}
               {activeFiltersCount > 0 && (
-                <span className="ms-2 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full min-w-[20px] text-center">
+                <span className="ms-2 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full min-w-5 text-center">
                   {activeFiltersCount}
                 </span>
               )}
             </Button>
             <Button
               variant="outline"
-              size={isMobile ? "sm" : "md"}
               onClick={handleExport}
+              mode={isMobile ? "icon" : "default"}
               className="hover:bg-muted/80 transition-colors"
             >
-              <Download className="h-4 w-4 me-2" />
+              <Download className="" />
               {!isMobile && t("common.buttons.export")}
             </Button>
           </div>

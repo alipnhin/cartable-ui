@@ -27,7 +27,7 @@ export const mockAccounts: Account[] = [
   {
     id: "acc-1",
     groupId: "group-1",
-    accountTitle: "حساب اصلی - بانک ملی",
+    accountTitle: "حساب جاری ملی درآمد ثابت",
     accountNumber: "1234567890123456",
     sheba: "IR120150001234567890123456",
     bankName: "بانک ملی ایران",
@@ -48,7 +48,7 @@ export const mockAccounts: Account[] = [
   {
     id: "acc-2",
     groupId: "group-1",
-    accountTitle: "حساب سرمایه‌گذاری - بانک صادرات",
+    accountTitle: "کوتاه مدت آتیه ",
     accountNumber: "2345678901234567",
     sheba: "IR130190002345678901234567",
     bankName: "بانک صادرات ایران",
@@ -69,7 +69,7 @@ export const mockAccounts: Account[] = [
   {
     id: "acc-3",
     groupId: "group-2",
-    accountTitle: "حساب عملیاتی - بانک تجارت",
+    accountTitle: "کوتاه مدت درآمد ثابت",
     accountNumber: "3456789012345678",
     sheba: "IR140180003456789012345678",
     bankName: "بانک تجارت",
@@ -90,7 +90,7 @@ export const mockAccounts: Account[] = [
   {
     id: "acc-4",
     groupId: "group-2",
-    accountTitle: "حساب پس‌انداز - بانک ملت",
+    accountTitle: "حساب جاری ملت آتیه",
     accountNumber: "4567890123456789",
     sheba: "IR150120004567890123456789",
     bankName: "بانک ملت",
@@ -111,7 +111,7 @@ export const mockAccounts: Account[] = [
   {
     id: "acc-5",
     groupId: "group-2",
-    accountTitle: "حساب ارزی - بانک پاسارگاد",
+    accountTitle: "پاسارگاه صندوق طلا",
     accountNumber: "5678901234567890",
     sheba: "IR160570005678901234567890",
     bankName: "بانک پاسارگاد",

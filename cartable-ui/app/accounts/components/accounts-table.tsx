@@ -44,23 +44,33 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
       }}
     >
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-accent/60 font-bold">
           <TableRow>
-            <TableHead>{t("accounts.accountTitle")}</TableHead>
-            <TableHead>{t("accounts.bankName")}</TableHead>
-            <TableHead>{t("accounts.accountNumber")}</TableHead>
-            <TableHead>{t("accounts.iban")}</TableHead>
-            <TableHead className="text-center">
+            <TableHead className="font-bold">
+              {t("accounts.accountTitle")}
+            </TableHead>
+            <TableHead className="font-bold">
+              {t("accounts.bankName")}
+            </TableHead>
+            <TableHead className="font-bold">
+              {t("accounts.accountNumber")}
+            </TableHead>
+            <TableHead className="font-bold">{t("accounts.iban")}</TableHead>
+            <TableHead className="text-center font-bold">
               {t("accounts.balance")}
             </TableHead>
-            <TableHead className="text-center">
+            <TableHead className="text-center font-bold">
               {t("accounts.minSignatures")}
             </TableHead>
-            <TableHead className="text-center">
+            <TableHead className="text-center font-bold">
               {t("accounts.signersCount")}
             </TableHead>
-            <TableHead className="text-center">{t("common.status")}</TableHead>
-            <TableHead className="text-center">{t("common.actions")}</TableHead>
+            <TableHead className="text-center font-bold">
+              {t("common.status")}
+            </TableHead>
+            <TableHead className="text-center font-bold">
+              {t("common.actions")}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -123,7 +133,9 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
                       title={t("common.buttons.view")}
                     >
                       <Eye className="h-4 w-4" />
-                      <span className="hidden xl:inline">{t("common.buttons.view")}</span>
+                      <span className="hidden xl:inline">
+                        {t("common.buttons.view")}
+                      </span>
                     </Button>
                   </div>
                 </TableCell>

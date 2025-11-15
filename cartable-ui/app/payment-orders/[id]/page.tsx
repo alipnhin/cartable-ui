@@ -10,7 +10,16 @@ import { OrderDetailStatistics } from "./components/order-detail-statistics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import useTranslation from "@/hooks/useTranslation";
-import { ArrowRight, FileText, Users, History, BarChart3 } from "lucide-react";
+import {
+  ArrowRight,
+  FileText,
+  Users,
+  History,
+  BarChart3,
+  UserRound,
+  Bell,
+  ShieldCheck,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function PaymentOrderDetailPage() {
@@ -48,12 +57,13 @@ export default function PaymentOrderDetailPage() {
       <Tabs defaultValue="statistics" className="w-full space-y-6">
         {/* Tab Navigation */}
         <div className="rounded-lg border bg-card p-4">
-          <TabsList className="w-full justify-center bg-transparent h-auto gap-3 flex-wrap">
-            <TabsTrigger
-              value="statistics"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
-            >
-              <BarChart3 className="h-4 w-4" />
+          <TabsList
+            className="w-full justify-center bg-transparent h-auto gap-3 flex-wrap"
+            size="lg"
+            variant="button"
+          >
+            <TabsTrigger value="statistics">
+              <BarChart3 />{" "}
               <span className="hidden sm:inline">
                 {t("paymentOrders.statistics")}
               </span>
@@ -62,11 +72,8 @@ export default function PaymentOrderDetailPage() {
               </span>
             </TabsTrigger>
 
-            <TabsTrigger
-              value="transactions"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
-            >
-              <FileText className="h-4 w-4" />
+            <TabsTrigger value="transactions">
+              <FileText className="" />
               <span className="hidden sm:inline">
                 {t("paymentOrders.transactions")}
               </span>
@@ -78,11 +85,8 @@ export default function PaymentOrderDetailPage() {
               </span>
             </TabsTrigger>
 
-            <TabsTrigger
-              value="approvers"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
-            >
-              <Users className="h-4 w-4" />
+            <TabsTrigger value="approvers">
+              <Users />
               <span className="hidden sm:inline">
                 {t("paymentOrders.approvers")}
               </span>
@@ -94,11 +98,8 @@ export default function PaymentOrderDetailPage() {
               </span>
             </TabsTrigger>
 
-            <TabsTrigger
-              value="history"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-3 gap-2 transition-all"
-            >
-              <History className="h-4 w-4" />
+            <TabsTrigger value="history">
+              <History />
               <span className="hidden sm:inline">
                 {t("paymentOrders.history")}
               </span>

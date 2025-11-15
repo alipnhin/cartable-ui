@@ -16,8 +16,8 @@
     --radius-xl: 0.75rem;
     --radius-2xl: 1rem;
     --spacing: 0.25rem;
-    --text-xs: 0.65rem;
-    --text-sm: 0.775rem;
+    --text-xs: 0.75rem;
+    --text-sm: 0.813rem;
     --text-base: 0.875rem;
     --text-lg: 1.125rem;
     --text-xl: 1.25rem;
@@ -84,8 +84,8 @@
     --secondary-foreground: #1E293B;
     --muted: #F4F8FA;
     --muted-foreground: #64748B;
-    --accent: #06B6D4;
-    --accent-foreground: #0F172A;
+    --accent: oklch(96.7% 0.003 264.542);
+    --accent-foreground: oklch(21% 0.006 285.885);
     --success: #10B981;
     --success-foreground: #ECFDF5;
     --warning: #F59E0B;
@@ -128,8 +128,8 @@
     --secondary-foreground: #F0FDFF;
     --muted: #1E3A4A;
     --muted-foreground: #94A3B8;
-    --accent: #06B6D4;
-    --accent-foreground: #F0FDFF;
+    --accent: oklch(21% 0.006 285.885);
+    --accent-foreground: oklch(98.5% 0 0);
     --success: #34D399;
     --success-foreground: #064E3B;
     --warning: #FBBF24;

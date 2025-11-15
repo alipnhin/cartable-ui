@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { OrderStatus } from "@/types/order";
-import { DataTableViewOptions } from "./data-table-view-options";
+import { mockAccounts } from "@/mocks";
 import useTranslation from "@/hooks/useTranslation";
 
 interface DataTableToolbarProps<TData> {
@@ -56,8 +56,8 @@ export function DataTableToolbar<TData>({
         />
         {table.getColumn("status") && (
           <DataTableFacetedFilter
-            column={table.getColumn("status")}
-            title={t(`orders.status`)}
+            column={table.getColumn("accountTitle")}
+            title={t(`orders.accountTitle`)}
             options={statusOptions}
           />
         )}

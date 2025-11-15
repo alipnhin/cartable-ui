@@ -445,7 +445,7 @@ export function OrderDetailTransactions({
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           {bankCode && (
-                            <div className="flex-shrink-0">
+                            <div className="shrink-0">
                               <BankLogo bankCode={bankCode} size="sm" />
                             </div>
                           )}
@@ -695,7 +695,7 @@ export function OrderDetailTransactions({
                             )}
                             <button
                               onClick={() => handlePageChange(page)}
-                              className={`min-w-[32px] h-8 px-3 text-sm rounded-md transition-all font-medium ${
+                              className={`min-w-8 h-8 px-3 text-sm rounded-md transition-all font-medium ${
                                 currentPage === page
                                   ? "bg-primary text-primary-foreground shadow-sm"
                                   : "text-muted-foreground hover:bg-muted"

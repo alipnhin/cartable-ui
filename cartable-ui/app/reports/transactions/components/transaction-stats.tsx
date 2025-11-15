@@ -97,45 +97,6 @@ export function TransactionStats({ transactions }: TransactionStatsProps) {
           );
         })}
       </div>
-
-      {/* کارت‌های مبلغ */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="border-primary">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-primary/10">
-                <DollarSign className="h-8 w-8 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground">
-                  {t("reports.totalAmount")}
-                </p>
-                <p className="text-2xl font-bold mt-1">
-                  {formatCurrency(stats.totalAmount, locale)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-green-600">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-green-50">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground">
-                  {t("reports.successAmount")}
-                </p>
-                <p className="text-2xl font-bold mt-1 text-green-600">
-                  {formatCurrency(stats.successAmount, locale)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }

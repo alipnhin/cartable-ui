@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import useTranslation from "@/hooks/useTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { Phone } from "lucide-react";
+import { toAbsoluteUrl } from "@/lib/helpers";
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -61,9 +63,13 @@ export default function LoginPage() {
               <form onSubmit={handleLogin} className="p-6 md:p-8">
                 <FieldGroup>
                   <div className="flex flex-col items-center gap-2 text-center">
-                    <div className="mb-2 h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-                      <div className="text-2xl font-bold text-primary">کـ</div>
-                    </div>
+                    <Image
+                      src={toAbsoluteUrl("/media/logo.png")}
+                      alt="App Logo"
+                      width={64}
+                      height={64}
+                      className="object-contain mb-4"
+                    />
                     <h1 className="text-2xl font-bold">
                       {t("auth.welcomeBack")}
                     </h1>
