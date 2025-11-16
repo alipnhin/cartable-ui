@@ -39,17 +39,17 @@ export interface PaymentOrder {
 }
 
 export enum OrderStatus {
-  Draft = "draft", // پیش‌نویس
-  WaitingForOwnersApproval = "waiting_for_owners_approval", // در انتظار تأیید صاحبان امضا
-  OwnersApproved = "owners_approved", // تأیید شده توسط صاحبان امضا
-  OwnerRejected = "ownerRejected",
-  SubmittedToBank = "submitted_to_bank", // ارسال شده به بانک
-  Succeeded = "succeeded", // انجام شده
-  PartiallySucceeded = "partially_succeeded", // انجام شده با خطا
+  Draft = "Draft", // پیش‌نویس
+  WaitingForOwnersApproval = "WaitingForOwnersApproval", // در انتظار تأیید صاحبان امضا
+  OwnersApproved = "OwnersApproved", // تأیید شده توسط صاحبان امضا
+  OwnerRejected = "OwnerRejected",
+  SubmittedToBank = "SubmittedToBank", // ارسال شده به بانک
+  Succeeded = "BankSucceeded", // انجام شده
+  PartiallySucceeded = "DoneWithError", // انجام شده با خطا
   Rejected = "rejected", // عدم تأیید
-  BankRejected = "bank_rejected", // رد شده توسط بانک
-  Canceled = "canceled", // لغو شده
-  Expired = "expired", // منقضی شده
+  BankRejected = "BankRejected", // رد شده توسط بانک
+  Canceled = "Canceled", // لغو شده
+  Expired = "Expired", // منقضی شده
 }
 
 export interface PaymentOrderDetail extends PaymentOrder {

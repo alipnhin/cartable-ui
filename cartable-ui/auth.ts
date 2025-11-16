@@ -11,7 +11,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientSecret: process.env.AUTH_CLIENT_SECRET,
       authorization: {
         params: {
-          scope: "openid profile email offline_access",
+          scope:
+            "openid profile email offline_access TadbirPay.Cartable.Api.Scope",
           response_type: "code",
         },
       },
