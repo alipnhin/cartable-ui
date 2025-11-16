@@ -24,6 +24,7 @@ import {
 import { mapPaymentListDtosToPaymentOrders } from "@/lib/api-mappers";
 import { PaymentOrder } from "@/types/order";
 import { OperationTypeEnum } from "@/types/api";
+import { getErrorMessage } from "@/lib/error-handler";
 
 export default function MyCartablePage() {
   const { t, locale } = useTranslation();
@@ -132,7 +133,7 @@ export default function MyCartablePage() {
       });
       toast({
         title: t("toast.error"),
-        description: "خطا در ارسال کد تایید",
+        description: getErrorMessage(error),
         variant: "error",
       });
     }
@@ -183,7 +184,7 @@ export default function MyCartablePage() {
       });
       toast({
         title: t("toast.error"),
-        description: "خطا در ارسال کد تایید",
+        description: getErrorMessage(error),
         variant: "error",
       });
     }
@@ -240,7 +241,7 @@ export default function MyCartablePage() {
       });
       toast({
         title: t("toast.error"),
-        description: "خطا در ارسال کد تایید",
+        description: getErrorMessage(error),
         variant: "error",
       });
     }
@@ -297,7 +298,7 @@ export default function MyCartablePage() {
       });
       toast({
         title: t("toast.error"),
-        description: "خطا در ارسال کد تایید",
+        description: getErrorMessage(error),
         variant: "error",
       });
     }
@@ -371,7 +372,7 @@ export default function MyCartablePage() {
       console.error("Error confirming operation:", error);
       toast({
         title: t("toast.error"),
-        description: "خطا در انجام عملیات",
+        description: getErrorMessage(error),
         variant: "error",
       });
       throw error; // برای اینکه OTP dialog خطا را نمایش دهد
@@ -417,7 +418,7 @@ export default function MyCartablePage() {
       console.error("Error resending OTP:", error);
       toast({
         title: t("toast.error"),
-        description: "خطا در ارسال مجدد کد تایید",
+        description: getErrorMessage(error),
         variant: "error",
       });
     }
