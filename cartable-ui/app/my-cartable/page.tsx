@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { AppLayout, PageHeader } from "@/components/layout";
 import { OrderCard, OrderCardSkeleton } from "./components/order-card";
@@ -87,8 +87,34 @@ export default function MyCartablePage() {
     fetchOrders();
   }, [session?.accessToken, pageNumber, pageSize]);
 
+  // Helper function to reload data
+  const reloadData = useCallback(async () => {
+    if (!session?.accessToken) return;
+
+    setIsLoading(true);
+    try {
+      const response = await getApproverCartable(
+        {
+          pageNumber,
+          pageSize,
+          orderBy: "createdDateTime",
+        },
+        session.accessToken
+      );
+
+      const mappedOrders = mapPaymentListDtosToPaymentOrders(response.items);
+      setOrders(mappedOrders);
+      setTotalItems(response.totalItemCount);
+      setTotalPages(response.totalPageCount);
+    } catch (error) {
+      console.error("Error fetching cartable:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [session?.accessToken, pageNumber, pageSize]);
+
   // Handlers
-  const handleSingleApprove = async (orderId: string) => {
+  const handleSingleApprove = useCallback(async (orderId: string) => {
     if (!session?.accessToken) return;
 
     // باز کردن دیالوگ با حالت loading
@@ -137,9 +163,9 @@ export default function MyCartablePage() {
         variant: "error",
       });
     }
-  };
+  }, [session?.accessToken, t, toast]);
 
-  const handleSingleReject = async (orderId: string) => {
+  const handleSingleReject = useCallback(async (orderId: string) => {
     if (!session?.accessToken) return;
 
     // باز کردن دیالوگ با حالت loading
@@ -188,7 +214,7 @@ export default function MyCartablePage() {
         variant: "error",
       });
     }
-  };
+  }, [session?.accessToken, t, toast]);
 
   const handleBulkApprove = async () => {
     if (!session?.accessToken) return;
@@ -355,19 +381,7 @@ export default function MyCartablePage() {
       setSelectedRowIds({});
 
       // بارگذاری مجدد لیست
-      const response = await getApproverCartable(
-        {
-          pageNumber,
-          pageSize,
-          orderBy: "createdDateTime",
-        },
-        session.accessToken
-      );
-
-      const mappedOrders = mapPaymentListDtosToPaymentOrders(response.items);
-      setOrders(mappedOrders);
-      setTotalItems(response.totalItemCount);
-      setTotalPages(response.totalPageCount);
+      await reloadData();
     } catch (error) {
       console.error("Error confirming operation:", error);
       toast({
@@ -447,7 +461,7 @@ export default function MyCartablePage() {
   // Create columns with handlers
   const columns = useMemo(
     () => createColumns(locale, handleSingleApprove, handleSingleReject, t),
-    [locale]
+    [locale, handleSingleApprove, handleSingleReject, t]
   );
 
   const hasSelection = isMobile
