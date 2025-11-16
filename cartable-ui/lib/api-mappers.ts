@@ -3,44 +3,78 @@
  * توابع تبدیل داده‌های API به تایپ‌های داخلی برنامه
  */
 
-import { CartableItem } from "@/types/api";
+import { PaymentListDto, PaymentStatusEnum } from "@/types/api";
 import { PaymentOrder, OrderStatus } from "@/types/order";
 
 /**
- * تبدیل CartableItem (از API) به PaymentOrder (داخلی)
+ * تبدیل PaymentStatusEnum (از API) به OrderStatus (داخلی)
  */
-export function mapCartableItemToPaymentOrder(
-  item: CartableItem
+function mapPaymentStatus(status: PaymentStatusEnum): OrderStatus {
+  switch (status) {
+    case PaymentStatusEnum.Draft:
+      return OrderStatus.Draft;
+    case PaymentStatusEnum.WaitingForOwnersApproval:
+      return OrderStatus.WaitingForOwnersApproval;
+    case PaymentStatusEnum.OwnersApproved:
+      return OrderStatus.OwnersApproved;
+    case PaymentStatusEnum.OwnerRejected:
+      return OrderStatus.OwnerRejected;
+    case PaymentStatusEnum.SubmittedToBank:
+      return OrderStatus.SubmittedToBank;
+    case PaymentStatusEnum.Succeeded:
+      return OrderStatus.Succeeded;
+    case PaymentStatusEnum.PartiallySucceeded:
+      return OrderStatus.PartiallySucceeded;
+    case PaymentStatusEnum.Rejected:
+      return OrderStatus.Rejected;
+    case PaymentStatusEnum.BankRejected:
+      return OrderStatus.BankRejected;
+    case PaymentStatusEnum.Canceled:
+      return OrderStatus.Canceled;
+    case PaymentStatusEnum.Expired:
+      return OrderStatus.Expired;
+    default:
+      return OrderStatus.Draft;
+  }
+}
+
+/**
+ * تبدیل PaymentListDto (از API) به PaymentOrder (برای UI)
+ */
+export function mapPaymentListDtoToPaymentOrder(
+  dto: PaymentListDto
 ): PaymentOrder {
   return {
-    id: item.id,
-    orderId: item.orderId,
-    name: item.name,
-    description: item.description,
-    status: item.status as OrderStatus,
-    sourceIban: item.sourceIban,
-    accountNumber: item.accountNumber,
-    bankCode: item.bankCode,
-    bankName: item.bankName,
-    gatewayTitle: item.gatewayTitle,
-    totalAmount: parseFloat(item.totalAmount) || 0,
-    numberOfTransactions: parseInt(item.numberOfTransactions) || 0,
-    totalTransactions: parseInt(item.numberOfTransactions) || 0,
-    transactionsFee: item.transactionsFee,
-    trackingId: item.trackingId,
-    createdDateTime: item.createdDateTime,
-    updatedDateTime: item.updatedDateTime,
-    providerCode: item.providerCode,
-    bankGatewayId: item.bankGatewayId,
-    tenantId: item.tenantId,
+    id: dto.id,
+    orderId: dto.orderId,
+    title: dto.name,
+    accountId: dto.bankGatewayId,
+    accountNumber: dto.accountNumber,
+    accountSheba: dto.sourceIban,
+    bankName: dto.bankName,
+    numberOfTransactions: parseInt(dto.numberOfTransactions) || 0,
+    totalAmount: parseFloat(dto.totalAmount) || 0,
+    currency: "IRR",
+    status: mapPaymentStatus(dto.status),
+    createdBy: "",
+    createdByName: "",
+    createdAt: dto.createdDateTime,
+    updatedAt: dto.updatedDateTime,
+    description: dto.description,
+    // فیلدهای اضافی برای UI
+    orderNumber: dto.orderId,
+    accountTitle: dto.bankName,
+    totalTransactions: parseInt(dto.numberOfTransactions) || 0,
+    createdDate: dto.createdDateTime,
+    createdDateTime: dto.createdDateTime,
   };
 }
 
 /**
- * تبدیل لیست CartableItem به لیست PaymentOrder
+ * تبدیل لیست PaymentListDto به لیست PaymentOrder
  */
-export function mapCartableItemsToPaymentOrders(
-  items: CartableItem[]
+export function mapPaymentListDtosToPaymentOrders(
+  dtos: PaymentListDto[]
 ): PaymentOrder[] {
-  return items.map(mapCartableItemToPaymentOrder);
+  return dtos.map(mapPaymentListDtoToPaymentOrder);
 }
