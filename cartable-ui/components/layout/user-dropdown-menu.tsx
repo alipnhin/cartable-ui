@@ -2,7 +2,7 @@
 import { ReactNode, useState } from "react";
 import Link from "next/link";
 import { I18N_LANGUAGES, Language } from "@/i18n/config";
-import { FileText, Globe, Moon, User } from "lucide-react";
+import { FileText, Globe, LogOut, Moon, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSession, signOut } from "next-auth/react";
 
 export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const { t } = useTranslation();
@@ -30,6 +31,12 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const { theme, setTheme } = useTheme();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+  const { data: session } = useSession();
+
+  // اطلاعات کاربر از session
+  const userName = session?.user?.name || "کاربر";
+  const userEmail = session?.user?.email || "";
+  const userImage = session?.user?.image || "/media/avatars/blank.png";
 
   const handleLanguage = (lang: Language) => {
     changeLanguage(lang.code);
@@ -38,6 +45,10 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
 
   const handleThemeToggle = (checked: boolean) => {
     setTheme(checked ? "dark" : "light");
+  };
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/" });
   };
 
   // Mobile Drawer Version
@@ -51,18 +62,17 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             <div className="flex items-center gap-3 mb-6">
               <img
                 className="w-14 h-14 rounded-full border-2 border-border"
-                src={"/media/avatars/blank.png"}
+                src={userImage}
                 alt="User avatar"
               />
               <div className="flex flex-col flex-1">
-                <div className="text-base font-semibold">A.Panahian</div>
-                <div className="text-sm text-muted-foreground">
-                  ali.pnhin@gmail.com
-                </div>
+                <div className="text-base font-semibold">{userName}</div>
+                {userEmail && (
+                  <div className="text-sm text-muted-foreground">
+                    {userEmail}
+                  </div>
+                )}
               </div>
-              <Badge variant="primary" appearance="light">
-                Pro
-              </Badge>
             </div>
 
             {/* Menu Items */}
@@ -131,7 +141,13 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             </div>
 
             {/* Logout Button */}
-            <Button size="lg" className="w-full" onClick={() => setOpen(false)}>
+            <Button
+              size="lg"
+              variant="destructive"
+              className="w-full gap-2"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-5 w-5" />
               {t("userMenu.logout")}
             </Button>
           </div>
@@ -150,27 +166,16 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
           <div className="flex items-center gap-2">
             <img
               className="w-9 h-9 rounded-full border border-border"
-              src={"/media/avatars/blank.png"}
+              src={userImage}
               alt="User avatar"
             />
             <div className="flex flex-col">
-              <Link
-                href="/account/home/get-started"
-                className="text-sm text-mono hover:text-primary font-semibold"
-              >
-                A.Panahian
-              </Link>
-              <Link
-                href="ali.pnhin@gmail.com"
-                className="text-xs text-muted-foreground hover:text-primary"
-              >
-                ali.pnhin@gmail.com
-              </Link>
+              <div className="text-sm text-mono font-semibold">{userName}</div>
+              {userEmail && (
+                <div className="text-xs text-muted-foreground">{userEmail}</div>
+              )}
             </div>
           </div>
-          <Badge variant="primary" appearance="light" size="sm">
-            Pro
-          </Badge>
         </div>
 
         <DropdownMenuSeparator />
@@ -255,7 +260,13 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
           </div>
         </DropdownMenuItem>
         <div className="p-2 mt-1">
-          <Button size="sm" className="w-full">
+          <Button
+            size="sm"
+            variant="destructive"
+            className="w-full gap-2"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" />
             {t("userMenu.logout")}
           </Button>
         </div>

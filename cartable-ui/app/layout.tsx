@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { PWAInstaller } from "@/components/common/pwa-installer";
 import { AppSplashLoader } from "@/components/common/app-splash-loader";
 import { OfflineIndicator } from "@/components/common/offline-indicator";
+import { SessionProvider } from "next-auth/react";
 import localFont from "next/font/local";
 
 const yekanBakh = localFont({
@@ -64,16 +65,18 @@ export default function RootLayout({
         <AppSplashLoader />
         <OfflineIndicator />
         <PWAInstaller />
-        <ThemeProvider>
-          <I18nProvider>
-            <TooltipsProvider>
-              <DirectionProvider dir="rtl">
-                {children}
-                <Toaster />
-              </DirectionProvider>
-            </TooltipsProvider>
-          </I18nProvider>
-        </ThemeProvider>
+        <SessionProvider>
+          <ThemeProvider>
+            <I18nProvider>
+              <TooltipsProvider>
+                <DirectionProvider dir="rtl">
+                  {children}
+                  <Toaster />
+                </DirectionProvider>
+              </TooltipsProvider>
+            </I18nProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );
