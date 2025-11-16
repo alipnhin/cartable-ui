@@ -95,3 +95,65 @@ export interface PaymentListDto {
 
 // تایپ پاسخ لیست دستورات پرداخت
 export type PaymentListResponse = PaginatedResponse<PaymentListDto>;
+
+/**
+ * Enum نوع عملیات برای دریافت کد OTP
+ */
+export enum OperationTypeEnum {
+  /** بدون عملیات */
+  None = 0,
+  /** تائید درخواست پرداخت */
+  ApproveCartablePayment = 1,
+  /** رد درخواست پرداخت */
+  RejectCartablePayment = 2,
+  /** فعال کردن امضادار */
+  EnableGatewayUser = 3,
+  /** غیرفعال کردن امضادار */
+  DisableGatewayUser = 4,
+  /** رد درخواست امضادار */
+  RejectGatewayUser = 5,
+}
+
+/**
+ * درخواست ارسال کد OTP برای عملیات تکی
+ */
+export interface SendOperationOtpRequest {
+  /** شناسه دستور پرداخت */
+  objectId: string;
+  /** نوع عملیات */
+  operation: OperationTypeEnum;
+}
+
+/**
+ * درخواست تایید/رد تکی
+ */
+export interface ApproveRequest {
+  /** نوع عملیات */
+  operationType: OperationTypeEnum;
+  /** شناسه دستور پرداخت */
+  withdrawalOrderId: string;
+  /** کد OTP */
+  otpCode: string;
+}
+
+/**
+ * درخواست ارسال کد OTP برای عملیات گروهی
+ */
+export interface SendBatchOperationOtpRequest {
+  /** لیست شناسه‌های دستور پرداخت */
+  objectIds: string[];
+  /** نوع عملیات */
+  operation: OperationTypeEnum;
+}
+
+/**
+ * درخواست تایید/رد گروهی
+ */
+export interface BatchApproveRequest {
+  /** لیست شناسه‌های دستور پرداخت */
+  objectIds: string[];
+  /** نوع عملیات */
+  operationType: OperationTypeEnum;
+  /** کد OTP */
+  otpCode: string;
+}
