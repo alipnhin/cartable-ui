@@ -30,6 +30,8 @@ interface OtpDialogProps {
   description: string;
   onConfirm: (otp: string) => Promise<void>;
   onResend?: () => Promise<void>;
+  /** آیا در حال درخواست ارسال کد OTP است */
+  isRequestingOtp?: boolean;
 }
 
 export function OtpDialog({
@@ -39,8 +41,51 @@ export function OtpDialog({
   description,
   onConfirm,
   onResend,
+  isRequestingOtp = false,
 }: OtpDialogProps) {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
+
+  // اگر در حال درخواست OTP است، loading نمایش بده
+  if (isRequestingOtp) {
+    if (isMobile) {
+      return (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>{title}</DrawerTitle>
+              <DrawerDescription>{description}</DrawerDescription>
+            </DrawerHeader>
+            <div className="px-4 pb-6">
+              <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  {t("otp.requesting")}
+                </p>
+              </div>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      );
+    }
+
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center py-8 space-y-4">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">
+              {t("otp.requesting")}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   if (isMobile) {
     return (

@@ -39,7 +39,8 @@ export default function MyCartablePage() {
     open: boolean;
     type: "approve" | "reject";
     orderIds: string[];
-  }>({ open: false, type: "approve", orderIds: [] });
+    isRequestingOtp: boolean;
+  }>({ open: false, type: "approve", orderIds: [], isRequestingOtp: false });
 
   // State برای API
   const [orders, setOrders] = useState<PaymentOrder[]>([]);
@@ -89,6 +90,14 @@ export default function MyCartablePage() {
   const handleSingleApprove = async (orderId: string) => {
     if (!session?.accessToken) return;
 
+    // باز کردن دیالوگ با حالت loading
+    setOtpDialog({
+      open: true,
+      type: "approve",
+      orderIds: [orderId],
+      isRequestingOtp: true,
+    });
+
     try {
       // مرحله 1: درخواست ارسال کد OTP
       await sendOperationOtp(
@@ -99,15 +108,28 @@ export default function MyCartablePage() {
         session.accessToken
       );
 
+      // موفقیت - نمایش فرم OTP
+      setOtpDialog({
+        open: true,
+        type: "approve",
+        orderIds: [orderId],
+        isRequestingOtp: false,
+      });
+
       toast({
         title: t("toast.success"),
         description: t("otp.codeSent"),
         variant: "success",
       });
-
-      setOtpDialog({ open: true, type: "approve", orderIds: [orderId] });
     } catch (error) {
       console.error("Error sending OTP:", error);
+      // بستن دیالوگ و نمایش خطا
+      setOtpDialog({
+        open: false,
+        type: "approve",
+        orderIds: [],
+        isRequestingOtp: false,
+      });
       toast({
         title: t("toast.error"),
         description: "خطا در ارسال کد تایید",
@@ -119,6 +141,14 @@ export default function MyCartablePage() {
   const handleSingleReject = async (orderId: string) => {
     if (!session?.accessToken) return;
 
+    // باز کردن دیالوگ با حالت loading
+    setOtpDialog({
+      open: true,
+      type: "reject",
+      orderIds: [orderId],
+      isRequestingOtp: true,
+    });
+
     try {
       // مرحله 1: درخواست ارسال کد OTP
       await sendOperationOtp(
@@ -129,15 +159,28 @@ export default function MyCartablePage() {
         session.accessToken
       );
 
+      // موفقیت - نمایش فرم OTP
+      setOtpDialog({
+        open: true,
+        type: "reject",
+        orderIds: [orderId],
+        isRequestingOtp: false,
+      });
+
       toast({
         title: t("toast.success"),
         description: t("otp.codeSent"),
         variant: "success",
       });
-
-      setOtpDialog({ open: true, type: "reject", orderIds: [orderId] });
     } catch (error) {
       console.error("Error sending OTP:", error);
+      // بستن دیالوگ و نمایش خطا
+      setOtpDialog({
+        open: false,
+        type: "reject",
+        orderIds: [],
+        isRequestingOtp: false,
+      });
       toast({
         title: t("toast.error"),
         description: "خطا در ارسال کد تایید",
@@ -155,6 +198,14 @@ export default function MyCartablePage() {
 
     if (orderIds.length === 0) return;
 
+    // باز کردن دیالوگ با حالت loading
+    setOtpDialog({
+      open: true,
+      type: "approve",
+      orderIds,
+      isRequestingOtp: true,
+    });
+
     try {
       // مرحله 1: درخواست ارسال کد OTP برای عملیات گروهی
       await sendBatchOperationOtp(
@@ -165,15 +216,28 @@ export default function MyCartablePage() {
         session.accessToken
       );
 
+      // موفقیت - نمایش فرم OTP
+      setOtpDialog({
+        open: true,
+        type: "approve",
+        orderIds,
+        isRequestingOtp: false,
+      });
+
       toast({
         title: t("toast.success"),
         description: t("otp.codeSent"),
         variant: "success",
       });
-
-      setOtpDialog({ open: true, type: "approve", orderIds });
     } catch (error) {
       console.error("Error sending batch OTP:", error);
+      // بستن دیالوگ و نمایش خطا
+      setOtpDialog({
+        open: false,
+        type: "approve",
+        orderIds: [],
+        isRequestingOtp: false,
+      });
       toast({
         title: t("toast.error"),
         description: "خطا در ارسال کد تایید",
@@ -191,6 +255,14 @@ export default function MyCartablePage() {
 
     if (orderIds.length === 0) return;
 
+    // باز کردن دیالوگ با حالت loading
+    setOtpDialog({
+      open: true,
+      type: "reject",
+      orderIds,
+      isRequestingOtp: true,
+    });
+
     try {
       // مرحله 1: درخواست ارسال کد OTP برای عملیات گروهی
       await sendBatchOperationOtp(
@@ -201,15 +273,28 @@ export default function MyCartablePage() {
         session.accessToken
       );
 
+      // موفقیت - نمایش فرم OTP
+      setOtpDialog({
+        open: true,
+        type: "reject",
+        orderIds,
+        isRequestingOtp: false,
+      });
+
       toast({
         title: t("toast.success"),
         description: t("otp.codeSent"),
         variant: "success",
       });
-
-      setOtpDialog({ open: true, type: "reject", orderIds });
     } catch (error) {
       console.error("Error sending batch OTP:", error);
+      // بستن دیالوگ و نمایش خطا
+      setOtpDialog({
+        open: false,
+        type: "reject",
+        orderIds: [],
+        isRequestingOtp: false,
+      });
       toast({
         title: t("toast.error"),
         description: "خطا در ارسال کد تایید",
@@ -551,6 +636,7 @@ export default function MyCartablePage() {
         }
         onConfirm={handleOtpConfirm}
         onResend={handleOtpResend}
+        isRequestingOtp={otpDialog.isRequestingOtp}
       />
     </AppLayout>
   );
