@@ -187,24 +187,22 @@ export default function PaymentOrderDetailPage() {
     );
   }
 
-  // تبدیل orderDetails به فرمت مورد نیاز کامپوننت‌های قدیمی
+  // تبدیل orderDetails به فرمت مورد نیاز header
   const orderForHeader = {
     id: orderDetails.id,
     orderId: orderDetails.orderId,
     title: orderDetails.name,
-    accountId: orderDetails.bankGatewayId,
-    accountNumber: orderDetails.accountNumber,
     accountSheba: orderDetails.sourceIban,
     bankName: orderDetails.bankName,
     numberOfTransactions: parseInt(orderDetails.numberOfTransactions),
     totalAmount: parseFloat(orderDetails.totalAmount),
-    currency: "ریال",
     status: orderDetails.status as any, // Map enum
     createdAt: orderDetails.createdDateTime,
-    updatedAt: orderDetails.updatedDateTime,
     description: orderDetails.description,
     trackingId: orderDetails.trackingId,
     gatewayTitle: orderDetails.gatewayTitle,
+    accountTitle: orderDetails.name, // عنوان حساب
+    accountNumber: orderDetails.accountNumber,
   };
 
   const canInquiry = orderDetails.status === PaymentStatusEnum.SubmittedToBank;

@@ -30,11 +30,18 @@ import {
   Search,
   RefreshCw,
   Loader2,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  User,
+  CreditCard,
+  Hash,
+  Wallet,
+  FileText,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetFooter,
   SheetHeader,
@@ -44,7 +51,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { TransactionDetailDialog } from "./transaction-detail-dialog";
 import { BankLogo } from "@/components/common/bank-logo";
-import { PaymentTypeIcon } from "@/components/common/payment-type-icon";
 import { getBankCodeFromIban } from "@/lib/bank-logos";
 import { MobilePagination } from "@/components/common/mobile-pagination";
 import {
@@ -67,6 +73,8 @@ interface OrderDetailTransactionsProps {
   onRefresh: () => void | Promise<void>;
   onFilterChange: (filters: Partial<TransactionFilterParams>) => void | Promise<void>;
 }
+
+type SortField = "amount" | "destinationAccountOwner" | "nationalCode";
 
 // Helper function to convert API enum to display name
 const getStatusBadgeVariant = (status: TransactionStatusApiEnum) => {
@@ -155,14 +163,31 @@ export function OrderDetailTransactions({
   const [statusFilter, setStatusFilter] = useState<TransactionStatusApiEnum | "">("");
   const [paymentTypeFilter, setPaymentTypeFilter] = useState<PaymentTypeApiEnum | "">("");
   const [reasonCodeFilter, setReasonCodeFilter] = useState<ReasonCodeApiEnum | "">("");
+  const [sortField, setSortField] = useState<SortField | "">("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Dialog state
   const [selectedTransaction, setSelectedTransaction] = useState<WithdrawalTransaction | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const handleApplyFilters = () => {
-    const filters: Partial<TransactionFilterParams> = {};
+  const handleSort = (field: SortField) => {
+    let newDirection: "asc" | "desc" = "asc";
+
+    if (sortField === field) {
+      newDirection = sortDirection === "asc" ? "desc" : "asc";
+    }
+
+    setSortField(field);
+    setSortDirection(newDirection);
+
+    // ارسال درخواست سورت به سرور
+    const orderBy = `${field} ${newDirection}`;
+    applyFilters({ orderBy });
+  };
+
+  const applyFilters = (extraFilters?: Partial<TransactionFilterParams>) => {
+    const filters: Partial<TransactionFilterParams> = { ...extraFilters };
 
     if (searchValue) filters.serchValue = searchValue;
     if (statusFilter) filters.status = statusFilter;
@@ -170,6 +195,10 @@ export function OrderDetailTransactions({
     if (reasonCodeFilter) filters.reasonCode = reasonCodeFilter;
 
     onFilterChange(filters);
+  };
+
+  const handleApplyFilters = () => {
+    applyFilters();
     setIsFilterOpen(false);
   };
 
@@ -178,6 +207,8 @@ export function OrderDetailTransactions({
     setStatusFilter("");
     setPaymentTypeFilter("");
     setReasonCodeFilter("");
+    setSortField("");
+    setSortDirection("asc");
     onFilterChange({});
     setIsFilterOpen(false);
   };
@@ -200,6 +231,17 @@ export function OrderDetailTransactions({
     (reasonCodeFilter ? 1 : 0);
 
   const startIndex = (pageNumber - 1) * pageSize;
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-3.5 w-3.5 opacity-40" />;
+    }
+    return sortDirection === "asc" ? (
+      <ArrowUp className="h-3.5 w-3.5" />
+    ) : (
+      <ArrowDown className="h-3.5 w-3.5" />
+    );
+  };
 
   return (
     <>
@@ -429,98 +471,127 @@ export function OrderDetailTransactions({
           {!isLoading && (
             <>
               {isMobile ? (
-                // Mobile Cards View
+                // Mobile Cards View - بازطراحی شده
                 <div className="p-4 space-y-3">
                   {transactions.map((transaction, index) => {
                     const bankCode = getBankCodeFromIban(transaction.destinationIban);
                     const canInquiry = transaction.status === TransactionStatusApiEnum.WaitForBank;
 
                     return (
-                      <div
+                      <Card
                         key={transaction.id}
-                        className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
+                        className="border-2 hover:shadow-md transition-shadow"
                       >
-                        <div className="space-y-3">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              {bankCode && (
-                                <div className="shrink-0">
-                                  <BankLogo bankCode={bankCode} size="sm" />
+                        <CardContent className="p-4">
+                          <div className="space-y-3">
+                            {/* هدر کارت: نام و وضعیت */}
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                {bankCode && (
+                                  <div className="shrink-0">
+                                    <BankLogo bankCode={bankCode} size="sm" />
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-bold text-base truncate">
+                                    {transaction.destinationAccountOwner}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground mt-0.5">
+                                    ردیف {startIndex + index + 1}
+                                  </div>
+                                </div>
+                              </div>
+                              <Badge variant={getStatusBadgeVariant(transaction.status) as any} className="shrink-0">
+                                {getStatusLabel(transaction.status)}
+                              </Badge>
+                            </div>
+
+                            <div className="border-t" />
+
+                            {/* اطلاعات اصلی */}
+                            <div className="space-y-2.5">
+                              {/* مبلغ */}
+                              <div className="flex items-center gap-2">
+                                <Wallet className="h-4 w-4 text-primary shrink-0" />
+                                <span className="text-xs text-muted-foreground">مبلغ:</span>
+                                <span className="font-bold text-primary flex-1 truncate">
+                                  {formatCurrency(parseFloat(transaction.amount), locale)} ریال
+                                </span>
+                              </div>
+
+                              {/* کد ملی */}
+                              <div className="flex items-center gap-2">
+                                <Hash className="h-4 w-4 text-muted-foreground shrink-0" />
+                                <span className="text-xs text-muted-foreground">کد ملی:</span>
+                                <span className="text-sm font-mono flex-1">
+                                  {transaction.nationalCode}
+                                </span>
+                              </div>
+
+                              {/* شماره شبا */}
+                              <div className="flex items-center gap-2">
+                                <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" />
+                                <span className="text-xs text-muted-foreground">شبا:</span>
+                                <span className="text-xs font-mono flex-1 truncate">
+                                  {transaction.destinationIban}
+                                </span>
+                              </div>
+
+                              {/* نوع پرداخت */}
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                                <span className="text-xs text-muted-foreground">نوع:</span>
+                                <span className="text-sm font-medium">
+                                  {getPaymentTypeLabel(transaction.paymentType)}
+                                </span>
+                              </div>
+
+                              {/* کد علت */}
+                              <div className="flex items-start gap-2">
+                                <User className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                                <span className="text-xs text-muted-foreground">علت:</span>
+                                <span className="text-sm flex-1">
+                                  {getReasonCodeLabel(transaction.reasonCode)}
+                                </span>
+                              </div>
+
+                              {/* کد رهگیری */}
+                              {transaction.trackingId && (
+                                <div className="flex items-center gap-2 pt-2 border-t">
+                                  <span className="text-xs text-muted-foreground">کد رهگیری:</span>
+                                  <span className="text-sm font-mono font-medium flex-1">
+                                    {transaction.trackingId}
+                                  </span>
                                 </div>
                               )}
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium truncate">
-                                  {transaction.destinationAccountOwner}
-                                </div>
-                                <div className="text-xs text-muted-foreground font-mono truncate mt-1">
-                                  {transaction.destinationIban}
-                                </div>
-                              </div>
                             </div>
-                            <Badge variant={getStatusBadgeVariant(transaction.status) as any}>
-                              {getStatusLabel(transaction.status)}
-                            </Badge>
-                          </div>
 
-                          <div className="border-t" />
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <div className="text-muted-foreground text-xs mb-1">
-                                مبلغ:
-                              </div>
-                              <div className="font-bold text-primary">
-                                {formatCurrency(parseFloat(transaction.amount), locale)}
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-muted-foreground text-xs mb-1">
-                                نوع:
-                              </div>
-                              <div className="text-sm font-medium">
-                                {getPaymentTypeLabel(transaction.paymentType)}
-                              </div>
-                            </div>
-                          </div>
-
-                          {transaction.trackingId && (
-                            <>
-                              <div className="border-t" />
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">
-                                  کد رهگیری:
-                                </span>
-                                <span className="font-mono font-medium">
-                                  {transaction.trackingId}
-                                </span>
-                              </div>
-                            </>
-                          )}
-
-                          <div className="border-t pt-2 flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewDetails(transaction)}
-                              className="flex-1 gap-2"
-                            >
-                              <Eye className="h-4 w-4" />
-                              مشاهده
-                            </Button>
-                            {canInquiry && (
+                            {/* دکمه‌های عملیات */}
+                            <div className="pt-2 flex gap-2 border-t">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleInquiry(transaction)}
+                                onClick={() => handleViewDetails(transaction)}
                                 className="flex-1 gap-2"
                               >
-                                <RefreshCw className="h-4 w-4" />
-                                استعلام
+                                <Eye className="h-4 w-4" />
+                                مشاهده جزئیات
                               </Button>
-                            )}
+                              {canInquiry && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleInquiry(transaction)}
+                                  className="gap-2"
+                                >
+                                  <RefreshCw className="h-4 w-4" />
+                                  استعلام
+                                </Button>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </div>
+                        </CardContent>
+                      </Card>
                     );
                   })}
 
@@ -556,10 +627,34 @@ export function OrderDetailTransactions({
                     <TableHeader>
                       <TableRow className="hover:bg-transparent">
                         <TableHead className="w-12">#</TableHead>
-                        <TableHead>نام و نام خانوادگی</TableHead>
-                        <TableHead>کد ملی</TableHead>
+                        <TableHead
+                          className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                          onClick={() => handleSort("destinationAccountOwner")}
+                        >
+                          <div className="flex items-center gap-2">
+                            نام و نام خانوادگی
+                            <SortIcon field="destinationAccountOwner" />
+                          </div>
+                        </TableHead>
+                        <TableHead
+                          className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                          onClick={() => handleSort("nationalCode")}
+                        >
+                          <div className="flex items-center gap-2">
+                            کد ملی
+                            <SortIcon field="nationalCode" />
+                          </div>
+                        </TableHead>
                         <TableHead>شماره شبا</TableHead>
-                        <TableHead>مبلغ</TableHead>
+                        <TableHead
+                          className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                          onClick={() => handleSort("amount")}
+                        >
+                          <div className="flex items-center gap-2">
+                            مبلغ
+                            <SortIcon field="amount" />
+                          </div>
+                        </TableHead>
                         <TableHead>نوع پرداخت</TableHead>
                         <TableHead>کد علت</TableHead>
                         <TableHead>وضعیت</TableHead>
@@ -623,6 +718,7 @@ export function OrderDetailTransactions({
                                   size="sm"
                                   onClick={() => handleViewDetails(transaction)}
                                   className="h-8 w-8 p-0 hover:bg-primary/10"
+                                  title="مشاهده جزئیات"
                                 >
                                   <Eye className="h-4 w-4" />
                                 </Button>
