@@ -152,7 +152,7 @@ function OtpForm({ onConfirm, onResend, onClose }: OtpFormProps) {
   }, [timeLeft]);
 
   const handleSubmit = async () => {
-    if (otp.length < 5) return;
+    if (otp.length < 6) return;
 
     setIsLoading(true);
     try {
@@ -257,7 +257,7 @@ interface OtpInputProps {
   length?: number;
 }
 
-function OtpInput({ value, onChange, length = 5 }: OtpInputProps) {
+function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
   const [inputs, setInputs] = useState<string[]>(Array(length).fill(""));
 
   useEffect(() => {
