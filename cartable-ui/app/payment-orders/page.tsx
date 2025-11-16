@@ -150,6 +150,7 @@ export default function PaymentOrdersPage() {
     };
 
     fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     session?.accessToken,
     pageNumber,
@@ -158,12 +159,13 @@ export default function PaymentOrdersPage() {
     orderNumber,
     orderTitle,
     accountId,
-    statusFilter,
+    // statusFilter نباید مستقیماً در dependency باشد چون array است
+    JSON.stringify(statusFilter),
     dateFrom,
     dateTo,
-    sorting,
-    toast,
-    t,
+    // sorting نباید مستقیماً در dependency باشد چون array است
+    JSON.stringify(sorting),
+    // toast و t را حذف کردیم چون باعث re-render می‌شوند
   ]);
 
   /**
