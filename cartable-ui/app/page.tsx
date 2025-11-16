@@ -1,15 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { signIn } from "next-auth/react";
+import { Loader2 } from "lucide-react";
 
 export default function Home() {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignIn = () => {
-    signIn("identity-server", { callbackUrl: "/dashboard" });
+  const handleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      await signIn("identity-server", { callbackUrl: "/dashboard" });
+    } catch (error) {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -42,8 +50,16 @@ export default function Home() {
                 className="w-full sm:w-auto min-w-[300px] text-lg"
                 size="lg"
                 onClick={handleSignIn}
+                disabled={isLoading}
               >
-                <span className="py-4">{t("app.login")}</span>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="me-2 h-5 w-5 animate-spin" />
+                    <span className="py-4">در حال انتقال...</span>
+                  </>
+                ) : (
+                  <span className="py-4">{t("app.login")}</span>
+                )}
               </Button>
             </div>
           </div>
