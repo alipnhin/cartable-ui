@@ -1,6 +1,6 @@
 import apiClient from "@/lib/api-client";
 import {
-  CartableListResponse,
+  PaymentListResponse,
   CartableFilterParams,
 } from "@/types/api";
 
@@ -18,7 +18,7 @@ import {
 export const getApproverCartable = async (
   params: CartableFilterParams,
   accessToken: string
-): Promise<CartableListResponse> => {
+): Promise<PaymentListResponse> => {
   const {
     pageNumber = 1,
     pageSize = 10,
@@ -38,7 +38,7 @@ export const getApproverCartable = async (
     queryParams.append("bankGatewayId", bankGatewayId);
   }
 
-  const response = await apiClient.post<CartableListResponse>(
+  const response = await apiClient.post<PaymentListResponse>(
     `/v1-Cartable/Approver/ApproverCartable?${queryParams.toString()}`,
     {},
     {

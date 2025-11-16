@@ -15,7 +15,7 @@ import { OtpDialog } from "@/components/common/otp-dialog";
 import { cn } from "@/lib/utils";
 import { IStatisticsItems, Statistics } from "./components/statistics";
 import { getApproverCartable } from "@/services/cartableService";
-import { mapCartableItemsToPaymentOrders } from "@/lib/api-mappers";
+import { mapPaymentListDtosToPaymentOrders } from "@/lib/api-mappers";
 import { PaymentOrder } from "@/types/order";
 
 export default function MyCartablePage() {
@@ -59,7 +59,7 @@ export default function MyCartablePage() {
         );
 
         // تبدیل داده‌های API به فرمت داخلی
-        const mappedOrders = mapCartableItemsToPaymentOrders(response.items);
+        const mappedOrders = mapPaymentListDtosToPaymentOrders(response.items);
         setOrders(mappedOrders);
         setTotalItems(response.totalItemCount);
         setTotalPages(response.totalPageCount);
