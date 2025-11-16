@@ -29,15 +29,7 @@ export default function MyCartablePage() {
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
   const { toast } = useToast();
-  const { data: session, status } = useSession();
-
-  // Debug logging
-  useEffect(() => {
-    console.log("=== MY CARTABLE PAGE DEBUG ===");
-    console.log("Session status:", status);
-    console.log("Session data:", session);
-    console.log("Access token:", session?.accessToken ? "EXISTS" : "MISSING");
-  }, [session, status]);
+  const { data: session } = useSession();
 
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [selectedRowIds, setSelectedRowIds] = useState<Record<string, boolean>>(
