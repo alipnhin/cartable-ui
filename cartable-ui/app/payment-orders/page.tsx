@@ -40,84 +40,131 @@ export default function PaymentOrdersPage() {
   const [totalPages, setTotalPages] = useState(0);
 
   /**
+   * State برای sorting سمت سرور
+   */
+  const [sorting, setSorting] = useState<{ id: string; desc: boolean }[]>([]);
+
+  /**
    * State برای فیلترها
    * این فیلترها به API ارسال می‌شوند
    */
-  const [filters, setFilters] = useState({
-    status: [] as OrderStatus[],
-    search: "",
-    orderTitle: "",
-    orderNumber: "",
-    trackingId: "",
-    dateFrom: "",
-    dateTo: "",
-    accountId: "",
-  });
+  const [trackingId, setTrackingId] = useState("");
+  const [orderNumber, setOrderNumber] = useState("");
+  const [orderTitle, setOrderTitle] = useState("");
+  const [accountId, setAccountId] = useState("");
+  const [statusFilter, setStatusFilter] = useState<OrderStatus[]>([]);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
+  // فیلترهای legacy برای FilterSheet
+  const filters = useMemo(
+    () => ({
+      status: statusFilter,
+      search: "",
+      orderTitle,
+      orderNumber,
+      trackingId,
+      dateFrom,
+      dateTo,
+      accountId,
+    }),
+    [statusFilter, orderTitle, orderNumber, trackingId, dateFrom, dateTo, accountId]
+  );
 
   /**
    * واکشی داده‌ها از API
-   * این تابع هر بار که فیلترها یا صفحه تغییر کند، اجرا می‌شود
-   */
-  const fetchOrders = useCallback(async () => {
-    if (!session?.accessToken) return;
-
-    setIsLoading(true);
-    try {
-      // ساخت پارامترهای فیلتر برای API
-      const apiFilters: any = {
-        pageNumber,
-        pageSize,
-        orderBy: "createdDateTime",
-      };
-
-      // اضافه کردن فیلترهای اختیاری
-      if (filters.trackingId) apiFilters.trackingId = filters.trackingId;
-      if (filters.orderNumber) apiFilters.orderId = filters.orderNumber;
-      if (filters.orderTitle) apiFilters.name = filters.orderTitle;
-      if (filters.accountId && filters.accountId !== "all")
-        apiFilters.bankGatewayId = filters.accountId;
-      if (filters.status.length === 1) {
-        // اگر فقط یک وضعیت انتخاب شده، به API ارسال می‌شود
-        apiFilters.status = filters.status[0] as unknown as PaymentStatusEnum;
-      }
-      if (filters.dateFrom) {
-        const fromDate = new Date(filters.dateFrom);
-        apiFilters.fromDate = fromDate.toISOString();
-      }
-      if (filters.dateTo) {
-        const toDate = new Date(filters.dateTo);
-        toDate.setHours(23, 59, 59, 999);
-        apiFilters.toDate = toDate.toISOString();
-      }
-
-      const response = await searchPaymentOrders(
-        apiFilters,
-        session.accessToken
-      );
-
-      // تبدیل داده‌های API به فرمت داخلی
-      const mappedOrders = mapPaymentListDtosToPaymentOrders(response.items);
-      setOrders(mappedOrders);
-      setTotalItems(response.totalItemCount);
-      setTotalPages(response.totalPageCount);
-    } catch (error) {
-      console.error("Error fetching payment orders:", error);
-      toast({
-        title: t("toast.error"),
-        description: "خطا در دریافت اطلاعات دستورات پرداخت",
-        variant: "error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [session?.accessToken, pageNumber, pageSize, filters, toast, t]);
-
-  /**
-   * Effect برای واکشی داده‌ها هنگام تغییر فیلترها یا صفحه
+   * این تابع هر بار که فیلترها، صفحه یا sorting تغییر کند، اجرا می‌شود
    */
   useEffect(() => {
+    const fetchOrders = async () => {
+      if (!session?.accessToken) return;
+
+      setIsLoading(true);
+      try {
+        // ساخت پارامترهای فیلتر برای API
+        const apiFilters: any = {
+          pageNumber,
+          pageSize,
+        };
+
+        // اضافه کردن sorting
+        if (sorting.length > 0) {
+          const sortField = sorting[0];
+          // تبدیل نام فیلد از frontend به backend format
+          const fieldMap: Record<string, string> = {
+            orderNumber: "orderId",
+            accountTitle: "name",
+            totalAmount: "totalAmount",
+            numberOfTransactions: "numberOfTransactions",
+            status: "status",
+            createdDateTime: "createdDateTime",
+          };
+          const backendField = fieldMap[sortField.id] || sortField.id;
+          apiFilters.orderBy = sortField.desc
+            ? `${backendField} desc`
+            : backendField;
+        } else {
+          apiFilters.orderBy = "createdDateTime desc";
+        }
+
+        // اضافه کردن فیلترهای اختیاری
+        if (trackingId) apiFilters.trackingId = trackingId;
+        if (orderNumber) apiFilters.orderId = orderNumber;
+        if (orderTitle) apiFilters.name = orderTitle;
+        if (accountId && accountId !== "all")
+          apiFilters.bankGatewayId = accountId;
+        if (statusFilter.length === 1) {
+          // اگر فقط یک وضعیت انتخاب شده، به API ارسال می‌شود
+          apiFilters.status = statusFilter[0] as unknown as PaymentStatusEnum;
+        }
+        if (dateFrom) {
+          const fromDate = new Date(dateFrom);
+          apiFilters.fromDate = fromDate.toISOString();
+        }
+        if (dateTo) {
+          const toDate = new Date(dateTo);
+          toDate.setHours(23, 59, 59, 999);
+          apiFilters.toDate = toDate.toISOString();
+        }
+
+        const response = await searchPaymentOrders(
+          apiFilters,
+          session.accessToken
+        );
+
+        // تبدیل داده‌های API به فرمت داخلی
+        const mappedOrders = mapPaymentListDtosToPaymentOrders(response.items);
+        setOrders(mappedOrders);
+        setTotalItems(response.totalItemCount);
+        setTotalPages(response.totalPageCount);
+      } catch (error) {
+        console.error("Error fetching payment orders:", error);
+        toast({
+          title: t("toast.error"),
+          description: "خطا در دریافت اطلاعات دستورات پرداخت",
+          variant: "error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchOrders();
-  }, [fetchOrders]);
+  }, [
+    session?.accessToken,
+    pageNumber,
+    pageSize,
+    trackingId,
+    orderNumber,
+    orderTitle,
+    accountId,
+    statusFilter,
+    dateFrom,
+    dateTo,
+    sorting,
+    toast,
+    t,
+  ]);
 
   /**
    * محاسبه آمار
@@ -164,7 +211,13 @@ export default function PaymentOrdersPage() {
    * بعد از تغییر فیلتر، صفحه به اول برگردانده می‌شود
    */
   const handleFilterChange = (newFilters: typeof filters) => {
-    setFilters(newFilters);
+    setStatusFilter(newFilters.status);
+    setOrderTitle(newFilters.orderTitle);
+    setOrderNumber(newFilters.orderNumber);
+    setTrackingId(newFilters.trackingId);
+    setDateFrom(newFilters.dateFrom);
+    setDateTo(newFilters.dateTo);
+    setAccountId(newFilters.accountId);
     setPageNumber(1); // بازگشت به صفحه اول
   };
 
@@ -172,16 +225,13 @@ export default function PaymentOrdersPage() {
    * ریست کردن فیلترها
    */
   const handleResetFilters = () => {
-    setFilters({
-      status: [],
-      search: "",
-      orderTitle: "",
-      orderNumber: "",
-      trackingId: "",
-      dateFrom: "",
-      dateTo: "",
-      accountId: "",
-    });
+    setStatusFilter([]);
+    setOrderTitle("");
+    setOrderNumber("");
+    setTrackingId("");
+    setDateFrom("");
+    setDateTo("");
+    setAccountId("");
     setPageNumber(1); // بازگشت به صفحه اول
   };
 
@@ -284,7 +334,16 @@ export default function PaymentOrdersPage() {
 
       {/* Data Display */}
       {!isMobile ? (
-        <DataTable columns={columns} data={orders} isLoading={isLoading} />
+        <DataTable
+          columns={columns}
+          data={orders}
+          isLoading={isLoading}
+          pageNumber={pageNumber}
+          totalPages={totalPages}
+          onPageChange={setPageNumber}
+          sorting={sorting}
+          onSortingChange={setSorting}
+        />
       ) : (
         <div className="space-y-3">
           {orders.map((order) => (

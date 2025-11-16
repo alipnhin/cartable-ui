@@ -7,6 +7,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
+  OnChangeFn,
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
@@ -36,22 +37,44 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading?: boolean;
+  /** Server-side pagination */
+  pageNumber?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
+  /** Server-side sorting */
+  sorting?: SortingState;
+  onSortingChange?: OnChangeFn<SortingState>;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   isLoading,
+  pageNumber = 1,
+  totalPages = 1,
+  onPageChange,
+  sorting: externalSorting,
+  onSortingChange: externalOnSortingChange,
 }: DataTableProps<TData, TValue>) {
   const { t } = useTranslation();
-  const [sorting, setSorting] = useState<SortingState>([]);
+
+  // استفاده از sorting سرور یا کلاینت
+  const [internalSorting, setInternalSorting] = useState<SortingState>([]);
+  const sorting = externalSorting !== undefined ? externalSorting : internalSorting;
+  const setSorting = externalOnSortingChange || setInternalSorting;
+
+  // تشخیص server-side یا client-side mode
+  const isServerSide = onPageChange !== undefined;
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    // فقط در حالت client-side از این features استفاده می‌شود
+    getPaginationRowModel: isServerSide ? undefined : getPaginationRowModel(),
+    getSortedRowModel: isServerSide ? undefined : getSortedRowModel(),
+    manualPagination: isServerSide,
+    manualSorting: isServerSide,
     onSortingChange: setSorting,
     state: {
       sorting,
@@ -61,6 +84,7 @@ export function DataTable<TData, TValue>({
         pageSize: 10,
       },
     },
+    pageCount: totalPages,
   });
 
   if (isLoading) {
@@ -152,61 +176,114 @@ export function DataTable<TData, TValue>({
       {/* Pagination */}
       <div className="flex items-center justify-between px-2">
         <div className="text-sm text-muted-foreground">
-          {t("common.pagination.showing")}{" "}
-          <span className="font-medium text-foreground">
-            {table.getState().pagination.pageIndex *
-              table.getState().pagination.pageSize +
-              1}
-          </span>{" "}
-          {t("common.pagination.to")}{" "}
-          <span className="font-medium text-foreground">
-            {Math.min(
-              (table.getState().pagination.pageIndex + 1) *
-                table.getState().pagination.pageSize,
-              data.length
-            )}
-          </span>{" "}
-          {t("common.pagination.of")}{" "}
-          <span className="font-medium text-foreground">{data.length}</span>
+          {isServerSide ? (
+            // Server-side pagination info
+            <>
+              {t("common.pagination.page")}{" "}
+              <span className="font-medium text-foreground">{pageNumber}</span>{" "}
+              {t("common.pagination.of")}{" "}
+              <span className="font-medium text-foreground">{totalPages}</span>
+            </>
+          ) : (
+            // Client-side pagination info
+            <>
+              {t("common.pagination.showing")}{" "}
+              <span className="font-medium text-foreground">
+                {table.getState().pagination.pageIndex *
+                  table.getState().pagination.pageSize +
+                  1}
+              </span>{" "}
+              {t("common.pagination.to")}{" "}
+              <span className="font-medium text-foreground">
+                {Math.min(
+                  (table.getState().pagination.pageIndex + 1) *
+                    table.getState().pagination.pageSize,
+                  data.length
+                )}
+              </span>{" "}
+              {t("common.pagination.of")}{" "}
+              <span className="font-medium text-foreground">{data.length}</span>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => {
+              if (isServerSide && onPageChange) {
+                onPageChange(1);
+              } else {
+                table.setPageIndex(0);
+              }
+            }}
+            disabled={
+              isServerSide ? pageNumber === 1 : !table.getCanPreviousPage()
+            }
           >
             <ChevronsRight className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => {
+              if (isServerSide && onPageChange) {
+                onPageChange(pageNumber - 1);
+              } else {
+                table.previousPage();
+              }
+            }}
+            disabled={
+              isServerSide ? pageNumber === 1 : !table.getCanPreviousPage()
+            }
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
           <div className="text-sm font-medium px-3">
             {t("common.pagination.page")}{" "}
             <span className="text-primary">
-              {table.getState().pagination.pageIndex + 1}
+              {isServerSide
+                ? pageNumber
+                : table.getState().pagination.pageIndex + 1}
             </span>{" "}
             {t("common.pagination.of")}{" "}
-            <span className="text-primary">{table.getPageCount()}</span>
+            <span className="text-primary">
+              {isServerSide ? totalPages : table.getPageCount()}
+            </span>
           </div>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            onClick={() => {
+              if (isServerSide && onPageChange) {
+                onPageChange(pageNumber + 1);
+              } else {
+                table.nextPage();
+              }
+            }}
+            disabled={
+              isServerSide
+                ? pageNumber === totalPages
+                : !table.getCanNextPage()
+            }
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
+            onClick={() => {
+              if (isServerSide && onPageChange) {
+                onPageChange(totalPages);
+              } else {
+                table.setPageIndex(table.getPageCount() - 1);
+              }
+            }}
+            disabled={
+              isServerSide
+                ? pageNumber === totalPages
+                : !table.getCanNextPage()
+            }
           >
             <ChevronsLeft className="h-4 w-4" />
           </Button>
