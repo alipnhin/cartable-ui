@@ -548,6 +548,7 @@ export function OrderDetailTransactions({
                         <SortIcon field="ownerName" />
                       </div>
                     </TableHead>
+                    <TableHead>کد ملی</TableHead>
                     <TableHead>شماره شبا</TableHead>
                     <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
@@ -592,17 +593,25 @@ export function OrderDetailTransactions({
                         <TableCell className="text-muted-foreground text-sm">
                           {startIndex + index + 1}
                         </TableCell>
-                        <TableCell className="font-medium">
+                        <TableCell className="">
                           {transaction.ownerName}
                         </TableCell>
+                        <TableCell className="">
+                          {transaction.nationalCode}
+                        </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center grow gap-2.5">
                             {bankCode && (
-                              <BankLogo bankCode={bankCode} size="xs" />
+                              <BankLogo bankCode={bankCode} size="sm" />
                             )}
-                            <span className="font-mono text-xs text-muted-foreground">
-                              {transaction.destinationIban}
-                            </span>
+                            <div className="flex flex-col gap-1">
+                              <span className="text-sm font-medium text-mono hover:text-primary-active mb-px">
+                                {transaction.destinationIban}
+                              </span>
+                              <span className="text-xs font-normal text-muted-400 leading-3">
+                                {transaction.accountNumber}
+                              </span>
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>

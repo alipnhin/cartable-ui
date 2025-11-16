@@ -11,6 +11,10 @@ import {
   Timer,
   Users,
   AlertCircle,
+  CreditCard,
+  CalendarPlus2,
+  Clock,
+  Newspaper,
 } from "lucide-react";
 import Link from "next/link";
 import useTranslation from "@/hooks/useTranslation";
@@ -67,18 +71,6 @@ export function OrderDetailHeader({ order }: OrderDetailHeaderProps) {
   return (
     <Card className="mb-6">
       <div className="p-4 md:p-6">
-        {/* Breadcrumb */}
-
-        <div className="flex items-end justify-end mb-6">
-          <Link
-            href="/payment-orders"
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded-md transition-colors"
-          >
-            <ArrowRight className="h-4 w-4" />
-            بازگشت
-          </Link>
-        </div>
-
         {/* بخش اصلی */}
         <div className="space-y-6">
           {/* لوگو بانک و عنوان */}
@@ -106,67 +98,19 @@ export function OrderDetailHeader({ order }: OrderDetailHeaderProps) {
                   {/* اطلاعات خلاصه */}
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1.5">
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                        />
-                      </svg>
+                      <Newspaper size="14" />
                       {bankCode}-{order.account.bankName}
                     </span>
                     <span className="flex items-center gap-1.5 font-mono text-xs">
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                        />
-                      </svg>
+                      <CreditCard size="14" />
                       {order.account.sheba}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
+                      <CalendarPlus2 size="14" />
                       {formatDate(order.createdAt, locale)}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
+                      <Clock size="14" />
                       {new Date(order.createdAt).toLocaleTimeString(locale, {
                         hour: "2-digit",
                         minute: "2-digit",
@@ -189,7 +133,7 @@ export function OrderDetailHeader({ order }: OrderDetailHeaderProps) {
           </div>
 
           {/* کارت‌های آماری 4تایی */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
             {/* مبلغ کل */}
             <div className="bg-success/5 border border-success/20 rounded-lg p-4">
               <div className="flex items-center gap-3">
@@ -197,7 +141,7 @@ export function OrderDetailHeader({ order }: OrderDetailHeaderProps) {
                   <DollarSign className="w-5 h-5 text-success" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-lg md:text-xl font-bold text-success truncate">
+                  <div className=" md:text-xl font-bold text-success truncate">
                     {formatCurrency(stats.totalAmount, locale)}
                   </div>
                   <div className="text-xs text-muted-foreground">

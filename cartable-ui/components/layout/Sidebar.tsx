@@ -28,7 +28,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "hidden h-full flex-col border-e bg-card text-foreground transition-all duration-300 md:flex flex-shrink-0",
+        "hidden h-full flex-col border-e bg-card text-foreground transition-all duration-300 md:flex shrink-0",
         isCollapsed ? "w-16" : "w-64",
         className
       )}
@@ -86,7 +86,7 @@ export function Sidebar({
                   {item.badge && item.badge > 0 && (
                     <Badge
                       variant="destructive"
-                      className="ms-auto animate-pulse"
+                      className="ms-auto rounded-full"
                     >
                       {item.badge > 9 ? "9+" : item.badge}
                     </Badge>
@@ -96,7 +96,7 @@ export function Sidebar({
 
               {/* Collapsed Badge */}
               {isCollapsed && item.badge && item.badge > 0 && (
-                <div className="absolute -top-1 -end-1 w-2 h-2 bg-destructive rounded-full animate-pulse" />
+                <div className="absolute -top-1 -end-1 w-2 h-2 bg-destructive rounded-full " />
               )}
             </Button>
           );

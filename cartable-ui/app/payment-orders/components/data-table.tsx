@@ -27,6 +27,7 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  LayoutList,
 } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { cn } from "@/lib/utils";
@@ -87,8 +88,13 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      {/* Table */}
       <div className="rounded-lg border bg-card overflow-hidden">
+        <div className="p-4 border-b">
+          <div className="flex font-bold ">
+            <LayoutList className="me-2" size={20} />
+            {t("paymentCartable.pageTitle")}
+          </div>
+        </div>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

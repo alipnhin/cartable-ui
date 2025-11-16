@@ -125,7 +125,7 @@ export function AccountsFilters({
             onChange={(e) => setSearchText(e.target.value)}
           />
           <InputGroupAddon>
-            <SearchIcon />
+            <SearchIcon className="ms-2" />
           </InputGroupAddon>
         </InputGroup>
       </div>
@@ -134,7 +134,7 @@ export function AccountsFilters({
         {isMobile ? (
           <Drawer>
             <DrawerTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" size="lg">
                 <Filter />
                 {t("common.buttons.filter") || "فیلتر"}
                 {activeFiltersCount > 0 && (
@@ -174,7 +174,7 @@ export function AccountsFilters({
         ) : (
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" size="lg">
                 <Filter />
                 {t("common.buttons.filter") || "فیلتر"}
                 {activeFiltersCount > 0 && (
@@ -195,12 +195,12 @@ export function AccountsFilters({
                 <FilterForm />
               </div>
               <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={handleReset}>
+                <Button variant="outline" size="lg" onClick={handleReset}>
                   <X className="me-2 h-4 w-4" />
                   {t("common.buttons.reset") || "پاک کردن"}
                 </Button>
                 <DialogTrigger asChild>
-                  <Button>اعمال فیلتر</Button>
+                  <Button size="lg">اعمال فیلتر</Button>
                 </DialogTrigger>
               </DialogFooter>
             </DialogContent>

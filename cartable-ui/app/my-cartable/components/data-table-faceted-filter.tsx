@@ -75,7 +75,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                         key={option.value}
                         className="rounded-sm px-1 font-normal"
                       >
-                        {t(`paymentCartable.statusLabels.${option.label}`)}
+                        {t(`${option.label}`)}
                       </Badge>
                     ))
                 )}
@@ -84,7 +84,7 @@ export function DataTableFacetedFilter<TData, TValue>({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-60 p-0" align="start">
+      <PopoverContent className="w-full p-0" align="start">
         <Command>
           <CommandInput placeholder={title} />
           <CommandList>
@@ -109,7 +109,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                   >
                     <div
                       className={cn(
-                        "flex size-4 items-center justify-center rounded-sm border border-primary me-2",
+                        "flex size-5 items-center justify-center rounded-sm border border-primary me-2",
                         isSelected
                           ? "bg-primary text-primary-foreground"
                           : "opacity-50 [&_svg]:invisible"
@@ -120,10 +120,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                     {option.icon && (
                       <option.icon className="me-2 h-4 w-4 text-muted-foreground" />
                     )}
-                    <span>
-                      {" "}
-                      {t(`paymentCartable.statusLabels.${option.label}`)}
-                    </span>
+                    <span> {t(`${option.label}`)}</span>
                     {facets?.get(option.value) && (
                       <span className="ms-auto flex h-4 w-4 items-center justify-center font-mono text-xs">
                         {facets.get(option.value)}

@@ -5,103 +5,50 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { PaymentOrder, OrderStatus } from "@/types/order";
-import { formatCurrency, formatDate } from "@/lib/helpers";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/helpers";
 import Link from "next/link";
 import {
   getPaymentStatusBadge,
+  OrderStatusBadge,
   StatusBadge,
 } from "@/components/ui/status-badge";
+import { getBankCodeFromIban } from "@/lib/bank-logos";
+import { BankLogo } from "@/components/common/bank-logo";
 
 export const createColumns = (
   locale: string,
   t: (key: string) => string,
   onView?: (orderId: string) => void
 ): ColumnDef<PaymentOrder>[] => {
-  const getStatusBadge = (status: OrderStatus) => {
-    const statusMap: Record<
-      OrderStatus,
-      {
-        label: string;
-        variant:
-          | "primary"
-          | "secondary"
-          | "destructive"
-          | "outline"
-          | "success"
-          | "warning"
-          | "info";
-      }
-    > = {
-      [OrderStatus.WaitingForOwnersApproval]: {
-        label: t("paymentCartable.statusLabels.waitingForApproval"),
-        variant: "warning",
-      },
-      [OrderStatus.OwnersApproved]: {
-        label: t("paymentCartable.statusLabels.approved"),
-        variant: "success",
-      },
-      [OrderStatus.SubmittedToBank]: {
-        label: t("paymentCartable.statusLabels.submittedToBank"),
-        variant: "info",
-      },
-      [OrderStatus.Succeeded]: {
-        label: t("paymentCartable.statusLabels.succeeded"),
-        variant: "success",
-      },
-      [OrderStatus.Rejected]: {
-        label: t("paymentCartable.statusLabels.rejected"),
-        variant: "destructive",
-      },
-      [OrderStatus.BankRejected]: {
-        label: t("paymentCartable.statusLabels.bankRejected"),
-        variant: "destructive",
-      },
-      [OrderStatus.Draft]: {
-        label: t("paymentCartable.statusLabels.draft"),
-        variant: "outline",
-      },
-      [OrderStatus.PartiallySucceeded]: {
-        label: t("paymentCartable.statusLabels.doneWithError"),
-        variant: "warning",
-      },
-      [OrderStatus.Canceled]: {
-        label: t("paymentCartable.statusLabels.canceled"),
-        variant: "outline",
-      },
-      [OrderStatus.Expired]: {
-        label: t("paymentCartable.statusLabels.expired"),
-        variant: "outline",
-      },
-      [OrderStatus.OwnerRejected]: {
-        label: "",
-        variant: "primary",
-      },
-    };
-
-    const statusInfo = statusMap[status];
-    return (
-      <Badge variant={statusInfo.variant} className="text-xs whitespace-nowrap">
-        {statusInfo.label}
-      </Badge>
-    );
-  };
-
   return [
+    {
+      accessorKey: "accountTitle",
+      header: t("orders.accountTitle"),
+      cell: ({ row }) => {
+        const bankCode = getBankCodeFromIban(row.original.accountSheba);
+        return (
+          <div className="flex items-center grow gap-2.5">
+            {row.original.accountSheba && (
+              <BankLogo bankCode={bankCode} size="md" />
+            )}
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-mono hover:text-primary-active mb-px">
+                {row.original.accountTitle}
+              </span>
+              <span className="text-xs font-normal text-secondary-foreground leading-3">
+                {row.original.accountNumber}
+              </span>
+            </div>
+          </div>
+        );
+      },
+      enableSorting: true,
+    },
     {
       accessorKey: "orderNumber",
       header: t("orders.orderNumber"),
       cell: ({ row }) => (
         <div className="font-medium">{row.original.orderNumber}</div>
-      ),
-      enableSorting: true,
-    },
-    {
-      accessorKey: "accountTitle",
-      header: t("orders.accountTitle"),
-      cell: ({ row }) => (
-        <div className="max-w-[200px] truncate">
-          {row.original.accountTitle}
-        </div>
       ),
       enableSorting: true,
     },
@@ -127,14 +74,7 @@ export const createColumns = (
       accessorKey: "status",
       header: t("orders.status"),
       cell: ({ row }) => {
-        const statusBadge = getPaymentStatusBadge(row.original.status);
-        const { variant, icon: Icon, label_fa, label_en } = statusBadge;
-
-        return (
-          <StatusBadge variant={variant} icon={<Icon />}>
-            {locale === "fa" ? label_fa : label_en}
-          </StatusBadge>
-        );
+        return <OrderStatusBadge status={row.original.status} size="default" />;
       },
       enableSorting: true,
     },
@@ -144,7 +84,7 @@ export const createColumns = (
       cell: ({ row }) => (
         <div className="text-sm text-muted-foreground whitespace-nowrap">
           {row.original.createdDateTime
-            ? formatDate(row.original.createdDateTime, locale)
+            ? formatDateTime(row.original.createdDateTime, locale)
             : "-"}
         </div>
       ),
@@ -154,12 +94,7 @@ export const createColumns = (
       id: "actions",
       header: t("common.actions"),
       cell: ({ row }) => (
-        <Button
-          variant="outline"
-          size="sm"
-          className="hover:bg-muted/80 transition-colors"
-          asChild
-        >
+        <Button variant="outline" size="sm" asChild>
           <Link href={`/payment-orders/${row.original.id}`}>
             <Eye className="" />
             {t("common.buttons.view")}

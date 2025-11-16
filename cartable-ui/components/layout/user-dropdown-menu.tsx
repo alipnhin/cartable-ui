@@ -2,19 +2,7 @@
 import { ReactNode, useState } from "react";
 import Link from "next/link";
 import { I18N_LANGUAGES, Language } from "@/i18n/config";
-import {
-  BetweenHorizontalStart,
-  Coffee,
-  CreditCard,
-  FileText,
-  Globe,
-  Moon,
-  Settings,
-  Shield,
-  User,
-  UserCircle,
-  Users,
-} from "lucide-react";
+import { FileText, Globe, Moon, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";

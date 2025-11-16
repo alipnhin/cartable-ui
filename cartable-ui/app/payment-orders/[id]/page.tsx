@@ -21,6 +21,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
+import { FixHeader } from "@/components/layout/Fix-Header";
 
 export default function PaymentOrderDetailPage() {
   const params = useParams();
@@ -49,87 +50,90 @@ export default function PaymentOrderDetailPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-6">
-      {/* Header با کارت‌های آماری */}
-      <OrderDetailHeader order={orderDetail} />
+    <>
+      <FixHeader returnUrl="/payment-orders" />
+      <div className="container mx-auto p-4 md:p-6 space-y-6 mt-14">
+        {/* Header با کارت‌های آماری */}
+        <OrderDetailHeader order={orderDetail} />
 
-      {/* تب‌های جزئیات */}
-      <Tabs defaultValue="statistics" className="w-full space-y-6">
-        {/* Tab Navigation */}
-        <div className="rounded-lg border bg-card p-4">
-          <TabsList
-            className="w-full justify-center bg-transparent h-auto gap-3 flex-wrap"
-            size="lg"
-            variant="button"
-          >
-            <TabsTrigger value="statistics">
-              <BarChart3 />{" "}
-              <span className="hidden sm:inline">
-                {t("paymentOrders.statistics")}
-              </span>
-              <span className="sm:hidden">
-                {t("paymentOrders.statisticsShort")}
-              </span>
-            </TabsTrigger>
+        {/* تب‌های جزئیات */}
+        <Tabs defaultValue="statistics" className="w-full space-y-6">
+          {/* Tab Navigation */}
+          <div className="rounded-lg border bg-card p-4">
+            <TabsList
+              className="w-full justify-center bg-transparent h-auto gap-3 flex-wrap"
+              size="lg"
+              variant="button"
+            >
+              <TabsTrigger value="statistics">
+                <BarChart3 />{" "}
+                <span className="hidden sm:inline">
+                  {t("paymentOrders.statistics")}
+                </span>
+                <span className="sm:hidden">
+                  {t("paymentOrders.statisticsShort")}
+                </span>
+              </TabsTrigger>
 
-            <TabsTrigger value="transactions">
-              <FileText className="" />
-              <span className="hidden sm:inline">
-                {t("paymentOrders.transactions")}
-              </span>
-              <span className="sm:hidden">
-                {t("paymentOrders.transactionsShort")}
-              </span>
-              <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
-                {orderDetail.transactions.length}
-              </span>
-            </TabsTrigger>
+              <TabsTrigger value="transactions">
+                <FileText className="" />
+                <span className="hidden sm:inline">
+                  {t("paymentOrders.transactions")}
+                </span>
+                <span className="sm:hidden">
+                  {t("paymentOrders.transactionsShort")}
+                </span>
+                <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
+                  {orderDetail.transactions.length}
+                </span>
+              </TabsTrigger>
 
-            <TabsTrigger value="approvers">
-              <Users />
-              <span className="hidden sm:inline">
-                {t("paymentOrders.approvers")}
-              </span>
-              <span className="sm:hidden">
-                {t("paymentOrders.approversShort")}
-              </span>
-              <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
-                {orderDetail.approvers.length}
-              </span>
-            </TabsTrigger>
+              <TabsTrigger value="approvers">
+                <Users />
+                <span className="hidden sm:inline">
+                  {t("paymentOrders.approvers")}
+                </span>
+                <span className="sm:hidden">
+                  {t("paymentOrders.approversShort")}
+                </span>
+                <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
+                  {orderDetail.approvers.length}
+                </span>
+              </TabsTrigger>
 
-            <TabsTrigger value="history">
-              <History />
-              <span className="hidden sm:inline">
-                {t("paymentOrders.history")}
-              </span>
-              <span className="sm:hidden">
-                {t("paymentOrders.historyShort")}
-              </span>
-              <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
-                {orderDetail.changeHistory.length}
-              </span>
-            </TabsTrigger>
-          </TabsList>
-        </div>
+              <TabsTrigger value="history">
+                <History />
+                <span className="hidden sm:inline">
+                  {t("paymentOrders.history")}
+                </span>
+                <span className="sm:hidden">
+                  {t("paymentOrders.historyShort")}
+                </span>
+                <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
+                  {orderDetail.changeHistory.length}
+                </span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        {/* Tab Contents - هر کدام در Card مستقل */}
-        <TabsContent value="statistics" className="mt-0">
-          <OrderDetailStatistics order={orderDetail} />
-        </TabsContent>
+          {/* Tab Contents - هر کدام در Card مستقل */}
+          <TabsContent value="statistics" className="mt-0">
+            <OrderDetailStatistics order={orderDetail} />
+          </TabsContent>
 
-        <TabsContent value="transactions" className="mt-0">
-          <OrderDetailTransactions transactions={orderDetail.transactions} />
-        </TabsContent>
+          <TabsContent value="transactions" className="mt-0">
+            <OrderDetailTransactions transactions={orderDetail.transactions} />
+          </TabsContent>
 
-        <TabsContent value="approvers" className="mt-0">
-          <OrderDetailApprovers approvers={orderDetail.approvers} />
-        </TabsContent>
+          <TabsContent value="approvers" className="mt-0">
+            <OrderDetailApprovers approvers={orderDetail.approvers} />
+          </TabsContent>
 
-        <TabsContent value="history" className="mt-0">
-          <OrderDetailHistory changeHistory={orderDetail.changeHistory} />
-        </TabsContent>
-      </Tabs>
-    </div>
+          <TabsContent value="history" className="mt-0">
+            <OrderDetailHistory changeHistory={orderDetail.changeHistory} />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
   );
 }

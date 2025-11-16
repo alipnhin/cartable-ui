@@ -62,7 +62,7 @@ export function StatusBadge({
     <Badge
       variant="outline"
       className={cn(
-        "text-xs font-medium border px-3 py-3 gap-1 inline-flex items-center whitespace-nowrap",
+        "text-xs  border px-2 py-2 gap-1 inline-flex items-center whitespace-nowrap",
         variantStyles[variant],
         className
       )}

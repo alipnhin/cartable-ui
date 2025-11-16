@@ -7,7 +7,7 @@ import { createColumns } from "./components/columns";
 import { OrderCard } from "./components/order-card";
 import { FilterSheet } from "./components/filter-sheet";
 import { Button } from "@/components/ui/button";
-import { Download, Filter } from "lucide-react";
+import { Download, FileBadge, Filter, Timer } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { mockOrders } from "@/mocks/mockOrders";
@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { OrderStatus } from "@/types/order";
 import { useRouter } from "next/navigation";
 import { MobilePagination } from "@/components/common/mobile-pagination";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import StatisticCard, { StatisticCardProps } from "./components/statistic-card";
 
 export default function PaymentOrdersPage() {
   const { t, locale } = useTranslation();
@@ -107,11 +109,13 @@ export default function PaymentOrdersPage() {
   const stats = useMemo(() => {
     const total = filteredOrders.length;
     const pending = filteredOrders.filter(
-      (o) => o.status === OrderStatus.WaitingForOwnersApproval
-    ).length;
-    const approved = filteredOrders.filter(
       (o) =>
-        o.status === OrderStatus.OwnersApproved ||
+        o.status === OrderStatus.SubmittedToBank ||
+        o.status === OrderStatus.WaitingForOwnersApproval
+    ).length;
+    const succeeded = filteredOrders.filter(
+      (o) =>
+        o.status === OrderStatus.PartiallySucceeded ||
         o.status === OrderStatus.Succeeded
     ).length;
     const totalAmount = filteredOrders.reduce(
@@ -119,7 +123,7 @@ export default function PaymentOrdersPage() {
       0
     );
 
-    return { total, pending, approved, totalAmount };
+    return { total, pending, succeeded, totalAmount };
   }, [filteredOrders]);
 
   // Handlers
@@ -186,6 +190,33 @@ export default function PaymentOrdersPage() {
     [locale, t]
   );
 
+  const statisticCards: StatisticCardProps[] = [
+    {
+      icon: FileBadge,
+      accentColor: "primary",
+      value: stats.total.toString(),
+      label: "کل دستورات",
+    },
+    {
+      icon: Timer,
+      accentColor: "success",
+      value: stats.succeeded.toString(),
+      label: "موفق انجام شده",
+    },
+    {
+      icon: Timer,
+      accentColor: "warning",
+      value: stats.pending.toString(),
+      label: "در صف پردازش",
+    },
+    {
+      icon: Timer,
+      accentColor: "info",
+      value: stats.totalAmount,
+      label: "مبلغ کل دستورات",
+    },
+  ];
+
   const activeFiltersCount =
     filters.status.length +
     (filters.orderTitle ? 1 : 0) +
@@ -231,31 +262,7 @@ export default function PaymentOrdersPage() {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-        <StatCard
-          label="کل دستورات"
-          value={stats.total.toString()}
-          color="blue"
-        />
-        <StatCard
-          label="در انتظار تأیید"
-          value={stats.pending.toString()}
-          color="yellow"
-        />
-        <StatCard
-          label="تأیید شده"
-          value={stats.approved.toString()}
-          color="green"
-        />
-        <StatCard
-          label="مبلغ کل"
-          value={new Intl.NumberFormat("fa-IR", {
-            notation: "compact",
-          }).format(stats.totalAmount)}
-          color="purple"
-          suffix="ریال"
-        />
-      </div>
+      <StatisticCard cards={statisticCards} />
 
       {/* Data Display */}
       {!isMobile ? (
@@ -289,56 +296,5 @@ export default function PaymentOrdersPage() {
         onReset={handleResetFilters}
       />
     </AppLayout>
-  );
-}
-
-// =====================================
-// Stat Card Component
-// =====================================
-interface StatCardProps {
-  label: string;
-  value: string;
-  color: "blue" | "yellow" | "green" | "purple";
-  suffix?: string;
-}
-
-function StatCard({ label, value, color, suffix }: StatCardProps) {
-  const colorStyles = {
-    blue: {
-      bg: "bg-blue-50 dark:bg-blue-950/30",
-      text: "text-blue-600 dark:text-blue-400",
-      border: "border-blue-200 dark:border-blue-800",
-    },
-    yellow: {
-      bg: "bg-yellow-50 dark:bg-yellow-950/30",
-      text: "text-yellow-600 dark:text-yellow-400",
-      border: "border-yellow-200 dark:border-yellow-800",
-    },
-    green: {
-      bg: "bg-green-50 dark:bg-green-950/30",
-      text: "text-green-600 dark:text-green-400",
-      border: "border-green-200 dark:border-green-800",
-    },
-    purple: {
-      bg: "bg-purple-50 dark:bg-purple-950/30",
-      text: "text-purple-600 dark:text-purple-400",
-      border: "border-purple-200 dark:border-purple-800",
-    },
-  };
-
-  const styles = colorStyles[color];
-
-  return (
-    <div
-      className={`rounded-lg border p-4 transition-all hover:-translate-y-0.5 ${styles.bg} ${styles.border}`}
-    >
-      <div className="text-xs md:text-sm text-muted-foreground mb-1 truncate">
-        {label}
-      </div>
-      <div className={`text-xl md:text-2xl font-bold ${styles.text}`}>
-        {value}
-        {suffix && <span className="text-sm ms-1">{suffix}</span>}
-      </div>
-    </div>
   );
 }

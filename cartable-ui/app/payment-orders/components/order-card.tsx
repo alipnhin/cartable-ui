@@ -38,7 +38,7 @@ export function OrderCard({ order, onView }: OrderCardProps) {
               {order.title || order.orderNumber}
             </Link>
           </div>
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             <StatusBadge variant={variant} icon={<Icon />}>
               {locale === "fa" ? label_fa : label_en}
             </StatusBadge>

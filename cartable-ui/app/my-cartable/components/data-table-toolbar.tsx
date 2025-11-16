@@ -13,28 +13,33 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
 
-const statusOptions = [
-  {
-    label: "waitingForApproval",
-    value: OrderStatus.WaitingForOwnersApproval,
-  },
-  {
-    label: "approved",
-    value: OrderStatus.OwnersApproved,
-  },
-  {
-    label: "submittedToBank",
-    value: OrderStatus.SubmittedToBank,
-  },
-  {
-    label: "succeeded",
-    value: OrderStatus.Succeeded,
-  },
-  {
-    label: "bankRejected",
-    value: OrderStatus.Rejected,
-  },
-];
+const statusOptions = mockAccounts.map((account) => ({
+  label: account.accountTitle,
+  value: account.accountTitle,
+}));
+
+// const statusOptions = [
+//   {
+//     label: "waitingForApproval",
+//     value: OrderStatus.WaitingForOwnersApproval,
+//   },
+//   {
+//     label: "approved",
+//     value: OrderStatus.OwnersApproved,
+//   },
+//   {
+//     label: "submittedToBank",
+//     value: OrderStatus.SubmittedToBank,
+//   },
+//   {
+//     label: "succeeded",
+//     value: OrderStatus.Succeeded,
+//   },
+//   {
+//     label: "bankRejected",
+//     value: OrderStatus.Rejected,
+//   },
+// ];
 
 export function DataTableToolbar<TData>({
   table,

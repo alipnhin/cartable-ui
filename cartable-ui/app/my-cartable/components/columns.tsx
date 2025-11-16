@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PaymentOrder, OrderStatus } from "@/types/order";
 import {
+  OrderStatusBadge,
   StatusBadge,
   getPaymentStatusBadge,
 } from "@/components/ui/status-badge";
@@ -18,7 +19,7 @@ import {
   ChevronsUpDown,
 } from "lucide-react";
 import Link from "next/link";
-import { formatCurrency, formatDate } from "@/lib/helpers";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/helpers";
 import { getBankCodeFromIban } from "@/lib/bank-logos";
 import { BankLogo } from "@/components/common/bank-logo";
 
@@ -181,14 +182,7 @@ export const createColumns = (
       accessorKey: "status",
       header: () => <div className="font-semibold">{t("orders.status")}</div>,
       cell: ({ row }) => {
-        const statusBadge = getPaymentStatusBadge(row.original.status);
-        const { variant, icon: Icon, label_fa, label_en } = statusBadge;
-
-        return (
-          <StatusBadge variant={variant} icon={<Icon />}>
-            {locale === "fa" ? label_fa : label_en}
-          </StatusBadge>
-        );
+        return <OrderStatusBadge status={row.original.status} size="default" />;
       },
       filterFn: (row, id, value) => value.includes(row.getValue(id)),
       size: 140,
@@ -215,7 +209,7 @@ export const createColumns = (
       },
       cell: ({ row }) => (
         <div className="text-sm text-muted-foreground">
-          {formatDate(
+          {formatDateTime(
             row.original.createdDate || row.original.createdAt,
             locale
           )}

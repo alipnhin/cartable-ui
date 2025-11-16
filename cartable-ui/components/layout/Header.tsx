@@ -31,7 +31,7 @@ export function Header({
   const { t } = useTranslation();
 
   return (
-    <header className="z-40 w-full border-b bg-card flex-shrink-0">
+    <header className="z-40 w-full border-b bg-card shrink-0">
       <div className="flex h-16 items-center px-4 gap-4">
         {showMenuButton && !isMobile && (
           <Button

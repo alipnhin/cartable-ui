@@ -54,8 +54,9 @@ export function PaymentTypeIcon({
 
   if (showLabel) {
     return (
-      <Badge variant={config.variant} appearance="light">
-        <Icon /> {config.label}
+      <Badge variant={config.variant} appearance="outline" size="sm">
+        {/* <Icon />  */}
+        {config.label}
       </Badge>
     );
   }
