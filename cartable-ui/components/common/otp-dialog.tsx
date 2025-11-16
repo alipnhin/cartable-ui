@@ -23,6 +23,16 @@ import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Loader2 } from "lucide-react";
 
+/**
+ * Props for OTP Dialog Component
+ * @property open - وضعیت باز/بسته بودن دیالوگ
+ * @property onOpenChange - callback برای تغییر وضعیت دیالوگ
+ * @property title - عنوان دیالوگ
+ * @property description - توضیحات دیالوگ
+ * @property onConfirm - callback برای تأیید کد OTP
+ * @property onResend - callback اختیاری برای ارسال مجدد کد
+ * @property isRequestingOtp - نمایش loading در حین درخواست ارسال کد
+ */
 interface OtpDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -30,10 +40,18 @@ interface OtpDialogProps {
   description: string;
   onConfirm: (otp: string) => Promise<void>;
   onResend?: () => Promise<void>;
-  /** آیا در حال درخواست ارسال کد OTP است */
   isRequestingOtp?: boolean;
 }
 
+/**
+ * OTP Dialog Component
+ * کامپوننت دیالوگ ورود کد OTP با قابلیت‌های:
+ * - نمایش loading هنگام درخواست ارسال کد
+ * - ورود کد 6 رقمی با Auto-focus
+ * - تایمر 2 دقیقه‌ای برای انقضا
+ * - قابلیت ارسال مجدد کد بعد از انقضا
+ * - پشتیبانی از موبایل (Drawer) و دسکتاپ (Dialog)
+ */
 export function OtpDialog({
   open,
   onOpenChange,
@@ -46,7 +64,7 @@ export function OtpDialog({
   const { t } = useTranslation();
   const isMobile = useIsMobile();
 
-  // اگر در حال درخواست OTP است، loading نمایش بده
+  // در حالت درخواست OTP، صفحه loading نمایش داده می‌شود
   if (isRequestingOtp) {
     if (isMobile) {
       return (
@@ -127,20 +145,38 @@ export function OtpDialog({
 // =====================================
 // OTP Form Component
 // =====================================
+/**
+ * Props for OTP Form
+ * @property onConfirm - callback برای تأیید کد OTP
+ * @property onResend - callback اختیاری برای ارسال مجدد کد
+ * @property onClose - callback برای بستن فرم
+ */
 interface OtpFormProps {
   onConfirm: (otp: string) => Promise<void>;
   onResend?: () => Promise<void>;
   onClose: () => void;
 }
 
+/**
+ * OTP Form Component
+ * فرم ورود کد OTP با قابلیت‌های:
+ * - تایمر 2 دقیقه‌ای (120 ثانیه)
+ * - دکمه ارسال مجدد بعد از انقضای تایمر
+ * - اعتبارسنجی طول کد (حداقل 5 رقم)
+ * - نمایش loading در حین ارسال
+ */
 function OtpForm({ onConfirm, onResend, onClose }: OtpFormProps) {
   const { t } = useTranslation();
   const [otp, setOtp] = useState("");
-  const [timeLeft, setTimeLeft] = useState(120); // 2 minutes
+  const [timeLeft, setTimeLeft] = useState(120); // 2 دقیقه
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
-  // Countdown timer
+  /**
+   * تایمر شمارش معکوس
+   * هر ثانیه مقدار timeLeft را یک واحد کم می‌کند
+   * بعد از رسیدن به صفر، تایمر متوقف می‌شود
+   */
   useEffect(() => {
     if (timeLeft <= 0) return;
 
@@ -151,6 +187,10 @@ function OtpForm({ onConfirm, onResend, onClose }: OtpFormProps) {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
+  /**
+   * ارسال کد OTP برای تأیید
+   * حداقل طول کد باید 5 رقم باشد (6 رقم ایده‌آل است)
+   */
   const handleSubmit = async () => {
     if (otp.length < 6) return;
 
@@ -165,13 +205,17 @@ function OtpForm({ onConfirm, onResend, onClose }: OtpFormProps) {
     }
   };
 
+  /**
+   * ارسال مجدد کد OTP
+   * تایمر را به 120 ثانیه ریست می‌کند و فیلد OTP را پاک می‌کند
+   */
   const handleResend = async () => {
     if (!onResend) return;
 
     setIsResending(true);
     try {
       await onResend();
-      setTimeLeft(120); // Reset timer
+      setTimeLeft(120); // ریست تایمر به 2 دقیقه
       setOtp("");
     } catch (error) {
       console.error("OTP resend failed:", error);
@@ -180,6 +224,11 @@ function OtpForm({ onConfirm, onResend, onClose }: OtpFormProps) {
     }
   };
 
+  /**
+   * فرمت کردن زمان به صورت mm:ss
+   * @param seconds - تعداد ثانیه‌ها
+   * @returns رشته فرمت شده به صورت "m:ss"
+   */
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -251,15 +300,34 @@ function OtpForm({ onConfirm, onResend, onClose }: OtpFormProps) {
 // =====================================
 // OTP Input Component
 // =====================================
+/**
+ * Props for OTP Input
+ * @property value - مقدار کامل کد OTP (رشته‌ای از ارقام)
+ * @property onChange - callback برای تغییر مقدار
+ * @property length - تعداد خانه‌های ورودی (پیش‌فرض 6)
+ */
 interface OtpInputProps {
   value: string;
   onChange: (value: string) => void;
   length?: number;
 }
 
+/**
+ * OTP Input Component
+ * کامپوننت ورود کد OTP با ویژگی‌های:
+ * - 6 خانه جداگانه برای ارقام
+ * - Auto-focus به خانه بعدی بعد از ورود رقم
+ * - پشتیبانی از Backspace برای برگشت به خانه قبلی
+ * - پشتیبانی از Paste (چسباندن کد کامل)
+ * - فقط ارقام مجاز هستند (اعتبارسنجی با regex)
+ * - کیبورد عددی در موبایل (inputMode="numeric")
+ */
 function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
   const [inputs, setInputs] = useState<string[]>(Array(length).fill(""));
 
+  /**
+   * همگام‌سازی state داخلی با value خارجی
+   */
   useEffect(() => {
     const newInputs = value.split("").slice(0, length);
     while (newInputs.length < length) {
@@ -268,8 +336,13 @@ function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
     setInputs(newInputs);
   }, [value, length]);
 
+  /**
+   * مدیریت تغییر مقدار یک خانه
+   * - فقط ارقام مجاز هستند
+   * - بعد از ورود رقم، فوکوس به خانه بعدی منتقل می‌شود
+   */
   const handleChange = (index: number, newValue: string) => {
-    // Only allow digits
+    // فقط ارقام مجاز هستند
     if (newValue && !/^\d$/.test(newValue)) return;
 
     const newInputs = [...inputs];
@@ -277,13 +350,17 @@ function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
     setInputs(newInputs);
     onChange(newInputs.join(""));
 
-    // Auto-focus next input
+    // Auto-focus به خانه بعدی
     if (newValue && index < length - 1) {
       const nextInput = document.getElementById(`otp-${index + 1}`);
       nextInput?.focus();
     }
   };
 
+  /**
+   * مدیریت کلید Backspace
+   * اگر خانه فعلی خالی باشد، فوکوس به خانه قبلی منتقل می‌شود
+   */
   const handleKeyDown = (
     index: number,
     e: React.KeyboardEvent<HTMLInputElement>
@@ -294,6 +371,11 @@ function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
     }
   };
 
+  /**
+   * مدیریت Paste (چسباندن کد)
+   * فقط ارقام از متن چسبانده شده استخراج می‌شوند
+   * بعد از paste، فوکوس به آخرین خانه پر شده منتقل می‌شود
+   */
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData("text/plain");
@@ -306,7 +388,7 @@ function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
     setInputs(newInputs);
     onChange(newInputs.join(""));
 
-    // Focus last filled input
+    // فوکوس به آخرین خانه پر شده
     const lastFilledIndex = Math.min(pastedDigits.length - 1, length - 1);
     const lastInput = document.getElementById(`otp-${lastFilledIndex}`);
     lastInput?.focus();

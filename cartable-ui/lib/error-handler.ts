@@ -1,11 +1,32 @@
 /**
- * Helper functions for error handling
+ * Error Handling Utilities
+ *
+ * این ماژول شامل توابع کمکی برای مدیریت خطاهای API است
+ * و پیغام‌های خطا را از فرمت‌های مختلف سرور استخراج می‌کند
  */
 
 /**
  * استخراج پیغام خطا از response سرور
- * @param error خطای دریافتی از API
- * @returns پیغام خطا برای نمایش به کاربر
+ *
+ * این تابع پیغام خطا را از فرمت‌های مختلف response استخراج می‌کند:
+ * - رشته مستقیم در response.data
+ * - فیلد message (فرمت استاندارد)
+ * - فیلد error (فرمت جایگزین)
+ * - فیلد title (فرمت ASP.NET Core)
+ * - آرایه errors (validation errors)
+ * - پیغام‌های پیش‌فرض بر اساس status code
+ * - خطاهای شبکه (network errors)
+ *
+ * @param error - خطای دریافتی از API (معمولاً از Axios)
+ * @returns پیغام خطا به زبان فارسی برای نمایش به کاربر
+ *
+ * @example
+ * try {
+ *   await apiCall();
+ * } catch (error) {
+ *   const message = getErrorMessage(error);
+ *   toast.error(message);
+ * }
  */
 export function getErrorMessage(error: any): string {
   // اگر خطا axios error است
