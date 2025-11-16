@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { AppLayout, PageHeader } from "@/components/layout";
 import { OrderCard, OrderCardSkeleton } from "./components/order-card";
 import { DataTable } from "./components/data-table";
@@ -9,17 +10,19 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Download, X } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { mockOrders } from "@/mocks/mockOrders";
 import { useToast } from "@/hooks/use-toast";
-import { OrderStatus } from "@/types/order";
 import { OtpDialog } from "@/components/common/otp-dialog";
 import { cn } from "@/lib/utils";
 import { IStatisticsItems, Statistics } from "./components/statistics";
+import { getApproverCartable } from "@/services/cartableService";
+import { mapCartableItemsToPaymentOrders } from "@/lib/api-mappers";
+import { PaymentOrder } from "@/types/order";
 
 export default function MyCartablePage() {
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const { data: session } = useSession();
 
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [selectedRowIds, setSelectedRowIds] = useState<Record<string, boolean>>(
@@ -31,12 +34,49 @@ export default function MyCartablePage() {
     orderIds: string[];
   }>({ open: false, type: "approve", orderIds: [] });
 
-  // فقط دستورات در انتظار تأیید
-  const pendingOrders = useMemo(() => {
-    return mockOrders.filter(
-      (order) => order.status === OrderStatus.WaitingForOwnersApproval
-    );
-  }, []);
+  // State برای API
+  const [orders, setOrders] = useState<PaymentOrder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  // واکشی داده‌ها از API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!session?.accessToken) return;
+
+      setIsLoading(true);
+      try {
+        const response = await getApproverCartable(
+          {
+            pageNumber,
+            pageSize,
+            orderBy: "createdDateTime",
+          },
+          session.accessToken
+        );
+
+        // تبدیل داده‌های API به فرمت داخلی
+        const mappedOrders = mapCartableItemsToPaymentOrders(response.items);
+        setOrders(mappedOrders);
+        setTotalItems(response.totalItemCount);
+        setTotalPages(response.totalPageCount);
+      } catch (error) {
+        console.error("Error fetching cartable:", error);
+        toast({
+          title: t("toast.error"),
+          description: "خطا در دریافت اطلاعات کارتابل",
+          variant: "error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [session?.accessToken, pageNumber, pageSize]);
 
   // Handlers
   const handleSingleApprove = (orderId: string) => {
@@ -132,22 +172,22 @@ export default function MyCartablePage() {
     ? selectedOrders.length
     : Object.keys(selectedRowIds).filter((id) => selectedRowIds[id]).length;
 
+  // محاسبه آمار
   const items: IStatisticsItems = [
     {
-      number: `${pendingOrders.length}`,
+      number: `${totalItems}`,
       label: `${t("myCartable.totalOrders")}`,
     },
     {
-      number: `${pendingOrders.reduce(
-        (sum, order) =>
-          sum + (order.totalTransactions || order.numberOfTransactions),
+      number: `${orders.reduce(
+        (sum, order) => sum + (order.numberOfTransactions || 0),
         0
       )}`,
       label: `${t("myCartable.totalTransactions")}`,
     },
     {
       number: `${new Intl.NumberFormat("fa-IR").format(
-        pendingOrders.reduce((sum, order) => sum + order.totalAmount, 0)
+        orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0)
       )}`,
       label: `${t("myCartable.totalAmount")}`,
     },
@@ -159,13 +199,9 @@ export default function MyCartablePage() {
         <PageHeader
           title={t("myCartable.pageTitle")}
           description={t("myCartable.pageSubtitle")}
-          badge={
-            pendingOrders.length > 0
-              ? pendingOrders.length.toString()
-              : undefined
-          }
+          badge={totalItems > 0 ? totalItems.toString() : undefined}
           actions={
-            pendingOrders.length > 0 &&
+            totalItems > 0 &&
             !isMobile &&
             !hasSelection && (
               <Button variant="outline" onClick={handleExport}>
@@ -213,27 +249,36 @@ export default function MyCartablePage() {
         {!isMobile ? (
           <DataTable
             columns={columns}
-            data={pendingOrders}
-            isLoading={false}
+            data={orders}
+            isLoading={isLoading}
             onRowSelectionChange={handleRowSelectionChange}
           />
         ) : (
           /* Mobile: Cards */
           <div className="space-y-3 pb-24">
-            {pendingOrders.map((order) => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                onApprove={handleSingleApprove}
-                onReject={handleSingleReject}
-                selected={selectedOrders.includes(order.id)}
-                onSelect={handleOrderSelect}
-              />
-            ))}
-            {pendingOrders.length === 0 && (
-              <div className="text-center py-12 text-muted-foreground">
-                {t("orders.noOrders")}
-              </div>
+            {isLoading ? (
+              // Loading skeletons
+              Array.from({ length: 3 }).map((_, i) => (
+                <OrderCardSkeleton key={i} />
+              ))
+            ) : (
+              <>
+                {orders.map((order) => (
+                  <OrderCard
+                    key={order.id}
+                    order={order}
+                    onApprove={handleSingleApprove}
+                    onReject={handleSingleReject}
+                    selected={selectedOrders.includes(order.id)}
+                    onSelect={handleOrderSelect}
+                  />
+                ))}
+                {orders.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    {t("orders.noOrders")}
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
