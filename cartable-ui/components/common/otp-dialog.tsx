@@ -318,8 +318,9 @@ function OtpInput({ value, onChange, length = 5 }: OtpInputProps) {
         <Input
           key={index}
           id={`otp-${index}`}
-          type="text"
+          type="tel"
           inputMode="numeric"
+          pattern="[0-9]*"
           maxLength={1}
           value={digit}
           onChange={(e) => handleChange(index, e.target.value)}
@@ -327,6 +328,7 @@ function OtpInput({ value, onChange, length = 5 }: OtpInputProps) {
           onPaste={handlePaste}
           className="w-12 h-12 text-center text-lg font-semibold"
           autoComplete="off"
+          autoFocus={index === 0}
         />
       ))}
     </div>

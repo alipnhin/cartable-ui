@@ -10,6 +10,7 @@ import { PWAInstaller } from "@/components/common/pwa-installer";
 import { AppSplashLoader } from "@/components/common/app-splash-loader";
 import { OfflineIndicator } from "@/components/common/offline-indicator";
 import { SessionProvider } from "next-auth/react";
+import { UnauthorizedHandler } from "@/components/auth/unauthorized-handler";
 import localFont from "next/font/local";
 
 const yekanBakh = localFont({
@@ -66,6 +67,7 @@ export default function RootLayout({
         <OfflineIndicator />
         <PWAInstaller />
         <SessionProvider>
+          <UnauthorizedHandler />
           <ThemeProvider>
             <I18nProvider>
               <TooltipsProvider>

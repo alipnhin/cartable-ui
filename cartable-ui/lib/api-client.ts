@@ -35,11 +35,15 @@ apiClient.interceptors.response.use(
       // سرور پاسخ با status code خارج از 2xx داده
       console.error("API Error:", error.response.data);
 
-      // اگر 401 بود، یعنی unauthorized
+      // اگر 401 بود، یعنی unauthorized - token منقضی شده یا invalid است
       if (error.response.status === 401) {
-        // می‌توانیم کاربر را به صفحه لاگین هدایت کنیم
+        // فقط error را throw می‌کنیم و در component handle می‌شود
+        // چون نمی‌توانیم اینجا signOut را صدا بزنیم
+        console.error("Unauthorized: Token is invalid or expired");
+
+        // اگر در browser هستیم، می‌توانیم یک custom event dispatch کنیم
         if (typeof window !== "undefined") {
-          window.location.href = "/";
+          window.dispatchEvent(new CustomEvent("auth:unauthorized"));
         }
       }
     } else if (error.request) {
