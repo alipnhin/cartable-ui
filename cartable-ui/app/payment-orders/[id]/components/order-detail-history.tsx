@@ -1,9 +1,8 @@
 "use client";
 
-import { ChangeHistoryEntry } from "@/types/common";
+import { WithdrawalChangeHistory, PaymentStatusEnum } from "@/types/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDate } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
 import {
@@ -14,72 +13,103 @@ import {
   Send,
   UserPlus,
   History as HistoryIcon,
+  AlertCircle,
+  Ban,
 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { OrderStatusBadge, StatusBadge } from "@/components/ui/status-badge";
+import { OrderStatusBadge } from "@/components/ui/status-badge";
 
 interface OrderDetailHistoryProps {
-  changeHistory: ChangeHistoryEntry[];
+  changeHistory: WithdrawalChangeHistory[];
 }
 
 export function OrderDetailHistory({ changeHistory }: OrderDetailHistoryProps) {
   const { t, locale } = useTranslation();
 
-  const getActionIcon = (action: string) => {
-    switch (action) {
-      case "created":
-        return <FileEdit className="h-5 w-5 text-blue-600" />;
-      case "approved":
+  const getStatusIcon = (status: PaymentStatusEnum) => {
+    switch (status) {
+      case PaymentStatusEnum.Draft:
+        return <FileEdit className="h-5 w-5 text-gray-600" />;
+      case PaymentStatusEnum.WaitingForOwnersApproval:
+        return <Clock className="h-5 w-5 text-blue-600" />;
+      case PaymentStatusEnum.OwnersApproved:
         return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case "rejected":
+      case PaymentStatusEnum.OwnerRejected:
         return <XCircle className="h-5 w-5 text-red-600" />;
-      case "submitted":
+      case PaymentStatusEnum.SubmittedToBank:
         return <Send className="h-5 w-5 text-purple-600" />;
-      case "signer_added":
-        return <UserPlus className="h-5 w-5 text-orange-600" />;
+      case PaymentStatusEnum.Succeeded:
+        return <CheckCircle className="h-5 w-5 text-success" />;
+      case PaymentStatusEnum.PartiallySucceeded:
+        return <AlertCircle className="h-5 w-5 text-warning" />;
+      case PaymentStatusEnum.Rejected:
+      case PaymentStatusEnum.BankRejected:
+        return <XCircle className="h-5 w-5 text-destructive" />;
+      case PaymentStatusEnum.Canceled:
+        return <Ban className="h-5 w-5 text-muted-foreground" />;
+      case PaymentStatusEnum.Expired:
+        return <Clock className="h-5 w-5 text-muted-foreground" />;
       default:
         return <Clock className="h-5 w-5 text-gray-600" />;
     }
   };
+
+  // Sort by date descending (most recent first)
+  const sortedHistory = [...changeHistory].sort(
+    (a, b) =>
+      new Date(b.createdDateTime).getTime() -
+      new Date(a.createdDateTime).getTime()
+  );
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
           <HistoryIcon className="h-5 w-5" />
-          {t("paymentOrders.changeHistory")}
+          تاریخچه تغییرات
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {changeHistory.length === 0 ? (
+        {sortedHistory.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            {t("history.noHistory")}
+            تاریخچه‌ای وجود ندارد
           </div>
         ) : (
           <div className="relative">
             {/* لیست رویدادها */}
             <div className="space-y-4">
-              {changeHistory.map((entry, index) => (
+              {sortedHistory.map((entry, index) => (
                 <div className="flex items-start relative" key={entry.id}>
-                  <div className="w-9 start-0 top-9 absolute bottom-0 rtl:-translate-x-1/2 translate-x-1/2 border-s border-s-input"></div>
+                  {/* خط عمودی اتصال */}
+                  {index < sortedHistory.length - 1 && (
+                    <div className="w-9 start-0 top-9 absolute bottom-0 rtl:-translate-x-1/2 translate-x-1/2 border-s border-s-input"></div>
+                  )}
 
-                  <div className="flex items-center justify-center bg-accent/60 shrink-0 rounded-full  border border-input size-9 text-secondary-foreground">
-                    {getActionIcon(entry.title)}
+                  {/* آیکون وضعیت */}
+                  <div className="flex items-center justify-center bg-accent/60 shrink-0 rounded-full border border-input size-9 text-secondary-foreground z-10">
+                    {getStatusIcon(entry.status)}
                   </div>
+
+                  {/* محتوای تاریخچه */}
                   <div className="ps-2.5 mb-7 text-base grow">
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2 mb-3 flex-wrap">
-                        <OrderStatusBadge
-                          status={entry.Status}
-                          size="default"
-                        />
+                        <OrderStatusBadge status={entry.status as any} size="default" />
                       </div>
-                      <div className="text-sm text-mono mb-2 font-bold">
-                        {entry.description}
+                      <div className="text-sm mb-2 font-medium">
+                        {entry.description || "بدون توضیحات"}
                       </div>
-                      <span className="text-xs text-secondary-foreground">
-                        {formatDate(entry.createdDateTime, locale)}
-                      </span>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>{formatDate(entry.createdDateTime, locale)}</span>
+                        <span>
+                          {new Date(entry.createdDateTime).toLocaleTimeString(
+                            locale,
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

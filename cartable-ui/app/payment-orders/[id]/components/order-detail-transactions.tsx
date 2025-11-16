@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import {
-  Transaction,
-  TransactionStatus,
-  PaymentMethodEnum,
-} from "@/types/transaction";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+  WithdrawalTransaction,
+  TransactionStatusApiEnum,
+  PaymentTypeApiEnum,
+  ReasonCodeApiEnum,
+  TransactionFilterParams,
+} from "@/types/api";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -17,20 +19,17 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TransactionStatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
 import {
-  Download,
   Eye,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
   ChevronLeft,
   ChevronRight,
   Filter as FilterIcon,
   X,
   Search,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -42,242 +41,191 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { TransactionDetailDialog } from "./transaction-detail-dialog";
 import { BankLogo } from "@/components/common/bank-logo";
 import { PaymentTypeIcon } from "@/components/common/payment-type-icon";
 import { getBankCodeFromIban } from "@/lib/bank-logos";
 import { MobilePagination } from "@/components/common/mobile-pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 interface OrderDetailTransactionsProps {
-  transactions: Transaction[];
+  transactions: WithdrawalTransaction[];
+  isLoading: boolean;
+  pageNumber: number;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onRefresh: () => void | Promise<void>;
+  onFilterChange: (filters: Partial<TransactionFilterParams>) => void | Promise<void>;
 }
 
-const ITEMS_PER_PAGE_MOBILE = 10;
-const ITEMS_PER_PAGE_DESKTOP = 15;
+// Helper function to convert API enum to display name
+const getStatusBadgeVariant = (status: TransactionStatusApiEnum) => {
+  switch (status) {
+    case TransactionStatusApiEnum.BankSucceeded:
+      return "success";
+    case TransactionStatusApiEnum.BankFailed:
+    case TransactionStatusApiEnum.Canceled:
+      return "destructive";
+    case TransactionStatusApiEnum.WaitForBank:
+    case TransactionStatusApiEnum.WaitForExecution:
+    case TransactionStatusApiEnum.Draft:
+      return "warning";
+    default:
+      return "secondary";
+  }
+};
 
-type SortField = "ownerName" | "amount" | "status" | "paymentType";
-type SortDirection = "asc" | "desc";
+const getStatusLabel = (status: TransactionStatusApiEnum) => {
+  switch (status) {
+    case TransactionStatusApiEnum.Draft:
+      return "پیش‌نویس";
+    case TransactionStatusApiEnum.WaitForExecution:
+      return "در انتظار اجرا";
+    case TransactionStatusApiEnum.WaitForBank:
+      return "در انتظار بانک";
+    case TransactionStatusApiEnum.BankSucceeded:
+      return "موفق";
+    case TransactionStatusApiEnum.BankFailed:
+      return "ناموفق";
+    case TransactionStatusApiEnum.Canceled:
+      return "لغو شده";
+    default:
+      return status;
+  }
+};
+
+const getPaymentTypeLabel = (type: PaymentTypeApiEnum) => {
+  switch (type) {
+    case PaymentTypeApiEnum.Paya:
+      return "پایا";
+    case PaymentTypeApiEnum.Satna:
+      return "ساتنا";
+    case PaymentTypeApiEnum.Rtgs:
+      return "آنی (RTGS)";
+    default:
+      return type;
+  }
+};
+
+const getReasonCodeLabel = (code: ReasonCodeApiEnum) => {
+  switch (code) {
+    case ReasonCodeApiEnum.InvestmentAndBourse:
+      return "سرمایه‌گذاری و بورس";
+    case ReasonCodeApiEnum.ImportGoods:
+      return "واردات کالا";
+    case ReasonCodeApiEnum.SalaryAndWages:
+      return "حقوق و دستمزد";
+    case ReasonCodeApiEnum.TaxAndDuties:
+      return "مالیات و عوارض";
+    case ReasonCodeApiEnum.LoanRepayment:
+      return "بازپرداخت وام";
+    case ReasonCodeApiEnum.OtherPayments:
+      return "سایر پرداخت‌ها";
+    default:
+      return code;
+  }
+};
 
 export function OrderDetailTransactions({
   transactions,
+  isLoading,
+  pageNumber,
+  totalPages,
+  totalItems,
+  pageSize,
+  onPageChange,
+  onRefresh,
+  onFilterChange,
 }: OrderDetailTransactionsProps) {
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
 
-  // State
-  const [statusFilter, setStatusFilter] = useState<TransactionStatus[]>([]);
-  const [typeFilter, setTypeFilter] = useState<PaymentMethodEnum[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortField, setSortField] = useState<SortField>("ownerName");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const [selectedTransaction, setSelectedTransaction] =
-    useState<Transaction | null>(null);
+  // Local filter state
+  const [searchValue, setSearchValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState<TransactionStatusApiEnum | "">("");
+  const [paymentTypeFilter, setPaymentTypeFilter] = useState<PaymentTypeApiEnum | "">("");
+  const [reasonCodeFilter, setReasonCodeFilter] = useState<ReasonCodeApiEnum | "">("");
+
+  // Dialog state
+  const [selectedTransaction, setSelectedTransaction] = useState<WithdrawalTransaction | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Filter Options
-  const statusOptions = [
-    {
-      value: TransactionStatus.BankSucceeded,
-      label: t("status.succeeded"),
-    },
-    {
-      value: TransactionStatus.WaitForExecution,
-      label: t("status.pending"),
-    },
-    {
-      value: TransactionStatus.WaitForBank,
-      label: t("status.pending"),
-    },
-    {
-      value: TransactionStatus.Failed,
-      label: t("status.failed"),
-    },
-    {
-      value: TransactionStatus.BankRejected,
-      label: t("status.bankRejected"),
-    },
-  ];
+  const handleApplyFilters = () => {
+    const filters: Partial<TransactionFilterParams> = {};
 
-  const typeOptions = [
-    {
-      value: PaymentMethodEnum.Internal,
-      label: t("paymentType.internal"),
-    },
-    { value: PaymentMethodEnum.Paya, label: t("paymentType.paya") },
-    { value: PaymentMethodEnum.Satna, label: t("paymentType.satna") },
-  ];
+    if (searchValue) filters.serchValue = searchValue;
+    if (statusFilter) filters.status = statusFilter;
+    if (paymentTypeFilter) filters.paymentType = paymentTypeFilter;
+    if (reasonCodeFilter) filters.reasonCode = reasonCodeFilter;
 
-  // Filter and Sort Logic
-  const filteredAndSortedTransactions = useMemo(() => {
-    let result = [...transactions];
-
-    // Apply search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (tx) =>
-          tx.ownerName?.toLowerCase().includes(query) ||
-          tx.destinationIban?.toLowerCase().includes(query) ||
-          tx.trackingId?.toLowerCase().includes(query) ||
-          tx.nationalCode?.toLowerCase().includes(query)
-      );
-    }
-
-    // Apply status filter
-    if (statusFilter.length > 0) {
-      result = result.filter((tx) => statusFilter.includes(tx.status));
-    }
-
-    // Apply type filter
-    if (typeFilter.length > 0) {
-      result = result.filter(
-        (tx) => tx.paymentType && typeFilter.includes(tx.paymentType)
-      );
-    }
-
-    // Apply sorting
-    result.sort((a, b) => {
-      let comparison = 0;
-
-      switch (sortField) {
-        case "ownerName":
-          comparison = (a.ownerName || "").localeCompare(b.ownerName || "");
-          break;
-        case "amount":
-          comparison = a.amount - b.amount;
-          break;
-        case "status":
-          comparison = a.status.localeCompare(b.status);
-          break;
-        case "paymentType":
-          comparison = (a.paymentType || "").localeCompare(b.paymentType || "");
-          break;
-      }
-
-      return sortDirection === "asc" ? comparison : -comparison;
-    });
-
-    return result;
-  }, [
-    transactions,
-    searchQuery,
-    statusFilter,
-    typeFilter,
-    sortField,
-    sortDirection,
-  ]);
-
-  // Pagination
-  const itemsPerPage = isMobile
-    ? ITEMS_PER_PAGE_MOBILE
-    : ITEMS_PER_PAGE_DESKTOP;
-  const totalPages = Math.ceil(
-    filteredAndSortedTransactions.length / itemsPerPage
-  );
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedTransactions = filteredAndSortedTransactions.slice(
-    startIndex,
-    endIndex
-  );
-
-  // Handlers
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleStatusToggle = (status: TransactionStatus) => {
-    setStatusFilter((prev) =>
-      prev.includes(status)
-        ? prev.filter((s) => s !== status)
-        : [...prev, status]
-    );
-    setCurrentPage(1);
-  };
-
-  const handleTypeToggle = (type: PaymentMethodEnum) => {
-    setTypeFilter((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-    );
-    setCurrentPage(1);
+    onFilterChange(filters);
+    setIsFilterOpen(false);
   };
 
   const handleResetFilters = () => {
-    setStatusFilter([]);
-    setTypeFilter([]);
-    setSearchQuery("");
-    setCurrentPage(1);
+    setSearchValue("");
+    setStatusFilter("");
+    setPaymentTypeFilter("");
+    setReasonCodeFilter("");
+    onFilterChange({});
+    setIsFilterOpen(false);
   };
 
-  const handleViewDetails = (transaction: Transaction) => {
+  const handleViewDetails = (transaction: WithdrawalTransaction) => {
     setSelectedTransaction(transaction);
     setIsDialogOpen(true);
   };
 
-  const handleExport = () => {
-    console.log("Exporting transactions...");
+  const handleInquiry = async (transaction: WithdrawalTransaction) => {
+    // TODO: Implement inquiry API call
+    console.log("Inquiry for transaction:", transaction.id);
+    await onRefresh();
   };
 
   const activeFiltersCount =
-    statusFilter.length + typeFilter.length + (searchQuery ? 1 : 0);
+    (searchValue ? 1 : 0) +
+    (statusFilter ? 1 : 0) +
+    (paymentTypeFilter ? 1 : 0) +
+    (reasonCodeFilter ? 1 : 0);
 
-  const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="h-3.5 w-3.5 opacity-40" />;
-    }
-    return sortDirection === "asc" ? (
-      <ArrowUp className="h-3.5 w-3.5" />
-    ) : (
-      <ArrowDown className="h-3.5 w-3.5" />
-    );
-  };
+  const startIndex = (pageNumber - 1) * pageSize;
 
   return (
     <>
       <Card className="shadow-sm overflow-hidden">
-        {/* Card Content */}
         <CardContent className="p-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border-b bg-muted/20">
             {/* Title & Count */}
             <div className="flex items-baseline gap-3">
-              <CardTitle className="text-xl">
-                {t("paymentOrders.transactionsList")}
-              </CardTitle>
+              <CardTitle className="text-xl">لیست تراکنش‌ها</CardTitle>
               <span className="text-sm text-muted-foreground">
-                {filteredAndSortedTransactions.length} تراکنش
+                {totalItems} تراکنش
               </span>
             </div>
 
             {/* Actions */}
             <div className="flex gap-2 w-full sm:w-auto ms-auto">
-              {/* Search */}
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="جستجو در تراکنش‌ها..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full pr-10 pl-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
-                />
-              </div>
+              {/* Refresh Button */}
+              <Button
+                variant="outline"
+                onClick={onRefresh}
+                disabled={isLoading}
+                className="gap-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+                {!isMobile && "بروزرسانی"}
+              </Button>
 
               {/* Filter Button */}
               <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
@@ -292,68 +240,102 @@ export function OrderDetailTransactions({
                     )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-full sm:max-w-md">
+                <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto">
                   <SheetHeader>
                     <SheetTitle>فیلتر تراکنش‌ها</SheetTitle>
                   </SheetHeader>
 
                   <div className="space-y-6 py-6">
-                    {/* Status Filter */}
-                    <div className="space-y-3">
-                      <Label className="text-base font-semibold">
-                        وضعیت تراکنش
-                      </Label>
-                      <div className="space-y-2">
-                        {statusOptions.map((option) => (
-                          <div
-                            key={option.value}
-                            className="flex items-center gap-3"
-                          >
-                            <Checkbox
-                              id={`status-${option.value}`}
-                              checked={statusFilter.includes(option.value)}
-                              onCheckedChange={() =>
-                                handleStatusToggle(option.value)
-                              }
-                            />
-                            <Label
-                              htmlFor={`status-${option.value}`}
-                              className="cursor-pointer flex-1"
-                            >
-                              {option.label}
-                            </Label>
-                          </div>
-                        ))}
+                    {/* Search */}
+                    <div className="space-y-2">
+                      <Label>جستجو</Label>
+                      <div className="relative">
+                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="نام، شماره شبا، کد ملی..."
+                          value={searchValue}
+                          onChange={(e) => setSearchValue(e.target.value)}
+                          className="pr-10"
+                        />
                       </div>
                     </div>
 
-                    {/* Type Filter */}
-                    <div className="space-y-3">
-                      <Label className="text-base font-semibold">
-                        نوع تراکنش
-                      </Label>
-                      <div className="space-y-2">
-                        {typeOptions.map((option) => (
-                          <div
-                            key={option.value}
-                            className="flex items-center gap-3"
-                          >
-                            <Checkbox
-                              id={`type-${option.value}`}
-                              checked={typeFilter.includes(option.value)}
-                              onCheckedChange={() =>
-                                handleTypeToggle(option.value)
-                              }
-                            />
-                            <Label
-                              htmlFor={`type-${option.value}`}
-                              className="cursor-pointer flex-1"
-                            >
-                              {option.label}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
+                    {/* Status Filter */}
+                    <div className="space-y-2">
+                      <Label>وضعیت تراکنش</Label>
+                      <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="همه وضعیت‌ها" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">همه وضعیت‌ها</SelectItem>
+                          <SelectItem value={TransactionStatusApiEnum.BankSucceeded}>
+                            موفق
+                          </SelectItem>
+                          <SelectItem value={TransactionStatusApiEnum.BankFailed}>
+                            ناموفق
+                          </SelectItem>
+                          <SelectItem value={TransactionStatusApiEnum.WaitForBank}>
+                            در انتظار بانک
+                          </SelectItem>
+                          <SelectItem value={TransactionStatusApiEnum.WaitForExecution}>
+                            در انتظار اجرا
+                          </SelectItem>
+                          <SelectItem value={TransactionStatusApiEnum.Draft}>
+                            پیش‌نویس
+                          </SelectItem>
+                          <SelectItem value={TransactionStatusApiEnum.Canceled}>
+                            لغو شده
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Payment Type Filter */}
+                    <div className="space-y-2">
+                      <Label>نوع پرداخت</Label>
+                      <Select value={paymentTypeFilter} onValueChange={(v) => setPaymentTypeFilter(v as any)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="همه انواع" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">همه انواع</SelectItem>
+                          <SelectItem value={PaymentTypeApiEnum.Paya}>پایا</SelectItem>
+                          <SelectItem value={PaymentTypeApiEnum.Satna}>ساتنا</SelectItem>
+                          <SelectItem value={PaymentTypeApiEnum.Rtgs}>آنی (RTGS)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Reason Code Filter */}
+                    <div className="space-y-2">
+                      <Label>کد علت</Label>
+                      <Select value={reasonCodeFilter} onValueChange={(v) => setReasonCodeFilter(v as any)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="همه کدها" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">همه کدها</SelectItem>
+                          <SelectItem value={ReasonCodeApiEnum.InvestmentAndBourse}>
+                            سرمایه‌گذاری و بورس
+                          </SelectItem>
+                          <SelectItem value={ReasonCodeApiEnum.ImportGoods}>
+                            واردات کالا
+                          </SelectItem>
+                          <SelectItem value={ReasonCodeApiEnum.SalaryAndWages}>
+                            حقوق و دستمزد
+                          </SelectItem>
+                          <SelectItem value={ReasonCodeApiEnum.TaxAndDuties}>
+                            مالیات و عوارض
+                          </SelectItem>
+                          <SelectItem value={ReasonCodeApiEnum.LoanRepayment}>
+                            بازپرداخت وام
+                          </SelectItem>
+                          <SelectItem value={ReasonCodeApiEnum.OtherPayments}>
+                            سایر پرداخت‌ها
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -365,58 +347,66 @@ export function OrderDetailTransactions({
                     >
                       پاک کردن
                     </Button>
-                    <SheetClose asChild>
-                      <Button className="flex-1">اعمال</Button>
-                    </SheetClose>
+                    <Button onClick={handleApplyFilters} className="flex-1">
+                      اعمال فیلتر
+                    </Button>
                   </SheetFooter>
                 </SheetContent>
               </Sheet>
-
-              {/* Export */}
-              <Button
-                variant="outline"
-                onClick={handleExport}
-                className="gap-2"
-              >
-                <Download className="h-4 w-4" />
-                {!isMobile && "Excel"}
-              </Button>
             </div>
           </div>
 
           {/* Active Filters Display */}
           {activeFiltersCount > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
-              {statusFilter.map((status) => {
-                const option = statusOptions.find(
-                  (opt) => opt.value === status
-                );
-                return (
-                  <Badge
-                    key={status}
-                    variant="secondary"
-                    className="gap-1.5 cursor-pointer hover:bg-secondary/80 transition-colors"
-                    onClick={() => handleStatusToggle(status)}
-                  >
-                    {option?.label}
-                    <X className="h-3 w-3" />
-                  </Badge>
-                );
-              })}
-              {typeFilter.map((type) => {
-                const option = typeOptions.find((opt) => opt.value === type);
-                return (
-                  <Badge
-                    key={type}
-                    variant="secondary"
-                    className="gap-1.5 cursor-pointer hover:bg-secondary/80 transition-colors"
-                    onClick={() => handleTypeToggle(type)}
-                  >
-                    {option?.label}
-                    <X className="h-3 w-3" />
-                  </Badge>
-                );
-              })}
+            <div className="flex flex-wrap gap-2 p-4 border-b bg-muted/10">
+              {searchValue && (
+                <Badge variant="secondary" className="gap-1.5">
+                  جستجو: {searchValue}
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => {
+                      setSearchValue("");
+                      handleApplyFilters();
+                    }}
+                  />
+                </Badge>
+              )}
+              {statusFilter && (
+                <Badge variant="secondary" className="gap-1.5">
+                  {getStatusLabel(statusFilter)}
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => {
+                      setStatusFilter("");
+                      handleApplyFilters();
+                    }}
+                  />
+                </Badge>
+              )}
+              {paymentTypeFilter && (
+                <Badge variant="secondary" className="gap-1.5">
+                  {getPaymentTypeLabel(paymentTypeFilter)}
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => {
+                      setPaymentTypeFilter("");
+                      handleApplyFilters();
+                    }}
+                  />
+                </Badge>
+              )}
+              {reasonCodeFilter && (
+                <Badge variant="secondary" className="gap-1.5">
+                  {getReasonCodeLabel(reasonCodeFilter)}
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => {
+                      setReasonCodeFilter("");
+                      handleApplyFilters();
+                    }}
+                  />
+                </Badge>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -428,306 +418,312 @@ export function OrderDetailTransactions({
             </div>
           )}
 
-          {isMobile ? (
-            // Mobile Cards View
-            <div className="p-4 space-y-3">
-              {paginatedTransactions.map((transaction) => {
-                const bankCode = getBankCodeFromIban(
-                  transaction.destinationIban
-                );
-                return (
-                  <div
-                    key={transaction.id}
-                    className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => handleViewDetails(transaction)}
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          {bankCode && (
-                            <div className="shrink-0">
-                              <BankLogo bankCode={bankCode} size="sm" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium truncate">
-                              {transaction.ownerName}
-                            </div>
-                            <div className="text-xs text-muted-foreground font-mono truncate mt-1">
-                              {transaction.destinationIban}
-                            </div>
-                          </div>
-                        </div>
-                        <TransactionStatusBadge
-                          status={transaction.status}
-                          size="sm"
-                        />
-                      </div>
-
-                      <div className="border-t" />
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-muted-foreground text-xs mb-1">
-                            مبلغ:
-                          </div>
-                          <div className="font-bold text-primary">
-                            {formatCurrency(transaction.amount, locale)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-muted-foreground text-xs mb-1">
-                            نوع:
-                          </div>
-                          <PaymentTypeIcon
-                            type={
-                              transaction.paymentType ||
-                              PaymentMethodEnum.Unknown
-                            }
-                            showLabel
-                          />
-                        </div>
-                      </div>
-
-                      {transaction.trackingId && (
-                        <>
-                          <div className="border-t" />
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground">
-                              کد رهگیری:
-                            </span>
-                            <span className="font-mono font-medium">
-                              {transaction.trackingId}
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {paginatedTransactions.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="text-muted-foreground mb-3">
-                    {t("common.noResults")}
-                  </div>
-                  {activeFiltersCount > 0 && (
-                    <Button
-                      variant="outline"
-                      onClick={handleResetFilters}
-                      size="sm"
-                    >
-                      پاک کردن فیلترها
-                    </Button>
-                  )}
-                </div>
-              )}
-
-              {filteredAndSortedTransactions.length > 0 && (
-                <MobilePagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                />
-              )}
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : (
-            // Desktop Table
+          )}
+
+          {/* Content */}
+          {!isLoading && (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-12">#</TableHead>
-                    <TableHead
-                      className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
-                      onClick={() => handleSort("ownerName")}
-                    >
-                      <div className="flex items-center gap-2">
-                        نام و نام خانوادگی
-                        <SortIcon field="ownerName" />
-                      </div>
-                    </TableHead>
-                    <TableHead>کد ملی</TableHead>
-                    <TableHead>شماره شبا</TableHead>
-                    <TableHead
-                      className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
-                      onClick={() => handleSort("amount")}
-                    >
-                      <div className="flex items-center gap-2">
-                        مبلغ
-                        <SortIcon field="amount" />
-                      </div>
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
-                      onClick={() => handleSort("paymentType")}
-                    >
-                      <div className="flex items-center gap-2">
-                        نوع
-                        <SortIcon field="paymentType" />
-                      </div>
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
-                      onClick={() => handleSort("status")}
-                    >
-                      <div className="flex items-center gap-2">
-                        وضعیت
-                        <SortIcon field="status" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="w-16 text-left">عملیات</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedTransactions.map((transaction, index) => {
-                    const bankCode = getBankCodeFromIban(
-                      transaction.destinationIban
-                    );
+              {isMobile ? (
+                // Mobile Cards View
+                <div className="p-4 space-y-3">
+                  {transactions.map((transaction, index) => {
+                    const bankCode = getBankCodeFromIban(transaction.destinationIban);
+                    const canInquiry = transaction.status === TransactionStatusApiEnum.WaitForBank;
+
                     return (
-                      <TableRow
+                      <div
                         key={transaction.id}
-                        className="hover:bg-muted/30 transition-colors"
+                        className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
                       >
-                        <TableCell className="text-muted-foreground text-sm">
-                          {startIndex + index + 1}
-                        </TableCell>
-                        <TableCell className="">
-                          {transaction.ownerName}
-                        </TableCell>
-                        <TableCell className="">
-                          {transaction.nationalCode}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center grow gap-2.5">
-                            {bankCode && (
-                              <BankLogo bankCode={bankCode} size="sm" />
-                            )}
-                            <div className="flex flex-col gap-1">
-                              <span className="text-sm font-medium text-mono hover:text-primary-active mb-px">
-                                {transaction.destinationIban}
-                              </span>
-                              <span className="text-xs font-normal text-muted-400 leading-3">
-                                {transaction.accountNumber}
-                              </span>
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              {bankCode && (
+                                <div className="shrink-0">
+                                  <BankLogo bankCode={bankCode} size="sm" />
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium truncate">
+                                  {transaction.destinationAccountOwner}
+                                </div>
+                                <div className="text-xs text-muted-foreground font-mono truncate mt-1">
+                                  {transaction.destinationIban}
+                                </div>
+                              </div>
+                            </div>
+                            <Badge variant={getStatusBadgeVariant(transaction.status) as any}>
+                              {getStatusLabel(transaction.status)}
+                            </Badge>
+                          </div>
+
+                          <div className="border-t" />
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-muted-foreground text-xs mb-1">
+                                مبلغ:
+                              </div>
+                              <div className="font-bold text-primary">
+                                {formatCurrency(parseFloat(transaction.amount), locale)}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-muted-foreground text-xs mb-1">
+                                نوع:
+                              </div>
+                              <div className="text-sm font-medium">
+                                {getPaymentTypeLabel(transaction.paymentType)}
+                              </div>
                             </div>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-semibold">
-                            {formatCurrency(transaction.amount, locale)}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <PaymentTypeIcon
-                            type={
-                              transaction.paymentType ||
-                              PaymentMethodEnum.Unknown
-                            }
-                            showLabel
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <TransactionStatusBadge
-                            status={transaction.status}
-                            size="sm"
-                          />
-                        </TableCell>
-                        <TableCell className="text-left">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewDetails(transaction)}
-                            className="h-8 w-8 p-0 hover:bg-primary/10"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
+
+                          {transaction.trackingId && (
+                            <>
+                              <div className="border-t" />
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-muted-foreground">
+                                  کد رهگیری:
+                                </span>
+                                <span className="font-mono font-medium">
+                                  {transaction.trackingId}
+                                </span>
+                              </div>
+                            </>
+                          )}
+
+                          <div className="border-t pt-2 flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewDetails(transaction)}
+                              className="flex-1 gap-2"
+                            >
+                              <Eye className="h-4 w-4" />
+                              مشاهده
+                            </Button>
+                            {canInquiry && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleInquiry(transaction)}
+                                className="flex-1 gap-2"
+                              >
+                                <RefreshCw className="h-4 w-4" />
+                                استعلام
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     );
                   })}
-                </TableBody>
-              </Table>
 
-              {paginatedTransactions.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="text-muted-foreground mb-3">
-                    {t("common.noResults")}
-                  </div>
-                  {activeFiltersCount > 0 && (
-                    <Button
-                      variant="outline"
-                      onClick={handleResetFilters}
-                      size="sm"
-                    >
-                      پاک کردن فیلترها
-                    </Button>
+                  {transactions.length === 0 && (
+                    <div className="text-center py-12">
+                      <div className="text-muted-foreground mb-3">
+                        تراکنشی یافت نشد
+                      </div>
+                      {activeFiltersCount > 0 && (
+                        <Button
+                          variant="outline"
+                          onClick={handleResetFilters}
+                          size="sm"
+                        >
+                          پاک کردن فیلترها
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {totalPages > 1 && (
+                    <MobilePagination
+                      currentPage={pageNumber}
+                      totalPages={totalPages}
+                      onPageChange={onPageChange}
+                    />
                   )}
                 </div>
-              )}
+              ) : (
+                // Desktop Table
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="w-12">#</TableHead>
+                        <TableHead>نام و نام خانوادگی</TableHead>
+                        <TableHead>کد ملی</TableHead>
+                        <TableHead>شماره شبا</TableHead>
+                        <TableHead>مبلغ</TableHead>
+                        <TableHead>نوع پرداخت</TableHead>
+                        <TableHead>کد علت</TableHead>
+                        <TableHead>وضعیت</TableHead>
+                        <TableHead className="text-left">عملیات</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {transactions.map((transaction, index) => {
+                        const bankCode = getBankCodeFromIban(transaction.destinationIban);
+                        const canInquiry = transaction.status === TransactionStatusApiEnum.WaitForBank;
 
-              {/* Desktop Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between p-4 border-t bg-muted/20">
-                  <div className="text-sm text-muted-foreground">
-                    نمایش {startIndex + 1} تا{" "}
-                    {Math.min(endIndex, filteredAndSortedTransactions.length)}{" "}
-                    از {filteredAndSortedTransactions.length} تراکنش
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="gap-1"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                      قبلی
-                    </Button>
-
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1)
-                        .filter(
-                          (page) =>
-                            page === 1 ||
-                            page === totalPages ||
-                            Math.abs(page - currentPage) <= 1
-                        )
-                        .map((page, index, array) => (
-                          <div key={page} className="flex items-center gap-1">
-                            {index > 0 && array[index - 1] !== page - 1 && (
-                              <span className="px-2 text-muted-foreground">
-                                ...
+                        return (
+                          <TableRow
+                            key={transaction.id}
+                            className="hover:bg-muted/30 transition-colors"
+                          >
+                            <TableCell className="text-muted-foreground text-sm">
+                              {startIndex + index + 1}
+                            </TableCell>
+                            <TableCell>
+                              {transaction.destinationAccountOwner}
+                            </TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {transaction.nationalCode}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2.5">
+                                {bankCode && (
+                                  <BankLogo bankCode={bankCode} size="sm" />
+                                )}
+                                <div className="flex flex-col gap-1">
+                                  <span className="text-sm font-medium font-mono">
+                                    {transaction.destinationIban}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {transaction.accountNumber}
+                                  </span>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <span className="font-semibold">
+                                {formatCurrency(parseFloat(transaction.amount), locale)}
                               </span>
-                            )}
-                            <button
-                              onClick={() => handlePageChange(page)}
-                              className={`min-w-8 h-8 px-3 text-sm rounded-md transition-all font-medium ${
-                                currentPage === page
-                                  ? "bg-primary text-primary-foreground shadow-sm"
-                                  : "text-muted-foreground hover:bg-muted"
-                              }`}
-                            >
-                              {page}
-                            </button>
-                          </div>
-                        ))}
-                    </div>
+                            </TableCell>
+                            <TableCell>
+                              {getPaymentTypeLabel(transaction.paymentType)}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {getReasonCodeLabel(transaction.reasonCode)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={getStatusBadgeVariant(transaction.status) as any}>
+                                {getStatusLabel(transaction.status)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-left">
+                              <div className="flex items-center gap-1 justify-end">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleViewDetails(transaction)}
+                                  className="h-8 w-8 p-0 hover:bg-primary/10"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {canInquiry && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleInquiry(transaction)}
+                                    className="h-8 w-8 p-0 hover:bg-primary/10"
+                                    title="استعلام تراکنش"
+                                  >
+                                    <RefreshCw className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="gap-1"
-                    >
-                      بعدی
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+                  {transactions.length === 0 && (
+                    <div className="text-center py-12">
+                      <div className="text-muted-foreground mb-3">
+                        تراکنشی یافت نشد
+                      </div>
+                      {activeFiltersCount > 0 && (
+                        <Button
+                          variant="outline"
+                          onClick={handleResetFilters}
+                          size="sm"
+                        >
+                          پاک کردن فیلترها
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Desktop Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between p-4 border-t bg-muted/20">
+                      <div className="text-sm text-muted-foreground">
+                        نمایش {startIndex + 1} تا{" "}
+                        {Math.min(startIndex + pageSize, totalItems)} از {totalItems} تراکنش
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onPageChange(pageNumber - 1)}
+                          disabled={pageNumber === 1}
+                          className="gap-1"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                          قبلی
+                        </Button>
+
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1)
+                            .filter(
+                              (page) =>
+                                page === 1 ||
+                                page === totalPages ||
+                                Math.abs(page - pageNumber) <= 1
+                            )
+                            .map((page, index, array) => (
+                              <div key={page} className="flex items-center gap-1">
+                                {index > 0 && array[index - 1] !== page - 1 && (
+                                  <span className="px-2 text-muted-foreground">
+                                    ...
+                                  </span>
+                                )}
+                                <button
+                                  onClick={() => onPageChange(page)}
+                                  className={`min-w-8 h-8 px-3 text-sm rounded-md transition-all font-medium ${
+                                    pageNumber === page
+                                      ? "bg-primary text-primary-foreground shadow-sm"
+                                      : "text-muted-foreground hover:bg-muted"
+                                  }`}
+                                >
+                                  {page}
+                                </button>
+                              </div>
+                            ))}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onPageChange(pageNumber + 1)}
+                          disabled={pageNumber === totalPages}
+                          className="gap-1"
+                        >
+                          بعدی
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
@@ -735,7 +731,7 @@ export function OrderDetailTransactions({
       </Card>
 
       <TransactionDetailDialog
-        transaction={selectedTransaction}
+        transaction={selectedTransaction as any}
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
       />

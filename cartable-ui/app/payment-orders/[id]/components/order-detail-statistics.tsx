@@ -1,8 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
-import { PaymentOrderDetail } from "@/types/order";
-import { TransactionStatus, PaymentMethodEnum } from "@/types/transaction";
+import { WithdrawalStatistics } from "@/types/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
@@ -16,122 +14,36 @@ import {
   XCircle,
   Clock,
   Calendar,
+  BarChart3,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface OrderDetailStatisticsProps {
-  order: PaymentOrderDetail;
+  statistics: WithdrawalStatistics;
 }
 
-export function OrderDetailStatistics({ order }: OrderDetailStatisticsProps) {
+export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps) {
   const { t, locale } = useTranslation();
 
-  // محاسبه آمار تراکنش‌ها
-  const statistics = useMemo(() => {
-    const transactions = order.transactions;
-    const total = transactions.length;
+  const {
+    totalTransactions,
+    totalAmount,
+    overallSuccessRate,
+    statusStatistics,
+    paymentTypeStatistics,
+    reasonCodeStatistics,
+    financialStatistics,
+    timeStatistics,
+  } = statistics;
 
-    const succeeded = transactions.filter(
-      (tx) => tx.status === TransactionStatus.BankSucceeded
-    ).length;
-
-    const failed = transactions.filter(
-      (tx) =>
-        tx.status === TransactionStatus.BankRejected ||
-        tx.status === TransactionStatus.Failed
-    ).length;
-
-    const pending = transactions.filter(
-      (tx) =>
-        tx.status === TransactionStatus.WaitForBank ||
-        tx.status === TransactionStatus.Registered ||
-        tx.status === TransactionStatus.WaitForExecution
-    ).length;
-
-    const succeededAmount = transactions
-      .filter((tx) => tx.status === TransactionStatus.BankSucceeded)
-      .reduce((sum, tx) => sum + tx.amount, 0);
-
-    const failedAmount = transactions
-      .filter(
-        (tx) =>
-          tx.status === TransactionStatus.BankRejected ||
-          tx.status === TransactionStatus.Failed
-      )
-      .reduce((sum, tx) => sum + tx.amount, 0);
-
-    const pendingAmount = transactions
-      .filter(
-        (tx) =>
-          tx.status === TransactionStatus.WaitForBank ||
-          tx.status === TransactionStatus.Registered ||
-          tx.status === TransactionStatus.WaitForExecution
-      )
-      .reduce((sum, tx) => sum + tx.amount, 0);
-
-    const averageAmount = total > 0 ? order.totalAmount / total : 0;
-    const successRate = total > 0 ? (succeeded / total) * 100 : 0;
-
-    // آمار انواع پرداخت
-    const paymentTypes = {
-      internal: transactions.filter(
-        (tx) => tx.paymentType === PaymentMethodEnum.Internal
-      ).length,
-      paya: transactions.filter(
-        (tx) => tx.paymentType === PaymentMethodEnum.Paya
-      ).length,
-      satna: transactions.filter(
-        (tx) => tx.paymentType === PaymentMethodEnum.Satna
-      ).length,
-    };
-
-    const paymentTypePercentages = {
-      internal: total > 0 ? (paymentTypes.internal / total) * 100 : 0,
-      paya: total > 0 ? (paymentTypes.paya / total) * 100 : 0,
-      satna: total > 0 ? (paymentTypes.satna / total) * 100 : 0,
-    };
-
-    return {
-      total,
-      succeeded,
-      failed,
-      pending,
-      succeededAmount,
-      failedAmount,
-      pendingAmount,
-      averageAmount,
-      successRate,
-      paymentTypes,
-      paymentTypePercentages,
-    };
-  }, [order.transactions, order.totalAmount]);
-
-  // محاسبه زمان پردازش
-  const processingTime = useMemo(() => {
-    if (order.processedAt && order.submittedToBankAt) {
-      const start = new Date(order.submittedToBankAt).getTime();
-      const end = new Date(order.processedAt).getTime();
-      const diffMinutes = Math.floor((end - start) / (1000 * 60));
-      return diffMinutes;
-    }
-    return null;
-  }, [order.processedAt, order.submittedToBankAt]);
-
-  // تاریخ اولین و آخرین تراکنش
-  const transactionDates = useMemo(() => {
-    if (order.transactions.length === 0) return null;
-
-    const sortedTransactions = [...order.transactions].sort(
-      (a, b) =>
-        new Date(a.createdDateTime).getTime() -
-        new Date(b.createdDateTime).getTime()
-    );
-
-    return {
-      first: sortedTransactions[0].createdDateTime,
-      last: sortedTransactions[sortedTransactions.length - 1].createdDateTime,
-    };
-  }, [order.transactions]);
+  // محاسبه تعداد تراکنش‌ها بر اساس وضعیت
+  const succeededCount = statusStatistics.breakdown.find(s => s.status === "BankSucceeded")?.count || 0;
+  const failedCount = statusStatistics.breakdown.filter(s =>
+    s.status === "BankFailed" || s.status === "Canceled"
+  ).reduce((sum, s) => sum + s.count, 0);
+  const pendingCount = statusStatistics.breakdown.filter(s =>
+    s.status === "WaitForExecution" || s.status === "WaitForBank" || s.status === "Draft"
+  ).reduce((sum, s) => sum + s.count, 0);
 
   return (
     <div className="space-y-6">
@@ -141,14 +53,13 @@ export function OrderDetailStatistics({ order }: OrderDetailStatisticsProps) {
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-base flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <span>{t("statistics.statusChart")}</span>
+              <span>وضعیت تراکنش‌ها</span>
               <span className="text-sm font-normal text-success">
-                {t("statistics.successRate")}:{" "}
-                {statistics.successRate.toFixed(1)}%
+                نرخ موفقیت: {overallSuccessRate.toFixed(1)}%
               </span>
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              {t("statistics.statusBreakdown")}
+              توزیع وضعیت تراکنش‌ها
             </p>
           </CardHeader>
           <CardContent>
@@ -158,22 +69,20 @@ export function OrderDetailStatistics({ order }: OrderDetailStatisticsProps) {
                 className="absolute inset-0 rounded-full"
                 style={{
                   background: `conic-gradient(
-                    #10B981 0% ${statistics.successRate}%,
-                    #EF4444 ${statistics.successRate}% ${
-                    statistics.successRate +
-                    (statistics.failed / statistics.total) * 100
+                    #10B981 0% ${overallSuccessRate}%,
+                    #EF4444 ${overallSuccessRate}% ${
+                    overallSuccessRate + statusStatistics.failureRate
                   }%,
                     #F59E0B ${
-                      statistics.successRate +
-                      (statistics.failed / statistics.total) * 100
+                      overallSuccessRate + statusStatistics.failureRate
                     }% 100%
                   )`,
                 }}
               >
                 <div className="absolute inset-[25%] bg-white dark:bg-card rounded-full flex flex-col items-center justify-center shadow-lg">
-                  <div className="text-2xl font-bold">{statistics.total}</div>
+                  <div className="text-2xl font-bold">{totalTransactions}</div>
                   <div className="text-xs text-muted-foreground truncate max-w-[80%] text-center">
-                    {t("transactions.paymentType")}
+                    تراکنش
                   </div>
                 </div>
               </div>
@@ -181,58 +90,44 @@ export function OrderDetailStatistics({ order }: OrderDetailStatisticsProps) {
 
             {/* لیست وضعیت‌ها */}
             <div className="space-y-3">
-              {statistics.succeeded > 0 && (
+              {succeededCount > 0 && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-success"></div>
-                    <span className="text-sm">{t("statistics.succeeded")}</span>
+                    <span className="text-sm">موفق</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">
-                      {statistics.succeeded}
-                    </span>
+                    <span className="text-sm font-medium">{succeededCount}</span>
                     <span className="text-xs text-muted-foreground">
-                      ({statistics.successRate.toFixed(1)}%)
+                      ({overallSuccessRate.toFixed(1)}%)
                     </span>
                   </div>
                 </div>
               )}
-              {statistics.failed > 0 && (
+              {failedCount > 0 && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-destructive"></div>
-                    <span className="text-sm">{t("statistics.failed")}</span>
+                    <span className="text-sm">ناموفق</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">
-                      {statistics.failed}
-                    </span>
+                    <span className="text-sm font-medium">{failedCount}</span>
                     <span className="text-xs text-muted-foreground">
-                      (
-                      {((statistics.failed / statistics.total) * 100).toFixed(
-                        1
-                      )}
-                      %)
+                      ({statusStatistics.failureRate.toFixed(1)}%)
                     </span>
                   </div>
                 </div>
               )}
-              {statistics.pending > 0 && (
+              {pendingCount > 0 && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-warning"></div>
-                    <span className="text-sm">{t("statistics.pending")}</span>
+                    <span className="text-sm">در انتظار</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">
-                      {statistics.pending}
-                    </span>
+                    <span className="text-sm font-medium">{pendingCount}</span>
                     <span className="text-xs text-muted-foreground">
-                      (
-                      {((statistics.pending / statistics.total) * 100).toFixed(
-                        1
-                      )}
-                      %)
+                      ({(100 - overallSuccessRate - statusStatistics.failureRate).toFixed(1)}%)
                     </span>
                   </div>
                 </div>
@@ -245,100 +140,89 @@ export function OrderDetailStatistics({ order }: OrderDetailStatisticsProps) {
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-base">
-              {t("statistics.statusDetails")}
+              جزئیات وضعیت‌ها
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              {t("statistics.statusBreakdown")}
+              توزیع وضعیت و مبالغ
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {statistics.succeeded > 0 && (
+            {succeededCount > 0 && (
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
                   <CheckCircle2 className="h-4 w-4 text-success" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium">
-                      {t("statistics.succeeded")}
-                    </span>
+                    <span className="text-sm font-medium">موفق</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
-                        {statistics.succeeded}
-                      </span>
+                      <span className="text-sm font-medium">{succeededCount}</span>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success">
-                        {statistics.successRate.toFixed(1)}%
+                        {overallSuccessRate.toFixed(1)}%
                       </span>
                     </div>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {formatCurrency(statistics.succeededAmount, locale)}{" "}
-                    {t("statistics.rial")}
+                    {formatCurrency(financialStatistics.successfulAmount, locale)} ریال
                   </div>
                 </div>
               </div>
             )}
 
-            {statistics.failed > 0 && (
+            {failedCount > 0 && (
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
                   <XCircle className="h-4 w-4 text-destructive" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium">
-                      {t("statistics.failed")}
-                    </span>
+                    <span className="text-sm font-medium">ناموفق</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
-                        {statistics.failed}
-                      </span>
+                      <span className="text-sm font-medium">{failedCount}</span>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">
-                        {((statistics.failed / statistics.total) * 100).toFixed(
-                          1
-                        )}
-                        %
+                        {statusStatistics.failureRate.toFixed(1)}%
                       </span>
                     </div>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {formatCurrency(statistics.failedAmount, locale)}{" "}
-                    {t("statistics.rial")}
+                    {formatCurrency(financialStatistics.failedAmount, locale)} ریال
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="pt-3 border-t">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">
-                  {t("statistics.transactionReason")}
-                </span>
-                <span className="text-xs px-2 py-1 rounded-full bg-warning/10 text-warning">
-                  100%
-                </span>
+            {reasonCodeStatistics.breakdown.length > 0 && (
+              <div className="pt-3 border-t">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">
+                    پرکاربردترین کد علت
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                    {reasonCodeStatistics.mostUsedReasonPercentage.toFixed(1)}%
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {reasonCodeStatistics.breakdown[0]?.reasonName || reasonCodeStatistics.mostUsedReason}
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t("transactions.transactionReasons.investmentAndBourse")}
-              </p>
-            </div>
+            )}
           </CardContent>
         </Card>
 
         {/* خلاصه مالی */}
         <Card className="lg:col-span-1 overflow-hidden">
-          <div className="bg-linear-to-br from-primary to-primary/80 p-6 text-primary-foreground">
+          <div className="bg-gradient-to-br from-primary to-primary/80 p-6 text-primary-foreground">
             <h3 className="text-base font-semibold mb-1">
-              {t("statistics.financialSummary")}
+              خلاصه مالی
             </h3>
             <div className="text-center mt-4">
               <div className="text-xs opacity-80">
-                {t("statistics.totalTransactionAmount")}
+                مجموع مبلغ تراکنش‌ها
               </div>
               <div className="text-2xl font-bold mt-1">
-                {formatCurrency(order.totalAmount, locale)}
+                {formatCurrency(financialStatistics.totalAmount, locale)}
               </div>
-              <div className="text-xs opacity-80">{t("statistics.rial")}</div>
+              <div className="text-xs opacity-80">ریال</div>
             </div>
           </div>
 
@@ -349,12 +233,12 @@ export function OrderDetailStatistics({ order }: OrderDetailStatisticsProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-muted-foreground">
-                  {t("statistics.successfulAmount")}
+                  مبلغ موفق
                 </div>
                 <div className="font-medium text-sm truncate">
-                  {formatCurrency(statistics.succeededAmount, locale)}
+                  {formatCurrency(financialStatistics.successfulAmount, locale)}
                   <span className="text-xs text-muted-foreground ms-1">
-                    {t("statistics.rial")}
+                    ریال
                   </span>
                 </div>
               </div>
@@ -366,12 +250,12 @@ export function OrderDetailStatistics({ order }: OrderDetailStatisticsProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-muted-foreground">
-                  {t("statistics.failedAmount")}
+                  مبلغ ناموفق
                 </div>
                 <div className="font-medium text-sm truncate">
-                  {formatCurrency(statistics.failedAmount, locale)}
+                  {formatCurrency(financialStatistics.failedAmount, locale)}
                   <span className="text-xs text-muted-foreground ms-1">
-                    {t("statistics.rial")}
+                    ریال
                   </span>
                 </div>
               </div>
@@ -383,12 +267,12 @@ export function OrderDetailStatistics({ order }: OrderDetailStatisticsProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-muted-foreground">
-                  {t("statistics.pendingAmount")}
+                  مبلغ در انتظار
                 </div>
                 <div className="font-medium text-sm truncate">
-                  {formatCurrency(statistics.pendingAmount, locale)}
+                  {formatCurrency(financialStatistics.pendingAmount, locale)}
                   <span className="text-xs text-muted-foreground ms-1">
-                    {t("statistics.rial")}
+                    ریال
                   </span>
                 </div>
               </div>
@@ -400,12 +284,12 @@ export function OrderDetailStatistics({ order }: OrderDetailStatisticsProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-muted-foreground">
-                  {t("statistics.averageTransaction")}
+                  میانگین تراکنش
                 </div>
                 <div className="font-medium text-sm truncate">
-                  {formatCurrency(statistics.averageAmount, locale)}
+                  {formatCurrency(financialStatistics.averageAmount, locale)}
                   <span className="text-xs text-muted-foreground ms-1">
-                    {t("statistics.rial")}
+                    ریال
                   </span>
                 </div>
               </div>
@@ -419,92 +303,56 @@ export function OrderDetailStatistics({ order }: OrderDetailStatisticsProps) {
         {/* انواع پرداخت */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">
-              {t("statistics.paymentTypes")}
+            <CardTitle className="text-base flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              انواع پرداخت
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              {t("statistics.paymentTypeDistribution")}
+              توزیع انواع پرداخت
             </p>
           </CardHeader>
           <CardContent className="space-y-5">
-            {statistics.paymentTypes.internal > 0 && (
-              <div className="space-y-2">
+            {paymentTypeStatistics.breakdown.map((type) => (
+              <div key={type.paymentType} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-success/10 flex items-center justify-center">
-                      <TrendingUp className="h-4 w-4 text-success" />
+                    <div className={`w-6 h-6 rounded-lg ${
+                      type.paymentType === "Paya" ? "bg-blue-500/10" :
+                      type.paymentType === "Satna" ? "bg-purple-500/10" :
+                      "bg-green-500/10"
+                    } flex items-center justify-center`}>
+                      <Activity className={`h-4 w-4 ${
+                        type.paymentType === "Paya" ? "text-blue-500" :
+                        type.paymentType === "Satna" ? "text-purple-500" :
+                        "text-green-500"
+                      }`} />
                     </div>
                     <span className="text-sm font-medium">
-                      {t("transactions.paymentTypes.internal")}
+                      {type.typeName}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">
-                      {statistics.paymentTypes.internal}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success">
-                      {statistics.paymentTypePercentages.internal.toFixed(1)}%
+                    <span className="text-sm font-medium">{type.count}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      type.paymentType === "Paya" ? "bg-blue-500/10 text-blue-500" :
+                      type.paymentType === "Satna" ? "bg-purple-500/10 text-purple-500" :
+                      "bg-green-500/10 text-green-500"
+                    }`}>
+                      {type.percentage.toFixed(1)}%
                     </span>
                   </div>
                 </div>
-                <Progress
-                  value={statistics.paymentTypePercentages.internal}
-                  className="h-2"
-                />
+                <Progress value={type.percentage} className="h-2" />
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>مبلغ: {formatCurrency(type.amount, locale)} ریال</span>
+                  <span>نرخ موفقیت: {type.successRate.toFixed(1)}%</span>
+                </div>
               </div>
-            )}
+            ))}
 
-            {statistics.paymentTypes.satna > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Activity className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium">
-                      {t("transactions.paymentTypes.satna")}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">
-                      {statistics.paymentTypes.satna}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                      {statistics.paymentTypePercentages.satna.toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-                <Progress
-                  value={statistics.paymentTypePercentages.satna}
-                  className="h-2"
-                />
-              </div>
-            )}
-
-            {statistics.paymentTypes.paya > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                      <Activity className="h-4 w-4 text-blue-500" />
-                    </div>
-                    <span className="text-sm font-medium">
-                      {t("transactions.paymentTypes.paya")}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">
-                      {statistics.paymentTypes.paya}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500">
-                      {statistics.paymentTypePercentages.paya.toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-                <Progress
-                  value={statistics.paymentTypePercentages.paya}
-                  className="h-2"
-                />
+            {paymentTypeStatistics.breakdown.length === 0 && (
+              <div className="text-center text-sm text-muted-foreground py-8">
+                اطلاعاتی موجود نیست
               </div>
             )}
           </CardContent>
@@ -513,76 +361,77 @@ export function OrderDetailStatistics({ order }: OrderDetailStatisticsProps) {
         {/* تاریخچه زمانی */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">
-              {t("statistics.timeStatistics")}
+            <CardTitle className="text-base flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              آمار زمانی
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              {t("statistics.timelineInformation")}
+              اطلاعات زمانی تراکنش‌ها
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-4">
-              {transactionDates && (
-                <>
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
+              {timeStatistics.earliestTransaction && (
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium mb-1">
+                      اولین تراکنش
                     </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium mb-1">
-                        {t("statistics.firstTransaction")}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3 inline me-1" />
-                        {formatDate(transactionDates.first, locale)}
-                      </div>
+                    <div className="text-xs text-muted-foreground">
+                      <Calendar className="h-3 w-3 inline me-1" />
+                      {formatDate(timeStatistics.earliestTransaction, locale)}
                     </div>
                   </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                      <Clock className="h-4 w-4 text-blue-500" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium mb-1">
-                        {t("statistics.lastTransaction")}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3 inline me-1" />
-                        {formatDate(transactionDates.last, locale)}
-                      </div>
-                    </div>
-                  </div>
-                </>
+                </div>
               )}
 
-              {order.updatedAt && (
+              {timeStatistics.latestTransaction && (
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                    <Clock className="h-4 w-4 text-blue-500" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium mb-1">
+                      آخرین تراکنش
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <Calendar className="h-3 w-3 inline me-1" />
+                      {formatDate(timeStatistics.latestTransaction, locale)}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {timeStatistics.lastUpdate && (
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
                     <Clock className="h-4 w-4 text-success" />
                   </div>
                   <div className="flex-1">
                     <div className="text-sm font-medium mb-1">
-                      {t("statistics.lastStatusUpdate")}
+                      آخرین بروزرسانی
                     </div>
                     <div className="text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3 inline me-1" />
-                      {formatDate(order.updatedAt, locale)}
+                      {formatDate(timeStatistics.lastUpdate, locale)}
                     </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {processingTime !== null && (
+            {timeStatistics.averageProcessingTimeMinutes > 0 && (
               <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-sm font-semibold text-primary mb-1">
-                      {t("statistics.averageProcessingTime")}
+                      میانگین زمان پردازش
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {processingTime} {t("statistics.minutes")}
+                      {timeStatistics.averageProcessingTimeMinutes} دقیقه
                     </div>
                   </div>
                   <Timer className="h-8 w-8 text-primary" />
@@ -592,6 +441,50 @@ export function OrderDetailStatistics({ order }: OrderDetailStatisticsProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* ردیف سوم: آمار کد علت */}
+      {reasonCodeStatistics.breakdown.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              توزیع کدهای علت
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              آمار کدهای علت پرداخت
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {reasonCodeStatistics.breakdown.map((reason) => (
+                <div key={reason.reasonCode} className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium truncate flex-1">
+                      {reason.reasonName}
+                    </span>
+                    <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary shrink-0 ms-2">
+                      {reason.percentage.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="space-y-1 text-xs text-muted-foreground">
+                    <div className="flex items-center justify-between">
+                      <span>تعداد:</span>
+                      <span className="font-medium">{reason.count}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>مبلغ:</span>
+                      <span className="font-medium">{formatCurrency(reason.amount, locale)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>نرخ موفقیت:</span>
+                      <span className="font-medium">{reason.successRate.toFixed(1)}%</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

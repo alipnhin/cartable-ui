@@ -1,68 +1,77 @@
 "use client";
 
-import { OrderApprover } from "@/types/signer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { WithdrawalApprover, ApproverStatusEnum } from "@/types/api";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
-import { OrderApproveStatus } from "@/types/signer";
 
 interface OrderDetailApproversProps {
-  approvers: OrderApprover[];
+  approvers: WithdrawalApprover[];
 }
 
 export function OrderDetailApprovers({ approvers }: OrderDetailApproversProps) {
   const { t, locale } = useTranslation();
 
-  const getStatusIcon = (status: OrderApproveStatus) => {
+  const getStatusIcon = (status: ApproverStatusEnum) => {
     switch (status) {
-      case OrderApproveStatus.Accepted:
+      case ApproverStatusEnum.Accepted:
         return <CheckCircle className="h-5 w-5 text-success" />;
-      case OrderApproveStatus.Rejected:
+      case ApproverStatusEnum.Rejected:
         return <XCircle className="h-5 w-5 text-destructive" />;
-      case OrderApproveStatus.WaitForAction:
+      case ApproverStatusEnum.WaitForAction:
         return <Clock className="h-5 w-5 text-warning" />;
     }
   };
 
-  const getStatusBadge = (status: OrderApproveStatus) => {
+  const getStatusBadge = (status: ApproverStatusEnum) => {
     switch (status) {
-      case OrderApproveStatus.Accepted:
+      case ApproverStatusEnum.Accepted:
         return (
           <Badge className="bg-success text-white hover:bg-success/90">
-            {t("approvers.approved")}
+            تایید شده
           </Badge>
         );
-      case OrderApproveStatus.Rejected:
-        return <Badge variant="destructive">{t("approvers.rejected")}</Badge>;
-      case OrderApproveStatus.WaitForAction:
+      case ApproverStatusEnum.Rejected:
+        return <Badge variant="destructive">رد شده</Badge>;
+      case ApproverStatusEnum.WaitForAction:
         return (
           <Badge className="bg-warning text-warning-foreground hover:bg-warning/90">
-            {t("approvers.pending")}
+            در انتظار
           </Badge>
         );
     }
   };
 
-  const getBorderColor = (status: OrderApproveStatus) => {
+  const getBorderColor = (status: ApproverStatusEnum) => {
     switch (status) {
-      case OrderApproveStatus.Accepted:
+      case ApproverStatusEnum.Accepted:
         return "border-success";
-      case OrderApproveStatus.Rejected:
+      case ApproverStatusEnum.Rejected:
         return "border-destructive";
-      case OrderApproveStatus.WaitForAction:
+      case ApproverStatusEnum.WaitForAction:
         return "border-warning";
       default:
         return "border-border";
     }
   };
 
+  if (approvers.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-12 text-center text-muted-foreground">
+          هیچ تاییدکننده‌ای برای این دستور پرداخت وجود ندارد
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {approvers.map((approver) => (
         <Card
-          key={approver.signerId}
+          key={approver.id}
           className={`border-2 ${getBorderColor(
             approver.status
           )} transition-all hover:shadow-lg`}
@@ -85,14 +94,14 @@ export function OrderDetailApprovers({ approvers }: OrderDetailApproversProps) {
 
             {/* بخش پایین: جزئیات */}
             <div className="text-center">
-              {approver.status !== OrderApproveStatus.WaitForAction ? (
+              {approver.status !== ApproverStatusEnum.WaitForAction ? (
                 <>
                   <div className="flex items-center justify-center gap-2 text-sm mb-1">
                     {getStatusIcon(approver.status)}
                     <span className="font-medium">
-                      {approver.status === OrderApproveStatus.Accepted
-                        ? t("approvers.approved")
-                        : t("approvers.rejected")}
+                      {approver.status === ApproverStatusEnum.Accepted
+                        ? "تایید شده"
+                        : "رد شده"}
                     </span>
                   </div>
                   {approver.createdDateTime && (

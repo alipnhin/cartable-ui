@@ -1,72 +1,62 @@
 "use client";
 
 import { useMemo } from "react";
-import { PaymentOrderDetail } from "@/types/order";
 import { OrderStatusBadge } from "@/components/ui/status-badge";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
-  ArrowRight,
   DollarSign,
   Activity,
-  Timer,
-  Users,
-  AlertCircle,
   CreditCard,
   CalendarPlus2,
   Clock,
-  Newspaper,
+  RefreshCw,
+  Check,
+  X,
 } from "lucide-react";
-import Link from "next/link";
 import useTranslation from "@/hooks/useTranslation";
 import { formatCurrency, formatDate } from "@/lib/helpers";
 import { getBankCodeFromIban, getBankLogo } from "@/lib/bank-logos";
 import Image from "next/image";
-import { TransactionStatus } from "@/types/transaction";
-import { OrderApproveStatus } from "@/types/signer";
+import { OrderStatus } from "@/types/order";
 
 interface OrderDetailHeaderProps {
-  order: PaymentOrderDetail;
+  order: {
+    id: string;
+    orderId: string;
+    title: string;
+    accountSheba: string;
+    bankName: string;
+    numberOfTransactions: number;
+    totalAmount: number;
+    status: OrderStatus;
+    createdAt: string;
+    trackingId?: string;
+    gatewayTitle?: string;
+  };
+  canInquiry?: boolean;
+  canApproveReject?: boolean;
+  onInquiry?: () => void | Promise<void>;
+  onApprove?: () => void | Promise<void>;
+  onReject?: () => void | Promise<void>;
 }
 
-export function OrderDetailHeader({ order }: OrderDetailHeaderProps) {
+export function OrderDetailHeader({
+  order,
+  canInquiry = false,
+  canApproveReject = false,
+  onInquiry,
+  onApprove,
+  onReject,
+}: OrderDetailHeaderProps) {
   const { t, locale } = useTranslation();
-
-  // محاسبه آمار
-  const stats = useMemo(() => {
-    const waitingForBank = order.transactions.filter(
-      (tx) => tx.status === TransactionStatus.WaitForBank
-    ).length;
-
-    const approvedCount = order.approvers.filter(
-      (a) => a.status === OrderApproveStatus.Accepted
-    ).length;
-    const totalApprovers = order.approvers.length;
-
-    return {
-      totalAmount: order.totalAmount,
-      transactionCount: order.transactions.length,
-      waitingForBank,
-      approvedCount,
-      totalApprovers,
-    };
-  }, [order]);
 
   // کد بانک از IBAN
   const bankCode = useMemo(() => {
-    return getBankCodeFromIban(order.account.sheba);
-  }, [order.account.sheba]);
+    return getBankCodeFromIban(order.accountSheba);
+  }, [order.accountSheba]);
 
   const bankLogo = bankCode ? getBankLogo(bankCode) : null;
-
-  // بررسی خطا
-  const hasError = useMemo(() => {
-    const failedCount = order.transactions.filter(
-      (tx) =>
-        tx.status === TransactionStatus.BankRejected ||
-        tx.status === TransactionStatus.Failed
-    ).length;
-    return failedCount > 0;
-  }, [order.transactions]);
 
   return (
     <Card className="mb-6">
@@ -78,196 +68,130 @@ export function OrderDetailHeader({ order }: OrderDetailHeaderProps) {
             {/* لوگو */}
             {bankLogo && (
               <div className="shrink-0">
-                <div className="w-12 h-12 relative">
+                <div className="w-16 h-16 rounded-lg overflow-hidden bg-white shadow-sm flex items-center justify-center">
                   <Image
                     src={bankLogo}
-                    alt={order.account.bankName}
-                    fill
-                    className="object-contain"
+                    alt={order.bankName}
+                    width={64}
+                    height={64}
+                    className="object-contain p-2"
                   />
                 </div>
               </div>
             )}
 
-            {/* اطلاعات و Badge */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-4 mb-3">
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold mb-2">{order.title}</h2>
-
-                  {/* اطلاعات خلاصه */}
-                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                      <Newspaper size="14" />
-                      {bankCode}-{order.account.bankName}
-                    </span>
-                    <span className="flex items-center gap-1.5 font-mono text-xs">
-                      <CreditCard size="14" />
-                      {order.account.sheba}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <CalendarPlus2 size="14" />
-                      {formatDate(order.createdAt, locale)}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Clock size="14" />
-                      {new Date(order.createdAt).toLocaleTimeString(locale, {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                  </div>
+            {/* عنوان و اطلاعات */}
+            <div className="flex-1 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div>
+                  <h1 className="text-xl md:text-2xl font-bold">{order.title}</h1>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {order.gatewayTitle || order.bankName}
+                  </p>
                 </div>
+                <OrderStatusBadge status={order.status} />
+              </div>
 
-                {/* وضعیت */}
+              {/* شماره دستور و کد رهگیری */}
+              <div className="flex flex-wrap gap-4 text-sm">
                 <div className="flex items-center gap-2">
-                  <OrderStatusBadge status={order.status} size="default" />
-                  {hasError && (
-                    <button className="p-1 hover:bg-warning/10 rounded">
-                      <AlertCircle className="h-5 w-5 text-warning animate-pulse" />
-                    </button>
-                  )}
+                  <span className="text-muted-foreground">شماره دستور:</span>
+                  <span className="font-medium">{order.orderId}</span>
+                </div>
+                {order.trackingId && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">کد رهگیری:</span>
+                    <span className="font-medium">{order.trackingId}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <CalendarPlus2 className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium">{formatDate(order.createdAt, locale)}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* کارت‌های آماری 4تایی */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          {/* کارت‌های آماری */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* مبلغ کل */}
-            <div className="bg-success/5 border border-success/20 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
-                  <DollarSign className="w-5 h-5 text-success" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className=" md:text-xl font-bold text-success truncate">
-                    {formatCurrency(stats.totalAmount, locale)}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    مبلغ کل (ریال)
-                  </div>
-                </div>
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30">
+              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/50">
+                <DollarSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">مبلغ کل</p>
+                <p className="text-lg font-bold">{formatCurrency(order.totalAmount)}</p>
               </div>
             </div>
 
-            {/* تعداد تراکنش */}
-            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Activity className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-lg md:text-xl font-bold text-primary">
-                    {stats.transactionCount}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    تعداد تراکنش
-                  </div>
-                </div>
+            {/* تعداد تراکنش‌ها */}
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30">
+              <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/50">
+                <Activity className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">تعداد تراکنش‌ها</p>
+                <p className="text-lg font-bold">{order.numberOfTransactions}</p>
               </div>
             </div>
 
-            {/* در صف پردازش */}
-            <div className="bg-warning/5 border border-warning/20 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center shrink-0">
-                  <Timer className="w-5 h-5 text-warning" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-lg md:text-xl font-bold text-warning">
-                    {stats.waitingForBank}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    در صف پردازش بانک
-                  </div>
-                </div>
+            {/* شماره شبا */}
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-green-50 dark:bg-green-950/30">
+              <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/50">
+                <CreditCard className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
-            </div>
-
-            {/* امضاءها */}
-            <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                  <Users className="w-5 h-5 text-blue-500" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-lg md:text-xl font-bold text-blue-500">
-                    {stats.approvedCount}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    از {stats.totalApprovers} امضاء
-                  </div>
-                </div>
+              <div>
+                <p className="text-sm text-muted-foreground">شماره شبا</p>
+                <p className="text-sm font-medium font-mono direction-ltr">
+                  {order.accountSheba}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* اطلاعات جزئی */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-4 border-t">
-            {/* ستون چپ */}
-            <div className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">
-                  وضعیت درخواست:
-                </span>
-                <div className="text-end">
-                  <OrderStatusBadge status={order.status} size="sm" />
-                </div>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">
-                  شماره درخواست:
-                </span>
-                <strong className="text-sm">{order.orderId}</strong>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">
-                  کد رهگیری بانک:
-                </span>
-                <strong className="text-sm font-mono">{order.id}</strong>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">توضیحات:</span>
-                <strong className="text-sm text-end max-w-[60%]">
-                  {order.description || "-"}
-                </strong>
-              </div>
+          {/* دکمه‌های عملیات */}
+          {(canInquiry || canApproveReject) && (
+            <div className="flex flex-wrap gap-3 pt-4 border-t">
+              {canInquiry && onInquiry && (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={onInquiry}
+                  className="gap-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  استعلام دستور پرداخت
+                </Button>
+              )}
+              {canApproveReject && (
+                <>
+                  {onApprove && (
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      onClick={onApprove}
+                      className="gap-2"
+                    >
+                      <Check className="h-4 w-4" />
+                      تایید
+                    </Button>
+                  )}
+                  {onReject && (
+                    <Button
+                      variant="destructive"
+                      size="lg"
+                      onClick={onReject}
+                      className="gap-2"
+                    >
+                      <X className="h-4 w-4" />
+                      رد
+                    </Button>
+                  )}
+                </>
+              )}
             </div>
-
-            {/* ستون راست */}
-            <div className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">
-                  عنوان حساب مبدا:
-                </span>
-                <strong className="text-sm text-end max-w-[60%]">
-                  {order.account.accountTitle || order.account.bankName}
-                </strong>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">
-                  شماره حساب مبداء:
-                </span>
-                <strong className="text-sm font-mono">
-                  {order.account.accountNumber}
-                </strong>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">
-                  شباء مبدا:
-                </span>
-                <strong className="text-sm font-mono">
-                  {order.account.sheba}
-                </strong>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </Card>
