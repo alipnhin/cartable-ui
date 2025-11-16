@@ -1,5 +1,13 @@
 import apiClient from "@/lib/api-client";
-import { PaymentListResponse, CartableFilterParams } from "@/types/api";
+import {
+  PaymentListResponse,
+  CartableFilterParams,
+  WithdrawalOrderDetails,
+  WithdrawalStatistics,
+  TransactionListResponse,
+  TransactionFilterParams,
+  WithdrawalTransaction,
+} from "@/types/api";
 
 /**
  * سرویس دستورات پرداخت
@@ -69,6 +77,124 @@ export const searchPaymentOrders = async (
   const response = await apiClient.post<PaymentListResponse>(
     `/v1-Cartable/Withdrawal/Search`,
     requestBody,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * دریافت جزئیات کامل دستور پرداخت
+ *
+ * @param id شناسه دستور پرداخت
+ * @param accessToken توکن دسترسی کاربر
+ * @returns جزئیات کامل دستور پرداخت شامل تاییدکنندگان و تاریخچه
+ */
+export const getWithdrawalOrderDetails = async (
+  id: string,
+  accessToken: string
+): Promise<WithdrawalOrderDetails> => {
+  const response = await apiClient.get<WithdrawalOrderDetails>(
+    `/v1-Cartable/Withdrawal/${id}/find`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * دریافت آمار کامل دستور پرداخت
+ *
+ * @param id شناسه دستور پرداخت
+ * @param accessToken توکن دسترسی کاربر
+ * @returns آمار کامل شامل وضعیت، نوع پرداخت، کد علت و آمار مالی
+ */
+export const getWithdrawalStatistics = async (
+  id: string,
+  accessToken: string
+): Promise<WithdrawalStatistics> => {
+  const response = await apiClient.get<WithdrawalStatistics>(
+    `/v1-Cartable/Withdrawal/${id}/statistics/complete`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * دریافت لیست تراکنش‌های دستور پرداخت با فیلترهای پیشرفته
+ *
+ * @param params پارامترهای فیلتر و صفحه‌بندی
+ * @param accessToken توکن دسترسی کاربر
+ * @returns لیست تراکنش‌ها به صورت صفحه‌بندی شده
+ */
+export const getWithdrawalTransactions = async (
+  params: TransactionFilterParams,
+  accessToken: string
+): Promise<TransactionListResponse> => {
+  const {
+    withdrawalOrderId,
+    pageNumber = 1,
+    pageSize = 10,
+    orderBy,
+    serchValue,
+    reasonCode,
+    status,
+    paymentType,
+  } = params;
+
+  // ساخت body برای درخواست POST
+  const requestBody: any = {
+    withdrawalOrderId,
+    pageNumber,
+    pageSize,
+  };
+
+  // اضافه کردن فیلدهای اختیاری
+  if (orderBy) requestBody.orderBy = orderBy;
+  if (serchValue) requestBody.serchValue = serchValue;
+  if (reasonCode) requestBody.reasonCode = reasonCode;
+  if (status) requestBody.status = status;
+  if (paymentType) requestBody.paymentType = paymentType;
+
+  const response = await apiClient.post<TransactionListResponse>(
+    `/v1-Cartable/Withdrawal/GetWithdrawalTransactions`,
+    requestBody,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * دریافت جزئیات یک تراکنش
+ *
+ * @param transactionId شناسه تراکنش
+ * @param accessToken توکن دسترسی کاربر
+ * @returns جزئیات کامل تراکنش شامل تاریخچه تغییرات
+ */
+export const getTransactionDetails = async (
+  transactionId: string,
+  accessToken: string
+): Promise<WithdrawalTransaction> => {
+  const response = await apiClient.get<WithdrawalTransaction>(
+    `/v1-Cartable/Withdrawal/FindTransaction/${transactionId}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
