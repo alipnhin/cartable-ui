@@ -9,29 +9,38 @@ import { PaymentOrder, OrderStatus } from "@/types/order";
 /**
  * تبدیل PaymentStatusEnum (از API) به OrderStatus (داخلی)
  */
-function mapPaymentStatus(status: PaymentStatusEnum): OrderStatus {
-  switch (status) {
-    case PaymentStatusEnum.Draft:
+function mapPaymentStatus(status: PaymentStatusEnum | string): OrderStatus {
+  // تبدیل به lowercase برای مقایسه case-insensitive
+  const statusStr = String(status).toLowerCase();
+
+  switch (statusStr) {
+    case "draft":
       return OrderStatus.Draft;
-    case PaymentStatusEnum.WaitingForOwnersApproval:
+    case "waitingforownersapproval":
+    case "waiting_for_owners_approval":
       return OrderStatus.WaitingForOwnersApproval;
-    case PaymentStatusEnum.OwnersApproved:
+    case "ownersapproved":
+    case "owners_approved":
       return OrderStatus.OwnersApproved;
-    case PaymentStatusEnum.OwnerRejected:
+    case "ownerrejected":
+    case "owner_rejected":
       return OrderStatus.OwnerRejected;
-    case PaymentStatusEnum.SubmittedToBank:
+    case "submittedtobank":
+    case "submitted_to_bank":
       return OrderStatus.SubmittedToBank;
-    case PaymentStatusEnum.Succeeded:
+    case "succeeded":
       return OrderStatus.Succeeded;
-    case PaymentStatusEnum.PartiallySucceeded:
+    case "partiallysucceeded":
+    case "partially_succeeded":
       return OrderStatus.PartiallySucceeded;
-    case PaymentStatusEnum.Rejected:
+    case "rejected":
       return OrderStatus.Rejected;
-    case PaymentStatusEnum.BankRejected:
+    case "bankrejected":
+    case "bank_rejected":
       return OrderStatus.BankRejected;
-    case PaymentStatusEnum.Canceled:
+    case "canceled":
       return OrderStatus.Canceled;
-    case PaymentStatusEnum.Expired:
+    case "expired":
       return OrderStatus.Expired;
     default:
       return OrderStatus.Draft;

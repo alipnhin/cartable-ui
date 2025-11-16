@@ -34,17 +34,17 @@ export interface CartableFilterParams extends PaginationParams {
  * Enum وضعیت پرداخت
  */
 export enum PaymentStatusEnum {
-  Draft = 0,
-  WaitingForOwnersApproval = 1,
-  OwnersApproved = 2,
-  OwnerRejected = 3,
-  SubmittedToBank = 4,
-  Succeeded = 5,
-  PartiallySucceeded = 6,
-  Rejected = 7,
-  BankRejected = 8,
-  Canceled = 9,
-  Expired = 10,
+  Draft = "Draft",
+  WaitingForOwnersApproval = "WaitingForOwnersApproval",
+  OwnersApproved = "OwnersApproved",
+  OwnerRejected = "OwnerRejected",
+  SubmittedToBank = "SubmittedToBank",
+  Succeeded = "Succeeded",
+  PartiallySucceeded = "PartiallySucceeded",
+  Rejected = "Rejected",
+  BankRejected = "BankRejected",
+  Canceled = "Canceled",
+  Expired = "Expired",
 }
 
 /**
