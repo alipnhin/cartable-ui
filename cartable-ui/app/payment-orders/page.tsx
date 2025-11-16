@@ -52,7 +52,7 @@ export default function PaymentOrdersPage() {
   const [orderNumber, setOrderNumber] = useState("");
   const [orderTitle, setOrderTitle] = useState("");
   const [accountId, setAccountId] = useState("");
-  const [statusFilter, setStatusFilter] = useState<OrderStatus[]>([]);
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | "">("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
@@ -113,9 +113,9 @@ export default function PaymentOrdersPage() {
         if (orderTitle) apiFilters.name = orderTitle;
         if (accountId && accountId !== "all")
           apiFilters.bankGatewayId = accountId;
-        if (statusFilter.length === 1) {
-          // اگر فقط یک وضعیت انتخاب شده، به API ارسال می‌شود
-          apiFilters.status = statusFilter[0] as unknown as PaymentStatusEnum;
+        if (statusFilter) {
+          // تبدیل OrderStatus به PaymentStatusEnum
+          apiFilters.status = statusFilter as unknown as PaymentStatusEnum;
         }
         if (dateFrom) {
           const fromDate = new Date(dateFrom);
@@ -159,8 +159,7 @@ export default function PaymentOrdersPage() {
     orderNumber,
     orderTitle,
     accountId,
-    // statusFilter نباید مستقیماً در dependency باشد چون array است
-    JSON.stringify(statusFilter),
+    statusFilter, // statusFilter حالا string است نه array
     dateFrom,
     dateTo,
     // sorting نباید مستقیماً در dependency باشد چون array است
@@ -227,7 +226,7 @@ export default function PaymentOrdersPage() {
    * ریست کردن فیلترها
    */
   const handleResetFilters = () => {
-    setStatusFilter([]);
+    setStatusFilter("");
     setOrderTitle("");
     setOrderNumber("");
     setTrackingId("");
@@ -288,7 +287,7 @@ export default function PaymentOrdersPage() {
   ];
 
   const activeFiltersCount =
-    filters.status.length +
+    (filters.status ? 1 : 0) +
     (filters.orderTitle ? 1 : 0) +
     (filters.orderNumber ? 1 : 0) +
     (filters.trackingId ? 1 : 0) +
@@ -373,6 +372,7 @@ export default function PaymentOrdersPage() {
         filters={filters}
         onFiltersChange={handleFilterChange}
         onReset={handleResetFilters}
+        isLoading={isLoading}
       />
     </AppLayout>
   );
