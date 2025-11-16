@@ -14,9 +14,16 @@ import { useToast } from "@/hooks/use-toast";
 import { OtpDialog } from "@/components/common/otp-dialog";
 import { cn } from "@/lib/utils";
 import { IStatisticsItems, Statistics } from "./components/statistics";
-import { getApproverCartable } from "@/services/cartableService";
+import {
+  getApproverCartable,
+  sendOperationOtp,
+  approvePayment,
+  sendBatchOperationOtp,
+  batchApprovePayments,
+} from "@/services/cartableService";
 import { mapPaymentListDtosToPaymentOrders } from "@/lib/api-mappers";
 import { PaymentOrder } from "@/types/order";
+import { OperationTypeEnum } from "@/types/api";
 
 export default function MyCartablePage() {
   const { t, locale } = useTranslation();
@@ -79,30 +86,136 @@ export default function MyCartablePage() {
   }, [session?.accessToken, pageNumber, pageSize]);
 
   // Handlers
-  const handleSingleApprove = (orderId: string) => {
-    setOtpDialog({ open: true, type: "approve", orderIds: [orderId] });
+  const handleSingleApprove = async (orderId: string) => {
+    if (!session?.accessToken) return;
+
+    try {
+      // مرحله 1: درخواست ارسال کد OTP
+      await sendOperationOtp(
+        {
+          objectId: orderId,
+          operation: OperationTypeEnum.ApproveCartablePayment,
+        },
+        session.accessToken
+      );
+
+      toast({
+        title: t("toast.success"),
+        description: t("otp.codeSent"),
+        variant: "success",
+      });
+
+      setOtpDialog({ open: true, type: "approve", orderIds: [orderId] });
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در ارسال کد تایید",
+        variant: "error",
+      });
+    }
   };
 
-  const handleSingleReject = (orderId: string) => {
-    setOtpDialog({ open: true, type: "reject", orderIds: [orderId] });
+  const handleSingleReject = async (orderId: string) => {
+    if (!session?.accessToken) return;
+
+    try {
+      // مرحله 1: درخواست ارسال کد OTP
+      await sendOperationOtp(
+        {
+          objectId: orderId,
+          operation: OperationTypeEnum.RejectCartablePayment,
+        },
+        session.accessToken
+      );
+
+      toast({
+        title: t("toast.success"),
+        description: t("otp.codeSent"),
+        variant: "success",
+      });
+
+      setOtpDialog({ open: true, type: "reject", orderIds: [orderId] });
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در ارسال کد تایید",
+        variant: "error",
+      });
+    }
   };
 
-  const handleBulkApprove = () => {
+  const handleBulkApprove = async () => {
+    if (!session?.accessToken) return;
+
     const orderIds = isMobile
       ? selectedOrders
       : Object.keys(selectedRowIds).filter((id) => selectedRowIds[id]);
 
     if (orderIds.length === 0) return;
-    setOtpDialog({ open: true, type: "approve", orderIds });
+
+    try {
+      // مرحله 1: درخواست ارسال کد OTP برای عملیات گروهی
+      await sendBatchOperationOtp(
+        {
+          objectIds: orderIds,
+          operation: OperationTypeEnum.ApproveCartablePayment,
+        },
+        session.accessToken
+      );
+
+      toast({
+        title: t("toast.success"),
+        description: t("otp.codeSent"),
+        variant: "success",
+      });
+
+      setOtpDialog({ open: true, type: "approve", orderIds });
+    } catch (error) {
+      console.error("Error sending batch OTP:", error);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در ارسال کد تایید",
+        variant: "error",
+      });
+    }
   };
 
-  const handleBulkReject = () => {
+  const handleBulkReject = async () => {
+    if (!session?.accessToken) return;
+
     const orderIds = isMobile
       ? selectedOrders
       : Object.keys(selectedRowIds).filter((id) => selectedRowIds[id]);
 
     if (orderIds.length === 0) return;
-    setOtpDialog({ open: true, type: "reject", orderIds });
+
+    try {
+      // مرحله 1: درخواست ارسال کد OTP برای عملیات گروهی
+      await sendBatchOperationOtp(
+        {
+          objectIds: orderIds,
+          operation: OperationTypeEnum.RejectCartablePayment,
+        },
+        session.accessToken
+      );
+
+      toast({
+        title: t("toast.success"),
+        description: t("otp.codeSent"),
+        variant: "success",
+      });
+
+      setOtpDialog({ open: true, type: "reject", orderIds });
+    } catch (error) {
+      console.error("Error sending batch OTP:", error);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در ارسال کد تایید",
+        variant: "error",
+      });
+    }
   };
 
   const handleCancelSelection = () => {
@@ -111,31 +224,118 @@ export default function MyCartablePage() {
   };
 
   const handleOtpConfirm = async (otp: string) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    if (!session?.accessToken) return;
 
-    const action = otpDialog.type === "approve" ? "تأیید" : "رد";
-    const count = otpDialog.orderIds.length;
+    try {
+      const isSingleOperation = otpDialog.orderIds.length === 1;
+      const operationType =
+        otpDialog.type === "approve"
+          ? OperationTypeEnum.ApproveCartablePayment
+          : OperationTypeEnum.RejectCartablePayment;
 
-    toast({
-      title: t("toast.success"),
-      description: `${count} دستور با موفقیت ${action} شد`,
-      variant: "success",
-    });
+      if (isSingleOperation) {
+        // عملیات تکی
+        await approvePayment(
+          {
+            operationType,
+            withdrawalOrderId: otpDialog.orderIds[0],
+            otpCode: otp,
+          },
+          session.accessToken
+        );
+      } else {
+        // عملیات گروهی
+        await batchApprovePayments(
+          {
+            objectIds: otpDialog.orderIds,
+            operationType,
+            otpCode: otp,
+          },
+          session.accessToken
+        );
+      }
 
-    // Clear selection
-    setSelectedOrders([]);
-    setSelectedRowIds({});
+      const action = otpDialog.type === "approve" ? "تأیید" : "رد";
+      const count = otpDialog.orderIds.length;
+
+      toast({
+        title: t("toast.success"),
+        description: `${count} دستور با موفقیت ${action} شد`,
+        variant: "success",
+      });
+
+      // Clear selection
+      setSelectedOrders([]);
+      setSelectedRowIds({});
+
+      // بارگذاری مجدد لیست
+      const response = await getApproverCartable(
+        {
+          pageNumber,
+          pageSize,
+          orderBy: "createdDateTime",
+        },
+        session.accessToken
+      );
+
+      const mappedOrders = mapPaymentListDtosToPaymentOrders(response.items);
+      setOrders(mappedOrders);
+      setTotalItems(response.totalItemCount);
+      setTotalPages(response.totalPageCount);
+    } catch (error) {
+      console.error("Error confirming operation:", error);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در انجام عملیات",
+        variant: "error",
+      });
+      throw error; // برای اینکه OTP dialog خطا را نمایش دهد
+    }
   };
 
   const handleOtpResend = async () => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast({
-      title: t("toast.info"),
-      description: t("otp.codeSent"),
-      variant: "info",
-    });
+    if (!session?.accessToken) return;
+
+    try {
+      const isSingleOperation = otpDialog.orderIds.length === 1;
+      const operationType =
+        otpDialog.type === "approve"
+          ? OperationTypeEnum.ApproveCartablePayment
+          : OperationTypeEnum.RejectCartablePayment;
+
+      if (isSingleOperation) {
+        // ارسال مجدد برای عملیات تکی
+        await sendOperationOtp(
+          {
+            objectId: otpDialog.orderIds[0],
+            operation: operationType,
+          },
+          session.accessToken
+        );
+      } else {
+        // ارسال مجدد برای عملیات گروهی
+        await sendBatchOperationOtp(
+          {
+            objectIds: otpDialog.orderIds,
+            operation: operationType,
+          },
+          session.accessToken
+        );
+      }
+
+      toast({
+        title: t("toast.info"),
+        description: t("otp.codeSent"),
+        variant: "info",
+      });
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در ارسال مجدد کد تایید",
+        variant: "error",
+      });
+    }
   };
 
   const handleExport = () => {
