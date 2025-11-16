@@ -25,9 +25,27 @@ export interface PaginationParams {
   orderBy?: string;
 }
 
-// تایپ پارامترهای فیلتر کارتابل
+/**
+ * تایپ پارامترهای فیلتر کارتابل
+ * همه فیلدها به جز pageNumber و pageSize اختیاری هستند
+ */
 export interface CartableFilterParams extends PaginationParams {
+  /** کد پیگیری */
+  trackingId?: string;
+  /** شماره دستور */
+  orderId?: string;
+  /** نام دستور پرداخت */
+  name?: string;
+  /** شماره شبا */
+  sourceIban?: string;
+  /** شناسه درگاه بانکی */
   bankGatewayId?: string;
+  /** وضعیت دستور پرداخت (به صورت رشته‌ای ارسال می‌شود) */
+  status?: PaymentStatusEnum;
+  /** از تاریخ (ISO 8601 format) */
+  fromDate?: string;
+  /** تا تاریخ (ISO 8601 format) */
+  toDate?: string;
 }
 
 /**
