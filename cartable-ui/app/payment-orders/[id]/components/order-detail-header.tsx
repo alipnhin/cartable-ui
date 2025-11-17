@@ -13,6 +13,7 @@ import {
   Check,
   X,
   Clock,
+  Send,
 } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { formatCurrency, formatDate } from "@/lib/helpers";
@@ -39,9 +40,11 @@ interface OrderDetailHeaderProps {
   };
   canInquiry?: boolean;
   canApproveReject?: boolean;
+  canSendToBank?: boolean;
   onInquiry?: () => void | Promise<void>;
   onApprove?: () => void | Promise<void>;
   onReject?: () => void | Promise<void>;
+  onSendToBank?: () => void | Promise<void>;
   waitForBankCount?: number;
   approvalCount?: number;
   totalApprovers?: number;
@@ -51,9 +54,11 @@ export function OrderDetailHeader({
   order,
   canInquiry = false,
   canApproveReject = false,
+  canSendToBank = false,
   onInquiry,
   onApprove,
   onReject,
+  onSendToBank,
   waitForBankCount = 0,
   approvalCount = 0,
   totalApprovers = 0,
@@ -122,7 +127,7 @@ export function OrderDetailHeader({
           </div>
 
           {/* دکمه‌های عملیات */}
-          {(canInquiry || canApproveReject) && (
+          {(canInquiry || canApproveReject || canSendToBank) && (
             <div className="flex flex-wrap gap-2 shrink-0">
               {canInquiry && onInquiry && (
                 <Button
@@ -133,6 +138,17 @@ export function OrderDetailHeader({
                 >
                   <RefreshCw className="h-4 w-4" />
                   استعلام درخواست
+                </Button>
+              )}
+              {canSendToBank && onSendToBank && (
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={onSendToBank}
+                  className="gap-2"
+                >
+                  <Send className="h-4 w-4" />
+                  ارسال به بانک
                 </Button>
               )}
               {canApproveReject && onApprove && (

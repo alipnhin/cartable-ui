@@ -204,3 +204,74 @@ export const getTransactionDetails = async (
 
   return response.data;
 };
+
+/**
+ * استعلام دستور پرداخت
+ * بعد از فراخوانی موفق، باید اطلاعات صفحه ریلود شود
+ *
+ * @param orderId شناسه دستور پرداخت
+ * @param accessToken توکن دسترسی کاربر
+ * @returns وضعیت 200 در صورت موفقیت
+ */
+export const inquiryOrderById = async (
+  orderId: string,
+  accessToken: string
+): Promise<void> => {
+  await apiClient.get(
+    `/v1-Cartable/Withdrawal/InquiryById/${orderId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+};
+
+/**
+ * استعلام تراکنش
+ * بعد از فراخوانی موفق، باید لیست تراکنش‌ها refresh شود
+ *
+ * @param transactionId شناسه تراکنش
+ * @param accessToken توکن دسترسی کاربر
+ * @returns اطلاعات به‌روز شده تراکنش
+ */
+export const inquiryTransactionById = async (
+  transactionId: string,
+  accessToken: string
+): Promise<WithdrawalTransaction> => {
+  const response = await apiClient.get<WithdrawalTransaction>(
+    `/v1-Cartable/Withdrawal/TransactionInquiryById/${transactionId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * ارسال دستور پرداخت به بانک
+ * این عملیات فقط برای دستورات با وضعیت OwnersApproved قابل انجام است
+ *
+ * @param orderId شناسه دستور پرداخت
+ * @param accessToken توکن دسترسی کاربر
+ * @returns پیام موفقیت
+ */
+export const sendToBank = async (
+  orderId: string,
+  accessToken: string
+): Promise<string> => {
+  const response = await apiClient.post<string>(
+    `/v1-Cartable/Withdrawal/SendToBank/${orderId}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  return response.data;
+};

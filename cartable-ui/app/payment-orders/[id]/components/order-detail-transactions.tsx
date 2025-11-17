@@ -72,6 +72,7 @@ interface OrderDetailTransactionsProps {
   onPageChange: (page: number) => void;
   onRefresh: () => void | Promise<void>;
   onFilterChange: (filters: Partial<TransactionFilterParams>) => void | Promise<void>;
+  onInquiryTransaction: (transactionId: string) => void | Promise<void>;
 }
 
 type SortField = "amount" | "destinationAccountOwner" | "nationalCode";
@@ -154,6 +155,7 @@ export function OrderDetailTransactions({
   onPageChange,
   onRefresh,
   onFilterChange,
+  onInquiryTransaction,
 }: OrderDetailTransactionsProps) {
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
@@ -219,9 +221,7 @@ export function OrderDetailTransactions({
   };
 
   const handleInquiry = async (transaction: WithdrawalTransaction) => {
-    // TODO: Implement inquiry API call
-    console.log("Inquiry for transaction:", transaction.id);
-    await onRefresh();
+    await onInquiryTransaction(transaction.id);
   };
 
   const activeFiltersCount =

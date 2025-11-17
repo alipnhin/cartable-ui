@@ -13,6 +13,16 @@ import { Card } from "@/components/ui/card";
 import useTranslation from "@/hooks/useTranslation";
 import { useToast } from "@/hooks/use-toast";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   ArrowRight,
   FileText,
   Users,
@@ -26,14 +36,23 @@ import {
   getWithdrawalOrderDetails,
   getWithdrawalStatistics,
   getWithdrawalTransactions,
+  inquiryOrderById,
+  inquiryTransactionById,
+  sendToBank,
 } from "@/services/paymentOrdersService";
+import {
+  sendOperationOtp,
+  approvePayment,
+} from "@/services/cartableService";
 import {
   WithdrawalOrderDetails,
   WithdrawalStatistics,
   WithdrawalTransaction,
   TransactionFilterParams,
   PaymentStatusEnum,
+  OperationTypeEnum,
 } from "@/types/api";
+import { OtpDialog } from "@/components/common/otp-dialog";
 
 export default function PaymentOrderDetailPage() {
   const params = useParams();
@@ -55,6 +74,20 @@ export default function PaymentOrderDetailPage() {
   const [transactionPageSize] = useState(25); // پیشفرض 25
   const [totalTransactionPages, setTotalTransactionPages] = useState(0);
   const [totalTransactions, setTotalTransactions] = useState(0);
+
+  // Dialog states
+  const [showSendToBankDialog, setShowSendToBankDialog] = useState(false);
+
+  // OTP dialog state
+  const [otpDialog, setOtpDialog] = useState<{
+    open: boolean;
+    type: "approve" | "reject";
+    isRequestingOtp: boolean;
+  }>({
+    open: false,
+    type: "approve",
+    isRequestingOtp: false,
+  });
 
   /**
    * واکشی جزئیات دستور پرداخت و آمار
@@ -121,7 +154,70 @@ export default function PaymentOrderDetailPage() {
   };
 
   /**
-   * ریلود کامل صفحه (بعد از استعلام دستور پرداخت)
+   * استعلام دستور پرداخت
+   */
+  const handleInquiryOrder = async () => {
+    if (!session?.accessToken || !orderId) return;
+
+    try {
+      await inquiryOrderById(orderId, session.accessToken);
+
+      toast({
+        title: "موفق",
+        description: "استعلام دستور پرداخت با موفقیت انجام شد",
+        variant: "success",
+      });
+
+      // ریلود کامل صفحه
+      await reloadPage();
+    } catch (err) {
+      console.error("Error inquiring order:", err);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در استعلام دستور پرداخت",
+        variant: "error",
+      });
+    }
+  };
+
+  /**
+   * نمایش دایالوگ تایید ارسال به بانک
+   */
+  const confirmSendToBank = () => {
+    setShowSendToBankDialog(true);
+  };
+
+  /**
+   * ارسال به بانک
+   */
+  const handleSendToBank = async () => {
+    if (!session?.accessToken || !orderId) return;
+
+    setShowSendToBankDialog(false);
+
+    try {
+      const message = await sendToBank(orderId, session.accessToken);
+
+      toast({
+        title: "موفق",
+        description: message || "دستور پرداخت با موفقیت به بانک ارسال شد",
+        variant: "success",
+      });
+
+      // ریلود کامل صفحه
+      await reloadPage();
+    } catch (err) {
+      console.error("Error sending to bank:", err);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در ارسال به بانک",
+        variant: "error",
+      });
+    }
+  };
+
+  /**
+   * ریلود کامل صفحه
    */
   const reloadPage = async () => {
     await fetchOrderData();
@@ -133,6 +229,209 @@ export default function PaymentOrderDetailPage() {
    */
   const refreshTransactions = async () => {
     await fetchTransactions();
+  };
+
+  /**
+   * استعلام تراکنش
+   */
+  const handleInquiryTransaction = async (transactionId: string) => {
+    if (!session?.accessToken) return;
+
+    try {
+      await inquiryTransactionById(transactionId, session.accessToken);
+
+      toast({
+        title: "موفق",
+        description: "استعلام تراکنش با موفقیت انجام شد",
+        variant: "success",
+      });
+
+      // فقط لیست تراکنش‌ها را refresh کن (نه کل صفحه)
+      await refreshTransactions();
+    } catch (err) {
+      console.error("Error inquiring transaction:", err);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در استعلام تراکنش",
+        variant: "error",
+      });
+    }
+  };
+
+  /**
+   * تایید دستور پرداخت (مرحله 1: درخواست OTP)
+   */
+  const handleApprove = async () => {
+    if (!session?.accessToken || !orderId) return;
+
+    // نمایش دیالوگ در حالت loading
+    setOtpDialog({
+      open: true,
+      type: "approve",
+      isRequestingOtp: true,
+    });
+
+    try {
+      // مرحله 1: درخواست ارسال کد OTP
+      await sendOperationOtp(
+        {
+          objectId: orderId,
+          operation: OperationTypeEnum.ApproveCartablePayment,
+        },
+        session.accessToken
+      );
+
+      // موفقیت - نمایش فرم OTP
+      setOtpDialog({
+        open: true,
+        type: "approve",
+        isRequestingOtp: false,
+      });
+
+      toast({
+        title: "موفق",
+        description: "کد تایید به شماره موبایل شما ارسال شد",
+        variant: "success",
+      });
+    } catch (err) {
+      console.error("Error requesting OTP for approve:", err);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در ارسال کد تایید",
+        variant: "error",
+      });
+      // بستن دیالوگ در صورت خطا
+      setOtpDialog({ open: false, type: "approve", isRequestingOtp: false });
+    }
+  };
+
+  /**
+   * رد دستور پرداخت (مرحله 1: درخواست OTP)
+   */
+  const handleReject = async () => {
+    if (!session?.accessToken || !orderId) return;
+
+    // نمایش دیالوگ در حالت loading
+    setOtpDialog({
+      open: true,
+      type: "reject",
+      isRequestingOtp: true,
+    });
+
+    try {
+      // مرحله 1: درخواست ارسال کد OTP
+      await sendOperationOtp(
+        {
+          objectId: orderId,
+          operation: OperationTypeEnum.RejectCartablePayment,
+        },
+        session.accessToken
+      );
+
+      // موفقیت - نمایش فرم OTP
+      setOtpDialog({
+        open: true,
+        type: "reject",
+        isRequestingOtp: false,
+      });
+
+      toast({
+        title: "موفق",
+        description: "کد تایید به شماره موبایل شما ارسال شد",
+        variant: "success",
+      });
+    } catch (err) {
+      console.error("Error requesting OTP for reject:", err);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در ارسال کد تایید",
+        variant: "error",
+      });
+      // بستن دیالوگ در صورت خطا
+      setOtpDialog({ open: false, type: "reject", isRequestingOtp: false });
+    }
+  };
+
+  /**
+   * تایید کد OTP و انجام عملیات (مرحله 2: تایید یا رد با OTP)
+   */
+  const handleOtpConfirm = async (otp: string) => {
+    if (!session?.accessToken || !orderId) return;
+
+    const operationType =
+      otpDialog.type === "approve"
+        ? OperationTypeEnum.ApproveCartablePayment
+        : OperationTypeEnum.RejectCartablePayment;
+
+    try {
+      await approvePayment(
+        {
+          operationType,
+          withdrawalOrderId: orderId,
+          otpCode: otp,
+        },
+        session.accessToken
+      );
+
+      toast({
+        title: "موفق",
+        description:
+          otpDialog.type === "approve"
+            ? "دستور پرداخت با موفقیت تایید شد"
+            : "دستور پرداخت با موفقیت رد شد",
+        variant: "success",
+      });
+
+      // بستن دیالوگ
+      setOtpDialog({ open: false, type: "approve", isRequestingOtp: false });
+
+      // ریلود کامل صفحه
+      await reloadPage();
+    } catch (err) {
+      console.error("Error confirming OTP:", err);
+      toast({
+        title: t("toast.error"),
+        description: "کد تایید نامعتبر است",
+        variant: "error",
+      });
+      throw err; // برای نمایش خطا در OtpDialog
+    }
+  };
+
+  /**
+   * ارسال مجدد کد OTP
+   */
+  const handleOtpResend = async () => {
+    if (!session?.accessToken || !orderId) return;
+
+    const operationType =
+      otpDialog.type === "approve"
+        ? OperationTypeEnum.ApproveCartablePayment
+        : OperationTypeEnum.RejectCartablePayment;
+
+    try {
+      await sendOperationOtp(
+        {
+          objectId: orderId,
+          operation: operationType,
+        },
+        session.accessToken
+      );
+
+      toast({
+        title: "موفق",
+        description: "کد تایید مجدداً ارسال شد",
+        variant: "success",
+      });
+    } catch (err) {
+      console.error("Error resending OTP:", err);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در ارسال مجدد کد تایید",
+        variant: "error",
+      });
+      throw err;
+    }
   };
 
   // واکشی اولیه داده‌ها
@@ -207,6 +506,7 @@ export default function PaymentOrderDetailPage() {
 
   const canInquiry = orderDetails.status === PaymentStatusEnum.SubmittedToBank;
   const canApproveReject = orderDetails.status === PaymentStatusEnum.WaitingForOwnersApproval;
+  const canSendToBank = orderDetails.status === PaymentStatusEnum.OwnersApproved;
 
   // محاسبه تعداد تراکنش‌های در صف بانک
   const waitForBankCount = statistics
@@ -230,9 +530,11 @@ export default function PaymentOrderDetailPage() {
           order={orderForHeader}
           canInquiry={canInquiry}
           canApproveReject={canApproveReject}
-          onInquiry={reloadPage}
-          onApprove={reloadPage}
-          onReject={reloadPage}
+          canSendToBank={canSendToBank}
+          onInquiry={handleInquiryOrder}
+          onApprove={handleApprove}
+          onReject={handleReject}
+          onSendToBank={confirmSendToBank}
           waitForBankCount={waitForBankCount}
           approvalCount={approvalCount}
           totalApprovers={totalApprovers}
@@ -298,6 +600,7 @@ export default function PaymentOrderDetailPage() {
               onPageChange={setTransactionPage}
               onRefresh={refreshTransactions}
               onFilterChange={fetchTransactions}
+              onInquiryTransaction={handleInquiryTransaction}
             />
           </TabsContent>
 
@@ -309,6 +612,48 @@ export default function PaymentOrderDetailPage() {
             <OrderDetailHistory changeHistory={orderDetails.changeHistory} />
           </TabsContent>
         </Tabs>
+
+        {/* دایالوگ تایید ارسال به بانک */}
+        <AlertDialog open={showSendToBankDialog} onOpenChange={setShowSendToBankDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>تایید ارسال به بانک</AlertDialogTitle>
+              <AlertDialogDescription>
+                آیا از ارسال این دستور پرداخت به بانک اطمینان دارید؟
+                <br />
+                <br />
+                پس از ارسال، دستور پرداخت به سیستم بانک ارسال خواهد شد و قابل ویرایش نخواهد بود.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>انصراف</AlertDialogCancel>
+              <AlertDialogAction onClick={handleSendToBank}>
+                تایید و ارسال
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* دایالوگ OTP برای تایید/رد */}
+        <OtpDialog
+          open={otpDialog.open}
+          onOpenChange={(open) =>
+            setOtpDialog((prev) => ({ ...prev, open }))
+          }
+          title={
+            otpDialog.type === "approve"
+              ? "تایید دستور پرداخت"
+              : "رد دستور پرداخت"
+          }
+          description={
+            otpDialog.type === "approve"
+              ? "برای تایید دستور پرداخت، کد ارسال شده به موبایل خود را وارد نمایید"
+              : "برای رد دستور پرداخت، کد ارسال شده به موبایل خود را وارد نمایید"
+          }
+          onConfirm={handleOtpConfirm}
+          onResend={handleOtpResend}
+          isRequestingOtp={otpDialog.isRequestingOtp}
+        />
       </div>
     </>
   );
