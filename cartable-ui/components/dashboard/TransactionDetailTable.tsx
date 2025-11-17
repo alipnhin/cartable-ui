@@ -57,23 +57,28 @@ export default function TransactionDetailTable({
       </div>
 
       <div className="p-6">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="text-muted-foreground bg-muted/50">
-                <th className="text-right px-4 py-3 rounded-r-lg min-w-[200px]">
-                  {t("dashboard.charts.detailTable.status")}
-                </th>
-                <th className="text-right px-4 py-3 min-w-[100px]">{t("dashboard.charts.detailTable.count")}</th>
-                <th className="text-right px-4 py-3 min-w-[100px]">{t("dashboard.charts.detailTable.percent")}</th>
-                <th className="text-right px-4 py-3 min-w-[200px]">{t("dashboard.charts.detailTable.amount")}</th>
-                <th className="text-right px-4 py-3 rounded-l-lg min-w-[200px]">
-                  {t("dashboard.charts.detailTable.progress")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {data.map((item, index) => {
+        {data.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">{t("dashboard.charts.detailTable.noData")}</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-muted-foreground bg-muted/50">
+                  <th className="text-right px-4 py-3 rounded-r-lg min-w-[200px]">
+                    {t("dashboard.charts.detailTable.status")}
+                  </th>
+                  <th className="text-right px-4 py-3 min-w-[100px]">{t("dashboard.charts.detailTable.count")}</th>
+                  <th className="text-right px-4 py-3 min-w-[100px]">{t("dashboard.charts.detailTable.percent")}</th>
+                  <th className="text-right px-4 py-3 min-w-[200px]">{t("dashboard.charts.detailTable.amount")}</th>
+                  <th className="text-right px-4 py-3 rounded-l-lg min-w-[200px]">
+                    {t("dashboard.charts.detailTable.progress")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {data.map((item, index) => {
                 const config =
                   statusConfig[item.status as keyof typeof statusConfig];
                 if (!config) return null;
@@ -133,10 +138,11 @@ export default function TransactionDetailTable({
                     </td>
                   </tr>
                 );
-              })}
-            </tbody>
-          </table>
-        </div>
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </Card>
   );
