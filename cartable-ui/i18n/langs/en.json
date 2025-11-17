@@ -347,7 +347,10 @@
     "signatureComplete": "All Signatures Completed",
     "approvedAt": "Approved At",
     "rejectedAt": "Rejected At",
-    "waitingForApproval": "Waiting for Approval"
+    "waitingForApproval": "Waiting for Approval",
+    "authorizedSigner": "Authorized Signer",
+    "noApproversFound": "No approvers found for this payment order",
+    "waitingForApprovalOrReject": "Waiting for approval or rejection"
   },
   "history": {
     "created": "Created",
@@ -356,7 +359,9 @@
     "submitted": "Submitted",
     "signerAdded": "Signer Added",
     "comment": "Comment",
-    "noHistory": "No History Recorded"
+    "noHistory": "No History Recorded",
+    "noHistoryAvailable": "No history available",
+    "noDescription": "No description"
   },
   "reports": {
     "transactionReports": "Transaction Reports",

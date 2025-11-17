@@ -349,7 +349,10 @@
     "signatureComplete": "تمامی امضاها تکمیل شده است",
     "approvedAt": "تاریخ تأیید",
     "rejectedAt": "تاریخ رد",
-    "waitingForApproval": "در انتظار بررسی"
+    "waitingForApproval": "در انتظار بررسی",
+    "authorizedSigner": "امضادار مجاز",
+    "noApproversFound": "هیچ تاییدکننده‌ای برای این دستور پرداخت وجود ندارد",
+    "waitingForApprovalOrReject": "در انتظار تأیید یا رد"
   },
   "history": {
     "created": "ایجاد شد",
@@ -358,7 +361,9 @@
     "submitted": "ارسال شد",
     "signerAdded": "امضادار اضافه شد",
     "comment": "نظر",
-    "noHistory": "تاریخچه‌ای ثبت نشده است"
+    "noHistory": "تاریخچه‌ای ثبت نشده است",
+    "noHistoryAvailable": "تاریخچه‌ای وجود ندارد",
+    "noDescription": "بدون توضیحات"
   },
   "reports": {
     "transactionReports": "گزارشات تراکنش",

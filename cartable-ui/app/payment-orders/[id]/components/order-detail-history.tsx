@@ -65,13 +65,13 @@ export function OrderDetailHistory({ changeHistory }: OrderDetailHistoryProps) {
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
           <HistoryIcon className="h-5 w-5" />
-          تاریخچه تغییرات
+          {t("paymentOrders.changeHistory")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {sortedHistory.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            تاریخچه‌ای وجود ندارد
+            {t("history.noHistoryAvailable")}
           </div>
         ) : (
           <div className="relative">
@@ -96,7 +96,7 @@ export function OrderDetailHistory({ changeHistory }: OrderDetailHistoryProps) {
                         <OrderStatusBadge status={entry.status as any} size="default" />
                       </div>
                       <div className="text-sm mb-2 font-medium">
-                        {entry.description || "بدون توضیحات"}
+                        {entry.description || t("history.noDescription")}
                       </div>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span>{formatDate(entry.createdDateTime, locale)}</span>
