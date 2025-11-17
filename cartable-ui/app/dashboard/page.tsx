@@ -21,6 +21,9 @@ import SuccessGaugeChart from "@/components/dashboard/SuccessGaugeChart";
 import PerformanceChart from "@/components/dashboard/PerformanceChart";
 import TransactionDetailTable from "@/components/dashboard/TransactionDetailTable";
 import DashboardFilters from "@/components/dashboard/DashboardFilters";
+import ExportButtons from "@/components/dashboard/ExportButtons";
+import AmountVsCountChart from "@/components/dashboard/AmountVsCountChart";
+import ComparisonMetrics from "@/components/dashboard/ComparisonMetrics";
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -36,14 +39,13 @@ export default function DashboardPage() {
     weekAgo.setDate(weekAgo.getDate() - 7);
 
     return {
+      bankGatewayId: undefined,
       fromDate: weekAgo.toISOString(),
       toDate: today.toISOString(),
     };
   };
 
-  const [filters, setFilters] = useState<DashboardFilterParams>(
-    getDefaultFilters()
-  );
+  const [filters, setFilters] = useState<DashboardFilterParams>(getDefaultFilters());
 
   const fetchDashboardData = async () => {
     if (!session?.accessToken) return;
@@ -111,13 +113,11 @@ export default function DashboardPage() {
       <PageHeader
         title="داشبورد"
         description="نمای کلی تراکنش‌ها و آمار پرداخت"
+        actions={<ExportButtons data={dashboardData} filters={filters} />}
       />
 
       {/* Filters */}
-      <DashboardFilters
-        accounts={[]} // TODO: Fetch accounts from API
-        onFilterApply={handleFilterApply}
-      />
+      <DashboardFilters onFilterApply={handleFilterApply} />
 
       {/* Stats Cards Row */}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4 mb-5">
@@ -197,10 +197,19 @@ export default function DashboardPage() {
         />
       </div>
 
+      {/* Additional Charts Row */}
+      <div className="grid gap-5 xl:grid-cols-2 mb-5">
+        <AmountVsCountChart
+          data={dashboardData.transactionStatusSummary}
+          delay={0.9}
+        />
+        <ComparisonMetrics data={dashboardData} delay={1.0} />
+      </div>
+
       {/* Detail Table */}
       <TransactionDetailTable
         data={dashboardData.transactionStatusSummary}
-        delay={0.9}
+        delay={1.1}
       />
     </AppLayout>
   );

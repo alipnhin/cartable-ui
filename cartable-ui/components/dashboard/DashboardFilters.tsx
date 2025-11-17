@@ -3,36 +3,28 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Filter, Search } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-interface Account {
-  id: string;
-  name: string;
-  accountNumber: string;
-}
+import { Filter, Search, Calendar } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import AccountSelector from "@/components/common/AccountSelector";
+import PersianDatePicker from "@/components/common/PersianDatePicker";
 
 interface DashboardFiltersProps {
-  accounts: Account[];
   onFilterApply: (filters: {
     bankGatewayId?: string;
     fromDate: string;
     toDate: string;
   }) => void;
+  initialFilters?: {
+    bankGatewayId?: string;
+    fromDate: string;
+    toDate: string;
+  };
 }
 
 export default function DashboardFilters({
-  accounts,
   onFilterApply,
+  initialFilters,
 }: DashboardFiltersProps) {
-  const [selectedAccount, setSelectedAccount] = useState<string>("");
-
   // Default to last 7 days
   const getDefaultDates = () => {
     const today = new Date();
@@ -40,78 +32,97 @@ export default function DashboardFilters({
     weekAgo.setDate(weekAgo.getDate() - 7);
 
     return {
-      from: weekAgo.toISOString(),
-      to: today.toISOString(),
+      from: weekAgo.toISOString().split("T")[0],
+      to: today.toISOString().split("T")[0],
     };
   };
 
-  const [dateRange, setDateRange] = useState(getDefaultDates());
+  const defaultDates = getDefaultDates();
+  const defaults = initialFilters || {
+    bankGatewayId: undefined,
+    fromDate: defaultDates.from,
+    toDate: defaultDates.to,
+  };
+
+  const [selectedAccount, setSelectedAccount] = useState<string>(
+    defaults.bankGatewayId || "all"
+  );
+  const [fromDate, setFromDate] = useState<string>(
+    defaults.fromDate || defaultDates.from
+  );
+  const [toDate, setToDate] = useState<string>(
+    defaults.toDate || defaultDates.to
+  );
 
   const handleApplyFilters = () => {
     onFilterApply({
-      bankGatewayId: selectedAccount || undefined,
-      fromDate: dateRange.from,
-      toDate: dateRange.to,
+      bankGatewayId:
+        selectedAccount && selectedAccount !== "all"
+          ? selectedAccount
+          : undefined,
+      fromDate: fromDate
+        ? new Date(fromDate).toISOString()
+        : new Date().toISOString(),
+      toDate: toDate ? new Date(toDate).toISOString() : new Date().toISOString(),
     });
-  };
-
-  const formatDateDisplay = () => {
-    const from = new Date(dateRange.from);
-    const to = new Date(dateRange.to);
-    return `${from.toLocaleDateString("fa-IR")} تا ${to.toLocaleDateString("fa-IR")}`;
   };
 
   return (
     <Card className="mb-5 shadow-sm animate-fade-in">
-      <div className="p-4">
-        <div className="flex flex-wrap items-end gap-3">
+      <div className="p-5">
+        <div className="flex flex-wrap items-end gap-4">
           {/* Filter Icon */}
           <div className="hidden lg:flex items-center">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center ml-3">
+            <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center ml-3">
               <Filter className="w-5 h-5 text-primary" />
             </div>
           </div>
 
           {/* Account Selection */}
           <div className="flex-1 min-w-[200px] lg:flex-initial lg:w-64">
-            <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder="همه حساب‌ها" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">همه حساب‌ها</SelectItem>
-                {accounts.map((account) => (
-                  <SelectItem key={account.id} value={account.id}>
-                    {account.name} - {account.accountNumber}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label className="text-sm font-medium mb-2 block">حساب بانکی</Label>
+            <AccountSelector
+              value={selectedAccount}
+              onValueChange={setSelectedAccount}
+              placeholder="همه حساب‌ها"
+              showAllOption={true}
+              className="bg-background"
+            />
           </div>
 
-          {/* Date Range Display - You can replace this with a proper date picker */}
-          <div className="flex-1 min-w-[200px] lg:flex-initial">
-            <Button
-              variant="outline"
-              className="w-full justify-start text-right"
-              onClick={() => {
-                // TODO: Open date picker
-                console.log("Open date picker");
-              }}
-            >
-              <Calendar className="w-4 h-4 ml-2 text-muted-foreground" />
-              <span className="text-muted-foreground">{formatDateDisplay()}</span>
-            </Button>
+          {/* From Date */}
+          <div className="flex-1 min-w-[180px] lg:flex-initial lg:w-56">
+            <Label className="text-sm font-medium mb-2 block flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              از تاریخ
+            </Label>
+            <PersianDatePicker
+              value={fromDate}
+              onChange={setFromDate}
+              placeholder="انتخاب تاریخ"
+              locale="fa"
+            />
+          </div>
+
+          {/* To Date */}
+          <div className="flex-1 min-w-[180px] lg:flex-initial lg:w-56">
+            <Label className="text-sm font-medium mb-2 block flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              تا تاریخ
+            </Label>
+            <PersianDatePicker
+              value={toDate}
+              onChange={setToDate}
+              placeholder="انتخاب تاریخ"
+              locale="fa"
+            />
           </div>
 
           {/* Apply Filter Button */}
           <div className="w-full lg:w-auto lg:mr-auto">
-            <Button
-              onClick={handleApplyFilters}
-              className="w-full lg:w-auto gap-2"
-            >
+            <Button onClick={handleApplyFilters} className="w-full lg:w-auto gap-2">
               <Search className="w-4 h-4" />
-              <span className="hidden md:inline text-sm">اعمال فیلتر</span>
+              <span className="text-sm font-semibold">اعمال فیلتر</span>
             </Button>
           </div>
         </div>
