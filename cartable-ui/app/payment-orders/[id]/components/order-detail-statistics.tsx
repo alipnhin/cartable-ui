@@ -53,13 +53,13 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-base flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <span>وضعیت تراکنش‌ها</span>
+              <span>{t("orderDetail.statistics.transactionStatuses")}</span>
               <span className="text-sm font-normal text-success">
-                نرخ موفقیت: {overallSuccessRate.toFixed(1)}%
+                {t("statistics.successRate")}: {overallSuccessRate.toFixed(1)}%
               </span>
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              توزیع وضعیت تراکنش‌ها
+              {t("orderDetail.statistics.transactionStatusDistribution")}
             </p>
           </CardHeader>
           <CardContent>
@@ -82,7 +82,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                 <div className="absolute inset-[25%] bg-white dark:bg-card rounded-full flex flex-col items-center justify-center shadow-lg">
                   <div className="text-2xl font-bold">{totalTransactions}</div>
                   <div className="text-xs text-muted-foreground truncate max-w-[80%] text-center">
-                    تراکنش
+                    {t("dashboard.transaction")}
                   </div>
                 </div>
               </div>
@@ -94,7 +94,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-success"></div>
-                    <span className="text-sm">موفق</span>
+                    <span className="text-sm">{t("statistics.succeeded")}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{succeededCount}</span>
@@ -108,7 +108,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-destructive"></div>
-                    <span className="text-sm">ناموفق</span>
+                    <span className="text-sm">{t("statistics.failed")}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{failedCount}</span>
@@ -122,7 +122,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-warning"></div>
-                    <span className="text-sm">در انتظار</span>
+                    <span className="text-sm">{t("statistics.pending")}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{pendingCount}</span>
@@ -140,10 +140,10 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-base">
-              جزئیات وضعیت‌ها
+              {t("statistics.statusDetails")}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              توزیع وضعیت و مبالغ
+              {t("orderDetail.statistics.statusAndAmountDistribution")}
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -154,7 +154,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium">موفق</span>
+                    <span className="text-sm font-medium">{t("statistics.succeeded")}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">{succeededCount}</span>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success">
@@ -163,7 +163,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                     </div>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {formatCurrency(financialStatistics.successfulAmount, locale)} ریال
+                    {formatCurrency(financialStatistics.successfulAmount, locale)} {t("statistics.rial")}
                   </div>
                 </div>
               </div>
@@ -176,7 +176,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium">ناموفق</span>
+                    <span className="text-sm font-medium">{t("statistics.failed")}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">{failedCount}</span>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">
@@ -185,7 +185,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                     </div>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {formatCurrency(financialStatistics.failedAmount, locale)} ریال
+                    {formatCurrency(financialStatistics.failedAmount, locale)} {t("statistics.rial")}
                   </div>
                 </div>
               </div>
@@ -195,7 +195,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
               <div className="pt-3 border-t">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">
-                    پرکاربردترین کد علت
+                    {t("orderDetail.statistics.mostUsedReasonCode")}
                   </span>
                   <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
                     {reasonCodeStatistics.mostUsedReasonPercentage.toFixed(1)}%
@@ -213,16 +213,16 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
         <Card className="lg:col-span-1 overflow-hidden">
           <div className="bg-gradient-to-br from-primary to-primary/80 p-6 text-primary-foreground">
             <h3 className="text-base font-semibold mb-1">
-              خلاصه مالی
+              {t("statistics.financialSummary")}
             </h3>
             <div className="text-center mt-4">
               <div className="text-xs opacity-80">
-                مجموع مبلغ تراکنش‌ها
+                {t("orderDetail.statistics.totalTransactionAmount")}
               </div>
               <div className="text-2xl font-bold mt-1">
                 {formatCurrency(financialStatistics.totalAmount, locale)}
               </div>
-              <div className="text-xs opacity-80">ریال</div>
+              <div className="text-xs opacity-80">{t("statistics.rial")}</div>
             </div>
           </div>
 
@@ -233,12 +233,12 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-muted-foreground">
-                  مبلغ موفق
+                  {t("statistics.successfulAmount")}
                 </div>
                 <div className="font-medium text-sm truncate">
                   {formatCurrency(financialStatistics.successfulAmount, locale)}
                   <span className="text-xs text-muted-foreground ms-1">
-                    ریال
+                    {t("statistics.rial")}
                   </span>
                 </div>
               </div>
@@ -250,12 +250,12 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-muted-foreground">
-                  مبلغ ناموفق
+                  {t("statistics.failedAmount")}
                 </div>
                 <div className="font-medium text-sm truncate">
                   {formatCurrency(financialStatistics.failedAmount, locale)}
                   <span className="text-xs text-muted-foreground ms-1">
-                    ریال
+                    {t("statistics.rial")}
                   </span>
                 </div>
               </div>
@@ -267,12 +267,12 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-muted-foreground">
-                  مبلغ در انتظار
+                  {t("statistics.pendingAmount")}
                 </div>
                 <div className="font-medium text-sm truncate">
                   {formatCurrency(financialStatistics.pendingAmount, locale)}
                   <span className="text-xs text-muted-foreground ms-1">
-                    ریال
+                    {t("statistics.rial")}
                   </span>
                 </div>
               </div>
@@ -284,12 +284,12 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-muted-foreground">
-                  میانگین تراکنش
+                  {t("statistics.averageTransaction")}
                 </div>
                 <div className="font-medium text-sm truncate">
                   {formatCurrency(financialStatistics.averageAmount, locale)}
                   <span className="text-xs text-muted-foreground ms-1">
-                    ریال
+                    {t("statistics.rial")}
                   </span>
                 </div>
               </div>
@@ -305,10 +305,10 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              انواع پرداخت
+              {t("statistics.paymentTypes")}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              توزیع انواع پرداخت
+              {t("statistics.paymentTypeDistribution")}
             </p>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -344,15 +344,15 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                 </div>
                 <Progress value={type.percentage} className="h-2" />
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>مبلغ: {formatCurrency(type.amount, locale)} ریال</span>
-                  <span>نرخ موفقیت: {type.successRate.toFixed(1)}%</span>
+                  <span>{t("orderDetail.statistics.amount")} {formatCurrency(type.amount, locale)} {t("statistics.rial")}</span>
+                  <span>{t("orderDetail.statistics.successRate")} {type.successRate.toFixed(1)}%</span>
                 </div>
               </div>
             ))}
 
             {paymentTypeStatistics.breakdown.length === 0 && (
               <div className="text-center text-sm text-muted-foreground py-8">
-                اطلاعاتی موجود نیست
+                {t("orderDetail.statistics.noDataAvailable")}
               </div>
             )}
           </CardContent>
@@ -363,10 +363,10 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              آمار زمانی
+              {t("statistics.timeStatistics")}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              اطلاعات زمانی تراکنش‌ها
+              {t("orderDetail.statistics.transactionTimeInformation")}
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -378,7 +378,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                   </div>
                   <div className="flex-1">
                     <div className="text-sm font-medium mb-1">
-                      اولین تراکنش
+                      {t("statistics.firstTransaction")}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3 inline me-1" />
@@ -395,7 +395,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                   </div>
                   <div className="flex-1">
                     <div className="text-sm font-medium mb-1">
-                      آخرین تراکنش
+                      {t("statistics.lastTransaction")}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3 inline me-1" />
@@ -412,7 +412,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                   </div>
                   <div className="flex-1">
                     <div className="text-sm font-medium mb-1">
-                      آخرین بروزرسانی
+                      {t("orderDetail.statistics.lastUpdate")}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3 inline me-1" />
@@ -428,10 +428,10 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-sm font-semibold text-primary mb-1">
-                      میانگین زمان پردازش
+                      {t("statistics.averageProcessingTime")}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {timeStatistics.averageProcessingTimeMinutes} دقیقه
+                      {timeStatistics.averageProcessingTimeMinutes} {t("statistics.minutes")}
                     </div>
                   </div>
                   <Timer className="h-8 w-8 text-primary" />
@@ -447,10 +447,10 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
         <Card>
           <CardHeader>
             <CardTitle className="text-base">
-              توزیع کدهای علت
+              {t("orderDetail.statistics.reasonCodesDistribution")}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              آمار کدهای علت پرداخت
+              {t("orderDetail.statistics.paymentReasonCodesStats")}
             </p>
           </CardHeader>
           <CardContent>
@@ -467,15 +467,15 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                   </div>
                   <div className="space-y-1 text-xs text-muted-foreground">
                     <div className="flex items-center justify-between">
-                      <span>تعداد:</span>
+                      <span>{t("orderDetail.statistics.count")}</span>
                       <span className="font-medium">{reason.count}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span>مبلغ:</span>
+                      <span>{t("orderDetail.statistics.amount")}</span>
                       <span className="font-medium">{formatCurrency(reason.amount, locale)}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span>نرخ موفقیت:</span>
+                      <span>{t("orderDetail.statistics.successRate")}</span>
                       <span className="font-medium">{reason.successRate.toFixed(1)}%</span>
                     </div>
                   </div>

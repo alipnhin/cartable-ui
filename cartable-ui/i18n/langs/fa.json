@@ -675,5 +675,37 @@
     "theme": "تم",
     "themeDescription": "انتخاب تم روشن یا تاریک",
     "moreSettingsComingSoon": "تنظیمات بیشتر به زودی اضافه خواهد شد"
+  },
+  "orderDetail": {
+    "header": {
+      "inquiryRequest": "استعلام درخواست",
+      "sendToBank": "ارسال به بانک",
+      "totalAmountRial": "مبلغ کل (ریال)",
+      "transactionCount": "تعداد تراکنش",
+      "inBankProcessingQueue": "در صف پردازش بانک",
+      "signaturesOf": "از {{count}} امضاء",
+      "requestStatus": "وضعیت درخواست:",
+      "requestNumber": "شماره درخواست:",
+      "bankTrackingCode": "کد رهگیری بانک:",
+      "description": "توضیحات:",
+      "sourceAccountTitle": "عنوان حساب مبدا:",
+      "sourceAccountNumber": "شماره حساب مبداء:",
+      "sourceIban": "شباء مبدا:"
+    },
+    "statistics": {
+      "transactionStatuses": "وضعیت تراکنش‌ها",
+      "transactionStatusDistribution": "توزیع وضعیت تراکنش‌ها",
+      "statusAndAmountDistribution": "توزیع وضعیت و مبالغ",
+      "mostUsedReasonCode": "پرکاربردترین کد علت",
+      "totalTransactionAmount": "مجموع مبلغ تراکنش‌ها",
+      "noDataAvailable": "اطلاعاتی موجود نیست",
+      "transactionTimeInformation": "اطلاعات زمانی تراکنش‌ها",
+      "lastUpdate": "آخرین بروزرسانی",
+      "reasonCodesDistribution": "توزیع کدهای علت",
+      "paymentReasonCodesStats": "آمار کدهای علت پرداخت",
+      "count": "تعداد:",
+      "amount": "مبلغ:",
+      "successRate": "نرخ موفقیت:"
+    }
   }
 }

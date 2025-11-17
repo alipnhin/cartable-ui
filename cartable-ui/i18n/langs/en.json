@@ -667,5 +667,37 @@
     "theme": "Theme",
     "themeDescription": "Choose light or dark theme",
     "moreSettingsComingSoon": "More settings coming soon"
+  },
+  "orderDetail": {
+    "header": {
+      "inquiryRequest": "Inquiry Request",
+      "sendToBank": "Send to Bank",
+      "totalAmountRial": "Total Amount (Rial)",
+      "transactionCount": "Transaction Count",
+      "inBankProcessingQueue": "In Bank Processing Queue",
+      "signaturesOf": "of {{count}} signatures",
+      "requestStatus": "Request Status:",
+      "requestNumber": "Request Number:",
+      "bankTrackingCode": "Bank Tracking Code:",
+      "description": "Description:",
+      "sourceAccountTitle": "Source Account Title:",
+      "sourceAccountNumber": "Source Account Number:",
+      "sourceIban": "Source IBAN:"
+    },
+    "statistics": {
+      "transactionStatuses": "Transaction Statuses",
+      "transactionStatusDistribution": "Transaction Status Distribution",
+      "statusAndAmountDistribution": "Status and Amount Distribution",
+      "mostUsedReasonCode": "Most Used Reason Code",
+      "totalTransactionAmount": "Total Transaction Amount",
+      "noDataAvailable": "No Data Available",
+      "transactionTimeInformation": "Transaction Time Information",
+      "lastUpdate": "Last Update",
+      "reasonCodesDistribution": "Reason Codes Distribution",
+      "paymentReasonCodesStats": "Payment Reason Codes Statistics",
+      "count": "Count:",
+      "amount": "Amount:",
+      "successRate": "Success Rate:"
+    }
   }
 }
