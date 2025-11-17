@@ -475,7 +475,8 @@ export function OrderDetailTransactions({
                 <div className="p-4 space-y-3">
                   {transactions.map((transaction, index) => {
                     const bankCode = getBankCodeFromIban(transaction.destinationIban);
-                    const canInquiry = transaction.status === TransactionStatusApiEnum.WaitForBank;
+                    const canInquiry = transaction.status === TransactionStatusApiEnum.WaitForBank ||
+                                      transaction.status === TransactionStatusApiEnum.WaitForExecution;
 
                     return (
                       <Card
@@ -664,7 +665,8 @@ export function OrderDetailTransactions({
                     <TableBody>
                       {transactions.map((transaction, index) => {
                         const bankCode = getBankCodeFromIban(transaction.destinationIban);
-                        const canInquiry = transaction.status === TransactionStatusApiEnum.WaitForBank;
+                        const canInquiry = transaction.status === TransactionStatusApiEnum.WaitForBank ||
+                                          transaction.status === TransactionStatusApiEnum.WaitForExecution;
 
                         return (
                           <TableRow

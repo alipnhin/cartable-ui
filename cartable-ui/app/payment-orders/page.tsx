@@ -35,7 +35,7 @@ export default function PaymentOrdersPage() {
   const [orders, setOrders] = useState<PaymentOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
@@ -140,8 +140,8 @@ export default function PaymentOrdersPage() {
       } catch (error) {
         console.error("Error fetching payment orders:", error);
         toast({
-          title: t("toast.error"),
-          description: "خطا در دریافت اطلاعات دستورات پرداخت",
+          title: t("common.error"),
+          description: t("paymentOrders.fetchError"),
           variant: "error",
         });
       } finally {
@@ -201,8 +201,8 @@ export default function PaymentOrdersPage() {
     // Simulate export delay
     setTimeout(() => {
       toast({
-        title: t("toast.success"),
-        description: "فایل Excel آماده دانلود است",
+        title: t("common.success"),
+        description: t("paymentOrders.excelReady"),
       });
     }, 2000);
   };
@@ -264,25 +264,25 @@ export default function PaymentOrdersPage() {
       icon: FileBadge,
       accentColor: "primary",
       value: stats.total.toString(),
-      label: "کل دستورات",
+      label: t("paymentCartable.allOrders"),
     },
     {
       icon: Timer,
       accentColor: "success",
       value: stats.succeeded.toString(),
-      label: "موفق انجام شده",
+      label: t("paymentCartable.succeededOrders"),
     },
     {
       icon: Timer,
       accentColor: "warning",
       value: stats.pending.toString(),
-      label: "در صف پردازش",
+      label: t("paymentCartable.ordersInQueue"),
     },
     {
       icon: Timer,
       accentColor: "info",
       value: stats.totalAmount,
-      label: "مبلغ کل دستورات",
+      label: t("paymentCartable.totalOrdersAmount"),
     },
   ];
 
@@ -341,7 +341,9 @@ export default function PaymentOrdersPage() {
           isLoading={isLoading}
           pageNumber={pageNumber}
           totalPages={totalPages}
+          pageSize={pageSize}
           onPageChange={setPageNumber}
+          onPageSizeChange={setPageSize}
           sorting={sorting}
           onSortingChange={setSorting}
         />

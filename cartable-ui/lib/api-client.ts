@@ -9,15 +9,26 @@ const apiClient: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    Pragma: "no-cache",
+    Expires: "0",
   },
   timeout: 30000, // 30 seconds
 });
 
-// Interceptor برای اضافه کردن Authorization token
+// Interceptor برای اضافه کردن Authorization token و timestamp برای cache busting
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // در سمت کلاینت، توکن از session گرفته می‌شود
     // این کار در هر component که از API استفاده می‌کند انجام می‌شود
+
+    // اضافه کردن timestamp به URL برای جلوگیری از cache
+    // فقط برای GET requests
+    if (config.method === 'get' && config.url) {
+      const separator = config.url.includes('?') ? '&' : '?';
+      config.url = `${config.url}${separator}_t=${Date.now()}`;
+    }
+
     return config;
   },
   (error) => {
