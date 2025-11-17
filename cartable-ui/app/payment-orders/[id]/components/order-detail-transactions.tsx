@@ -94,57 +94,6 @@ const getStatusBadgeVariant = (status: TransactionStatusApiEnum) => {
   }
 };
 
-const getStatusLabel = (status: TransactionStatusApiEnum) => {
-  switch (status) {
-    case TransactionStatusApiEnum.Draft:
-      return "پیش‌نویس";
-    case TransactionStatusApiEnum.WaitForExecution:
-      return "در انتظار اجرا";
-    case TransactionStatusApiEnum.WaitForBank:
-      return "در انتظار بانک";
-    case TransactionStatusApiEnum.BankSucceeded:
-      return "موفق";
-    case TransactionStatusApiEnum.BankFailed:
-      return "ناموفق";
-    case TransactionStatusApiEnum.Canceled:
-      return "لغو شده";
-    default:
-      return status;
-  }
-};
-
-const getPaymentTypeLabel = (type: PaymentTypeApiEnum) => {
-  switch (type) {
-    case PaymentTypeApiEnum.Paya:
-      return "پایا";
-    case PaymentTypeApiEnum.Satna:
-      return "ساتنا";
-    case PaymentTypeApiEnum.Rtgs:
-      return "آنی (RTGS)";
-    default:
-      return type;
-  }
-};
-
-const getReasonCodeLabel = (code: ReasonCodeApiEnum) => {
-  switch (code) {
-    case ReasonCodeApiEnum.InvestmentAndBourse:
-      return "سرمایه‌گذاری و بورس";
-    case ReasonCodeApiEnum.ImportGoods:
-      return "واردات کالا";
-    case ReasonCodeApiEnum.SalaryAndWages:
-      return "حقوق و دستمزد";
-    case ReasonCodeApiEnum.TaxAndDuties:
-      return "مالیات و عوارض";
-    case ReasonCodeApiEnum.LoanRepayment:
-      return "بازپرداخت وام";
-    case ReasonCodeApiEnum.OtherPayments:
-      return "سایر پرداخت‌ها";
-    default:
-      return code;
-  }
-};
-
 export function OrderDetailTransactions({
   transactions,
   isLoading,
@@ -159,6 +108,58 @@ export function OrderDetailTransactions({
 }: OrderDetailTransactionsProps) {
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
+
+  // Helper functions with i18n
+  const getStatusLabel = (status: TransactionStatusApiEnum) => {
+    switch (status) {
+      case TransactionStatusApiEnum.Draft:
+        return t("transactions.statusLabels.draft");
+      case TransactionStatusApiEnum.WaitForExecution:
+        return t("transactions.statusLabels.waitForExecution");
+      case TransactionStatusApiEnum.WaitForBank:
+        return t("transactions.statusLabels.waitForBank");
+      case TransactionStatusApiEnum.BankSucceeded:
+        return t("transactions.statusLabels.bankSucceeded");
+      case TransactionStatusApiEnum.BankFailed:
+        return t("transactions.statusLabels.bankFailed");
+      case TransactionStatusApiEnum.Canceled:
+        return t("transactions.statusLabels.canceled");
+      default:
+        return status;
+    }
+  };
+
+  const getPaymentTypeLabel = (type: PaymentTypeApiEnum) => {
+    switch (type) {
+      case PaymentTypeApiEnum.Paya:
+        return t("transactions.paymentTypes.paya");
+      case PaymentTypeApiEnum.Satna:
+        return t("transactions.paymentTypes.satna");
+      case PaymentTypeApiEnum.Rtgs:
+        return t("transactions.paymentTypes.rtgs");
+      default:
+        return type;
+    }
+  };
+
+  const getReasonCodeLabel = (code: ReasonCodeApiEnum) => {
+    switch (code) {
+      case ReasonCodeApiEnum.InvestmentAndBourse:
+        return t("transactions.reasonCodes.investmentAndBourse");
+      case ReasonCodeApiEnum.ImportGoods:
+        return t("transactions.reasonCodes.importGoods");
+      case ReasonCodeApiEnum.SalaryAndWages:
+        return t("transactions.reasonCodes.salaryAndWages");
+      case ReasonCodeApiEnum.TaxAndDuties:
+        return t("transactions.reasonCodes.taxAndDuties");
+      case ReasonCodeApiEnum.LoanRepayment:
+        return t("transactions.reasonCodes.loanRepayment");
+      case ReasonCodeApiEnum.OtherPayments:
+        return t("transactions.reasonCodes.otherPayments");
+      default:
+        return code;
+    }
+  };
 
   // Local filter state
   const [searchValue, setSearchValue] = useState("");
@@ -250,9 +251,9 @@ export function OrderDetailTransactions({
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border-b bg-muted/20">
             {/* Title & Count */}
             <div className="flex items-baseline gap-3">
-              <CardTitle className="text-xl">لیست تراکنش‌ها</CardTitle>
+              <CardTitle className="text-xl">{t("transactions.listTitle")}</CardTitle>
               <span className="text-sm text-muted-foreground">
-                {totalItems} تراکنش
+                {totalItems} {t("transactions.transactionCount")}
               </span>
             </div>
 
@@ -266,7 +267,7 @@ export function OrderDetailTransactions({
                 className="gap-2"
               >
                 <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-                {!isMobile && "بروزرسانی"}
+                {!isMobile && t("transactions.refresh")}
               </Button>
 
               {/* Filter Button */}
@@ -274,7 +275,7 @@ export function OrderDetailTransactions({
                 <SheetTrigger asChild>
                   <Button variant="outline" className="gap-2 relative">
                     <FilterIcon className="h-4 w-4" />
-                    {!isMobile && "فیلتر"}
+                    {!isMobile && t("transactions.filter")}
                     {activeFiltersCount > 0 && (
                       <span className="absolute -top-1 -left-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium">
                         {activeFiltersCount}
@@ -284,17 +285,17 @@ export function OrderDetailTransactions({
                 </SheetTrigger>
                 <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto">
                   <SheetHeader>
-                    <SheetTitle>فیلتر تراکنش‌ها</SheetTitle>
+                    <SheetTitle>{t("transactions.filterTitle")}</SheetTitle>
                   </SheetHeader>
 
                   <div className="space-y-6 py-6">
                     {/* Search */}
                     <div className="space-y-2">
-                      <Label>جستجو</Label>
+                      <Label>{t("transactions.search")}</Label>
                       <div className="relative">
                         <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                          placeholder="نام، شماره شبا، کد ملی..."
+                          placeholder={t("transactions.searchPlaceholder")}
                           value={searchValue}
                           onChange={(e) => setSearchValue(e.target.value)}
                           className="pr-10"
@@ -304,30 +305,30 @@ export function OrderDetailTransactions({
 
                     {/* Status Filter */}
                     <div className="space-y-2">
-                      <Label>وضعیت تراکنش</Label>
+                      <Label>{t("transactions.transactionStatus")}</Label>
                       <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="همه وضعیت‌ها" />
+                          <SelectValue placeholder={t("transactions.allStatuses")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">همه وضعیت‌ها</SelectItem>
+                          <SelectItem value="all">{t("transactions.allStatuses")}</SelectItem>
                           <SelectItem value={TransactionStatusApiEnum.BankSucceeded}>
-                            موفق
+                            {t("transactions.statusLabels.bankSucceeded")}
                           </SelectItem>
                           <SelectItem value={TransactionStatusApiEnum.BankFailed}>
-                            ناموفق
+                            {t("transactions.statusLabels.bankFailed")}
                           </SelectItem>
                           <SelectItem value={TransactionStatusApiEnum.WaitForBank}>
-                            در انتظار بانک
+                            {t("transactions.statusLabels.waitForBank")}
                           </SelectItem>
                           <SelectItem value={TransactionStatusApiEnum.WaitForExecution}>
-                            در انتظار اجرا
+                            {t("transactions.statusLabels.waitForExecution")}
                           </SelectItem>
                           <SelectItem value={TransactionStatusApiEnum.Draft}>
-                            پیش‌نویس
+                            {t("transactions.statusLabels.draft")}
                           </SelectItem>
                           <SelectItem value={TransactionStatusApiEnum.Canceled}>
-                            لغو شده
+                            {t("transactions.statusLabels.canceled")}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -335,46 +336,46 @@ export function OrderDetailTransactions({
 
                     {/* Payment Type Filter */}
                     <div className="space-y-2">
-                      <Label>نوع پرداخت</Label>
+                      <Label>{t("transactions.paymentTypeLabel")}</Label>
                       <Select value={paymentTypeFilter} onValueChange={(v) => setPaymentTypeFilter(v as any)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="همه انواع" />
+                          <SelectValue placeholder={t("transactions.allTypes")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">همه انواع</SelectItem>
-                          <SelectItem value={PaymentTypeApiEnum.Paya}>پایا</SelectItem>
-                          <SelectItem value={PaymentTypeApiEnum.Satna}>ساتنا</SelectItem>
-                          <SelectItem value={PaymentTypeApiEnum.Rtgs}>آنی (RTGS)</SelectItem>
+                          <SelectItem value="all">{t("transactions.allTypes")}</SelectItem>
+                          <SelectItem value={PaymentTypeApiEnum.Paya}>{t("transactions.paymentTypes.paya")}</SelectItem>
+                          <SelectItem value={PaymentTypeApiEnum.Satna}>{t("transactions.paymentTypes.satna")}</SelectItem>
+                          <SelectItem value={PaymentTypeApiEnum.Rtgs}>{t("transactions.paymentTypes.rtgs")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     {/* Reason Code Filter */}
                     <div className="space-y-2">
-                      <Label>کد علت</Label>
+                      <Label>{t("transactions.reasonCode")}</Label>
                       <Select value={reasonCodeFilter} onValueChange={(v) => setReasonCodeFilter(v as any)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="همه کدها" />
+                          <SelectValue placeholder={t("transactions.allReasonCodes")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">همه کدها</SelectItem>
+                          <SelectItem value="all">{t("transactions.allReasonCodes")}</SelectItem>
                           <SelectItem value={ReasonCodeApiEnum.InvestmentAndBourse}>
-                            سرمایه‌گذاری و بورس
+                            {t("transactions.reasonCodes.investmentAndBourse")}
                           </SelectItem>
                           <SelectItem value={ReasonCodeApiEnum.ImportGoods}>
-                            واردات کالا
+                            {t("transactions.reasonCodes.importGoods")}
                           </SelectItem>
                           <SelectItem value={ReasonCodeApiEnum.SalaryAndWages}>
-                            حقوق و دستمزد
+                            {t("transactions.reasonCodes.salaryAndWages")}
                           </SelectItem>
                           <SelectItem value={ReasonCodeApiEnum.TaxAndDuties}>
-                            مالیات و عوارض
+                            {t("transactions.reasonCodes.taxAndDuties")}
                           </SelectItem>
                           <SelectItem value={ReasonCodeApiEnum.LoanRepayment}>
-                            بازپرداخت وام
+                            {t("transactions.reasonCodes.loanRepayment")}
                           </SelectItem>
                           <SelectItem value={ReasonCodeApiEnum.OtherPayments}>
-                            سایر پرداخت‌ها
+                            {t("transactions.reasonCodes.otherPayments")}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -387,10 +388,10 @@ export function OrderDetailTransactions({
                       onClick={handleResetFilters}
                       className="flex-1"
                     >
-                      پاک کردن
+                      {t("transactions.clearFilters")}
                     </Button>
                     <Button onClick={handleApplyFilters} className="flex-1">
-                      اعمال فیلتر
+                      {t("transactions.applyFilters")}
                     </Button>
                   </SheetFooter>
                 </SheetContent>
@@ -403,7 +404,7 @@ export function OrderDetailTransactions({
             <div className="flex flex-wrap gap-2 p-4 border-b bg-muted/10">
               {searchValue && (
                 <Badge variant="secondary" className="gap-1.5">
-                  جستجو: {searchValue}
+                  {t("transactions.searchLabel")} {searchValue}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => {
@@ -455,7 +456,7 @@ export function OrderDetailTransactions({
                 onClick={handleResetFilters}
                 className="h-7 text-xs"
               >
-                پاک کردن همه
+                {t("transactions.clearAll")}
               </Button>
             </div>
           )}
@@ -471,7 +472,7 @@ export function OrderDetailTransactions({
           {!isLoading && (
             <>
               {isMobile ? (
-                // Mobile Cards View - بازطراحی شده
+                // Mobile Cards View
                 <div className="p-4 space-y-3">
                   {transactions.map((transaction, index) => {
                     const bankCode = getBankCodeFromIban(transaction.destinationIban);
@@ -498,7 +499,7 @@ export function OrderDetailTransactions({
                                     {transaction.destinationAccountOwner}
                                   </div>
                                   <div className="text-xs text-muted-foreground mt-0.5">
-                                    ردیف {startIndex + index + 1}
+                                    {t("transactions.rowNumber")} {startIndex + index + 1}
                                   </div>
                                 </div>
                               </div>
@@ -514,16 +515,16 @@ export function OrderDetailTransactions({
                               {/* مبلغ */}
                               <div className="flex items-center gap-2">
                                 <Wallet className="h-4 w-4 text-primary shrink-0" />
-                                <span className="text-xs text-muted-foreground">مبلغ:</span>
+                                <span className="text-xs text-muted-foreground">{t("transactions.amountLabel")}</span>
                                 <span className="font-bold text-primary flex-1 truncate">
-                                  {formatCurrency(parseFloat(transaction.amount), locale)} ریال
+                                  {formatCurrency(parseFloat(transaction.amount), locale)} {t("transactions.rial")}
                                 </span>
                               </div>
 
                               {/* کد ملی */}
                               <div className="flex items-center gap-2">
                                 <Hash className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <span className="text-xs text-muted-foreground">کد ملی:</span>
+                                <span className="text-xs text-muted-foreground">{t("transactions.nationalCodeLabel")}</span>
                                 <span className="text-sm font-mono flex-1">
                                   {transaction.nationalCode}
                                 </span>
@@ -532,7 +533,7 @@ export function OrderDetailTransactions({
                               {/* شماره شبا */}
                               <div className="flex items-center gap-2">
                                 <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <span className="text-xs text-muted-foreground">شبا:</span>
+                                <span className="text-xs text-muted-foreground">{t("transactions.ibanLabel")}</span>
                                 <span className="text-xs font-mono flex-1 truncate">
                                   {transaction.destinationIban}
                                 </span>
@@ -541,7 +542,7 @@ export function OrderDetailTransactions({
                               {/* نوع پرداخت */}
                               <div className="flex items-center gap-2">
                                 <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <span className="text-xs text-muted-foreground">نوع:</span>
+                                <span className="text-xs text-muted-foreground">{t("transactions.typeLabel")}</span>
                                 <span className="text-sm font-medium">
                                   {getPaymentTypeLabel(transaction.paymentType)}
                                 </span>
@@ -550,7 +551,7 @@ export function OrderDetailTransactions({
                               {/* کد علت */}
                               <div className="flex items-start gap-2">
                                 <User className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                                <span className="text-xs text-muted-foreground">علت:</span>
+                                <span className="text-xs text-muted-foreground">{t("transactions.reasonLabel")}</span>
                                 <span className="text-sm flex-1">
                                   {getReasonCodeLabel(transaction.reasonCode)}
                                 </span>
@@ -559,7 +560,7 @@ export function OrderDetailTransactions({
                               {/* کد رهگیری */}
                               {transaction.trackingId && (
                                 <div className="flex items-center gap-2 pt-2 border-t">
-                                  <span className="text-xs text-muted-foreground">کد رهگیری:</span>
+                                  <span className="text-xs text-muted-foreground">{t("transactions.trackingIdLabel")}</span>
                                   <span className="text-sm font-mono font-medium flex-1">
                                     {transaction.trackingId}
                                   </span>
@@ -576,7 +577,7 @@ export function OrderDetailTransactions({
                                 className="flex-1 gap-2"
                               >
                                 <Eye className="h-4 w-4" />
-                                مشاهده جزئیات
+                                {t("transactions.viewDetails")}
                               </Button>
                               {canInquiry && (
                                 <Button
@@ -586,7 +587,7 @@ export function OrderDetailTransactions({
                                   className="gap-2"
                                 >
                                   <RefreshCw className="h-4 w-4" />
-                                  استعلام
+                                  {t("transactions.inquiry")}
                                 </Button>
                               )}
                             </div>
@@ -599,7 +600,7 @@ export function OrderDetailTransactions({
                   {transactions.length === 0 && (
                     <div className="text-center py-12">
                       <div className="text-muted-foreground mb-3">
-                        تراکنشی یافت نشد
+                        {t("transactions.noTransactionsFound")}
                       </div>
                       {activeFiltersCount > 0 && (
                         <Button
@@ -607,7 +608,7 @@ export function OrderDetailTransactions({
                           onClick={handleResetFilters}
                           size="sm"
                         >
-                          پاک کردن فیلترها
+                          {t("transactions.clearFilters")}
                         </Button>
                       )}
                     </div>
@@ -633,7 +634,7 @@ export function OrderDetailTransactions({
                           onClick={() => handleSort("destinationAccountOwner")}
                         >
                           <div className="flex items-center gap-2">
-                            نام و نام خانوادگی
+                            {t("transactions.fullName")}
                             <SortIcon field="destinationAccountOwner" />
                           </div>
                         </TableHead>
@@ -642,24 +643,24 @@ export function OrderDetailTransactions({
                           onClick={() => handleSort("nationalCode")}
                         >
                           <div className="flex items-center gap-2">
-                            کد ملی
+                            {t("transactions.nationalCode")}
                             <SortIcon field="nationalCode" />
                           </div>
                         </TableHead>
-                        <TableHead>شماره شبا</TableHead>
+                        <TableHead>{t("transactions.ibanNumber")}</TableHead>
                         <TableHead
                           className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
                           onClick={() => handleSort("amount")}
                         >
                           <div className="flex items-center gap-2">
-                            مبلغ
+                            {t("transactions.amountColumn")}
                             <SortIcon field="amount" />
                           </div>
                         </TableHead>
-                        <TableHead>نوع پرداخت</TableHead>
-                        <TableHead>کد علت</TableHead>
-                        <TableHead>وضعیت</TableHead>
-                        <TableHead className="text-left">عملیات</TableHead>
+                        <TableHead>{t("transactions.paymentTypeColumn")}</TableHead>
+                        <TableHead>{t("transactions.reasonCodeColumn")}</TableHead>
+                        <TableHead>{t("transactions.statusColumn")}</TableHead>
+                        <TableHead className="text-left">{t("transactions.actionsColumn")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -720,7 +721,7 @@ export function OrderDetailTransactions({
                                   size="sm"
                                   onClick={() => handleViewDetails(transaction)}
                                   className="h-8 w-8 p-0 hover:bg-primary/10"
-                                  title="مشاهده جزئیات"
+                                  title={t("transactions.viewDetailsTooltip")}
                                 >
                                   <Eye className="h-4 w-4" />
                                 </Button>
@@ -730,7 +731,7 @@ export function OrderDetailTransactions({
                                     size="sm"
                                     onClick={() => handleInquiry(transaction)}
                                     className="h-8 w-8 p-0 hover:bg-primary/10"
-                                    title="استعلام تراکنش"
+                                    title={t("transactions.inquiryTooltip")}
                                   >
                                     <RefreshCw className="h-4 w-4" />
                                   </Button>
@@ -746,7 +747,7 @@ export function OrderDetailTransactions({
                   {transactions.length === 0 && (
                     <div className="text-center py-12">
                       <div className="text-muted-foreground mb-3">
-                        تراکنشی یافت نشد
+                        {t("transactions.noTransactionsFound")}
                       </div>
                       {activeFiltersCount > 0 && (
                         <Button
@@ -754,7 +755,7 @@ export function OrderDetailTransactions({
                           onClick={handleResetFilters}
                           size="sm"
                         >
-                          پاک کردن فیلترها
+                          {t("transactions.clearFilters")}
                         </Button>
                       )}
                     </div>
@@ -764,8 +765,8 @@ export function OrderDetailTransactions({
                   {totalPages > 1 && (
                     <div className="flex items-center justify-between p-4 border-t bg-muted/20">
                       <div className="text-sm text-muted-foreground">
-                        نمایش {startIndex + 1} تا{" "}
-                        {Math.min(startIndex + pageSize, totalItems)} از {totalItems} تراکنش
+                        {t("transactions.showing")} {startIndex + 1} {t("transactions.to")}{" "}
+                        {Math.min(startIndex + pageSize, totalItems)} {t("transactions.of")} {totalItems} {t("transactions.transactionCount")}
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
@@ -776,7 +777,7 @@ export function OrderDetailTransactions({
                           className="gap-1"
                         >
                           <ChevronRight className="h-4 w-4" />
-                          قبلی
+                          {t("transactions.previous")}
                         </Button>
 
                         <div className="flex items-center gap-1">
@@ -815,7 +816,7 @@ export function OrderDetailTransactions({
                           disabled={pageNumber === totalPages}
                           className="gap-1"
                         >
-                          بعدی
+                          {t("transactions.next")}
                           <ChevronLeft className="h-4 w-4" />
                         </Button>
                       </div>

@@ -272,19 +272,72 @@
       "internal": "داخلی",
       "paya": "پایا",
       "satna": "ساتنا",
+      "rtgs": "آنی (RTGS)",
       "card": "کارت به کارت"
     },
     "statusLabels": {
       "registered": "ثبت شده",
-      "waitForBank": "در صف پردازش بانک",
-      "waitForExecution": "در انتظار تائید بانک",
-      "bankSucceeded": "تراکنش انجام شده",
-      "bankRejected": "رد شده توسط بانک",
+      "draft": "پیش‌نویس",
+      "waitForBank": "در انتظار بانک",
+      "waitForExecution": "در انتظار اجرا",
+      "bankSucceeded": "موفق",
+      "bankFailed": "ناموفق",
       "transactionRollback": "برگشت مبلغ به حساب مبدا",
       "failed": "خطا در ارسال به بانک",
       "canceled": "لغو شده",
       "expired": "منقضی شده"
-    }
+    },
+    "reasonCodes": {
+      "investmentAndBourse": "سرمایه‌گذاری و بورس",
+      "importGoods": "واردات کالا",
+      "salaryAndWages": "حقوق و دستمزد",
+      "taxAndDuties": "مالیات و عوارض",
+      "loanRepayment": "بازپرداخت وام",
+      "otherPayments": "سایر پرداخت‌ها"
+    },
+    "listTitle": "لیست تراکنش‌ها",
+    "transactionCount": "تراکنش",
+    "refresh": "بروزرسانی",
+    "filter": "فیلتر",
+    "filterTitle": "فیلتر تراکنش‌ها",
+    "search": "جستجو",
+    "searchPlaceholder": "نام، شماره شبا، کد ملی...",
+    "transactionStatus": "وضعیت تراکنش",
+    "allStatuses": "همه وضعیت‌ها",
+    "paymentTypeLabel": "نوع پرداخت",
+    "allTypes": "همه انواع",
+    "reasonCode": "کد علت",
+    "allReasonCodes": "همه کدها",
+    "clearFilters": "پاک کردن",
+    "applyFilters": "اعمال فیلتر",
+    "searchLabel": "جستجو:",
+    "clearAll": "پاک کردن همه",
+    "rowNumber": "ردیف",
+    "amountLabel": "مبلغ:",
+    "rial": "ریال",
+    "nationalCodeLabel": "کد ملی:",
+    "ibanLabel": "شبا:",
+    "typeLabel": "نوع:",
+    "reasonLabel": "علت:",
+    "trackingIdLabel": "کد رهگیری:",
+    "viewDetails": "مشاهده جزئیات",
+    "inquiry": "استعلام",
+    "noTransactionsFound": "تراکنشی یافت نشد",
+    "fullName": "نام و نام خانوادگی",
+    "nationalCode": "کد ملی",
+    "ibanNumber": "شماره شبا",
+    "amountColumn": "مبلغ",
+    "paymentTypeColumn": "نوع پرداخت",
+    "reasonCodeColumn": "کد علت",
+    "statusColumn": "وضعیت",
+    "actionsColumn": "عملیات",
+    "viewDetailsTooltip": "مشاهده جزئیات",
+    "inquiryTooltip": "استعلام تراکنش",
+    "showing": "نمایش",
+    "to": "تا",
+    "of": "از",
+    "previous": "قبلی",
+    "next": "بعدی"
   },
   "approvers": {
     "signatureProgress": "پیشرفت امضا",
@@ -296,7 +349,10 @@
     "signatureComplete": "تمامی امضاها تکمیل شده است",
     "approvedAt": "تاریخ تأیید",
     "rejectedAt": "تاریخ رد",
-    "waitingForApproval": "در انتظار بررسی"
+    "waitingForApproval": "در انتظار بررسی",
+    "authorizedSigner": "امضادار مجاز",
+    "noApproversFound": "هیچ تاییدکننده‌ای برای این دستور پرداخت وجود ندارد",
+    "waitingForApprovalOrReject": "در انتظار تأیید یا رد"
   },
   "history": {
     "created": "ایجاد شد",
@@ -305,7 +361,9 @@
     "submitted": "ارسال شد",
     "signerAdded": "امضادار اضافه شد",
     "comment": "نظر",
-    "noHistory": "تاریخچه‌ای ثبت نشده است"
+    "noHistory": "تاریخچه‌ای ثبت نشده است",
+    "noHistoryAvailable": "تاریخچه‌ای وجود ندارد",
+    "noDescription": "بدون توضیحات"
   },
   "reports": {
     "transactionReports": "گزارشات تراکنش",
@@ -397,7 +455,8 @@
         "percent": "درصد",
         "amount": "مبلغ",
         "progress": "پیشرفت",
-        "statusCode": "وضعیت کد"
+        "statusCode": "وضعیت کد",
+        "noData": "هیچ داده‌ای یافت نشد"
       }
     },
     "export": {
@@ -616,5 +675,37 @@
     "theme": "تم",
     "themeDescription": "انتخاب تم روشن یا تاریک",
     "moreSettingsComingSoon": "تنظیمات بیشتر به زودی اضافه خواهد شد"
+  },
+  "orderDetail": {
+    "header": {
+      "inquiryRequest": "استعلام درخواست",
+      "sendToBank": "ارسال به بانک",
+      "totalAmountRial": "مبلغ کل (ریال)",
+      "transactionCount": "تعداد تراکنش",
+      "inBankProcessingQueue": "در صف پردازش بانک",
+      "signaturesOf": "از {{count}} امضاء",
+      "requestStatus": "وضعیت درخواست:",
+      "requestNumber": "شماره درخواست:",
+      "bankTrackingCode": "کد رهگیری بانک:",
+      "description": "توضیحات:",
+      "sourceAccountTitle": "عنوان حساب مبدا:",
+      "sourceAccountNumber": "شماره حساب مبداء:",
+      "sourceIban": "شباء مبدا:"
+    },
+    "statistics": {
+      "transactionStatuses": "وضعیت تراکنش‌ها",
+      "transactionStatusDistribution": "توزیع وضعیت تراکنش‌ها",
+      "statusAndAmountDistribution": "توزیع وضعیت و مبالغ",
+      "mostUsedReasonCode": "پرکاربردترین کد علت",
+      "totalTransactionAmount": "مجموع مبلغ تراکنش‌ها",
+      "noDataAvailable": "اطلاعاتی موجود نیست",
+      "transactionTimeInformation": "اطلاعات زمانی تراکنش‌ها",
+      "lastUpdate": "آخرین بروزرسانی",
+      "reasonCodesDistribution": "توزیع کدهای علت",
+      "paymentReasonCodesStats": "آمار کدهای علت پرداخت",
+      "count": "تعداد:",
+      "amount": "مبلغ:",
+      "successRate": "نرخ موفقیت:"
+    }
   }
 }
