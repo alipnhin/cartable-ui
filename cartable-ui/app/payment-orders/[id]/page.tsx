@@ -109,10 +109,10 @@ export default function PaymentOrderDetailPage() {
       setStatistics(statsData);
     } catch (err) {
       console.error("Error fetching order data:", err);
-      setError("خطا در دریافت اطلاعات دستور پرداخت");
+      setError(t("paymentOrders.detailsFetchError"));
       toast({
-        title: t("toast.error"),
-        description: "خطا در دریافت اطلاعات دستور پرداخت",
+        title: t("common.error"),
+        description: t("paymentOrders.detailsFetchError"),
         variant: "error",
       });
     } finally {
@@ -144,8 +144,8 @@ export default function PaymentOrderDetailPage() {
     } catch (err) {
       console.error("Error fetching transactions:", err);
       toast({
-        title: t("toast.error"),
-        description: "خطا در دریافت لیست تراکنش‌ها",
+        title: t("common.error"),
+        description: t("paymentOrders.transactionsFetchError"),
         variant: "error",
       });
     } finally {
@@ -163,18 +163,25 @@ export default function PaymentOrderDetailPage() {
       await inquiryOrderById(orderId, session.accessToken);
 
       toast({
-        title: "موفق",
-        description: "استعلام دستور پرداخت با موفقیت انجام شد",
+        title: t("common.success"),
+        description: t("paymentOrders.inquiryOrderSuccess"),
         variant: "success",
       });
 
       // ریلود کامل صفحه
       await reloadPage();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error inquiring order:", err);
+
+      // نمایش پیام خطای دقیق‌تر از API
+      const errorMessage = err?.response?.data?.message ||
+                          err?.response?.data?.error ||
+                          err?.message ||
+                          t("paymentOrders.inquiryOrderError");
+
       toast({
-        title: t("toast.error"),
-        description: "خطا در استعلام دستور پرداخت",
+        title: t("common.error"),
+        description: errorMessage,
         variant: "error",
       });
     }
@@ -199,8 +206,8 @@ export default function PaymentOrderDetailPage() {
       const message = await sendToBank(orderId, session.accessToken);
 
       toast({
-        title: "موفق",
-        description: message || "دستور پرداخت با موفقیت به بانک ارسال شد",
+        title: t("common.success"),
+        description: message || t("paymentOrders.sendToBankSuccess"),
         variant: "success",
       });
 
@@ -209,8 +216,8 @@ export default function PaymentOrderDetailPage() {
     } catch (err) {
       console.error("Error sending to bank:", err);
       toast({
-        title: t("toast.error"),
-        description: "خطا در ارسال به بانک",
+        title: t("common.error"),
+        description: t("paymentOrders.sendToBankError"),
         variant: "error",
       });
     }
@@ -241,8 +248,8 @@ export default function PaymentOrderDetailPage() {
       await inquiryTransactionById(transactionId, session.accessToken);
 
       toast({
-        title: "موفق",
-        description: "استعلام تراکنش با موفقیت انجام شد",
+        title: t("common.success"),
+        description: t("paymentOrders.inquiryTransactionSuccess"),
         variant: "success",
       });
 
@@ -251,8 +258,8 @@ export default function PaymentOrderDetailPage() {
     } catch (err) {
       console.error("Error inquiring transaction:", err);
       toast({
-        title: t("toast.error"),
-        description: "خطا در استعلام تراکنش",
+        title: t("common.error"),
+        description: t("paymentOrders.inquiryTransactionError"),
         variant: "error",
       });
     }
@@ -289,15 +296,15 @@ export default function PaymentOrderDetailPage() {
       });
 
       toast({
-        title: "موفق",
-        description: "کد تایید به شماره موبایل شما ارسال شد",
+        title: t("common.success"),
+        description: t("paymentOrders.otpSentSuccess"),
         variant: "success",
       });
     } catch (err) {
       console.error("Error requesting OTP for approve:", err);
       toast({
-        title: t("toast.error"),
-        description: "خطا در ارسال کد تایید",
+        title: t("common.error"),
+        description: t("paymentOrders.otpSendError"),
         variant: "error",
       });
       // بستن دیالوگ در صورت خطا
@@ -336,15 +343,15 @@ export default function PaymentOrderDetailPage() {
       });
 
       toast({
-        title: "موفق",
-        description: "کد تایید به شماره موبایل شما ارسال شد",
+        title: t("common.success"),
+        description: t("paymentOrders.otpSentSuccess"),
         variant: "success",
       });
     } catch (err) {
       console.error("Error requesting OTP for reject:", err);
       toast({
-        title: t("toast.error"),
-        description: "خطا در ارسال کد تایید",
+        title: t("common.error"),
+        description: t("paymentOrders.otpSendError"),
         variant: "error",
       });
       // بستن دیالوگ در صورت خطا
@@ -374,11 +381,11 @@ export default function PaymentOrderDetailPage() {
       );
 
       toast({
-        title: "موفق",
+        title: t("common.success"),
         description:
           otpDialog.type === "approve"
-            ? "دستور پرداخت با موفقیت تایید شد"
-            : "دستور پرداخت با موفقیت رد شد",
+            ? t("paymentOrders.orderApprovedSuccess")
+            : t("paymentOrders.orderRejectedSuccess"),
         variant: "success",
       });
 
@@ -390,8 +397,8 @@ export default function PaymentOrderDetailPage() {
     } catch (err) {
       console.error("Error confirming OTP:", err);
       toast({
-        title: t("toast.error"),
-        description: "کد تایید نامعتبر است",
+        title: t("common.error"),
+        description: t("paymentOrders.otpInvalid"),
         variant: "error",
       });
       throw err; // برای نمایش خطا در OtpDialog
@@ -419,15 +426,15 @@ export default function PaymentOrderDetailPage() {
       );
 
       toast({
-        title: "موفق",
-        description: "کد تایید مجدداً ارسال شد",
+        title: t("common.success"),
+        description: t("paymentOrders.otpResentSuccess"),
         variant: "success",
       });
     } catch (err) {
       console.error("Error resending OTP:", err);
       toast({
-        title: t("toast.error"),
-        description: "خطا در ارسال مجدد کد تایید",
+        title: t("common.error"),
+        description: t("paymentOrders.otpResendError"),
         variant: "error",
       });
       throw err;
@@ -455,7 +462,7 @@ export default function PaymentOrderDetailPage() {
           <Card className="p-8">
             <div className="flex flex-col items-center justify-center gap-4">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">در حال بارگذاری...</p>
+              <p className="text-muted-foreground">{t("paymentOrders.loading")}</p>
             </div>
           </Card>
         </div>
@@ -471,14 +478,14 @@ export default function PaymentOrderDetailPage() {
         <div className="container mx-auto p-4 md:p-6 mt-14">
           <Card className="p-8 text-center">
             <p className="text-lg text-muted-foreground">
-              {error || "دستور پرداخت یافت نشد"}
+              {error || t("paymentOrders.orderNotFoundText")}
             </p>
             <Link
               href="/payment-orders"
               className="inline-flex items-center gap-2 mt-4 text-primary hover:underline"
             >
               <ArrowRight className="h-4 w-4" />
-              بازگشت به لیست
+              {t("paymentOrders.backToList")}
             </Link>
           </Card>
         </div>
@@ -551,14 +558,14 @@ export default function PaymentOrderDetailPage() {
             >
               <TabsTrigger value="statistics">
                 <BarChart3 />{" "}
-                <span className="hidden sm:inline">آمار</span>
-                <span className="sm:hidden">آمار</span>
+                <span className="hidden sm:inline">{t("paymentOrders.statisticsTab")}</span>
+                <span className="sm:hidden">{t("paymentOrders.statisticsShort")}</span>
               </TabsTrigger>
 
               <TabsTrigger value="transactions">
                 <FileText className="" />
-                <span className="hidden sm:inline">تراکنش‌ها</span>
-                <span className="sm:hidden">تراکنش‌ها</span>
+                <span className="hidden sm:inline">{t("paymentOrders.transactionsTab")}</span>
+                <span className="sm:hidden">{t("paymentOrders.transactionsShort")}</span>
                 <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
                   {totalTransactions}
                 </span>
@@ -566,8 +573,8 @@ export default function PaymentOrderDetailPage() {
 
               <TabsTrigger value="approvers">
                 <Users />
-                <span className="hidden sm:inline">تاییدکنندگان</span>
-                <span className="sm:hidden">تایید</span>
+                <span className="hidden sm:inline">{t("paymentOrders.approversTab")}</span>
+                <span className="sm:hidden">{t("paymentOrders.approversShort")}</span>
                 <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
                   {orderDetails.approvers.length}
                 </span>
@@ -575,8 +582,8 @@ export default function PaymentOrderDetailPage() {
 
               <TabsTrigger value="history">
                 <History />
-                <span className="hidden sm:inline">تاریخچه</span>
-                <span className="sm:hidden">تاریخچه</span>
+                <span className="hidden sm:inline">{t("paymentOrders.historyTab")}</span>
+                <span className="sm:hidden">{t("paymentOrders.historyShort")}</span>
                 <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
                   {orderDetails.changeHistory.length}
                 </span>

@@ -26,7 +26,7 @@ export default function DashboardFilters({
   onFilterApply,
   initialFilters,
 }: DashboardFiltersProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   // Default to last 7 days
   const getDefaultDates = () => {
@@ -103,7 +103,7 @@ export default function DashboardFilters({
               value={fromDate}
               onChange={setFromDate}
               placeholder={t("common.selectDate")}
-              locale="fa"
+              locale={locale}
             />
           </div>
 
@@ -117,7 +117,7 @@ export default function DashboardFilters({
               value={toDate}
               onChange={setToDate}
               placeholder={t("common.selectDate")}
-              locale="fa"
+              locale={locale}
             />
           </div>
 

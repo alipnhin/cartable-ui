@@ -30,15 +30,15 @@ export function OrderDetailApprovers({ approvers }: OrderDetailApproversProps) {
       case ApproverStatusEnum.Accepted:
         return (
           <Badge className="bg-success text-white hover:bg-success/90">
-            تایید شده
+            {t("approvers.approved")}
           </Badge>
         );
       case ApproverStatusEnum.Rejected:
-        return <Badge variant="destructive">رد شده</Badge>;
+        return <Badge variant="destructive">{t("approvers.rejected")}</Badge>;
       case ApproverStatusEnum.WaitForAction:
         return (
           <Badge className="bg-warning text-warning-foreground hover:bg-warning/90">
-            در انتظار
+            {t("approvers.pending")}
           </Badge>
         );
     }
@@ -61,7 +61,7 @@ export function OrderDetailApprovers({ approvers }: OrderDetailApproversProps) {
     return (
       <Card>
         <CardContent className="p-12 text-center text-muted-foreground">
-          هیچ تاییدکننده‌ای برای این دستور پرداخت وجود ندارد
+          {t("approvers.noApproversFound")}
         </CardContent>
       </Card>
     );
@@ -83,7 +83,7 @@ export function OrderDetailApprovers({ approvers }: OrderDetailApproversProps) {
                 {approver.approverName}
               </h3>
               <Badge variant="secondary" className="text-xs">
-                امضادار مجاز
+                {t("approvers.authorizedSigner")}
               </Badge>
             </div>
 
@@ -100,8 +100,8 @@ export function OrderDetailApprovers({ approvers }: OrderDetailApproversProps) {
                     {getStatusIcon(approver.status)}
                     <span className="font-medium">
                       {approver.status === ApproverStatusEnum.Accepted
-                        ? "تایید شده"
-                        : "رد شده"}
+                        ? t("approvers.approved")
+                        : t("approvers.rejected")}
                     </span>
                   </div>
                   {approver.createdDateTime && (
@@ -122,10 +122,10 @@ export function OrderDetailApprovers({ approvers }: OrderDetailApproversProps) {
                 <>
                   <div className="flex items-center justify-center gap-2 text-sm mb-1 text-warning">
                     {getStatusIcon(approver.status)}
-                    <span className="font-medium">منتظر بررسی</span>
+                    <span className="font-medium">{t("approvers.waitingForApproval")}</span>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    در انتظار تأیید یا رد
+                    {t("approvers.waitingForApprovalOrReject")}
                   </div>
                 </>
               )}

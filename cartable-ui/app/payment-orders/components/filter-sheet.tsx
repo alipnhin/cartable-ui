@@ -161,9 +161,9 @@ export function FilterSheet({
     <div className="space-y-6">
       {/* عنوان دستور پرداخت */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">عنوان دستور پرداخت</Label>
+        <Label className="text-sm font-medium">{t("filters.orderTitleLabel")}</Label>
         <Input
-          placeholder="جستجو بر اساس عنوان..."
+          placeholder={t("filters.orderTitlePlaceholder")}
           value={localFilters.orderTitle}
           onChange={(e) =>
             setLocalFilters({ ...localFilters, orderTitle: e.target.value })
@@ -174,9 +174,9 @@ export function FilterSheet({
 
       {/* شماره دستور پرداخت */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">شماره دستور پرداخت</Label>
+        <Label className="text-sm font-medium">{t("filters.orderNumberLabel")}</Label>
         <Input
-          placeholder="مثال: 1001..."
+          placeholder={t("filters.orderNumberPlaceholder")}
           value={localFilters.orderNumber}
           onChange={(e) =>
             setLocalFilters({ ...localFilters, orderNumber: e.target.value })
@@ -187,9 +187,9 @@ export function FilterSheet({
 
       {/* کد رهگیری */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">کد رهگیری</Label>
+        <Label className="text-sm font-medium">{t("filters.trackingIdLabel")}</Label>
         <Input
-          placeholder="جستجو بر اساس کد رهگیری..."
+          placeholder={t("filters.trackingIdPlaceholder")}
           value={localFilters.trackingId}
           onChange={(e) =>
             setLocalFilters({ ...localFilters, trackingId: e.target.value })
@@ -245,7 +245,7 @@ export function FilterSheet({
               <Command>
                 <CommandInput placeholder={t("filters.search")} />
                 <CommandList>
-                  <CommandEmpty>موردی یافت نشد</CommandEmpty>
+                  <CommandEmpty>{t("filters.notFound")}</CommandEmpty>
                   <CommandGroup>
                     <CommandItem
                       value="all"
@@ -387,7 +387,7 @@ export function FilterSheet({
               <Command>
                 <CommandInput placeholder={t("filters.search")} />
                 <CommandList>
-                  <CommandEmpty>موردی یافت نشد</CommandEmpty>
+                  <CommandEmpty>{t("filters.notFound")}</CommandEmpty>
                   <CommandGroup>
                     <CommandItem
                       value="all"
@@ -473,7 +473,7 @@ export function FilterSheet({
       {/* Date Range - تاریخ شمسی و میلادی */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label className="text-sm font-medium">از تاریخ</Label>
+          <Label className="text-sm font-medium">{t("filters.fromDate")}</Label>
           <DatePicker
             value={localFilters.dateFrom}
             onChange={(date: Value) => {
@@ -494,11 +494,11 @@ export function FilterSheet({
               isMobile ? "h-12 text-base" : "h-10"
             )}
             containerClassName="w-full"
-            placeholder={locale === "fa" ? "انتخاب تاریخ" : "Select date"}
+            placeholder={t("common.selectDate")}
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-sm font-medium">تا تاریخ</Label>
+          <Label className="text-sm font-medium">{t("filters.toDate")}</Label>
           <DatePicker
             value={localFilters.dateTo}
             onChange={(date: Value) => {
@@ -519,7 +519,7 @@ export function FilterSheet({
               isMobile ? "h-12 text-base" : "h-10"
             )}
             containerClassName="w-full"
-            placeholder={locale === "fa" ? "انتخاب تاریخ" : "Select date"}
+            placeholder={t("common.selectDate")}
           />
         </div>
       </div>
@@ -541,7 +541,7 @@ export function FilterSheet({
           onClick={handleApply}
           disabled={isLoading}
         >
-          {isLoading ? "در حال اعمال..." : "اعمال فیلتر"}
+          {isLoading ? t("filters.applyingFilter") : t("filters.applyFilter")}
           {activeFiltersCount > 0 && !isLoading && (
             <Badge variant="secondary" className="ms-2 bg-white/20 text-white">
               {activeFiltersCount}

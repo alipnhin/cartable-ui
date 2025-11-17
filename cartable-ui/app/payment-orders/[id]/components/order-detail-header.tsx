@@ -137,7 +137,7 @@ export function OrderDetailHeader({
                   className="gap-2"
                 >
                   <RefreshCw className="h-4 w-4" />
-                  استعلام درخواست
+                  {t("orderDetail.header.inquiryRequest")}
                 </Button>
               )}
               {canSendToBank && onSendToBank && (
@@ -148,7 +148,7 @@ export function OrderDetailHeader({
                   className="gap-2"
                 >
                   <Send className="h-4 w-4" />
-                  ارسال به بانک
+                  {t("orderDetail.header.sendToBank")}
                 </Button>
               )}
               {canApproveReject && onApprove && (
@@ -159,7 +159,7 @@ export function OrderDetailHeader({
                   className="gap-2"
                 >
                   <Check className="h-4 w-4" />
-                  تایید
+                  {t("common.buttons.approve")}
                 </Button>
               )}
               {canApproveReject && onReject && (
@@ -170,7 +170,7 @@ export function OrderDetailHeader({
                   className="gap-2"
                 >
                   <X className="h-4 w-4" />
-                  رد
+                  {t("common.buttons.reject")}
                 </Button>
               )}
             </div>
@@ -188,7 +188,7 @@ export function OrderDetailHeader({
               <div className="text-lg font-bold text-gray-900 dark:text-white truncate">
                 {formatCurrency(order.totalAmount, locale)}
               </div>
-              <div className="text-xs text-muted-foreground">مبلغ کل (ریال)</div>
+              <div className="text-xs text-muted-foreground">{t("orderDetail.header.totalAmountRial")}</div>
             </div>
           </div>
 
@@ -201,7 +201,7 @@ export function OrderDetailHeader({
               <div className="text-lg font-bold text-gray-900 dark:text-white">
                 {order.numberOfTransactions}
               </div>
-              <div className="text-xs text-muted-foreground">تعداد تراکنش</div>
+              <div className="text-xs text-muted-foreground">{t("orderDetail.header.transactionCount")}</div>
             </div>
           </div>
 
@@ -214,7 +214,7 @@ export function OrderDetailHeader({
               <div className="text-lg font-bold text-gray-900 dark:text-white">
                 {waitForBankCount}
               </div>
-              <div className="text-xs text-muted-foreground">در صف پردازش بانک</div>
+              <div className="text-xs text-muted-foreground">{t("orderDetail.header.inBankProcessingQueue")}</div>
             </div>
           </div>
 
@@ -228,7 +228,7 @@ export function OrderDetailHeader({
                 {approvalCount}
               </div>
               <div className="text-xs text-muted-foreground">
-                از {totalApprovers} امضاء
+                {t("orderDetail.header.signaturesOf", { count: totalApprovers })}
               </div>
             </div>
           </div>
@@ -240,20 +240,20 @@ export function OrderDetailHeader({
           <div className="flex flex-col gap-4">
             {/* وضعیت درخواست */}
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">وضعیت درخواست:</span>
+              <span className="text-sm text-muted-foreground">{t("orderDetail.header.requestStatus")}</span>
               <OrderStatusBadge status={order.status} size="default" />
             </div>
 
             {/* شماره درخواست */}
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">شماره درخواست:</span>
+              <span className="text-sm text-muted-foreground">{t("orderDetail.header.requestNumber")}</span>
               <strong className="text-sm font-bold font-mono">{order.orderId}</strong>
             </div>
 
             {/* کد رهگیری بانک */}
             {order.trackingId && (
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">کد رهگیری بانک:</span>
+                <span className="text-sm text-muted-foreground">{t("orderDetail.header.bankTrackingCode")}</span>
                 <strong className="text-sm font-bold font-mono">{order.trackingId}</strong>
               </div>
             )}
@@ -261,7 +261,7 @@ export function OrderDetailHeader({
             {/* توضیحات */}
             {order.description && (
               <div className="flex justify-between items-start gap-4">
-                <span className="text-sm text-muted-foreground shrink-0">توضیحات:</span>
+                <span className="text-sm text-muted-foreground shrink-0">{t("orderDetail.header.description")}</span>
                 <strong className="text-sm font-medium text-right break-words">
                   {order.description}
                 </strong>
@@ -274,7 +274,7 @@ export function OrderDetailHeader({
             {/* عنوان حساب مبدا */}
             {order.accountTitle && (
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">عنوان حساب مبدا:</span>
+                <span className="text-sm text-muted-foreground">{t("orderDetail.header.sourceAccountTitle")}</span>
                 <strong className="text-sm font-bold">{order.accountTitle}</strong>
               </div>
             )}
@@ -282,14 +282,14 @@ export function OrderDetailHeader({
             {/* شماره حساب مبداء */}
             {order.accountNumber && (
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">شماره حساب مبداء:</span>
+                <span className="text-sm text-muted-foreground">{t("orderDetail.header.sourceAccountNumber")}</span>
                 <strong className="text-sm font-bold font-mono">{order.accountNumber}</strong>
               </div>
             )}
 
             {/* شباء مبدا */}
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">شباء مبدا:</span>
+              <span className="text-sm text-muted-foreground">{t("orderDetail.header.sourceIban")}</span>
               <strong className="text-sm font-bold font-mono">{order.accountSheba}</strong>
             </div>
           </div>
