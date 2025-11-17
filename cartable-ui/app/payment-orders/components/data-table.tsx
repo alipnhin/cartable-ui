@@ -40,7 +40,9 @@ interface DataTableProps<TData, TValue> {
   /** Server-side pagination */
   pageNumber?: number;
   totalPages?: number;
+  pageSize?: number;
   onPageChange?: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
   /** Server-side sorting */
   sorting?: SortingState;
   onSortingChange?: OnChangeFn<SortingState>;
@@ -52,7 +54,9 @@ export function DataTable<TData, TValue>({
   isLoading,
   pageNumber = 1,
   totalPages = 1,
+  pageSize = 10,
   onPageChange,
+  onPageSizeChange,
   sorting: externalSorting,
   onSortingChange: externalOnSortingChange,
 }: DataTableProps<TData, TValue>) {
@@ -174,36 +178,59 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between px-2">
-        <div className="text-sm text-muted-foreground">
-          {isServerSide ? (
-            // Server-side pagination info
-            <>
-              {t("common.pagination.page")}{" "}
-              <span className="font-medium text-foreground">{pageNumber}</span>{" "}
-              {t("common.pagination.of")}{" "}
-              <span className="font-medium text-foreground">{totalPages}</span>
-            </>
-          ) : (
-            // Client-side pagination info
-            <>
-              {t("common.pagination.showing")}{" "}
-              <span className="font-medium text-foreground">
-                {table.getState().pagination.pageIndex *
-                  table.getState().pagination.pageSize +
-                  1}
-              </span>{" "}
-              {t("common.pagination.to")}{" "}
-              <span className="font-medium text-foreground">
-                {Math.min(
-                  (table.getState().pagination.pageIndex + 1) *
-                    table.getState().pagination.pageSize,
-                  data.length
-                )}
-              </span>{" "}
-              {t("common.pagination.of")}{" "}
-              <span className="font-medium text-foreground">{data.length}</span>
-            </>
+      <div className="flex items-center justify-between px-2 flex-wrap gap-4">
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-muted-foreground">
+            {isServerSide ? (
+              // Server-side pagination info
+              <>
+                {t("common.pagination.page")}{" "}
+                <span className="font-medium text-foreground">{pageNumber}</span>{" "}
+                {t("common.pagination.of")}{" "}
+                <span className="font-medium text-foreground">{totalPages}</span>
+              </>
+            ) : (
+              // Client-side pagination info
+              <>
+                {t("common.pagination.showing")}{" "}
+                <span className="font-medium text-foreground">
+                  {table.getState().pagination.pageIndex *
+                    table.getState().pagination.pageSize +
+                    1}
+                </span>{" "}
+                {t("common.pagination.to")}{" "}
+                <span className="font-medium text-foreground">
+                  {Math.min(
+                    (table.getState().pagination.pageIndex + 1) *
+                      table.getState().pagination.pageSize,
+                    data.length
+                  )}
+                </span>{" "}
+                {t("common.pagination.of")}{" "}
+                <span className="font-medium text-foreground">{data.length}</span>
+              </>
+            )}
+          </div>
+          {/* Page Size Selector */}
+          {isServerSide && onPageSizeChange && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {t("common.pagination.pageSize")}:
+              </span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  onPageSizeChange(Number(e.target.value));
+                  onPageChange?.(1); // Reset to first page when changing page size
+                }}
+                className="h-8 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
           )}
         </div>
         <div className="flex items-center gap-2">
