@@ -160,9 +160,9 @@ export function OrderDetailTransactions({
 
   // Local filter state
   const [searchValue, setSearchValue] = useState("");
-  const [statusFilter, setStatusFilter] = useState<TransactionStatusApiEnum | "">("");
-  const [paymentTypeFilter, setPaymentTypeFilter] = useState<PaymentTypeApiEnum | "">("");
-  const [reasonCodeFilter, setReasonCodeFilter] = useState<ReasonCodeApiEnum | "">("");
+  const [statusFilter, setStatusFilter] = useState<TransactionStatusApiEnum | "all">("all");
+  const [paymentTypeFilter, setPaymentTypeFilter] = useState<PaymentTypeApiEnum | "all">("all");
+  const [reasonCodeFilter, setReasonCodeFilter] = useState<ReasonCodeApiEnum | "all">("all");
   const [sortField, setSortField] = useState<SortField | "">("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
@@ -190,9 +190,9 @@ export function OrderDetailTransactions({
     const filters: Partial<TransactionFilterParams> = { ...extraFilters };
 
     if (searchValue) filters.serchValue = searchValue;
-    if (statusFilter) filters.status = statusFilter;
-    if (paymentTypeFilter) filters.paymentType = paymentTypeFilter;
-    if (reasonCodeFilter) filters.reasonCode = reasonCodeFilter;
+    if (statusFilter && statusFilter !== "all") filters.status = statusFilter;
+    if (paymentTypeFilter && paymentTypeFilter !== "all") filters.paymentType = paymentTypeFilter;
+    if (reasonCodeFilter && reasonCodeFilter !== "all") filters.reasonCode = reasonCodeFilter;
 
     onFilterChange(filters);
   };
@@ -204,9 +204,9 @@ export function OrderDetailTransactions({
 
   const handleResetFilters = () => {
     setSearchValue("");
-    setStatusFilter("");
-    setPaymentTypeFilter("");
-    setReasonCodeFilter("");
+    setStatusFilter("all");
+    setPaymentTypeFilter("all");
+    setReasonCodeFilter("all");
     setSortField("");
     setSortDirection("asc");
     onFilterChange({});
@@ -226,9 +226,9 @@ export function OrderDetailTransactions({
 
   const activeFiltersCount =
     (searchValue ? 1 : 0) +
-    (statusFilter ? 1 : 0) +
-    (paymentTypeFilter ? 1 : 0) +
-    (reasonCodeFilter ? 1 : 0);
+    (statusFilter && statusFilter !== "all" ? 1 : 0) +
+    (paymentTypeFilter && paymentTypeFilter !== "all" ? 1 : 0) +
+    (reasonCodeFilter && reasonCodeFilter !== "all" ? 1 : 0);
 
   const startIndex = (pageNumber - 1) * pageSize;
 
@@ -310,7 +310,7 @@ export function OrderDetailTransactions({
                           <SelectValue placeholder="همه وضعیت‌ها" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">همه وضعیت‌ها</SelectItem>
+                          <SelectItem value="all">همه وضعیت‌ها</SelectItem>
                           <SelectItem value={TransactionStatusApiEnum.BankSucceeded}>
                             موفق
                           </SelectItem>
@@ -341,7 +341,7 @@ export function OrderDetailTransactions({
                           <SelectValue placeholder="همه انواع" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">همه انواع</SelectItem>
+                          <SelectItem value="all">همه انواع</SelectItem>
                           <SelectItem value={PaymentTypeApiEnum.Paya}>پایا</SelectItem>
                           <SelectItem value={PaymentTypeApiEnum.Satna}>ساتنا</SelectItem>
                           <SelectItem value={PaymentTypeApiEnum.Rtgs}>آنی (RTGS)</SelectItem>
@@ -357,7 +357,7 @@ export function OrderDetailTransactions({
                           <SelectValue placeholder="همه کدها" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">همه کدها</SelectItem>
+                          <SelectItem value="all">همه کدها</SelectItem>
                           <SelectItem value={ReasonCodeApiEnum.InvestmentAndBourse}>
                             سرمایه‌گذاری و بورس
                           </SelectItem>
@@ -413,37 +413,37 @@ export function OrderDetailTransactions({
                   />
                 </Badge>
               )}
-              {statusFilter && (
+              {statusFilter && statusFilter !== "all" && (
                 <Badge variant="secondary" className="gap-1.5">
                   {getStatusLabel(statusFilter)}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => {
-                      setStatusFilter("");
+                      setStatusFilter("all");
                       handleApplyFilters();
                     }}
                   />
                 </Badge>
               )}
-              {paymentTypeFilter && (
+              {paymentTypeFilter && paymentTypeFilter !== "all" && (
                 <Badge variant="secondary" className="gap-1.5">
                   {getPaymentTypeLabel(paymentTypeFilter)}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => {
-                      setPaymentTypeFilter("");
+                      setPaymentTypeFilter("all");
                       handleApplyFilters();
                     }}
                   />
                 </Badge>
               )}
-              {reasonCodeFilter && (
+              {reasonCodeFilter && reasonCodeFilter !== "all" && (
                 <Badge variant="secondary" className="gap-1.5">
                   {getReasonCodeLabel(reasonCodeFilter)}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => {
-                      setReasonCodeFilter("");
+                      setReasonCodeFilter("all");
                       handleApplyFilters();
                     }}
                   />

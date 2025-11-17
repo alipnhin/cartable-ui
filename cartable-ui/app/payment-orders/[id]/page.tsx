@@ -208,6 +208,19 @@ export default function PaymentOrderDetailPage() {
   const canInquiry = orderDetails.status === PaymentStatusEnum.SubmittedToBank;
   const canApproveReject = orderDetails.status === PaymentStatusEnum.WaitingForOwnersApproval;
 
+  // محاسبه تعداد تراکنش‌های در صف بانک
+  const waitForBankCount = statistics
+    ? statistics.statusStatistics.breakdown.find(
+        (s) => s.status === "WaitForBank"
+      )?.count || 0
+    : 0;
+
+  // محاسبه تعداد امضاها
+  const approvalCount = orderDetails.approvers.filter(
+    (a) => a.status === "Accepted"
+  ).length;
+  const totalApprovers = orderDetails.approvers.length;
+
   return (
     <>
       <FixHeader returnUrl="/payment-orders" />
@@ -220,6 +233,9 @@ export default function PaymentOrderDetailPage() {
           onInquiry={reloadPage}
           onApprove={reloadPage}
           onReject={reloadPage}
+          waitForBankCount={waitForBankCount}
+          approvalCount={approvalCount}
+          totalApprovers={totalApprovers}
         />
 
         {/* تب‌های جزئیات */}
