@@ -7,6 +7,7 @@ import { Filter, Search, Calendar } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import AccountSelector from "@/components/common/AccountSelector";
 import PersianDatePicker from "@/components/common/PersianDatePicker";
+import useTranslation from "@/hooks/useTranslation";
 
 interface DashboardFiltersProps {
   onFilterApply: (filters: {
@@ -25,6 +26,8 @@ export default function DashboardFilters({
   onFilterApply,
   initialFilters,
 }: DashboardFiltersProps) {
+  const { t } = useTranslation();
+
   // Default to last 7 days
   const getDefaultDates = () => {
     const today = new Date();
@@ -80,11 +83,11 @@ export default function DashboardFilters({
 
           {/* Account Selection */}
           <div className="flex-1 min-w-[200px] lg:flex-initial lg:w-64">
-            <Label className="text-sm font-medium mb-2 block">حساب بانکی</Label>
+            <Label className="text-sm font-medium mb-2 block">{t("dashboard.filters.bankAccount")}</Label>
             <AccountSelector
               value={selectedAccount}
               onValueChange={setSelectedAccount}
-              placeholder="همه حساب‌ها"
+              placeholder={t("dashboard.filters.allAccounts")}
               showAllOption={true}
               className="bg-background"
             />
@@ -94,12 +97,12 @@ export default function DashboardFilters({
           <div className="flex-1 min-w-[180px] lg:flex-initial lg:w-56">
             <Label className="text-sm font-medium mb-2 block flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              از تاریخ
+              {t("dashboard.filters.fromDate")}
             </Label>
             <PersianDatePicker
               value={fromDate}
               onChange={setFromDate}
-              placeholder="انتخاب تاریخ"
+              placeholder={t("common.selectDate")}
               locale="fa"
             />
           </div>
@@ -108,12 +111,12 @@ export default function DashboardFilters({
           <div className="flex-1 min-w-[180px] lg:flex-initial lg:w-56">
             <Label className="text-sm font-medium mb-2 block flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              تا تاریخ
+              {t("dashboard.filters.toDate")}
             </Label>
             <PersianDatePicker
               value={toDate}
               onChange={setToDate}
-              placeholder="انتخاب تاریخ"
+              placeholder={t("common.selectDate")}
               locale="fa"
             />
           </div>
@@ -122,7 +125,7 @@ export default function DashboardFilters({
           <div className="w-full lg:w-auto lg:mr-auto">
             <Button onClick={handleApplyFilters} className="w-full lg:w-auto gap-2">
               <Search className="w-4 h-4" />
-              <span className="text-sm font-semibold">اعمال فیلتر</span>
+              <span className="text-sm font-semibold">{t("dashboard.filters.applyFilter")}</span>
             </Button>
           </div>
         </div>

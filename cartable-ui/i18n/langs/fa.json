@@ -304,7 +304,89 @@
   },
   "dashboard": {
     "pageTitle": "داشبورد",
-    "pageSubtitle": "نمای کلی فعالیت‌های مالی"
+    "pageSubtitle": "نمای کلی تراکنش‌ها و آمار پرداخت",
+    "filters": {
+      "bankAccount": "حساب بانکی",
+      "fromDate": "از تاریخ",
+      "toDate": "تا تاریخ",
+      "applyFilter": "اعمال فیلتر",
+      "allAccounts": "همه حساب‌ها",
+      "selectDate": "انتخاب تاریخ"
+    },
+    "stats": {
+      "totalTransactions": "کل تراکنش‌ها",
+      "succeededTransactions": "تراکنش‌های موفق",
+      "pendingTransactions": "در صف پردازش",
+      "failedTransactions": "تراکنش‌های ناموفق"
+    },
+    "charts": {
+      "transactionStatus": {
+        "title": "وضعیت تراکنش‌ها",
+        "subtitle": "براساس تعداد"
+      },
+      "paymentTypes": {
+        "title": "انواع پرداخت",
+        "subtitle": "توزیع بر اساس نوع"
+      },
+      "successGauge": {
+        "title": "تراکنش‌های موفق",
+        "subtitle": "حجم پردازش",
+        "successVolume": "حجم پردازش موفق"
+      },
+      "performance": {
+        "title": "تحلیل عملکرد",
+        "subtitle": "مقایسه تعداد و درصد",
+        "transactionCount": "تعداد تراکنش",
+        "percent": "درصد"
+      },
+      "amountVsCount": {
+        "title": "مقایسه تعداد و مبلغ",
+        "subtitle": "تحلیل همزمان تعداد و مبلغ تراکنش‌ها",
+        "count": "تعداد",
+        "amountNormalized": "مبلغ (نرمال شده)",
+        "note": "نکته: مبلغ برای نمایش بهتر نرمال‌سازی شده است. برای مشاهده مبلغ واقعی، روی نمودار کلیک کنید."
+      },
+      "comparisonMetrics": {
+        "title": "شاخص‌های کلیدی",
+        "subtitle": "متریک‌های محاسبه شده",
+        "successRate": "نرخ موفقیت",
+        "fromTotal": "از کل تراکنش‌ها",
+        "avgAmount": "میانگین مبلغ تراکنش",
+        "avgSuccessAmount": "میانگین تراکنش موفق",
+        "closedOrders": "دستورات بسته شده",
+        "ordersCount": "تعداد دستورات",
+        "systemStatus": "وضعیت کلی سیستم",
+        "systemStatusDesc": "بر اساس نرخ موفقیت و تعداد تراکنش‌ها",
+        "excellent": "عالی",
+        "average": "متوسط",
+        "needsReview": "نیاز به بررسی"
+      },
+      "detailTable": {
+        "title": "جزئیات تراکنش‌ها",
+        "subtitle": "اطلاعات تفصیلی",
+        "status": "وضعیت",
+        "count": "تعداد",
+        "percent": "درصد",
+        "amount": "مبلغ",
+        "progress": "پیشرفت",
+        "statusCode": "وضعیت کد"
+      }
+    },
+    "export": {
+      "downloadReport": "دریافت گزارش",
+      "downloadExcel": "دریافت Excel",
+      "downloadPDF": "دریافت PDF",
+      "creating": "در حال ایجاد...",
+      "success": "موفق",
+      "error": "خطا",
+      "excelError": "خطا در ایجاد فایل Excel",
+      "pdfError": "خطا در ایجاد فایل PDF",
+      "fileCreated": "فایل {{fileName}} با موفقیت ایجاد شد"
+    },
+    "loading": "در حال بارگذاری...",
+    "error": "خطا در دریافت اطلاعات",
+    "errorLoadingData": "خطا در دریافت اطلاعات داشبورد",
+    "transaction": "تراکنش"
   },
   "myCartable": {
     "pageTitle": "کارتابل من",

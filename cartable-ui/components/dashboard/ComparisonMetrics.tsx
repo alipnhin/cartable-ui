@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { TransactionProgressResponse } from "@/types/dashboard";
 import { formatNumber } from "@/lib/utils";
+import useTranslation from "@/hooks/useTranslation";
 
 interface ComparisonMetricsProps {
   data: TransactionProgressResponse;
@@ -14,40 +15,42 @@ export default function ComparisonMetrics({
   data,
   delay = 0,
 }: ComparisonMetricsProps) {
+  const { t } = useTranslation();
+
   const metrics = [
     {
-      title: "نرخ موفقیت",
+      title: t("dashboard.charts.comparisonMetrics.successRate"),
       value: `${data.successPercent.toFixed(1)}%`,
-      description: "از کل تراکنش‌ها",
+      description: t("dashboard.charts.comparisonMetrics.fromTotal"),
       trend: data.successPercent >= 70 ? "up" : data.successPercent >= 50 ? "neutral" : "down",
       color: data.successPercent >= 70 ? "text-success" : data.successPercent >= 50 ? "text-warning" : "text-destructive",
     },
     {
-      title: "میانگین مبلغ تراکنش",
+      title: t("dashboard.charts.comparisonMetrics.avgAmount"),
       value: formatNumber(
         data.totalTransactions > 0
           ? Math.round(data.totalAmount / data.totalTransactions)
           : 0
       ),
-      description: "ریال",
+      description: t("statistics.rial"),
       trend: "neutral",
       color: "text-primary",
     },
     {
-      title: "میانگین تراکنش موفق",
+      title: t("dashboard.charts.comparisonMetrics.avgSuccessAmount"),
       value: formatNumber(
         data.succeededTransactions > 0
           ? Math.round(data.succeededAmount / data.succeededTransactions)
           : 0
       ),
-      description: "ریال",
+      description: t("statistics.rial"),
       trend: "up",
       color: "text-success",
     },
     {
-      title: "دستورات بسته شده",
+      title: t("dashboard.charts.comparisonMetrics.closedOrders"),
       value: formatNumber(data.closedWithdrawalOrders),
-      description: "تعداد دستورات",
+      description: t("dashboard.charts.comparisonMetrics.ordersCount"),
       trend: "neutral",
       color: "text-muted-foreground",
     },
@@ -70,8 +73,8 @@ export default function ComparisonMetrics({
       style={{ animationDelay: `${delay}s` }}
     >
       <div className="border-b px-6 pt-5 pb-4">
-        <h3 className="font-bold text-lg mb-1">شاخص‌های کلیدی</h3>
-        <p className="text-muted-foreground text-sm">متریک‌های محاسبه شده</p>
+        <h3 className="font-bold text-lg mb-1">{t("dashboard.charts.comparisonMetrics.title")}</h3>
+        <p className="text-muted-foreground text-sm">{t("dashboard.charts.comparisonMetrics.subtitle")}</p>
       </div>
 
       <div className="p-6">
@@ -101,9 +104,9 @@ export default function ComparisonMetrics({
         <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-success/10 border">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-bold text-sm mb-1">وضعیت کلی سیستم</h4>
+              <h4 className="font-bold text-sm mb-1">{t("dashboard.charts.comparisonMetrics.systemStatus")}</h4>
               <p className="text-xs text-muted-foreground">
-                بر اساس نرخ موفقیت و تعداد تراکنش‌ها
+                {t("dashboard.charts.comparisonMetrics.systemStatusDesc")}
               </p>
             </div>
             <div className="text-right">
@@ -117,13 +120,13 @@ export default function ComparisonMetrics({
                 }`}
               >
                 {data.successPercent >= 70
-                  ? "عالی"
+                  ? t("dashboard.charts.comparisonMetrics.excellent")
                   : data.successPercent >= 50
-                  ? "متوسط"
-                  : "نیاز به بررسی"}
+                  ? t("dashboard.charts.comparisonMetrics.average")
+                  : t("dashboard.charts.comparisonMetrics.needsReview")}
               </div>
               <div className="text-xs text-muted-foreground mt-1">
-                {formatNumber(data.totalTransactions)} تراکنش
+                {formatNumber(data.totalTransactions)} {t("dashboard.transaction")}
               </div>
             </div>
           </div>

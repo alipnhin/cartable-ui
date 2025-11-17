@@ -12,6 +12,7 @@ import {
 import type { TransactionProgressResponse } from "@/types/dashboard";
 import { exportDashboardToExcel, exportDashboardToPDF } from "@/lib/export-utils";
 import { useToast } from "@/hooks/use-toast";
+import useTranslation from "@/hooks/useTranslation";
 
 interface ExportButtonsProps {
   data: TransactionProgressResponse;
@@ -24,6 +25,7 @@ interface ExportButtonsProps {
 
 export default function ExportButtons({ data, filters }: ExportButtonsProps) {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExportExcel = async () => {
@@ -31,15 +33,15 @@ export default function ExportButtons({ data, filters }: ExportButtonsProps) {
     try {
       const fileName = exportDashboardToExcel(data, filters);
       toast({
-        title: "موفق",
-        description: `فایل ${fileName} با موفقیت ایجاد شد`,
+        title: t("dashboard.export.success"),
+        description: t("dashboard.export.fileCreated", { fileName }),
         variant: "success",
       });
     } catch (error) {
       console.error("Error exporting to Excel:", error);
       toast({
-        title: "خطا",
-        description: "خطا در ایجاد فایل Excel",
+        title: t("dashboard.export.error"),
+        description: t("dashboard.export.excelError"),
         variant: "error",
       });
     } finally {
@@ -52,15 +54,15 @@ export default function ExportButtons({ data, filters }: ExportButtonsProps) {
     try {
       const fileName = exportDashboardToPDF(data, filters);
       toast({
-        title: "موفق",
-        description: `فایل ${fileName} با موفقیت ایجاد شد`,
+        title: t("dashboard.export.success"),
+        description: t("dashboard.export.fileCreated", { fileName }),
         variant: "success",
       });
     } catch (error) {
       console.error("Error exporting to PDF:", error);
       toast({
-        title: "خطا",
-        description: "خطا در ایجاد فایل PDF",
+        title: t("dashboard.export.error"),
+        description: t("dashboard.export.pdfError"),
         variant: "error",
       });
     } finally {
@@ -77,17 +79,17 @@ export default function ExportButtons({ data, filters }: ExportButtonsProps) {
           disabled={isExporting}
         >
           <Download className="w-4 h-4" />
-          {isExporting ? "در حال ایجاد..." : "دریافت گزارش"}
+          {isExporting ? t("dashboard.export.creating") : t("dashboard.export.downloadReport")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={handleExportExcel} className="gap-2 cursor-pointer">
           <FileSpreadsheet className="w-4 h-4 text-success" />
-          دریافت Excel
+          {t("dashboard.export.downloadExcel")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleExportPDF} className="gap-2 cursor-pointer">
           <FileText className="w-4 h-4 text-destructive" />
-          دریافت PDF
+          {t("dashboard.export.downloadPDF")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

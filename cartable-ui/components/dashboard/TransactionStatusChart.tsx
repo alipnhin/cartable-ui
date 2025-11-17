@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import type { TransactionStatusSummary } from "@/types/dashboard";
+import useTranslation from "@/hooks/useTranslation";
 
 interface TransactionStatusChartProps {
   data: TransactionStatusSummary[];
@@ -20,6 +21,8 @@ export default function TransactionStatusChart({
   data,
   delay = 0,
 }: TransactionStatusChartProps) {
+  const { t } = useTranslation();
+
   const chartData = data.map((item) => ({
     name: item.statusTitle,
     value: item.transactionCount,
@@ -32,8 +35,8 @@ export default function TransactionStatusChart({
       style={{ animationDelay: `${delay}s` }}
     >
       <div className="border-b px-6 pt-5 pb-4">
-        <h3 className="font-bold text-lg mb-1">وضعیت تراکنش‌ها</h3>
-        <p className="text-muted-foreground text-sm">براساس تعداد</p>
+        <h3 className="font-bold text-lg mb-1">{t("dashboard.charts.transactionStatus.title")}</h3>
+        <p className="text-muted-foreground text-sm">{t("dashboard.charts.transactionStatus.subtitle")}</p>
       </div>
 
       <div className="p-6">

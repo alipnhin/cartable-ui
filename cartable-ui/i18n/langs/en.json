@@ -291,7 +291,89 @@
   },
   "dashboard": {
     "pageTitle": "Dashboard",
-    "pageSubtitle": "Overview of Financial Activities"
+    "pageSubtitle": "Overview of Transactions and Payment Statistics",
+    "filters": {
+      "bankAccount": "Bank Account",
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "applyFilter": "Apply Filter",
+      "allAccounts": "All Accounts",
+      "selectDate": "Select Date"
+    },
+    "stats": {
+      "totalTransactions": "Total Transactions",
+      "succeededTransactions": "Succeeded Transactions",
+      "pendingTransactions": "Pending Queue",
+      "failedTransactions": "Failed Transactions"
+    },
+    "charts": {
+      "transactionStatus": {
+        "title": "Transaction Status",
+        "subtitle": "Based on Count"
+      },
+      "paymentTypes": {
+        "title": "Payment Types",
+        "subtitle": "Distribution by Type"
+      },
+      "successGauge": {
+        "title": "Successful Transactions",
+        "subtitle": "Processing Volume",
+        "successVolume": "Successful Processing Volume"
+      },
+      "performance": {
+        "title": "Performance Analysis",
+        "subtitle": "Count vs Percentage Comparison",
+        "transactionCount": "Transaction Count",
+        "percent": "Percent"
+      },
+      "amountVsCount": {
+        "title": "Amount vs Count Comparison",
+        "subtitle": "Simultaneous Analysis of Transaction Count and Amount",
+        "count": "Count",
+        "amountNormalized": "Amount (Normalized)",
+        "note": "Note: Amount is normalized for better visualization. Click on the chart to see actual amounts."
+      },
+      "comparisonMetrics": {
+        "title": "Key Metrics",
+        "subtitle": "Calculated Metrics",
+        "successRate": "Success Rate",
+        "fromTotal": "From Total Transactions",
+        "avgAmount": "Average Transaction Amount",
+        "avgSuccessAmount": "Average Successful Transaction",
+        "closedOrders": "Closed Orders",
+        "ordersCount": "Order Count",
+        "systemStatus": "Overall System Status",
+        "systemStatusDesc": "Based on Success Rate and Transaction Count",
+        "excellent": "Excellent",
+        "average": "Average",
+        "needsReview": "Needs Review"
+      },
+      "detailTable": {
+        "title": "Transaction Details",
+        "subtitle": "Detailed Information",
+        "status": "Status",
+        "count": "Count",
+        "percent": "Percent",
+        "amount": "Amount",
+        "progress": "Progress",
+        "statusCode": "Status Code"
+      }
+    },
+    "export": {
+      "downloadReport": "Download Report",
+      "downloadExcel": "Download Excel",
+      "downloadPDF": "Download PDF",
+      "creating": "Creating...",
+      "success": "Success",
+      "error": "Error",
+      "excelError": "Error creating Excel file",
+      "pdfError": "Error creating PDF file",
+      "fileCreated": "File {{fileName}} created successfully"
+    },
+    "loading": "Loading...",
+    "error": "Error fetching data",
+    "errorLoadingData": "Error loading dashboard data",
+    "transaction": "Transaction"
   },
   "myCartable": {
     "pageTitle": "My Cartable",

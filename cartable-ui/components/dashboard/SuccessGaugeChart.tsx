@@ -2,6 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import useTranslation from "@/hooks/useTranslation";
 
 interface SuccessGaugeChartProps {
   successPercent: number;
@@ -12,6 +13,8 @@ export default function SuccessGaugeChart({
   successPercent,
   delay = 0,
 }: SuccessGaugeChartProps) {
+  const { t } = useTranslation();
+
   const data = [
     { name: "Success", value: successPercent },
     { name: "Remaining", value: 100 - successPercent },
@@ -25,8 +28,8 @@ export default function SuccessGaugeChart({
       style={{ animationDelay: `${delay}s` }}
     >
       <div className="border-b px-6 pt-5 pb-4">
-        <h3 className="font-bold text-lg mb-1">تراکنش‌های موفق</h3>
-        <p className="text-muted-foreground text-sm">حجم پردازش</p>
+        <h3 className="font-bold text-lg mb-1">{t("dashboard.charts.successGauge.title")}</h3>
+        <p className="text-muted-foreground text-sm">{t("dashboard.charts.successGauge.subtitle")}</p>
       </div>
 
       <div className="p-6 flex items-center justify-center">
@@ -67,7 +70,7 @@ export default function SuccessGaugeChart({
           </div>
 
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-center">
-            <div className="text-sm text-muted-foreground">حجم پردازش موفق</div>
+            <div className="text-sm text-muted-foreground">{t("dashboard.charts.successGauge.successVolume")}</div>
           </div>
         </div>
       </div>

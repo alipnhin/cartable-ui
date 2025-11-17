@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { TransactionStatusSummary } from "@/types/dashboard";
+import useTranslation from "@/hooks/useTranslation";
 
 interface AmountVsCountChartProps {
   data: TransactionStatusSummary[];
@@ -22,14 +23,16 @@ export default function AmountVsCountChart({
   data,
   delay = 0,
 }: AmountVsCountChartProps) {
+  const { t } = useTranslation();
+
   // Normalize data for better visualization
   const maxCount = Math.max(...data.map((item) => item.transactionCount));
   const maxAmount = Math.max(...data.map((item) => item.totalAmount));
 
   const chartData = data.map((item) => ({
     name: item.statusTitle,
-    تعداد: item.transactionCount,
-    "مبلغ (نرمال شده)": Math.round((item.totalAmount / maxAmount) * maxCount),
+    [t("dashboard.charts.amountVsCount.count")]: item.transactionCount,
+    [t("dashboard.charts.amountVsCount.amountNormalized")]: Math.round((item.totalAmount / maxAmount) * maxCount),
     مبلغ_واقعی: item.totalAmount,
   }));
 
@@ -42,11 +45,11 @@ export default function AmountVsCountChart({
         >
           <p className="font-bold text-foreground mb-2">{payload[0].payload.name}</p>
           <p className="text-sm text-primary">
-            تعداد: {payload[0].value.toLocaleString("fa-IR")}
+            {t("dashboard.charts.amountVsCount.count")}: {payload[0].value.toLocaleString("fa-IR")}
           </p>
           <p className="text-sm text-success">
-            مبلغ:{" "}
-            {payload[0].payload.مبلغ_واقعی.toLocaleString("fa-IR")} ریال
+            {t("dashboard.charts.detailTable.amount")}:{" "}
+            {payload[0].payload.مبلغ_واقعی.toLocaleString("fa-IR")} {t("statistics.rial")}
           </p>
         </div>
       );
@@ -60,9 +63,9 @@ export default function AmountVsCountChart({
       style={{ animationDelay: `${delay}s` }}
     >
       <div className="border-b px-6 pt-5 pb-4">
-        <h3 className="font-bold text-lg mb-1">مقایسه تعداد و مبلغ</h3>
+        <h3 className="font-bold text-lg mb-1">{t("dashboard.charts.amountVsCount.title")}</h3>
         <p className="text-muted-foreground text-sm">
-          تحلیل همزمان تعداد و مبلغ تراکنش‌ها
+          {t("dashboard.charts.amountVsCount.subtitle")}
         </p>
       </div>
 
@@ -89,9 +92,9 @@ export default function AmountVsCountChart({
                 <span style={{ color: "hsl(var(--foreground))" }}>{value}</span>
               )}
             />
-            <Bar dataKey="تعداد" fill="#009ef7" radius={[5, 5, 0, 0]} />
+            <Bar dataKey={t("dashboard.charts.amountVsCount.count")} fill="#009ef7" radius={[5, 5, 0, 0]} />
             <Bar
-              dataKey="مبلغ (نرمال شده)"
+              dataKey={t("dashboard.charts.amountVsCount.amountNormalized")}
               fill="#50cd89"
               radius={[5, 5, 0, 0]}
             />
@@ -100,8 +103,7 @@ export default function AmountVsCountChart({
 
         <div className="mt-4 p-3 bg-muted/50 rounded-lg">
           <p className="text-xs text-muted-foreground">
-            💡 <strong>نکته:</strong> مبلغ برای نمایش بهتر نرمال‌سازی شده است. برای
-            مشاهده مبلغ واقعی، روی نمودار کلیک کنید.
+            {t("dashboard.charts.amountVsCount.note")}
           </p>
         </div>
       </div>

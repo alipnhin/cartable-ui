@@ -1,6 +1,5 @@
 "use client";
 
-import { forwardRef } from "react";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import type { Value } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
@@ -23,7 +22,7 @@ interface PersianDatePickerProps {
 
 /**
  * A reusable Persian/Gregorian date picker component
- * Fixes the Persian year display issue by using proper conversion
+ * Properly handles conversion between Gregorian and Persian calendars
  */
 export default function PersianDatePicker({
   value,
@@ -35,49 +34,40 @@ export default function PersianDatePicker({
   locale = "fa",
   isMobile = false,
 }: PersianDatePickerProps) {
-    const handleChange = (date: Value) => {
-      if (date && typeof date === "object" && "toDate" in date) {
-        // Convert to ISO date string (YYYY-MM-DD)
-        const jsDate = (date as DateObject).toDate();
-        const isoDate = jsDate.toISOString().split("T")[0];
-        onChange?.(isoDate);
-      } else if (!date) {
-        onChange?.("");
+  const handleChange = (date: Value) => {
+    if (date && typeof date === "object" && "toDate" in date) {
+      // Convert to ISO date string (YYYY-MM-DD)
+      const jsDate = (date as DateObject).toDate();
+      const isoDate = jsDate.toISOString().split("T")[0];
+      onChange?.(isoDate);
+    } else if (!date) {
+      onChange?.("");
+    }
+  };
+
+  // Convert value to DateObject if it's a string
+  let dateValue: Value = null;
+  if (value) {
+    if (typeof value === "string") {
+      // Parse ISO date string (YYYY-MM-DD) - create a Date object first
+      const dateStr = value.split("T")[0]; // Get date part only
+      const jsDate = new Date(dateStr + "T12:00:00"); // Add time to avoid timezone issues
+
+      // Create DateObject from JavaScript Date
+      dateValue = new DateObject(jsDate);
+
+      // If locale is Persian, convert to Persian calendar
+      if (locale === "fa") {
+        dateValue = dateValue.convert(persian, persian_fa);
       }
-    };
-
-    // Convert value to DateObject if it's a string
-    let dateValue: Value = null;
-    if (value) {
-      if (typeof value === "string") {
-        // Parse ISO date string (YYYY-MM-DD)
-        const parts = value.split("T")[0].split("-");
-        if (parts.length === 3) {
-          const year = parseInt(parts[0]);
-          const month = parseInt(parts[1]);
-          const day = parseInt(parts[2]);
-
-          // Create DateObject in Gregorian calendar first
-          dateValue = new DateObject({
-            year,
-            month,
-            day,
-            calendar: gregorian,
-            locale: gregorian_en,
-          });
-
-          // If locale is Persian, convert to Persian calendar
-          if (locale === "fa") {
-            dateValue = dateValue.convert(persian, persian_fa);
-          }
-        }
-      } else {
-        dateValue = new DateObject(value);
-        if (locale === "fa") {
-          dateValue = dateValue.convert(persian, persian_fa);
-        }
+    } else {
+      // value is already a Date object
+      dateValue = new DateObject(value);
+      if (locale === "fa") {
+        dateValue = dateValue.convert(persian, persian_fa);
       }
     }
+  }
 
   return (
     <DatePicker

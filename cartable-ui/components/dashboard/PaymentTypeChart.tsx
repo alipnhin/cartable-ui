@@ -12,6 +12,7 @@ import {
   Cell,
 } from "recharts";
 import type { PaymentTypeSummary } from "@/types/dashboard";
+import useTranslation from "@/hooks/useTranslation";
 
 interface PaymentTypeChartProps {
   data: PaymentTypeSummary[];
@@ -24,6 +25,8 @@ export default function PaymentTypeChart({
   data,
   delay = 0,
 }: PaymentTypeChartProps) {
+  const { t } = useTranslation();
+
   const chartData = data.map((item) => ({
     name: item.paymentTypeTitle,
     value: item.count,
@@ -35,8 +38,8 @@ export default function PaymentTypeChart({
       style={{ animationDelay: `${delay}s` }}
     >
       <div className="border-b px-6 pt-5 pb-4">
-        <h3 className="font-bold text-lg mb-1">انواع پرداخت</h3>
-        <p className="text-muted-foreground text-sm">توزیع بر اساس نوع</p>
+        <h3 className="font-bold text-lg mb-1">{t("dashboard.charts.paymentTypes.title")}</h3>
+        <p className="text-muted-foreground text-sm">{t("dashboard.charts.paymentTypes.subtitle")}</p>
       </div>
 
       <div className="p-6">

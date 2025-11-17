@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Timer, CheckCircle, XCircle, ArrowLeftRight } from "lucide-react";
 import type { TransactionStatusSummary } from "@/types/dashboard";
 import { formatNumber } from "@/lib/utils";
+import useTranslation from "@/hooks/useTranslation";
 
 interface TransactionDetailTableProps {
   data: TransactionStatusSummary[];
@@ -43,14 +44,16 @@ export default function TransactionDetailTable({
   data,
   delay = 0,
 }: TransactionDetailTableProps) {
+  const { t } = useTranslation();
+
   return (
     <Card
       className="animate-fade-in"
       style={{ animationDelay: `${delay}s` }}
     >
       <div className="border-b px-6 pt-5 pb-4">
-        <h3 className="font-bold text-lg mb-1">جزئیات تراکنش‌ها</h3>
-        <p className="text-muted-foreground text-sm">اطلاعات تفصیلی</p>
+        <h3 className="font-bold text-lg mb-1">{t("dashboard.charts.detailTable.title")}</h3>
+        <p className="text-muted-foreground text-sm">{t("dashboard.charts.detailTable.subtitle")}</p>
       </div>
 
       <div className="p-6">
@@ -59,13 +62,13 @@ export default function TransactionDetailTable({
             <thead>
               <tr className="text-muted-foreground bg-muted/50">
                 <th className="text-right px-4 py-3 rounded-r-lg min-w-[200px]">
-                  وضعیت
+                  {t("dashboard.charts.detailTable.status")}
                 </th>
-                <th className="text-right px-4 py-3 min-w-[100px]">تعداد</th>
-                <th className="text-right px-4 py-3 min-w-[100px]">درصد</th>
-                <th className="text-right px-4 py-3 min-w-[200px]">مبلغ</th>
+                <th className="text-right px-4 py-3 min-w-[100px]">{t("dashboard.charts.detailTable.count")}</th>
+                <th className="text-right px-4 py-3 min-w-[100px]">{t("dashboard.charts.detailTable.percent")}</th>
+                <th className="text-right px-4 py-3 min-w-[200px]">{t("dashboard.charts.detailTable.amount")}</th>
                 <th className="text-right px-4 py-3 rounded-l-lg min-w-[200px]">
-                  پیشرفت
+                  {t("dashboard.charts.detailTable.progress")}
                 </th>
               </tr>
             </thead>
@@ -91,7 +94,7 @@ export default function TransactionDetailTable({
                             {item.statusTitle}
                           </span>
                           <span className="text-muted-foreground text-xs">
-                            وضعیت کد: {item.status}
+                            {t("dashboard.charts.detailTable.statusCode")}: {item.status}
                           </span>
                         </div>
                       </div>
@@ -110,7 +113,7 @@ export default function TransactionDetailTable({
                     </td>
                     <td className="px-4 py-4">
                       <span className="text-foreground font-semibold text-sm">
-                        {formatNumber(item.totalAmount)} ریال
+                        {formatNumber(item.totalAmount)} {t("statistics.rial")}
                       </span>
                     </td>
                     <td className="px-4 py-4">

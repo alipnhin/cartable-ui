@@ -24,8 +24,10 @@ import DashboardFilters from "@/components/dashboard/DashboardFilters";
 import ExportButtons from "@/components/dashboard/ExportButtons";
 import AmountVsCountChart from "@/components/dashboard/AmountVsCountChart";
 import ComparisonMetrics from "@/components/dashboard/ComparisonMetrics";
+import useTranslation from "@/hooks/useTranslation";
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +60,7 @@ export default function DashboardPage() {
       setDashboardData(data);
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
-      setError("خطا در دریافت اطلاعات داشبورد");
+      setError(t("dashboard.errorLoadingData"));
     } finally {
       setLoading(false);
     }
@@ -76,13 +78,13 @@ export default function DashboardPage() {
     return (
       <AppLayout>
         <PageHeader
-          title="داشبورد"
-          description="نمای کلی تراکنش‌ها و آمار"
+          title={t("dashboard.pageTitle")}
+          description={t("dashboard.pageSubtitle")}
         />
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">در حال بارگذاری...</p>
+            <p className="text-muted-foreground">{t("dashboard.loading")}</p>
           </div>
         </div>
       </AppLayout>
@@ -93,14 +95,14 @@ export default function DashboardPage() {
     return (
       <AppLayout>
         <PageHeader
-          title="داشبورد"
-          description="نمای کلی تراکنش‌ها و آمار"
+          title={t("dashboard.pageTitle")}
+          description={t("dashboard.pageSubtitle")}
         />
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <XCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
             <p className="text-destructive font-semibold">
-              {error || "خطا در دریافت اطلاعات"}
+              {error || t("dashboard.error")}
             </p>
           </div>
         </div>
@@ -111,8 +113,8 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <PageHeader
-        title="داشبورد"
-        description="نمای کلی تراکنش‌ها و آمار پرداخت"
+        title={t("dashboard.pageTitle")}
+        description={t("dashboard.pageSubtitle")}
         actions={<ExportButtons data={dashboardData} filters={filters} />}
       />
 
@@ -122,7 +124,7 @@ export default function DashboardPage() {
       {/* Stats Cards Row */}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4 mb-5">
         <StatCard
-          title="کل تراکنش‌ها"
+          title={t("dashboard.stats.totalTransactions")}
           value={dashboardData.totalTransactions}
           amount={dashboardData.totalAmount}
           icon={ChartLine}
@@ -132,7 +134,7 @@ export default function DashboardPage() {
         />
 
         <StatCard
-          title="تراکنش‌های موفق"
+          title={t("dashboard.stats.succeededTransactions")}
           value={dashboardData.succeededTransactions}
           amount={dashboardData.succeededAmount}
           icon={CheckCircle}
@@ -146,7 +148,7 @@ export default function DashboardPage() {
         />
 
         <StatCard
-          title="در صف پردازش"
+          title={t("dashboard.stats.pendingTransactions")}
           value={dashboardData.pendingTransactions}
           amount={dashboardData.pendingAmount}
           icon={Timer}
@@ -160,7 +162,7 @@ export default function DashboardPage() {
         />
 
         <StatCard
-          title="تراکنش‌های ناموفق"
+          title={t("dashboard.stats.failedTransactions")}
           value={dashboardData.failedTransactions}
           amount={dashboardData.failedAmount}
           icon={XCircle}
