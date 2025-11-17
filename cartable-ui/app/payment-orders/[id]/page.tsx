@@ -170,11 +170,18 @@ export default function PaymentOrderDetailPage() {
 
       // ریلود کامل صفحه
       await reloadPage();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error inquiring order:", err);
+
+      // نمایش پیام خطای دقیق‌تر از API
+      const errorMessage = err?.response?.data?.message ||
+                          err?.response?.data?.error ||
+                          err?.message ||
+                          t("paymentOrders.inquiryOrderError");
+
       toast({
         title: t("common.error"),
-        description: t("paymentOrders.inquiryOrderError"),
+        description: errorMessage,
         variant: "error",
       });
     }

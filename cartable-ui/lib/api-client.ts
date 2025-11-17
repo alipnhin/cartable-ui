@@ -24,9 +24,20 @@ apiClient.interceptors.request.use(
 
     // اضافه کردن timestamp به URL برای جلوگیری از cache
     // فقط برای GET requests
+    // استثنا: endpoint های inquiry که با POST کار می‌کنند یا query parameter قبول نمی‌کنند
     if (config.method === 'get' && config.url) {
-      const separator = config.url.includes('?') ? '&' : '?';
-      config.url = `${config.url}${separator}_t=${Date.now()}`;
+      // لیست endpoint هایی که نباید timestamp اضافه شود
+      const excludedPatterns = [
+        '/Withdrawal/InquiryById/',
+        '/Withdrawal/TransactionInquiryById/',
+      ];
+
+      const shouldExclude = excludedPatterns.some(pattern => config.url?.includes(pattern));
+
+      if (!shouldExclude) {
+        const separator = config.url.includes('?') ? '&' : '?';
+        config.url = `${config.url}${separator}_t=${Date.now()}`;
+      }
     }
 
     return config;
