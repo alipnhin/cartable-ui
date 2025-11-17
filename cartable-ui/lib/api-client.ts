@@ -1,7 +1,8 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 
 // Base URL برای API
-const API_BASE_URL = "https://si-lab-tadbirpay.etadbir.com/api";
+// const API_BASE_URL = "https://si-lab-tadbirpay.etadbir.com/api";
+const API_BASE_URL = "https://localhost:8000/api";
 
 // ایجاد instance از axios
 const apiClient: AxiosInstance = axios.create({
@@ -25,17 +26,16 @@ apiClient.interceptors.request.use(
     // اضافه کردن timestamp به URL برای جلوگیری از cache
     // فقط برای GET requests
     // استثنا: endpoint های inquiry که با POST کار می‌کنند یا query parameter قبول نمی‌کنند
-    if (config.method === 'get' && config.url) {
+    if (config.method === "get" && config.url) {
       // لیست endpoint هایی که نباید timestamp اضافه شود
-      const excludedPatterns = [
-        '/Withdrawal/InquiryById/',
-        '/Withdrawal/TransactionInquiryById/',
-      ];
+      const excludedPatterns = ["/exclude urls/"];
 
-      const shouldExclude = excludedPatterns.some(pattern => config.url?.includes(pattern));
+      const shouldExclude = excludedPatterns.some((pattern) =>
+        config.url?.includes(pattern)
+      );
 
       if (!shouldExclude) {
-        const separator = config.url.includes('?') ? '&' : '?';
+        const separator = config.url.includes("?") ? "&" : "?";
         config.url = `${config.url}${separator}_t=${Date.now()}`;
       }
     }
