@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { AppLayout, PageHeader } from "@/components/layout";
 import { DataTable } from "./components/data-table";
 import { createColumns } from "./components/columns";
@@ -10,121 +11,185 @@ import { Button } from "@/components/ui/button";
 import { Download, FileBadge, Filter, Timer } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { mockOrders } from "@/mocks/mockOrders";
 import { useToast } from "@/hooks/use-toast";
-import { OrderStatus } from "@/types/order";
+import { OrderStatus, PaymentOrder } from "@/types/order";
+import { PaymentStatusEnum } from "@/types/api";
 import { useRouter } from "next/navigation";
 import { MobilePagination } from "@/components/common/mobile-pagination";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import StatisticCard, { StatisticCardProps } from "./components/statistic-card";
+import { searchPaymentOrders } from "@/services/paymentOrdersService";
+import { mapPaymentListDtosToPaymentOrders } from "@/lib/api-mappers";
 
 export default function PaymentOrdersPage() {
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const router = useRouter();
+  const { data: session } = useSession();
   const [showFilters, setShowFilters] = useState(false);
 
-  // State for filters
-  const [filters, setFilters] = useState({
-    status: [] as OrderStatus[],
-    search: "",
-    orderTitle: "",
-    orderNumber: "",
-    trackingId: "",
-    dateFrom: "",
-    dateTo: "",
-    accountId: "",
-  });
+  /**
+   * State مدیریت داده‌های صفحه
+   */
+  const [orders, setOrders] = useState<PaymentOrder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  // Apply filters
-  const filteredOrders = useMemo(() => {
-    let result = [...mockOrders];
+  /**
+   * State برای sorting سمت سرور
+   */
+  const [sorting, setSorting] = useState<{ id: string; desc: boolean }[]>([]);
 
-    // Filter by status
-    if (filters.status.length > 0) {
-      result = result.filter((order) => filters.status.includes(order.status));
-    }
+  /**
+   * State برای فیلترها
+   * این فیلترها به API ارسال می‌شوند
+   */
+  const [trackingId, setTrackingId] = useState("");
+  const [orderNumber, setOrderNumber] = useState("");
+  const [orderTitle, setOrderTitle] = useState("");
+  const [accountId, setAccountId] = useState("");
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | "">("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
-    // Filter by order title
-    if (filters.orderTitle) {
-      const titleLower = filters.orderTitle.toLowerCase();
-      result = result.filter((order) =>
-        order.accountTitle?.toLowerCase().includes(titleLower)
-      );
-    }
+  // فیلترهای legacy برای FilterSheet
+  const filters = useMemo(
+    () => ({
+      status: statusFilter,
+      search: "",
+      orderTitle,
+      orderNumber,
+      trackingId,
+      dateFrom,
+      dateTo,
+      accountId,
+    }),
+    [statusFilter, orderTitle, orderNumber, trackingId, dateFrom, dateTo, accountId]
+  );
 
-    // Filter by order number
-    if (filters.orderNumber) {
-      const numberLower = filters.orderNumber.toLowerCase();
-      result = result.filter((order) =>
-        order.orderNumber?.toLowerCase().includes(numberLower)
-      );
-    }
+  /**
+   * واکشی داده‌ها از API
+   * این تابع هر بار که فیلترها، صفحه یا sorting تغییر کند، اجرا می‌شود
+   */
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!session?.accessToken) return;
 
-    // Filter by tracking ID
-    if (filters.trackingId) {
-      const trackingLower = filters.trackingId.toLowerCase();
-      result = result.filter((order) =>
-        order.orderNumber?.toLowerCase().includes(trackingLower)
-      );
-    }
+      setIsLoading(true);
+      try {
+        // ساخت پارامترهای فیلتر برای API
+        const apiFilters: any = {
+          pageNumber,
+          pageSize,
+        };
 
-    // Filter by general search
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      result = result.filter(
-        (order) =>
-          order.orderNumber?.toLowerCase().includes(searchLower) ||
-          order.accountTitle?.toLowerCase().includes(searchLower)
-      );
-    }
+        // اضافه کردن sorting
+        if (sorting.length > 0) {
+          const sortField = sorting[0];
+          // تبدیل نام فیلد از frontend به backend format
+          const fieldMap: Record<string, string> = {
+            orderNumber: "orderId",
+            accountTitle: "name",
+            totalAmount: "totalAmount",
+            numberOfTransactions: "numberOfTransactions",
+            status: "status",
+            createdDateTime: "createdDateTime",
+          };
+          const backendField = fieldMap[sortField.id] || sortField.id;
+          apiFilters.orderBy = sortField.desc
+            ? `${backendField} desc`
+            : backendField;
+        } else {
+          apiFilters.orderBy = "createdDateTime desc";
+        }
 
-    // Filter by account
-    if (filters.accountId && filters.accountId !== "all") {
-      result = result.filter((order) => order.accountId === filters.accountId);
-    }
+        // اضافه کردن فیلترهای اختیاری
+        if (trackingId) apiFilters.trackingId = trackingId;
+        if (orderNumber) apiFilters.orderId = orderNumber;
+        if (orderTitle) apiFilters.name = orderTitle;
+        if (accountId && accountId !== "all")
+          apiFilters.bankGatewayId = accountId;
+        if (statusFilter) {
+          // تبدیل OrderStatus به PaymentStatusEnum
+          apiFilters.status = statusFilter as unknown as PaymentStatusEnum;
+        }
+        if (dateFrom) {
+          const fromDate = new Date(dateFrom);
+          apiFilters.fromDate = fromDate.toISOString();
+        }
+        if (dateTo) {
+          const toDate = new Date(dateTo);
+          toDate.setHours(23, 59, 59, 999);
+          apiFilters.toDate = toDate.toISOString();
+        }
 
-    // Filter by date range
-    if (filters.dateFrom) {
-      const fromDate = new Date(filters.dateFrom);
-      result = result.filter(
-        (order) =>
-          order.createdDateTime && new Date(order.createdDateTime) >= fromDate
-      );
-    }
-    if (filters.dateTo) {
-      const toDate = new Date(filters.dateTo);
-      toDate.setHours(23, 59, 59, 999);
-      result = result.filter(
-        (order) =>
-          order.createdDateTime && new Date(order.createdDateTime) <= toDate
-      );
-    }
+        const response = await searchPaymentOrders(
+          apiFilters,
+          session.accessToken
+        );
 
-    return result;
-  }, [filters]);
+        // تبدیل داده‌های API به فرمت داخلی
+        const mappedOrders = mapPaymentListDtosToPaymentOrders(response.items);
+        setOrders(mappedOrders);
+        setTotalItems(response.totalItemCount);
+        setTotalPages(response.totalPageCount);
+      } catch (error) {
+        console.error("Error fetching payment orders:", error);
+        toast({
+          title: t("toast.error"),
+          description: "خطا در دریافت اطلاعات دستورات پرداخت",
+          variant: "error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Stats
+    fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    session?.accessToken,
+    pageNumber,
+    pageSize,
+    trackingId,
+    orderNumber,
+    orderTitle,
+    accountId,
+    statusFilter, // statusFilter حالا string است نه array
+    dateFrom,
+    dateTo,
+    // sorting نباید مستقیماً در dependency باشد چون array است
+    JSON.stringify(sorting),
+    // toast و t را حذف کردیم چون باعث re-render می‌شوند
+  ]);
+
+  /**
+   * محاسبه آمار
+   * آمار بر اساس داده‌های دریافتی از API محاسبه می‌شود
+   */
   const stats = useMemo(() => {
-    const total = filteredOrders.length;
-    const pending = filteredOrders.filter(
+    const total = totalItems; // استفاده از totalItems از API
+    const pending = orders.filter(
       (o) =>
         o.status === OrderStatus.SubmittedToBank ||
         o.status === OrderStatus.WaitingForOwnersApproval
     ).length;
-    const succeeded = filteredOrders.filter(
+    const succeeded = orders.filter(
       (o) =>
         o.status === OrderStatus.PartiallySucceeded ||
         o.status === OrderStatus.Succeeded
     ).length;
-    const totalAmount = filteredOrders.reduce(
+    const totalAmount = orders.reduce(
       (sum, order) => sum + order.totalAmount,
       0
     );
 
     return { total, pending, succeeded, totalAmount };
-  }, [filteredOrders]);
+  }, [orders, totalItems]);
 
   // Handlers
   const handleExport = () => {
@@ -142,45 +207,49 @@ export default function PaymentOrdersPage() {
     }, 2000);
   };
 
+  /**
+   * تغییر فیلترها
+   * بعد از تغییر فیلتر، صفحه به اول برگردانده می‌شود
+   */
   const handleFilterChange = (newFilters: typeof filters) => {
-    setFilters(newFilters);
+    setStatusFilter(newFilters.status);
+    setOrderTitle(newFilters.orderTitle);
+    setOrderNumber(newFilters.orderNumber);
+    setTrackingId(newFilters.trackingId);
+    setDateFrom(newFilters.dateFrom);
+    setDateTo(newFilters.dateTo);
+    setAccountId(newFilters.accountId);
+    setPageNumber(1); // بازگشت به صفحه اول
   };
 
+  /**
+   * ریست کردن فیلترها
+   */
   const handleResetFilters = () => {
-    setFilters({
-      status: [],
-      search: "",
-      orderTitle: "",
-      orderNumber: "",
-      trackingId: "",
-      dateFrom: "",
-      dateTo: "",
-      accountId: "",
-    });
+    setStatusFilter("");
+    setOrderTitle("");
+    setOrderNumber("");
+    setTrackingId("");
+    setDateFrom("");
+    setDateTo("");
+    setAccountId("");
+    setPageNumber(1); // بازگشت به صفحه اول
   };
 
+  /**
+   * مشاهده جزئیات دستور پرداخت
+   */
   const handleViewOrder = (orderId: string) => {
-    // Navigate to order detail page (will be implemented later)
-    toast({
-      title: t("toast.info"),
-      description: `مشاهده جزئیات دستور ${orderId}`,
-    });
+    router.push(`/payment-orders/${orderId}`);
   };
 
-  // Mobile pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-
-  const visibleOrders = isMobile
-    ? filteredOrders.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-      )
-    : filteredOrders;
-
+  /**
+   * تغییر صفحه
+   * در موبایل از client-side pagination استفاده نمی‌شود
+   * و مستقیماً از API صفحه جدید دریافت می‌شود
+   */
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    setPageNumber(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -218,7 +287,7 @@ export default function PaymentOrdersPage() {
   ];
 
   const activeFiltersCount =
-    filters.status.length +
+    (filters.status ? 1 : 0) +
     (filters.orderTitle ? 1 : 0) +
     (filters.orderNumber ? 1 : 0) +
     (filters.trackingId ? 1 : 0) +
@@ -266,20 +335,29 @@ export default function PaymentOrdersPage() {
 
       {/* Data Display */}
       {!isMobile ? (
-        <DataTable columns={columns} data={filteredOrders} isLoading={false} />
+        <DataTable
+          columns={columns}
+          data={orders}
+          isLoading={isLoading}
+          pageNumber={pageNumber}
+          totalPages={totalPages}
+          onPageChange={setPageNumber}
+          sorting={sorting}
+          onSortingChange={setSorting}
+        />
       ) : (
         <div className="space-y-3">
-          {visibleOrders.map((order) => (
+          {orders.map((order) => (
             <OrderCard key={order.id} order={order} onView={handleViewOrder} />
           ))}
-          {filteredOrders.length === 0 && (
+          {orders.length === 0 && !isLoading && (
             <div className="text-center py-12 text-muted-foreground">
               {t("orders.noOrders")}
             </div>
           )}
           {totalPages > 1 && (
             <MobilePagination
-              currentPage={currentPage}
+              currentPage={pageNumber}
               totalPages={totalPages}
               onPageChange={handlePageChange}
             />
@@ -294,6 +372,7 @@ export default function PaymentOrdersPage() {
         filters={filters}
         onFiltersChange={handleFilterChange}
         onReset={handleResetFilters}
+        isLoading={isLoading}
       />
     </AppLayout>
   );

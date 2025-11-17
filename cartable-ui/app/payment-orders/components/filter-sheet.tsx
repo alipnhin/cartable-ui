@@ -36,12 +36,19 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { OrderStatus } from "@/types/order";
 import { mockAccounts } from "@/mocks/mockAccounts";
 import { cn } from "@/lib/utils";
+import DatePicker from "react-multi-date-picker";
+import type { Value } from "react-multi-date-picker";
+import persian from "react-date-object/calendars/persian";
+import persian_fa from "react-date-object/locales/persian_fa";
+import gregorian from "react-date-object/calendars/gregorian";
+import gregorian_en from "react-date-object/locales/gregorian_en";
+import "react-multi-date-picker/styles/colors/purple.css";
 
 interface FilterSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   filters: {
-    status: OrderStatus[];
+    status: OrderStatus | ""; // تک انتخابی
     search: string;
     orderTitle: string;
     orderNumber: string;
@@ -52,6 +59,7 @@ interface FilterSheetProps {
   };
   onFiltersChange: (filters: FilterSheetProps["filters"]) => void;
   onReset: () => void;
+  isLoading?: boolean; // برای نمایش loading هنگام اعمال فیلتر
 }
 
 export function FilterSheet({
@@ -60,16 +68,21 @@ export function FilterSheet({
   filters,
   onFiltersChange,
   onReset,
+  isLoading = false,
 }: FilterSheetProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
   const [localFilters, setLocalFilters] = useState(filters);
   const [accountOpen, setAccountOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
 
+  // فقط وقتی FilterSheet باز می‌شود، filters را به localFilters کپی می‌کنیم
+  // این مشکل از دست رفتن focus در textbox را حل می‌کند
   useEffect(() => {
-    setLocalFilters(filters);
-  }, [filters]);
+    if (open) {
+      setLocalFilters(filters);
+    }
+  }, [open, filters]);
 
   const statusOptions = [
     {
@@ -114,11 +127,10 @@ export function FilterSheet({
     },
   ];
 
-  const handleStatusToggle = (status: OrderStatus) => {
-    const newStatuses = localFilters.status.includes(status)
-      ? localFilters.status.filter((s) => s !== status)
-      : [...localFilters.status, status];
-    setLocalFilters({ ...localFilters, status: newStatuses });
+  // تغییر وضعیت - تک انتخابی
+  const handleStatusSelect = (status: OrderStatus | "") => {
+    setLocalFilters({ ...localFilters, status });
+    setStatusOpen(false); // بستن popover بعد از انتخاب
   };
 
   const handleApply = () => {
@@ -132,7 +144,7 @@ export function FilterSheet({
   };
 
   const activeFiltersCount =
-    localFilters.status.length +
+    (localFilters.status ? 1 : 0) +
     (localFilters.orderTitle ? 1 : 0) +
     (localFilters.orderNumber ? 1 : 0) +
     (localFilters.trackingId ? 1 : 0) +
@@ -336,7 +348,7 @@ export function FilterSheet({
         </Drawer>
       )}
 
-      {/* Status Multi-select Combobox */}
+      {/* Status Single-select Combobox - تک انتخابی */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">{t("filters.status")}</Label>
         {isMobile ? (
@@ -345,8 +357,9 @@ export function FilterSheet({
             className="w-full flex items-center justify-between h-12 px-4 rounded-lg border border-input bg-background text-start text-base"
           >
             <span className="truncate">
-              {localFilters.status.length > 0
-                ? `${localFilters.status.length} مورد انتخاب شده`
+              {localFilters.status
+                ? statusOptions.find((opt) => opt.value === localFilters.status)
+                    ?.label
                 : t("filters.allStatuses")}
             </span>
             <ChevronsUpDown className="ms-2 h-5 w-5 shrink-0 opacity-50" />
@@ -358,12 +371,13 @@ export function FilterSheet({
                 variant="outline"
                 role="combobox"
                 aria-expanded={statusOpen}
-                size="lg"
-                className="w-full justify-between"
+                className="w-full justify-between h-10"
               >
                 <span className="truncate">
-                  {localFilters.status.length > 0
-                    ? `${localFilters.status.length} مورد انتخاب شده`
+                  {localFilters.status
+                    ? statusOptions.find(
+                        (opt) => opt.value === localFilters.status
+                      )?.label
                     : t("filters.allStatuses")}
                 </span>
                 <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
@@ -375,26 +389,32 @@ export function FilterSheet({
                 <CommandList>
                   <CommandEmpty>موردی یافت نشد</CommandEmpty>
                   <CommandGroup>
+                    <CommandItem
+                      value="all"
+                      onSelect={() => handleStatusSelect("")}
+                    >
+                      <Check
+                        className={cn(
+                          "me-2 h-4 w-4",
+                          !localFilters.status ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {t("filters.allStatuses")}
+                    </CommandItem>
                     {statusOptions.map((option) => {
-                      const isSelected = localFilters.status.includes(
-                        option.value
-                      );
+                      const isSelected = localFilters.status === option.value;
                       return (
                         <CommandItem
                           key={option.value}
                           value={option.value}
-                          onSelect={() => handleStatusToggle(option.value)}
+                          onSelect={() => handleStatusSelect(option.value)}
                         >
-                          <div
+                          <Check
                             className={cn(
-                              "me-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                              isSelected
-                                ? "bg-primary text-primary-foreground"
-                                : "opacity-50 [&_svg]:invisible"
+                              "me-2 h-4 w-4",
+                              isSelected ? "opacity-100" : "opacity-0"
                             )}
-                          >
-                            <Check className="h-3 w-3" />
-                          </div>
+                          />
                           {option.label}
                         </CommandItem>
                       );
@@ -405,30 +425,9 @@ export function FilterSheet({
             </PopoverContent>
           </Popover>
         )}
-        {/* Selected Status Badges */}
-        {localFilters.status.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {localFilters.status.map((status) => {
-              const option = statusOptions.find((opt) => opt.value === status);
-              return (
-                <Badge
-                  key={status}
-                  variant="secondary"
-                  className="text-xs px-2 py-1"
-                >
-                  {option?.label}
-                  <X
-                    className="ms-1 h-3 w-3 cursor-pointer"
-                    onClick={() => handleStatusToggle(status)}
-                  />
-                </Badge>
-              );
-            })}
-          </div>
-        )}
       </div>
 
-      {/* Mobile Drawer for Status Selection */}
+      {/* Mobile Drawer for Status Selection - تک انتخابی */}
       {isMobile && (
         <Drawer open={statusOpen} onOpenChange={setStatusOpen}>
           <DrawerContent className="max-h-[70vh]">
@@ -436,12 +435,24 @@ export function FilterSheet({
               <DrawerTitle>{t("filters.status")}</DrawerTitle>
             </DrawerHeader>
             <div className="overflow-y-auto p-4 space-y-2">
+              <button
+                onClick={() => handleStatusSelect("")}
+                className={cn(
+                  "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
+                  !localFilters.status
+                    ? "bg-primary/10 text-primary"
+                    : "hover:bg-muted"
+                )}
+              >
+                {!localFilters.status && <Check className="h-5 w-5" />}
+                <span className="flex-1">{t("filters.allStatuses")}</span>
+              </button>
               {statusOptions.map((option) => {
-                const isSelected = localFilters.status.includes(option.value);
+                const isSelected = localFilters.status === option.value;
                 return (
                   <button
                     key={option.value}
-                    onClick={() => handleStatusToggle(option.value)}
+                    onClick={() => handleStatusSelect(option.value)}
                     className={cn(
                       "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
                       isSelected
@@ -449,16 +460,7 @@ export function FilterSheet({
                         : "hover:bg-muted"
                     )}
                   >
-                    <div
-                      className={cn(
-                        "flex h-5 w-5 items-center justify-center rounded border",
-                        isSelected
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "border-input"
-                      )}
-                    >
-                      {isSelected && <Check className="h-4 w-4" />}
-                    </div>
+                    {isSelected && <Check className="h-5 w-5" />}
                     <span className="flex-1">{option.label}</span>
                   </button>
                 );
@@ -468,28 +470,56 @@ export function FilterSheet({
         </Drawer>
       )}
 
-      {/* Date Range */}
+      {/* Date Range - تاریخ شمسی و میلادی */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label className="text-sm font-medium">از تاریخ</Label>
-          <Input
-            type="date"
+          <DatePicker
             value={localFilters.dateFrom}
-            onChange={(e) =>
-              setLocalFilters({ ...localFilters, dateFrom: e.target.value })
-            }
-            className={cn("h-10", isMobile && "h-12 text-base")}
+            onChange={(date: Value) => {
+              if (date && typeof date === "object" && "toDate" in date) {
+                const isoDate = date.toDate().toISOString().split("T")[0];
+                setLocalFilters({ ...localFilters, dateFrom: isoDate });
+              } else if (!date) {
+                setLocalFilters({ ...localFilters, dateFrom: "" });
+              }
+            }}
+            calendar={locale === "fa" ? persian : gregorian}
+            locale={locale === "fa" ? persian_fa : gregorian_en}
+            format={locale === "fa" ? "YYYY/MM/DD" : "YYYY-MM-DD"}
+            className={cn("purple", isMobile && "rmdp-mobile")}
+            calendarPosition={locale === "fa" ? "bottom-right" : "bottom-left"}
+            inputClass={cn(
+              "w-full px-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              isMobile ? "h-12 text-base" : "h-10"
+            )}
+            containerClassName="w-full"
+            placeholder={locale === "fa" ? "انتخاب تاریخ" : "Select date"}
           />
         </div>
         <div className="space-y-2">
           <Label className="text-sm font-medium">تا تاریخ</Label>
-          <Input
-            type="date"
+          <DatePicker
             value={localFilters.dateTo}
-            onChange={(e) =>
-              setLocalFilters({ ...localFilters, dateTo: e.target.value })
-            }
-            className={cn("h-10", isMobile && "h-12 text-base")}
+            onChange={(date: Value) => {
+              if (date && typeof date === "object" && "toDate" in date) {
+                const isoDate = date.toDate().toISOString().split("T")[0];
+                setLocalFilters({ ...localFilters, dateTo: isoDate });
+              } else if (!date) {
+                setLocalFilters({ ...localFilters, dateTo: "" });
+              }
+            }}
+            calendar={locale === "fa" ? persian : gregorian}
+            locale={locale === "fa" ? persian_fa : gregorian_en}
+            format={locale === "fa" ? "YYYY/MM/DD" : "YYYY-MM-DD"}
+            className={cn("purple", isMobile && "rmdp-mobile")}
+            calendarPosition={locale === "fa" ? "bottom-right" : "bottom-left"}
+            inputClass={cn(
+              "w-full px-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              isMobile ? "h-12 text-base" : "h-10"
+            )}
+            containerClassName="w-full"
+            placeholder={locale === "fa" ? "انتخاب تاریخ" : "Select date"}
           />
         </div>
       </div>
@@ -498,17 +528,21 @@ export function FilterSheet({
       <div className="flex gap-3 pt-4 border-t">
         <Button
           variant="outline"
+          size={isMobile ? "lg" : "md"}
           className={cn("flex-1", isMobile && "text-base")}
           onClick={handleReset}
+          disabled={isLoading}
         >
           {t("filters.reset")}
         </Button>
         <Button
-          className={cn("flex-1", isMobile && " text-base")}
+          size={isMobile ? "lg" : "md"}
+          className={cn("flex-1", isMobile && "text-base")}
           onClick={handleApply}
+          disabled={isLoading}
         >
-          اعمال فیلتر
-          {activeFiltersCount > 0 && (
+          {isLoading ? "در حال اعمال..." : "اعمال فیلتر"}
+          {activeFiltersCount > 0 && !isLoading && (
             <Badge variant="secondary" className="ms-2 bg-white/20 text-white">
               {activeFiltersCount}
             </Badge>

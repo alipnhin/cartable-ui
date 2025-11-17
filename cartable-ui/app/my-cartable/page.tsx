@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { AppLayout, PageHeader } from "@/components/layout";
 import { OrderCard, OrderCardSkeleton } from "./components/order-card";
@@ -24,6 +24,7 @@ import {
 import { mapPaymentListDtosToPaymentOrders } from "@/lib/api-mappers";
 import { PaymentOrder } from "@/types/order";
 import { OperationTypeEnum } from "@/types/api";
+import { getErrorMessage } from "@/lib/error-handler";
 
 export default function MyCartablePage() {
   const { t, locale } = useTranslation();
@@ -35,14 +36,33 @@ export default function MyCartablePage() {
   const [selectedRowIds, setSelectedRowIds] = useState<Record<string, boolean>>(
     {}
   );
+  /**
+   * State برای مدیریت دیالوگ OTP
+   * - isBatchOperation: مشخص می‌کند که آیا عملیات از نوع گروهی است یا تکی
+   *   این فلگ بر اساس نوع عملیات (کلیک روی دکمه تکی یا گروهی) تعیین می‌شود،
+   *   نه بر اساس تعداد آیتم‌های انتخاب شده
+   */
   const [otpDialog, setOtpDialog] = useState<{
     open: boolean;
     type: "approve" | "reject";
     orderIds: string[];
     isRequestingOtp: boolean;
-  }>({ open: false, type: "approve", orderIds: [], isRequestingOtp: false });
+    isBatchOperation: boolean;
+  }>({
+    open: false,
+    type: "approve",
+    orderIds: [],
+    isRequestingOtp: false,
+    isBatchOperation: false,
+  });
 
-  // State برای API
+  /**
+   * State مدیریت داده‌های صفحه
+   * - orders: لیست دستورهای پرداخت
+   * - isLoading: وضعیت بارگذاری داده‌ها
+   * - pageNumber, pageSize: اطلاعات صفحه‌بندی
+   * - totalItems, totalPages: تعداد کل آیتم‌ها و صفحات
+   */
   const [orders, setOrders] = useState<PaymentOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [pageNumber, setPageNumber] = useState(1);
@@ -50,7 +70,10 @@ export default function MyCartablePage() {
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  // واکشی داده‌ها از API
+  /**
+   * واکشی اولیه داده‌ها از API
+   * این effect هر بار که شماره صفحه یا توکن تغییر کند، اجرا می‌شود
+   */
   useEffect(() => {
     const fetchOrders = async () => {
       if (!session?.accessToken) return;
@@ -86,109 +109,176 @@ export default function MyCartablePage() {
     fetchOrders();
   }, [session?.accessToken, pageNumber, pageSize]);
 
-  // Handlers
-  const handleSingleApprove = async (orderId: string) => {
+  /**
+   * بارگذاری مجدد داده‌ها
+   * این تابع برای رفرش کردن لیست بعد از عملیات موفق (تأیید/رد) استفاده می‌شود
+   * برای جلوگیری از تکرار کد، واکشی داده‌ها در یک تابع جداگانه قرار گرفته است
+   */
+  const reloadData = useCallback(async () => {
     if (!session?.accessToken) return;
 
-    // باز کردن دیالوگ با حالت loading
-    setOtpDialog({
-      open: true,
-      type: "approve",
-      orderIds: [orderId],
-      isRequestingOtp: true,
-    });
-
+    setIsLoading(true);
     try {
-      // مرحله 1: درخواست ارسال کد OTP
-      await sendOperationOtp(
+      const response = await getApproverCartable(
         {
-          objectId: orderId,
-          operation: OperationTypeEnum.ApproveCartablePayment,
+          pageNumber,
+          pageSize,
+          orderBy: "createdDateTime",
         },
         session.accessToken
       );
 
-      // موفقیت - نمایش فرم OTP
+      const mappedOrders = mapPaymentListDtosToPaymentOrders(response.items);
+      setOrders(mappedOrders);
+      setTotalItems(response.totalItemCount);
+      setTotalPages(response.totalPageCount);
+    } catch (error) {
+      console.error("Error fetching cartable:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [session?.accessToken, pageNumber, pageSize]);
+
+  /**
+   * مدیریت عملیات تأیید تکی
+   * این تابع برای تأیید یک دستور پرداخت واحد استفاده می‌شود
+   * مراحل:
+   * 1. نمایش دیالوگ با حالت loading
+   * 2. درخواست ارسال کد OTP به سرور
+   * 3. در صورت موفقیت، نمایش فرم ورود کد
+   */
+  const handleSingleApprove = useCallback(
+    async (orderId: string) => {
+      if (!session?.accessToken) return;
+
+      // باز کردن دیالوگ با حالت loading
       setOtpDialog({
         open: true,
         type: "approve",
         orderIds: [orderId],
-        isRequestingOtp: false,
+        isRequestingOtp: true,
+        isBatchOperation: false, // عملیات تکی
       });
 
-      toast({
-        title: t("toast.success"),
-        description: t("otp.codeSent"),
-        variant: "success",
-      });
-    } catch (error) {
-      console.error("Error sending OTP:", error);
-      // بستن دیالوگ و نمایش خطا
-      setOtpDialog({
-        open: false,
-        type: "approve",
-        orderIds: [],
-        isRequestingOtp: false,
-      });
-      toast({
-        title: t("toast.error"),
-        description: "خطا در ارسال کد تایید",
-        variant: "error",
-      });
-    }
-  };
+      try {
+        // مرحله 1: درخواست ارسال کد OTP
+        await sendOperationOtp(
+          {
+            objectId: orderId,
+            operation: OperationTypeEnum.ApproveCartablePayment,
+          },
+          session.accessToken
+        );
 
-  const handleSingleReject = async (orderId: string) => {
-    if (!session?.accessToken) return;
+        // موفقیت - نمایش فرم OTP
+        setOtpDialog({
+          open: true,
+          type: "approve",
+          orderIds: [orderId],
+          isRequestingOtp: false,
+          isBatchOperation: false,
+        });
 
-    // باز کردن دیالوگ با حالت loading
-    setOtpDialog({
-      open: true,
-      type: "reject",
-      orderIds: [orderId],
-      isRequestingOtp: true,
-    });
+        toast({
+          title: t("toast.success"),
+          description: t("otp.codeSent"),
+          variant: "success",
+        });
+      } catch (error) {
+        console.error("Error sending OTP:", error);
+        // بستن دیالوگ و نمایش خطا
+        setOtpDialog({
+          open: false,
+          type: "approve",
+          orderIds: [],
+          isRequestingOtp: false,
+          isBatchOperation: false,
+        });
+        toast({
+          title: t("toast.error"),
+          description: getErrorMessage(error),
+          variant: "error",
+        });
+      }
+    },
+    [session?.accessToken, t, toast]
+  );
 
-    try {
-      // مرحله 1: درخواست ارسال کد OTP
-      await sendOperationOtp(
-        {
-          objectId: orderId,
-          operation: OperationTypeEnum.RejectCartablePayment,
-        },
-        session.accessToken
-      );
+  /**
+   * مدیریت عملیات رد تکی
+   * این تابع برای رد یک دستور پرداخت واحد استفاده می‌شود
+   * مراحل:
+   * 1. نمایش دیالوگ با حالت loading
+   * 2. درخواست ارسال کد OTP به سرور
+   * 3. در صورت موفقیت، نمایش فرم ورود کد
+   */
+  const handleSingleReject = useCallback(
+    async (orderId: string) => {
+      if (!session?.accessToken) return;
 
-      // موفقیت - نمایش فرم OTP
+      // باز کردن دیالوگ با حالت loading
       setOtpDialog({
         open: true,
         type: "reject",
         orderIds: [orderId],
-        isRequestingOtp: false,
+        isRequestingOtp: true,
+        isBatchOperation: false, // عملیات تکی
       });
 
-      toast({
-        title: t("toast.success"),
-        description: t("otp.codeSent"),
-        variant: "success",
-      });
-    } catch (error) {
-      console.error("Error sending OTP:", error);
-      // بستن دیالوگ و نمایش خطا
-      setOtpDialog({
-        open: false,
-        type: "reject",
-        orderIds: [],
-        isRequestingOtp: false,
-      });
-      toast({
-        title: t("toast.error"),
-        description: "خطا در ارسال کد تایید",
-        variant: "error",
-      });
-    }
-  };
+      try {
+        // مرحله 1: درخواست ارسال کد OTP
+        await sendOperationOtp(
+          {
+            objectId: orderId,
+            operation: OperationTypeEnum.RejectCartablePayment,
+          },
+          session.accessToken
+        );
 
+        // موفقیت - نمایش فرم OTP
+        setOtpDialog({
+          open: true,
+          type: "reject",
+          orderIds: [orderId],
+          isRequestingOtp: false,
+          isBatchOperation: false,
+        });
+
+        toast({
+          title: t("toast.success"),
+          description: t("otp.codeSent"),
+          variant: "success",
+        });
+      } catch (error) {
+        console.error("Error sending OTP:", error);
+        // بستن دیالوگ و نمایش خطا
+        setOtpDialog({
+          open: false,
+          type: "reject",
+          orderIds: [],
+          isRequestingOtp: false,
+          isBatchOperation: false,
+        });
+        toast({
+          title: t("toast.error"),
+          description: getErrorMessage(error),
+          variant: "error",
+        });
+      }
+    },
+    [session?.accessToken, t, toast]
+  );
+
+  /**
+   * مدیریت عملیات تأیید گروهی
+   * این تابع برای تأیید چندین دستور پرداخت به صورت همزمان استفاده می‌شود
+   * توجه: حتی اگر فقط یک آیتم انتخاب شده باشد، از API عملیات گروهی استفاده می‌شود
+   * مراحل:
+   * 1. دریافت لیست آیتم‌های انتخاب شده
+   * 2. نمایش دیالوگ با حالت loading
+   * 3. درخواست ارسال کد OTP برای عملیات گروهی
+   * 4. در صورت موفقیت، نمایش فرم ورود کد
+   */
   const handleBulkApprove = async () => {
     if (!session?.accessToken) return;
 
@@ -204,6 +294,7 @@ export default function MyCartablePage() {
       type: "approve",
       orderIds,
       isRequestingOtp: true,
+      isBatchOperation: true, // عملیات گروهی - حتی اگر یک آیتم باشد
     });
 
     try {
@@ -222,6 +313,7 @@ export default function MyCartablePage() {
         type: "approve",
         orderIds,
         isRequestingOtp: false,
+        isBatchOperation: true,
       });
 
       toast({
@@ -237,15 +329,26 @@ export default function MyCartablePage() {
         type: "approve",
         orderIds: [],
         isRequestingOtp: false,
+        isBatchOperation: false,
       });
       toast({
         title: t("toast.error"),
-        description: "خطا در ارسال کد تایید",
+        description: getErrorMessage(error),
         variant: "error",
       });
     }
   };
 
+  /**
+   * مدیریت عملیات رد گروهی
+   * این تابع برای رد چندین دستور پرداخت به صورت همزمان استفاده می‌شود
+   * توجه: حتی اگر فقط یک آیتم انتخاب شده باشد، از API عملیات گروهی استفاده می‌شود
+   * مراحل:
+   * 1. دریافت لیست آیتم‌های انتخاب شده
+   * 2. نمایش دیالوگ با حالت loading
+   * 3. درخواست ارسال کد OTP برای عملیات گروهی
+   * 4. در صورت موفقیت، نمایش فرم ورود کد
+   */
   const handleBulkReject = async () => {
     if (!session?.accessToken) return;
 
@@ -261,6 +364,7 @@ export default function MyCartablePage() {
       type: "reject",
       orderIds,
       isRequestingOtp: true,
+      isBatchOperation: true, // عملیات گروهی - حتی اگر یک آیتم باشد
     });
 
     try {
@@ -279,6 +383,7 @@ export default function MyCartablePage() {
         type: "reject",
         orderIds,
         isRequestingOtp: false,
+        isBatchOperation: true,
       });
 
       toast({
@@ -294,31 +399,46 @@ export default function MyCartablePage() {
         type: "reject",
         orderIds: [],
         isRequestingOtp: false,
+        isBatchOperation: false,
       });
       toast({
         title: t("toast.error"),
-        description: "خطا در ارسال کد تایید",
+        description: getErrorMessage(error),
         variant: "error",
       });
     }
   };
 
+  /**
+   * لغو انتخاب همه آیتم‌ها
+   * این تابع برای پاک کردن انتخاب‌ها در هر دو حالت موبایل و دسکتاپ استفاده می‌شود
+   */
   const handleCancelSelection = () => {
     setSelectedOrders([]);
     setSelectedRowIds({});
   };
 
+  /**
+   * تأیید عملیات با کد OTP وارد شده
+   * این تابع بر اساس نوع عملیات (تکی یا گروهی) API مناسب را فراخوانی می‌کند
+   * تشخیص نوع عملیات از طریق فلگ isBatchOperation انجام می‌شود، نه تعداد آیتم‌ها
+   * مراحل:
+   * 1. ارسال درخواست تأیید با کد OTP به سرور
+   * 2. نمایش پیام موفقیت
+   * 3. پاک کردن انتخاب‌ها
+   * 4. بارگذاری مجدد لیست برای نمایش تغییرات
+   */
   const handleOtpConfirm = async (otp: string) => {
     if (!session?.accessToken) return;
 
     try {
-      const isSingleOperation = otpDialog.orderIds.length === 1;
       const operationType =
         otpDialog.type === "approve"
           ? OperationTypeEnum.ApproveCartablePayment
           : OperationTypeEnum.RejectCartablePayment;
 
-      if (isSingleOperation) {
+      // تشخیص عملیات تکی یا گروهی بر اساس فلگ، نه تعداد آیتم‌ها
+      if (!otpDialog.isBatchOperation) {
         // عملیات تکی
         await approvePayment(
           {
@@ -329,7 +449,7 @@ export default function MyCartablePage() {
           session.accessToken
         );
       } else {
-        // عملیات گروهی
+        // عملیات گروهی - حتی اگر فقط یک آیتم انتخاب شده باشد
         await batchApprovePayments(
           {
             objectIds: otpDialog.orderIds,
@@ -349,46 +469,39 @@ export default function MyCartablePage() {
         variant: "success",
       });
 
-      // Clear selection
+      // پاک کردن انتخاب‌ها
       setSelectedOrders([]);
       setSelectedRowIds({});
 
-      // بارگذاری مجدد لیست
-      const response = await getApproverCartable(
-        {
-          pageNumber,
-          pageSize,
-          orderBy: "createdDateTime",
-        },
-        session.accessToken
-      );
-
-      const mappedOrders = mapPaymentListDtosToPaymentOrders(response.items);
-      setOrders(mappedOrders);
-      setTotalItems(response.totalItemCount);
-      setTotalPages(response.totalPageCount);
+      // بارگذاری مجدد لیست برای نمایش تغییرات
+      await reloadData();
     } catch (error) {
       console.error("Error confirming operation:", error);
       toast({
         title: t("toast.error"),
-        description: "خطا در انجام عملیات",
+        description: getErrorMessage(error),
         variant: "error",
       });
       throw error; // برای اینکه OTP dialog خطا را نمایش دهد
     }
   };
 
+  /**
+   * ارسال مجدد کد OTP
+   * این تابع برای ارسال مجدد کد OTP در صورت عدم دریافت یا انقضا استفاده می‌شود
+   * بر اساس نوع عملیات (تکی یا گروهی)، API مناسب فراخوانی می‌شود
+   */
   const handleOtpResend = async () => {
     if (!session?.accessToken) return;
 
     try {
-      const isSingleOperation = otpDialog.orderIds.length === 1;
       const operationType =
         otpDialog.type === "approve"
           ? OperationTypeEnum.ApproveCartablePayment
           : OperationTypeEnum.RejectCartablePayment;
 
-      if (isSingleOperation) {
+      // تشخیص عملیات تکی یا گروهی بر اساس فلگ، نه تعداد آیتم‌ها
+      if (!otpDialog.isBatchOperation) {
         // ارسال مجدد برای عملیات تکی
         await sendOperationOtp(
           {
@@ -398,7 +511,7 @@ export default function MyCartablePage() {
           session.accessToken
         );
       } else {
-        // ارسال مجدد برای عملیات گروهی
+        // ارسال مجدد برای عملیات گروهی - حتی اگر فقط یک آیتم باشد
         await sendBatchOperationOtp(
           {
             objectIds: otpDialog.orderIds,
@@ -417,12 +530,16 @@ export default function MyCartablePage() {
       console.error("Error resending OTP:", error);
       toast({
         title: t("toast.error"),
-        description: "خطا در ارسال مجدد کد تایید",
+        description: getErrorMessage(error),
         variant: "error",
       });
     }
   };
 
+  /**
+   * مدیریت عملیات خروجی Excel/CSV
+   * در نسخه فعلی فقط پیام نمایش می‌دهد
+   */
   const handleExport = () => {
     toast({
       title: t("toast.info"),
@@ -431,6 +548,10 @@ export default function MyCartablePage() {
     });
   };
 
+  /**
+   * مدیریت انتخاب/حذف انتخاب یک دستور در نمای موبایل
+   * @param orderId شناسه دستور پرداخت
+   */
   const handleOrderSelect = (orderId: string) => {
     setSelectedOrders((prev) =>
       prev.includes(orderId)
@@ -439,25 +560,48 @@ export default function MyCartablePage() {
     );
   };
 
+  /**
+   * مدیریت تغییرات انتخاب سطرها در جدول دسکتاپ
+   * این callback از TanStack Table صدا زده می‌شود
+   * @param newSelection object شامل row IDs و وضعیت انتخاب آن‌ها
+   */
   const handleRowSelectionChange = (newSelection: Record<string, boolean>) => {
     setSelectedRowIds(newSelection);
   };
 
-  // Create columns with handlers
+  /**
+   * ایجاد ستون‌های جدول با استفاده از useMemo
+   * useMemo از recreate شدن ستون‌ها در هر render جلوگیری می‌کند
+   * dependencies شامل locale و handler ها است تا تغییرات به درستی اعمال شود
+   */
   const columns = useMemo(
     () => createColumns(locale, handleSingleApprove, handleSingleReject, t),
-    [locale]
+    [locale, handleSingleApprove, handleSingleReject, t]
   );
 
+  /**
+   * بررسی وجود آیتم‌های انتخاب شده
+   * در موبایل از selectedOrders و در دسکتاپ از selectedRowIds استفاده می‌شود
+   */
   const hasSelection = isMobile
     ? selectedOrders.length > 0
     : Object.keys(selectedRowIds).filter((id) => selectedRowIds[id]).length > 0;
 
+  /**
+   * تعداد آیتم‌های انتخاب شده
+   * این مقدار برای نمایش در UI استفاده می‌شود
+   */
   const selectedCount = isMobile
     ? selectedOrders.length
     : Object.keys(selectedRowIds).filter((id) => selectedRowIds[id]).length;
 
-  // محاسبه آمار
+  /**
+   * محاسبه آمار برای نمایش در بخش Statistics
+   * شامل:
+   * - تعداد کل دستورهای پرداخت
+   * - مجموع تراکنش‌های تمام دستورها
+   * - مجموع مبلغ تمام دستورها (با فرمت فارسی)
+   */
   const items: IStatisticsItems = [
     {
       number: `${totalItems}`,

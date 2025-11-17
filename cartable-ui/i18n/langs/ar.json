@@ -261,7 +261,89 @@
   },
   "dashboard": {
     "pageTitle": "لوحة التحكم",
-    "pageSubtitle": "نظرة عامة على الأنشطة المالية"
+    "pageSubtitle": "نظرة عامة على المعاملات وإحصائيات الدفع",
+    "filters": {
+      "bankAccount": "الحساب البنكي",
+      "fromDate": "من تاريخ",
+      "toDate": "إلى تاريخ",
+      "applyFilter": "تطبيق الفلتر",
+      "allAccounts": "جميع الحسابات",
+      "selectDate": "اختر التاريخ"
+    },
+    "stats": {
+      "totalTransactions": "إجمالي المعاملات",
+      "succeededTransactions": "المعاملات الناجحة",
+      "pendingTransactions": "في قائمة الانتظار",
+      "failedTransactions": "المعاملات الفاشلة"
+    },
+    "charts": {
+      "transactionStatus": {
+        "title": "حالة المعاملات",
+        "subtitle": "بناءً على العدد"
+      },
+      "paymentTypes": {
+        "title": "أنواع الدفع",
+        "subtitle": "التوزيع حسب النوع"
+      },
+      "successGauge": {
+        "title": "المعاملات الناجحة",
+        "subtitle": "حجم المعالجة",
+        "successVolume": "حجم المعالجة الناجحة"
+      },
+      "performance": {
+        "title": "تحليل الأداء",
+        "subtitle": "مقارنة العدد والنسبة المئوية",
+        "transactionCount": "عدد المعاملات",
+        "percent": "النسبة المئوية"
+      },
+      "amountVsCount": {
+        "title": "مقارنة المبلغ والعدد",
+        "subtitle": "تحليل متزامن لعدد ومبلغ المعاملات",
+        "count": "العدد",
+        "amountNormalized": "المبلغ (موحد)",
+        "note": "ملاحظة: تم توحيد المبلغ لتحسين العرض. انقر على الرسم البياني لرؤية المبالغ الفعلية."
+      },
+      "comparisonMetrics": {
+        "title": "المؤشرات الرئيسية",
+        "subtitle": "المقاييس المحسوبة",
+        "successRate": "معدل النجاح",
+        "fromTotal": "من إجمالي المعاملات",
+        "avgAmount": "متوسط مبلغ المعاملة",
+        "avgSuccessAmount": "متوسط المعاملات الناجحة",
+        "closedOrders": "الأوامر المغلقة",
+        "ordersCount": "عدد الأوامر",
+        "systemStatus": "حالة النظام العامة",
+        "systemStatusDesc": "بناءً على معدل النجاح وعدد المعاملات",
+        "excellent": "ممتاز",
+        "average": "متوسط",
+        "needsReview": "يحتاج إلى مراجعة"
+      },
+      "detailTable": {
+        "title": "تفاصيل المعاملات",
+        "subtitle": "معلومات تفصيلية",
+        "status": "الحالة",
+        "count": "العدد",
+        "percent": "النسبة المئوية",
+        "amount": "المبلغ",
+        "progress": "التقدم",
+        "statusCode": "رمز الحالة"
+      }
+    },
+    "export": {
+      "downloadReport": "تحميل التقرير",
+      "downloadExcel": "تحميل Excel",
+      "downloadPDF": "تحميل PDF",
+      "creating": "جاري الإنشاء...",
+      "success": "نجاح",
+      "error": "خطأ",
+      "excelError": "خطأ في إنشاء ملف Excel",
+      "pdfError": "خطأ في إنشاء ملف PDF",
+      "fileCreated": "تم إنشاء الملف {{fileName}} بنجاح"
+    },
+    "loading": "جاري التحميل...",
+    "error": "خطأ في جلب البيانات",
+    "errorLoadingData": "خطأ في تحميل بيانات لوحة التحكم",
+    "transaction": "المعاملة"
   },
   "myCartable": {
     "pageTitle": "سلتي",

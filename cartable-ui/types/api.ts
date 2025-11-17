@@ -25,9 +25,27 @@ export interface PaginationParams {
   orderBy?: string;
 }
 
-// تایپ پارامترهای فیلتر کارتابل
+/**
+ * تایپ پارامترهای فیلتر کارتابل
+ * همه فیلدها به جز pageNumber و pageSize اختیاری هستند
+ */
 export interface CartableFilterParams extends PaginationParams {
+  /** کد پیگیری */
+  trackingId?: string;
+  /** شماره دستور */
+  orderId?: string;
+  /** نام دستور پرداخت */
+  name?: string;
+  /** شماره شبا */
+  sourceIban?: string;
+  /** شناسه درگاه بانکی */
   bankGatewayId?: string;
+  /** وضعیت دستور پرداخت (به صورت رشته‌ای ارسال می‌شود) */
+  status?: PaymentStatusEnum;
+  /** از تاریخ (ISO 8601 format) */
+  fromDate?: string;
+  /** تا تاریخ (ISO 8601 format) */
+  toDate?: string;
 }
 
 /**
@@ -156,4 +174,252 @@ export interface BatchApproveRequest {
   operationType: OperationTypeEnum;
   /** کد OTP */
   otpCode: string;
+}
+
+/**
+ * Enum کد علت پرداخت - مقادیر API (PascalCase)
+ * برای mapping به TransactionReasonEnum موجود
+ */
+export enum ReasonCodeApiEnum {
+  InvestmentAndBourse = "InvestmentAndBourse",
+  ImportGoods = "ImportGoods",
+  SalaryAndWages = "SalaryAndWages",
+  TaxAndDuties = "TaxAndDuties",
+  LoanRepayment = "LoanRepayment",
+  OtherPayments = "OtherPayments",
+}
+
+/**
+ * Enum وضعیت تراکنش - مقادیر API (PascalCase)
+ * برای mapping به TransactionStatus موجود
+ */
+export enum TransactionStatusApiEnum {
+  Draft = "Draft",
+  WaitForExecution = "WaitForExecution",
+  WaitForBank = "WaitForBank",
+  BankSucceeded = "BankSucceeded",
+  BankFailed = "BankFailed",
+  Canceled = "Canceled",
+}
+
+/**
+ * Enum نوع پرداخت - مقادیر API (PascalCase)
+ * برای mapping به PaymentMethodEnum موجود
+ */
+export enum PaymentTypeApiEnum {
+  Paya = "Paya",
+  Satna = "Satna",
+  Rtgs = "Rtgs",
+}
+
+/**
+ * Enum وضعیت تاییدکننده
+ */
+export enum ApproverStatusEnum {
+  WaitForAction = "WaitForAction",
+  Accepted = "Accepted",
+  Rejected = "Rejected",
+}
+
+/**
+ * تاریخچه تغییرات دستور پرداخت
+ */
+export interface WithdrawalChangeHistory {
+  id: string;
+  withdrawalOrderId: string;
+  status: PaymentStatusEnum;
+  createdDateTime: string;
+  description: string;
+}
+
+/**
+ * تاییدکننده دستور پرداخت
+ */
+export interface WithdrawalApprover {
+  id: string;
+  status: ApproverStatusEnum;
+  approverId: string;
+  userId: string | null;
+  approverName: string;
+  withdrawalOrderId: string;
+  createdDateTime: string;
+}
+
+/**
+ * جزئیات کامل دستور پرداخت
+ */
+export interface WithdrawalOrderDetails {
+  id: string;
+  orderId: string;
+  providerCode: string;
+  bankCode: string;
+  bankName: string;
+  gatewayTitle: string;
+  accountNumber: string;
+  trackingId: string;
+  name: string;
+  description: string;
+  sourceIban: string;
+  bankGatewayId: string;
+  totalAmount: string;
+  numberOfTransactions: string;
+  transactionsFee: number;
+  status: PaymentStatusEnum;
+  createdDateTime: string;
+  updatedDateTime: string;
+  metaData: string;
+  changeHistory: WithdrawalChangeHistory[];
+  transactions: any[]; // معمولاً خالی است
+  approvers: WithdrawalApprover[];
+}
+
+/**
+ * آمار وضعیت
+ */
+export interface StatusBreakdown {
+  status: TransactionStatusApiEnum;
+  statusName: string;
+  count: number;
+  percentage: number;
+  amount: number;
+}
+
+/**
+ * آمار نوع پرداخت
+ */
+export interface PaymentTypeBreakdown {
+  paymentType: PaymentTypeApiEnum;
+  typeName: string;
+  count: number;
+  percentage: number;
+  amount: number;
+  successRate: number;
+  averageAmount: number;
+}
+
+/**
+ * آمار کد علت
+ */
+export interface ReasonCodeBreakdown {
+  reasonCode: ReasonCodeApiEnum;
+  reasonName: string;
+  count: number;
+  percentage: number;
+  amount: number;
+  successRate: number;
+}
+
+/**
+ * آمار ساعتی
+ */
+export interface HourlyDistribution {
+  hour: number;
+  count: number;
+  percentage: number;
+}
+
+/**
+ * آمار کامل دستور پرداخت
+ */
+export interface WithdrawalStatistics {
+  withdrawalOrderId: string;
+  totalTransactions: number;
+  totalAmount: number;
+  successfulAmount: number;
+  failedAmount: number;
+  overallSuccessRate: number;
+  statusStatistics: {
+    breakdown: StatusBreakdown[];
+    successRate: number;
+    failureRate: number;
+  };
+  paymentTypeStatistics: {
+    breakdown: PaymentTypeBreakdown[];
+    mostUsedType: PaymentTypeApiEnum;
+    mostUsedTypePercentage: number;
+  };
+  reasonCodeStatistics: {
+    breakdown: ReasonCodeBreakdown[];
+    mostUsedReason: ReasonCodeApiEnum;
+    mostUsedReasonPercentage: number;
+  };
+  financialStatistics: {
+    totalAmount: number;
+    successfulAmount: number;
+    failedAmount: number;
+    pendingAmount: number;
+    averageAmount: number;
+    minAmount: number;
+    maxAmount: number;
+    medianAmount: number;
+  };
+  timeStatistics: {
+    earliestTransaction: string;
+    latestTransaction: string;
+    lastUpdate: string;
+    averageProcessingTimeMinutes: number;
+    hourlyDistribution: HourlyDistribution[];
+  };
+}
+
+/**
+ * تاریخچه تغییرات تراکنش
+ */
+export interface TransactionChangeHistory {
+  id: string;
+  withdrawalTransactionId: string;
+  description: string;
+  status: TransactionStatusApiEnum;
+  createdDateTime: string;
+}
+
+/**
+ * تراکنش دستور پرداخت
+ */
+export interface WithdrawalTransaction {
+  id: string;
+  orderId: string;
+  trackingId: string;
+  destinationIban: string;
+  nationalCode: string;
+  accountNumber: string;
+  destinationAccountOwner: string;
+  ownerFirstName: string;
+  ownerLastName: string;
+  description: string;
+  providerMessage: string;
+  amount: string;
+  paymentNumber: string;
+  reasonCode: ReasonCodeApiEnum;
+  rowNumber: number;
+  status: TransactionStatusApiEnum;
+  paymentType: PaymentTypeApiEnum;
+  transferDateTime: string;
+  createdDateTime: string;
+  updatedDateTime: string;
+  accountCode: string | null;
+  withdrawalOrderId: string;
+  metaData: string | null;
+  changeHistory: TransactionChangeHistory[];
+}
+
+/**
+ * پاسخ لیست تراکنش‌ها
+ */
+export type TransactionListResponse = PaginatedResponse<WithdrawalTransaction>;
+
+/**
+ * پارامترهای فیلتر تراکنش‌ها
+ */
+export interface TransactionFilterParams extends PaginationParams {
+  /** شناسه دستور پرداخت (الزامی) */
+  withdrawalOrderId: string;
+  /** جستجو در تمام فیلدها */
+  serchValue?: string;
+  /** کد علت پرداخت */
+  reasonCode?: ReasonCodeApiEnum;
+  /** وضعیت تراکنش */
+  status?: TransactionStatusApiEnum;
+  /** نوع پرداخت */
+  paymentType?: PaymentTypeApiEnum;
 }

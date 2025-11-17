@@ -80,6 +80,8 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    // استفاده از ID واقعی برای شناسایی ردیف‌ها
+    getRowId: (row: any) => row.id,
   });
 
   return (
