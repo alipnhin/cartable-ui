@@ -1,276 +1,207 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { AppLayout, PageHeader } from "@/components/layout";
-import { Plus, TrendingUp, Clock, Wallet, Activity } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import useTranslation from "@/hooks/useTranslation";
+import {
+  ChartLine,
+  CheckCircle,
+  Timer,
+  XCircle,
+} from "lucide-react";
+import { getTransactionProgress } from "@/services/dashboardService";
+import type {
+  TransactionProgressResponse,
+  DashboardFilterParams,
+} from "@/types/dashboard";
+import StatCard from "@/components/dashboard/StatCard";
+import TransactionStatusChart from "@/components/dashboard/TransactionStatusChart";
+import PaymentTypeChart from "@/components/dashboard/PaymentTypeChart";
+import SuccessGaugeChart from "@/components/dashboard/SuccessGaugeChart";
+import PerformanceChart from "@/components/dashboard/PerformanceChart";
+import TransactionDetailTable from "@/components/dashboard/TransactionDetailTable";
+import DashboardFilters from "@/components/dashboard/DashboardFilters";
 
 export default function DashboardPage() {
-  const { t } = useTranslation();
+  const { data: session } = useSession();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dashboardData, setDashboardData] =
+    useState<TransactionProgressResponse | null>(null);
+
+  // Default filters: last 7 days, all accounts
+  const getDefaultFilters = (): DashboardFilterParams => {
+    const today = new Date();
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    return {
+      fromDate: weekAgo.toISOString(),
+      toDate: today.toISOString(),
+    };
+  };
+
+  const [filters, setFilters] = useState<DashboardFilterParams>(
+    getDefaultFilters()
+  );
+
+  const fetchDashboardData = async () => {
+    if (!session?.accessToken) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await getTransactionProgress(filters, session.accessToken);
+      setDashboardData(data);
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+      setError("خطا در دریافت اطلاعات داشبورد");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [session, filters]);
+
+  const handleFilterApply = (newFilters: DashboardFilterParams) => {
+    setFilters(newFilters);
+  };
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <PageHeader
+          title="داشبورد"
+          description="نمای کلی تراکنش‌ها و آمار"
+        />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">در حال بارگذاری...</p>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (error || !dashboardData) {
+    return (
+      <AppLayout>
+        <PageHeader
+          title="داشبورد"
+          description="نمای کلی تراکنش‌ها و آمار"
+        />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <XCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+            <p className="text-destructive font-semibold">
+              {error || "خطا در دریافت اطلاعات"}
+            </p>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
       <PageHeader
-        title={t("dashboard.pageTitle")}
-        description={t("dashboard.pageSubtitle")}
-        actions={
-          <Button
-            className="hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
-            style={{
-              boxShadow:
-                "0 2px 8px rgba(39,174,96,0.25), 0 1px 4px rgba(39,174,96,0.15)",
-            }}
-          >
-            <Plus className="me-2 h-4 w-4" />
-            {t("common.buttons.new")}
-          </Button>
-        }
+        title="داشبورد"
+        description="نمای کلی تراکنش‌ها و آمار پرداخت"
       />
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Filters */}
+      <DashboardFilters
+        accounts={[]} // TODO: Fetch accounts from API
+        onFilterApply={handleFilterApply}
+      />
+
+      {/* Stats Cards Row */}
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4 mb-5">
         <StatCard
-          icon={Wallet}
-          label="کل مبلغ دستورات"
-          value="۱۲۰ میلیون"
-          trend="+12%"
-          trendUp={true}
-          accentColor="primary"
+          title="کل تراکنش‌ها"
+          value={dashboardData.totalTransactions}
+          amount={dashboardData.totalAmount}
+          icon={ChartLine}
+          iconBgColor="bg-primary/10"
+          iconColor="text-primary"
+          delay={0.1}
         />
 
         <StatCard
-          icon={Clock}
-          label="در انتظار تأیید"
-          value="۸"
-          badge="فوری"
-          accentColor="warning"
+          title="تراکنش‌های موفق"
+          value={dashboardData.succeededTransactions}
+          amount={dashboardData.succeededAmount}
+          icon={CheckCircle}
+          iconBgColor="bg-success/10"
+          iconColor="text-success"
+          badge={{
+            value: `${dashboardData.successPercent}%`,
+            variant: "success",
+          }}
+          delay={0.2}
         />
 
         <StatCard
-          icon={Activity}
-          label="حساب‌های فعال"
-          value="۵"
-          accentColor="success"
+          title="در صف پردازش"
+          value={dashboardData.pendingTransactions}
+          amount={dashboardData.pendingAmount}
+          icon={Timer}
+          iconBgColor="bg-warning/10"
+          iconColor="text-warning"
+          badge={{
+            value: `${dashboardData.pendingPercent}%`,
+            variant: "warning",
+          }}
+          delay={0.3}
         />
 
         <StatCard
-          icon={TrendingUp}
-          label="آخرین فعالیت"
-          value="امروز"
-          subtitle="۲ ساعت پیش"
-          accentColor="info"
+          title="تراکنش‌های ناموفق"
+          value={dashboardData.failedTransactions}
+          amount={dashboardData.failedAmount}
+          icon={XCircle}
+          iconBgColor="bg-destructive/10"
+          iconColor="text-destructive"
+          badge={{
+            value: `${dashboardData.failedPercent}%`,
+            variant: "danger",
+          }}
+          delay={0.4}
         />
       </div>
 
-      {/* محتوای اضافی */}
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <ActivityCard />
-        <PerformanceCard />
+      {/* Charts Row */}
+      <div className="grid gap-5 xl:grid-cols-3 mb-5">
+        <TransactionStatusChart
+          data={dashboardData.transactionStatusSummary}
+          delay={0.5}
+        />
+
+        <PaymentTypeChart data={dashboardData.paymentTypeSummary} delay={0.6} />
+
+        <SuccessGaugeChart
+          successPercent={dashboardData.successPercent}
+          delay={0.7}
+        />
       </div>
+
+      {/* Performance Chart */}
+      <div className="mb-5">
+        <PerformanceChart
+          data={dashboardData.transactionStatusSummary}
+          delay={0.8}
+        />
+      </div>
+
+      {/* Detail Table */}
+      <TransactionDetailTable
+        data={dashboardData.transactionStatusSummary}
+        delay={0.9}
+      />
     </AppLayout>
-  );
-}
-
-// =====================================
-// Stat Card Component
-// =====================================
-interface StatCardProps {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-  subtitle?: string;
-  trend?: string;
-  trendUp?: boolean;
-  badge?: string;
-  accentColor?: "primary" | "success" | "warning" | "info" | "destructive";
-}
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  subtitle,
-  trend,
-  trendUp,
-  badge,
-  accentColor = "primary",
-}: StatCardProps) {
-  const accentColors = {
-    primary: {
-      bg: "oklch(0.62 0.15 155 / 0.1)",
-      color: "oklch(0.62 0.15 155)",
-      border: "oklch(0.62 0.15 155 / 0.2)",
-    },
-    success: {
-      bg: "oklch(0.62 0.15 155 / 0.1)",
-      color: "oklch(0.62 0.15 155)",
-      border: "oklch(0.62 0.15 155 / 0.2)",
-    },
-    warning: {
-      bg: "oklch(0.75 0.12 75 / 0.1)",
-      color: "oklch(0.75 0.12 75)",
-      border: "oklch(0.75 0.12 75 / 0.2)",
-    },
-    info: {
-      bg: "oklch(0.68 0.10 220 / 0.1)",
-      color: "oklch(0.68 0.10 220)",
-      border: "oklch(0.68 0.10 220 / 0.2)",
-    },
-    destructive: {
-      bg: "oklch(0.58 0.18 20 / 0.1)",
-      color: "oklch(0.58 0.18 20)",
-      border: "oklch(0.58 0.18 20 / 0.2)",
-    },
-  };
-
-  const colors = accentColors[accentColor];
-
-  return (
-    <div
-      className="group relative rounded-xl border bg-card p-6 transition-all duration-200 overflow-hidden hover:-translate-y-0.5"
-      style={{
-        boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.06)",
-      }}
-    >
-      {/* Accent Line */}
-      <div
-        className="absolute top-0 right-0 w-1 h-full transition-all duration-200 group-hover:opacity-100"
-        style={{ backgroundColor: colors.border }}
-      />
-
-      <div className="flex items-start justify-between mb-4">
-        {/* Icon */}
-        <div
-          className="p-2.5 rounded-lg border transition-colors duration-200"
-          style={{
-            backgroundColor: colors.bg,
-            color: colors.color,
-            borderColor: colors.border,
-          }}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-
-        {/* Badge or Trend */}
-        {badge && (
-          <span className="px-2 py-1 text-xs font-semibold bg-warning/10 text-warning rounded-md">
-            {badge}
-          </span>
-        )}
-        {trend && (
-          <span
-            className={cn(
-              "text-xs font-semibold",
-              trendUp ? "text-success" : "text-destructive"
-            )}
-          >
-            {trend}
-          </span>
-        )}
-      </div>
-
-      {/* Label */}
-      <h3 className="text-sm font-medium text-muted-foreground mb-2">
-        {label}
-      </h3>
-
-      {/* Value */}
-      <p className="text-2xl font-bold text-foreground tracking-tight mb-1">
-        {value}
-      </p>
-
-      {/* Subtitle */}
-      {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-    </div>
-  );
-}
-
-// =====================================
-// Activity Card Component
-// =====================================
-function ActivityCard() {
-  return (
-    <div
-      className="rounded-xl border bg-card p-6 transition-all duration-200 hover:-translate-y-0.5"
-      style={{
-        boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.06)",
-      }}
-    >
-      <h3 className="text-lg font-semibold mb-4">فعالیت‌های اخیر</h3>
-      <div className="space-y-3">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-          >
-            <div className="w-2 h-2 rounded-full bg-primary" />
-            <div className="flex-1">
-              <p className="text-sm font-medium">تراکنش شماره {i}</p>
-              <p className="text-xs text-muted-foreground">۲ ساعت پیش</p>
-            </div>
-            <span className="text-sm font-semibold text-primary">۵ میلیون</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// =====================================
-// Performance Card Component
-// =====================================
-function PerformanceCard() {
-  return (
-    <div
-      className="rounded-xl border bg-card p-6 transition-all duration-200 hover:-translate-y-0.5"
-      style={{
-        boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.06)",
-      }}
-    >
-      <h3 className="text-lg font-semibold mb-4">خلاصه عملکرد</h3>
-      <div className="space-y-4">
-        <ProgressItem
-          label="تکمیل شده"
-          value={75}
-          color="oklch(0.62 0.15 155)"
-        />
-        <ProgressItem
-          label="در حال انجام"
-          value={15}
-          color="oklch(0.75 0.12 75)"
-        />
-        <ProgressItem label="لغو شده" value={10} color="oklch(0.58 0.18 20)" />
-      </div>
-    </div>
-  );
-}
-
-// =====================================
-// Progress Item Component
-// =====================================
-interface ProgressItemProps {
-  label: string;
-  value: number;
-  color: string;
-}
-
-function ProgressItem({ label, value, color }: ProgressItemProps) {
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium">{label}</span>
-        <span className="text-sm font-semibold">{value}%</span>
-      </div>
-      <div className="h-2 bg-muted rounded-full overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all duration-500"
-          style={{
-            width: `${value}%`,
-            backgroundColor: color,
-          }}
-        />
-      </div>
-    </div>
   );
 }
