@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { dockMenuItems, isRouteActive } from "@/config/navigation";
 import useTranslation from "@/hooks/useTranslation";
+import { useNavigationProgress } from "@/providers/navigation-progress-provider";
 import { Plus } from "lucide-react";
 import {
   useMemo,
@@ -53,11 +54,14 @@ function MinimalBottomDock() {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
+  const { startProgress } = useNavigationProgress();
   const [isPending, startTransition] = useTransition();
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
   const handleNavigation = (route: string) => {
+    if (route === pathname) return;
     setPendingRoute(route);
+    startProgress();
     startTransition(() => {
       router.push(route);
     });
@@ -166,6 +170,7 @@ function FloatingBottomDock({
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
+  const { startProgress } = useNavigationProgress();
   const [isPending, startTransition] = useTransition();
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
@@ -173,7 +178,9 @@ function FloatingBottomDock({
   const CenterIcon = dockMenuItems[centerIndex]?.icon || Plus;
 
   const handleNavigation = (route: string) => {
+    if (route === pathname) return;
     setPendingRoute(route);
+    startProgress();
     startTransition(() => {
       router.push(route);
     });
@@ -253,11 +260,14 @@ function ClassicBottomDock() {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
+  const { startProgress } = useNavigationProgress();
   const [isPending, startTransition] = useTransition();
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
   const handleNavigation = (route: string) => {
+    if (route === pathname) return;
     setPendingRoute(route);
+    startProgress();
     startTransition(() => {
       router.push(route);
     });
@@ -342,11 +352,14 @@ function MinimalV2BottomDock() {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
+  const { startProgress } = useNavigationProgress();
   const [isPending, startTransition] = useTransition();
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
   const handleNavigation = (route: string) => {
+    if (route === pathname) return;
     setPendingRoute(route);
+    startProgress();
     startTransition(() => {
       router.push(route);
     });

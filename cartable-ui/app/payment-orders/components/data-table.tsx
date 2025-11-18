@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -93,12 +94,36 @@ export function DataTable<TData, TValue>({
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border bg-card">
-        <div className="p-12 text-center">
-          <div className="inline-flex items-center gap-2 text-muted-foreground">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            {t("common.pagination.loading")}
+      <div className="rounded-lg border bg-card overflow-hidden">
+        <div className="p-4 border-b">
+          <div className="flex font-bold">
+            <LayoutList className="me-2" size={20} />
+            {t("paymentCartable.pageTitle")}
           </div>
+        </div>
+        <div className="p-4">
+          {/* Table Header Skeleton */}
+          <div className="flex gap-4 pb-4 border-b mb-4">
+            <Skeleton className="h-4 w-12" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+          {/* Table Rows Skeleton */}
+          {Array.from({ length: pageSize || 10 }).map((_, i) => (
+            <div key={i} className="flex gap-4 py-3 border-b last:border-0">
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+          ))}
         </div>
       </div>
     );

@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { AppLayout, PageHeader } from "@/components/layout";
 import { DataTable } from "./components/data-table";
 import { createColumns } from "./components/columns";
-import { OrderCard } from "./components/order-card";
+import { OrderCard, OrderCardSkeleton } from "./components/order-card";
 import { FilterSheet } from "./components/filter-sheet";
 import { Button } from "@/components/ui/button";
 import { Download, FileBadge, Filter, Timer } from "lucide-react";
@@ -349,20 +349,29 @@ export default function PaymentOrdersPage() {
         />
       ) : (
         <div className="space-y-3">
-          {orders.map((order) => (
-            <OrderCard key={order.id} order={order} onView={handleViewOrder} />
-          ))}
-          {orders.length === 0 && !isLoading && (
-            <div className="text-center py-12 text-muted-foreground">
-              {t("orders.noOrders")}
-            </div>
-          )}
-          {totalPages > 1 && (
-            <MobilePagination
-              currentPage={pageNumber}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
+          {isLoading ? (
+            // Loading skeletons
+            Array.from({ length: 5 }).map((_, i) => (
+              <OrderCardSkeleton key={i} />
+            ))
+          ) : (
+            <>
+              {orders.map((order) => (
+                <OrderCard key={order.id} order={order} onView={handleViewOrder} />
+              ))}
+              {orders.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">
+                  {t("orders.noOrders")}
+                </div>
+              )}
+              {totalPages > 1 && (
+                <MobilePagination
+                  currentPage={pageNumber}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              )}
+            </>
           )}
         </div>
       )}

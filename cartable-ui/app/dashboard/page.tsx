@@ -24,6 +24,7 @@ import DashboardFilters from "@/components/dashboard/DashboardFilters";
 import ExportButtons from "@/components/dashboard/ExportButtons";
 import AmountVsCountChart from "@/components/dashboard/AmountVsCountChart";
 import ComparisonMetrics from "@/components/dashboard/ComparisonMetrics";
+import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import useTranslation from "@/hooks/useTranslation";
 
 export default function DashboardPage() {
@@ -81,12 +82,7 @@ export default function DashboardPage() {
           title={t("dashboard.pageTitle")}
           description={t("dashboard.pageSubtitle")}
         />
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">{t("dashboard.loading")}</p>
-          </div>
-        </div>
+        <DashboardSkeleton />
       </AppLayout>
     );
   }

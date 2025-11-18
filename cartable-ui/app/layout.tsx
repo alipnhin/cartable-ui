@@ -11,6 +11,7 @@ import { AppSplashLoader } from "@/components/common/app-splash-loader";
 import { OfflineIndicator } from "@/components/common/offline-indicator";
 import { SessionProvider } from "next-auth/react";
 import { UnauthorizedHandler } from "@/components/auth/unauthorized-handler";
+import { NavigationProgressProvider } from "@/providers/navigation-progress-provider";
 import localFont from "next/font/local";
 
 const yekanBakh = localFont({
@@ -123,7 +124,9 @@ export default function RootLayout({
             <I18nProvider>
               <TooltipsProvider>
                 <DirectionProvider dir="rtl">
-                  {children}
+                  <NavigationProgressProvider>
+                    {children}
+                  </NavigationProgressProvider>
                   <Toaster />
                 </DirectionProvider>
               </TooltipsProvider>
