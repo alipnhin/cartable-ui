@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { AppLayout } from "@/components/layout";
@@ -40,13 +40,17 @@ export default function AccountDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // Use ref to store accessToken to avoid infinite loop
+  const accessTokenRef = useRef<string | undefined>(session?.accessToken);
+  accessTokenRef.current = session?.accessToken;
+
   // واکشی اطلاعات حساب
   const fetchAccountDetail = useCallback(async () => {
-    if (!session?.accessToken || !accountId) return;
+    if (!accessTokenRef.current || !accountId) return;
 
     setIsLoading(true);
     try {
-      const data = await getAccountDetail(accountId, session.accessToken);
+      const data = await getAccountDetail(accountId, accessTokenRef.current);
       setAccount(data);
     } catch (error) {
       console.error("Error fetching account detail:", error);
@@ -59,18 +63,20 @@ export default function AccountDetailPage() {
       setIsLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.accessToken, accountId]);
+  }, [accountId]);
 
   useEffect(() => {
-    fetchAccountDetail();
-  }, [fetchAccountDetail]);
+    if (session?.accessToken) {
+      fetchAccountDetail();
+    }
+  }, [session?.accessToken, fetchAccountDetail]);
 
   // تعداد امضاداران فعال
   const activeSignersCount = account?.users?.filter((u) => u.status === 1).length ?? 0;
 
   // هندلر تغییر حداقل امضا
   const handleSaveMinSignatures = async (value: number) => {
-    if (!session?.accessToken || !account) return;
+    if (!accessTokenRef.current || !account) return;
 
     setIsUpdating(true);
     try {
@@ -79,7 +85,7 @@ export default function AccountDetailPage() {
           minimumSignature: value,
           bankGatewayId: account.id,
         },
-        session.accessToken
+        accessTokenRef.current
       );
       toast({
         title: t("toast.success"),
@@ -101,19 +107,19 @@ export default function AccountDetailPage() {
 
   // هندلر تغییر وضعیت امضادار
   const handleRequestStatusChange = async (signerId: string, currentStatus: boolean) => {
-    if (!session?.accessToken) return;
+    if (!accessTokenRef.current) return;
 
     setIsUpdating(true);
     try {
       if (currentStatus) {
-        await disableSigner(signerId, session.accessToken);
+        await disableSigner(signerId, accessTokenRef.current);
         toast({
           title: t("toast.success"),
           description: "امضادار غیرفعال شد",
           variant: "success",
         });
       } else {
-        await enableSigner(signerId, session.accessToken);
+        await enableSigner(signerId, accessTokenRef.current);
         toast({
           title: t("toast.success"),
           description: "امضادار فعال شد",
