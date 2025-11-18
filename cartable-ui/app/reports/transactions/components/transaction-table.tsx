@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
+import { useLanguage } from "@/providers/i18n-provider";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   ChevronLeft,
@@ -45,6 +46,7 @@ type SortDirection = "asc" | "desc";
 
 export function TransactionTable({ transactions }: TransactionTableProps) {
   const { t, locale } = useTranslation();
+  const { language } = useLanguage();
   const isMobile = useIsMobile();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -260,68 +262,101 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
         </div>
 
         {/* Pagination دسکتاپ */}
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
-              {t("common.pagination.pageSize")}:
-            </span>
-            <Select
-              value={pageSize.toString()}
-              onValueChange={handlePageSizeChange}
-            >
-              <SelectTrigger className="w-24">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="20">20</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="100">100</SelectItem>
-              </SelectContent>
-            </Select>
+        <div className="flex items-center justify-between mt-4 px-2">
+          <div className="flex-1 text-sm text-muted-foreground">
+            {t("common.pagination.showing")}{" "}
+            <span className="font-medium text-foreground">{startIndex + 1}</span>{" "}
+            {t("common.pagination.to")}{" "}
+            <span className="font-medium text-foreground">
+              {Math.min(endIndex, transactions.length)}
+            </span>{" "}
+            {t("common.pagination.of")}{" "}
+            <span className="font-medium text-foreground">{transactions.length}</span>
           </div>
+          <div className="flex items-center gap-6 lg:gap-8">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium">
+                {t("common.pagination.pageSize")}
+              </p>
+              <Select
+                value={pageSize.toString()}
+                onValueChange={handlePageSizeChange}
+              >
+                <SelectTrigger className="h-8 w-[70px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent side="top">
+                  {[10, 20, 30, 40, 50].map((size) => (
+                    <SelectItem key={size} value={`${size}`}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(1)}
-              disabled={currentPage === 1}
-            >
-              <ChevronsRight className="h-4 w-4 me-2" />
-              {t("common.pagination.firstPage")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <ChevronRight className="h-4 w-4 me-2" />
-              {t("common.pagination.previousPage")}
-            </Button>
-            <span className="text-sm px-4">
-              {t("common.pagination.page")} {currentPage} {t("common.of")}{" "}
-              {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              {t("common.pagination.nextPage")}
-              <ChevronLeft className="h-4 w-4 ms-2" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(totalPages)}
-              disabled={currentPage === totalPages}
-            >
-              {t("common.pagination.lastPage")}
-              <ChevronsLeft className="h-4 w-4 ms-2" />
-            </Button>
+            <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+              {t("common.pagination.page")} {currentPage} {t("common.pagination.of")} {totalPages}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="hidden h-8 w-8 lg:flex"
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+              >
+                <span className="sr-only">{t("common.pagination.firstPage")}</span>
+                {language.direction === "rtl" ? (
+                  <ChevronsRight className="h-4 w-4" />
+                ) : (
+                  <ChevronsLeft className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <span className="sr-only">{t("common.pagination.previousPage")}</span>
+                {language.direction === "rtl" ? (
+                  <ChevronRight className="h-4 w-4" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <span className="sr-only">{t("common.pagination.nextPage")}</span>
+                {language.direction === "rtl" ? (
+                  <ChevronLeft className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="hidden h-8 w-8 lg:flex"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+              >
+                <span className="sr-only">{t("common.pagination.lastPage")}</span>
+                {language.direction === "rtl" ? (
+                  <ChevronsLeft className="h-4 w-4" />
+                ) : (
+                  <ChevronsRight className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
