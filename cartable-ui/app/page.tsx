@@ -47,7 +47,7 @@ export default function Home() {
 
             <div className="flex justify-center pt-4">
               <Button
-                className="w-full sm:w-auto min-w-[300px] text-lg"
+                className="w-full sm:w-auto min-w-[300px] text-md"
                 size="lg"
                 onClick={handleSignIn}
                 disabled={isLoading}

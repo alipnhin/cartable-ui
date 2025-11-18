@@ -1,7 +1,14 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+} from "recharts";
 import type { TransactionStatusSummary } from "@/types/dashboard";
 import useTranslation from "@/hooks/useTranslation";
 
@@ -10,12 +17,7 @@ interface TransactionStatusChartProps {
   delay?: number;
 }
 
-const COLORS = {
-  1: "#009ef7", // در صف پردازش - Primary
-  3: "#50cd89", // موفق - Success
-  4: "#f1416c", // رد شده - Danger
-  5: "#7c3aed", // برگشت - Purple
-};
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 export default function TransactionStatusChart({
   data,
@@ -30,13 +32,14 @@ export default function TransactionStatusChart({
   }));
 
   return (
-    <Card
-      className="animate-fade-in"
-      style={{ animationDelay: `${delay}s` }}
-    >
+    <Card className="animate-fade-in" style={{ animationDelay: `${delay}s` }}>
       <div className="border-b px-6 pt-5 pb-4">
-        <h3 className="font-bold text-lg mb-1">{t("dashboard.charts.transactionStatus.title")}</h3>
-        <p className="text-muted-foreground text-sm">{t("dashboard.charts.transactionStatus.subtitle")}</p>
+        <h3 className="font-bold text-lg mb-1">
+          {t("dashboard.charts.transactionStatus.title")}
+        </h3>
+        <p className="text-muted-foreground text-sm">
+          {t("dashboard.charts.transactionStatus.subtitle")}
+        </p>
       </div>
 
       <div className="p-6">
@@ -56,7 +59,7 @@ export default function TransactionStatusChart({
                 return (
                   <Cell
                     key={`cell-${index}`}
-                    fill={COLORS[status as keyof typeof COLORS] || "#009ef7"}
+                    fill={COLORS[index % COLORS.length]}
                   />
                 );
               })}
@@ -67,13 +70,13 @@ export default function TransactionStatusChart({
                 backgroundColor: "hsl(var(--background))",
                 border: "1px solid hsl(var(--border))",
                 borderRadius: "var(--radius)",
-                direction: "rtl",
               }}
             />
             <Legend
               verticalAlign="bottom"
               align="center"
               iconType="circle"
+              className="text-sm"
               formatter={(value) => (
                 <span style={{ color: "hsl(var(--foreground))" }}>{value}</span>
               )}

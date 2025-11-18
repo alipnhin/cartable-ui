@@ -66,7 +66,9 @@ export default function DashboardFilters({
       fromDate: fromDate
         ? new Date(fromDate).toISOString()
         : new Date().toISOString(),
-      toDate: toDate ? new Date(toDate).toISOString() : new Date().toISOString(),
+      toDate: toDate
+        ? new Date(toDate).toISOString()
+        : new Date().toISOString(),
     });
   };
 
@@ -83,7 +85,9 @@ export default function DashboardFilters({
 
           {/* Account Selection */}
           <div className="flex-1 min-w-[200px] lg:flex-initial lg:w-64">
-            <Label className="text-sm font-medium mb-2 block">{t("dashboard.filters.bankAccount")}</Label>
+            <Label className="text-sm font-medium mb-2 block">
+              {t("dashboard.filters.bankAccount")}
+            </Label>
             <AccountSelector
               value={selectedAccount}
               onValueChange={setSelectedAccount}
@@ -95,7 +99,7 @@ export default function DashboardFilters({
 
           {/* From Date */}
           <div className="flex-1 min-w-[180px] lg:flex-initial lg:w-56">
-            <Label className="text-sm font-medium mb-2 block flex items-center gap-2">
+            <Label className="text-sm font-medium mb-2  flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               {t("dashboard.filters.fromDate")}
             </Label>
@@ -103,13 +107,13 @@ export default function DashboardFilters({
               value={fromDate}
               onChange={setFromDate}
               placeholder={t("common.selectDate")}
-              locale={locale}
+              locale={locale === "fa" ? "fa" : "en"}
             />
           </div>
 
           {/* To Date */}
           <div className="flex-1 min-w-[180px] lg:flex-initial lg:w-56">
-            <Label className="text-sm font-medium mb-2 block flex items-center gap-2">
+            <Label className="text-sm font-medium mb-2  flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               {t("dashboard.filters.toDate")}
             </Label>
@@ -117,15 +121,20 @@ export default function DashboardFilters({
               value={toDate}
               onChange={setToDate}
               placeholder={t("common.selectDate")}
-              locale={locale}
+              locale={locale === "fa" ? "fa" : "en"}
             />
           </div>
 
           {/* Apply Filter Button */}
           <div className="w-full lg:w-auto lg:mr-auto">
-            <Button onClick={handleApplyFilters} className="w-full lg:w-auto gap-2">
+            <Button
+              onClick={handleApplyFilters}
+              className="w-full lg:w-auto gap-2"
+            >
               <Search className="w-4 h-4" />
-              <span className="text-sm font-semibold">{t("dashboard.filters.applyFilter")}</span>
+              <span className="text-sm font-semibold">
+                {t("dashboard.filters.applyFilter")}
+              </span>
             </Button>
           </div>
         </div>
