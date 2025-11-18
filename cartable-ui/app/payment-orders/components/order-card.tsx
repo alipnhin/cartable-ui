@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Wallet } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
+import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
 interface OrderCardProps {
@@ -87,6 +88,44 @@ export function OrderCard({ order, onView }: OrderCardProps) {
           >
             {t("common.buttons.view")}
           </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function OrderCardSkeleton() {
+  return (
+    <Card className="overflow-hidden">
+      <CardContent className="p-4 space-y-3">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-5 w-20 rounded-full" />
+        </div>
+
+        {/* Account */}
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-4 rounded" />
+          <Skeleton className="h-3 w-40" />
+        </div>
+
+        {/* Amount & Transactions */}
+        <div className="grid grid-cols-2 gap-3 p-3 bg-secondary rounded-lg border border-border">
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-4 w-12" />
+          </div>
+        </div>
+
+        {/* Date & View Link */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-3 w-16" />
         </div>
       </CardContent>
     </Card>

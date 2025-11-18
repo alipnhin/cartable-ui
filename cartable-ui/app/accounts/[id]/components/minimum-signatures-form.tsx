@@ -17,12 +17,14 @@ interface MinimumSignaturesFormProps {
   currentValue: number;
   maxValue: number;
   onSave: (value: number) => void;
+  isLoading?: boolean;
 }
 
 export function MinimumSignaturesForm({
   currentValue,
   maxValue,
   onSave,
+  isLoading = false,
 }: MinimumSignaturesFormProps) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
@@ -129,9 +131,9 @@ export function MinimumSignaturesForm({
         </div>
 
         <div className="flex gap-2 pt-2">
-          <Button onClick={handleSave} className="flex-1 gap-2">
+          <Button onClick={handleSave} className="flex-1 gap-2" disabled={isLoading}>
             <Save className="h-4 w-4" />
-            {t("common.buttons.save") || "ذخیره"}
+            {isLoading ? "در حال ذخیره..." : t("common.buttons.save") || "ذخیره"}
           </Button>
           <Button
             variant="outline"

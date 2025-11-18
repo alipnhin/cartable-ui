@@ -1,35 +1,28 @@
 "use client";
 
-import { Transaction, TransactionStatus } from "@/types/transaction";
+import { TransactionItem } from "@/services/transactionService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import useTranslation from "@/hooks/useTranslation";
-import { PieChart, BarChart3, TrendingUp } from "lucide-react";
+import { PieChart, TrendingUp } from "lucide-react";
 
 interface TransactionChartsProps {
-  transactions: Transaction[];
+  transactions: TransactionItem[];
 }
 
 export function TransactionCharts({ transactions }: TransactionChartsProps) {
   const { t } = useTranslation();
 
-  // محاسبه داده‌های چارت وضعیت
+  // محاسبه داده‌های چارت وضعیت بر اساس status number از API
+  // 3 = succeeded, 2 = waiting for execution, 5 = waiting for bank
+  // 4 = rejected by bank, 7 = canceled
   const statusData = {
-    succeeded: transactions.filter(
-      (tx) => tx.status === TransactionStatus.BankSucceeded
-    ).length,
+    succeeded: transactions.filter((tx) => tx.status === 3).length,
     pending: transactions.filter(
-      (tx) =>
-        tx.status === TransactionStatus.WaitForBank ||
-        tx.status === TransactionStatus.WaitForExecution
+      (tx) => tx.status === 2 || tx.status === 5 || tx.status === 1
     ).length,
-    failed:
-      transactions.filter((tx) => tx.status === TransactionStatus.Failed)
-        .length +
-      transactions.filter(
-        (tx) =>
-          tx.status === TransactionStatus.BankRejected ||
-          tx.status === TransactionStatus.Canceled
-      ).length,
+    failed: transactions.filter(
+      (tx) => tx.status === 4 || tx.status === 7 || tx.status === 6
+    ).length,
   };
 
   const total = transactions.length || 1;
@@ -128,7 +121,7 @@ export function TransactionCharts({ transactions }: TransactionChartsProps) {
           <div className="pt-4 border-t">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium">{t("reports.total")}</span>
-              <span className="text-lg font-bold">{total}</span>
+              <span className="text-lg font-bold">{transactions.length}</span>
             </div>
           </div>
         </CardContent>
@@ -144,7 +137,7 @@ export function TransactionCharts({ transactions }: TransactionChartsProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {dailyData.map((day, index) => (
+            {dailyData.map((day) => (
               <div key={day.date}>
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-xs text-muted-foreground">

@@ -5,59 +5,179 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { AppLayout } from "@/components/layout";
-import { ArrowLeft, Edit2, Users, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, Users, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import useTranslation from "@/hooks/useTranslation";
-import { getAccountById } from "@/mocks/mockAccounts";
-import { mockUsers } from "@/mocks/mockUsers";
+import { useToast } from "@/hooks/use-toast";
 import { AccountInfo } from "./components/account-info";
 import { SignerCard } from "./components/signer-card";
 import { MinimumSignaturesForm } from "./components/minimum-signatures-form";
 import { AddSignerDialog } from "./components/add-signer-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  getAccountDetail,
+  changeMinimumSignature,
+  enableSigner,
+  disableSigner,
+  AccountDetailResponse,
+} from "@/services/accountService";
 
 export default function AccountDetailPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { toast } = useToast();
   const params = useParams();
+  const { data: session } = useSession();
   const accountId = params?.id as string;
 
-  // گرفتن اطلاعات حساب
-  const account = useMemo(() => {
-    return getAccountById(accountId);
-  }, [accountId]);
+  const [account, setAccount] = useState<AccountDetailResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  // گرفتن امضاداران
-  const signers = useMemo(() => {
-    if (!account) return [];
-    return mockUsers.filter((user) => account.signerIds.includes(user.id));
-  }, [account]);
+  // واکشی اطلاعات حساب
+  const fetchAccountDetail = useCallback(async () => {
+    if (!session?.accessToken || !accountId) return;
 
-  // شمارش امضاداران فعال
-  const activeSignersCount = signers.filter((s) => s.isActive).length;
+    setIsLoading(true);
+    try {
+      const data = await getAccountDetail(accountId, session.accessToken);
+      setAccount(data);
+    } catch (error) {
+      console.error("Error fetching account detail:", error);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در دریافت اطلاعات حساب",
+        variant: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [session?.accessToken, accountId, toast, t]);
 
-  // هندلرها
-  const handleSaveMinSignatures = (value: number) => {
-    console.log("Saving min signatures:", value);
-    // در اینجا باید API call شود
+  useEffect(() => {
+    fetchAccountDetail();
+  }, [fetchAccountDetail]);
+
+  // تعداد امضاداران فعال
+  const activeSignersCount = account?.users?.filter((u) => u.status === 1).length ?? 0;
+
+  // هندلر تغییر حداقل امضا
+  const handleSaveMinSignatures = async (value: number) => {
+    if (!session?.accessToken || !account) return;
+
+    setIsUpdating(true);
+    try {
+      await changeMinimumSignature(
+        {
+          minimumSignature: value,
+          bankGatewayId: account.id,
+        },
+        session.accessToken
+      );
+      toast({
+        title: t("toast.success"),
+        description: "حداقل امضا با موفقیت تغییر کرد",
+        variant: "success",
+      });
+      fetchAccountDetail();
+    } catch (error) {
+      console.error("Error changing minimum signature:", error);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در تغییر حداقل امضا",
+        variant: "error",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  const handleRequestStatusChange = (signerId: string, currentStatus: boolean) => {
-    console.log(
-      `Request ${currentStatus ? "deactivation" : "activation"} for signer:`,
-      signerId
+  // هندلر تغییر وضعیت امضادار
+  const handleRequestStatusChange = async (signerId: string, currentStatus: boolean) => {
+    if (!session?.accessToken) return;
+
+    setIsUpdating(true);
+    try {
+      if (currentStatus) {
+        await disableSigner(signerId, session.accessToken);
+        toast({
+          title: t("toast.success"),
+          description: "امضادار غیرفعال شد",
+          variant: "success",
+        });
+      } else {
+        await enableSigner(signerId, session.accessToken);
+        toast({
+          title: t("toast.success"),
+          description: "امضادار فعال شد",
+          variant: "success",
+        });
+      }
+      fetchAccountDetail();
+    } catch (error) {
+      console.error("Error changing signer status:", error);
+      toast({
+        title: t("toast.error"),
+        description: "خطا در تغییر وضعیت امضادار",
+        variant: "error",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // هندلر افزودن امضادار
+  const handleAddSigner = () => {
+    fetchAccountDetail();
+  };
+
+  // Skeleton برای لودینگ
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="mb-6">
+          <Skeleton className="h-9 w-24 mb-4" />
+          <div className="flex items-center gap-3 mb-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-6 w-16 rounded-full" />
+          </div>
+          <Skeleton className="h-5 w-64" />
+        </div>
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-5 w-32" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-32 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
     );
-    // در اینجا باید API call برای درخواست تغییر وضعیت شود
-  };
-
-  const handleAddSigner = (userId: string) => {
-    console.log("Adding signer:", userId);
-    // در اینجا باید API call شود
-  };
+  }
 
   if (!account) {
     return (
@@ -91,21 +211,23 @@ export default function AccountDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold">{account.accountTitle}</h1>
-              <Badge variant={account.isActive ? "success" : "secondary"}>
-                {account.isActive ? "فعال" : "غیرفعال"}
+              <h1 className="text-2xl font-bold">{account.title}</h1>
+              <Badge variant={account.isEnable ? "success" : "secondary"}>
+                {account.isEnable ? "فعال" : "غیرفعال"}
               </Badge>
             </div>
             <p className="text-muted-foreground">
-              {account.bankName} - {account.sheba}
+              {account.bankName} - {account.shebaNumber}
             </p>
           </div>
           <Button
             variant="outline"
-            className="hover:-translate-y-0.5 active:scale-95 transition-all duration-200 gap-2"
+            onClick={fetchAccountDetail}
+            disabled={isUpdating}
+            className="gap-2"
           >
-            <Edit2 className="h-4 w-4" />
-            {t("accounts.editAccount") || "ویرایش حساب"}
+            <RefreshCw className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`} />
+            به‌روزرسانی
           </Button>
         </div>
       </div>
@@ -124,7 +246,7 @@ export default function AccountDetailPage() {
               </CardTitle>
               <AddSignerDialog
                 accountId={accountId}
-                existingSignerIds={account.signerIds}
+                existingSignerIds={account.users?.map((u) => u.userId) ?? []}
                 onAdd={handleAddSigner}
               />
             </div>
@@ -134,7 +256,7 @@ export default function AccountDetailPage() {
             <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
               <div className="flex items-center gap-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{signers.length}</div>
+                  <div className="text-2xl font-bold">{account.users?.length ?? 0}</div>
                   <div className="text-xs text-muted-foreground">
                     کل امضاداران
                   </div>
@@ -149,20 +271,20 @@ export default function AccountDetailPage() {
                 <div className="h-12 w-px bg-border" />
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">
-                    {account.minimumSignatureCount}
+                    {account.minimumSignature}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     حداقل مورد نیاز
                   </div>
                 </div>
               </div>
-              {activeSignersCount < account.minimumSignatureCount && (
+              {activeSignersCount < account.minimumSignature && (
                 <Badge variant="destructive" className="gap-1 flex-shrink-0">
                   <XCircle className="h-3 w-3" />
                   امضاداران فعال کافی نیست
                 </Badge>
               )}
-              {activeSignersCount >= account.minimumSignatureCount && (
+              {activeSignersCount >= account.minimumSignature && (
                 <Badge className="gap-1 bg-success hover:bg-success/90 flex-shrink-0">
                   <CheckCircle2 className="h-3 w-3" />
                   تعداد امضادار کافی است
@@ -172,15 +294,16 @@ export default function AccountDetailPage() {
 
             {/* فرم حداقل امضا */}
             <MinimumSignaturesForm
-              currentValue={account.minimumSignatureCount}
-              maxValue={signers.length}
+              currentValue={account.minimumSignature}
+              maxValue={account.users?.length ?? 0}
               onSave={handleSaveMinSignatures}
+              isLoading={isUpdating}
             />
 
             {/* لیست امضاداران */}
-            {signers.length > 0 ? (
+            {account.users && account.users.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2">
-                {signers.map((signer) => (
+                {account.users.map((signer) => (
                   <SignerCard
                     key={signer.id}
                     signer={signer}
@@ -195,12 +318,12 @@ export default function AccountDetailPage() {
                   امضاداری تعریف نشده است
                 </h3>
                 <p className="text-muted-foreground mb-6">
-                  برای استفاده از این حساب، حداقل {account.minimumSignatureCount}{" "}
+                  برای استفاده از این حساب، حداقل {account.minimumSignature}{" "}
                   امضادار نیاز است.
                 </p>
                 <AddSignerDialog
                   accountId={accountId}
-                  existingSignerIds={account.signerIds}
+                  existingSignerIds={account.users?.map((u) => u.userId) ?? []}
                   onAdd={handleAddSigner}
                 />
               </div>

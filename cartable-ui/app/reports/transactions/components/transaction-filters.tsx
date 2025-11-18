@@ -1,8 +1,7 @@
 "use client";
 
 import { TransactionFiltersType } from "../page";
-import { TransactionStatus } from "@/types/transaction";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input, InputWrapper } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,19 +21,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { PersianDatePicker } from "@/components/ui/persian-datepicker";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import AccountSelector from "@/components/common/AccountSelector";
+import {
+  TransactionStatusMap,
+  PaymentTypeMap,
+  getDefaultDateRange,
+} from "@/services/transactionService";
 import {
   Search,
   Filter,
   X,
   Calendar,
-  DollarSign,
   CheckSquare,
+  CreditCard,
+  Building2,
+  Hash,
+  FileText,
+  User,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -51,87 +59,125 @@ export function TransactionFilters({
   const isMobile = useIsMobile();
   const [localFilters, setLocalFilters] = useState(filters);
 
-  const statusOptions = [
-    { value: TransactionStatus.BankSucceeded, label: t("status.succeeded") },
-    { value: TransactionStatus.WaitForExecution, label: t("status.pending") },
-    { value: TransactionStatus.WaitForBank, label: t("status.pending") },
-    { value: TransactionStatus.Failed, label: t("status.failed") },
-    { value: TransactionStatus.BankRejected, label: t("status.bankRejected") },
-  ];
-
-  const handleStatusToggle = (status: TransactionStatus) => {
-    const newStatuses = localFilters.status.includes(status)
-      ? localFilters.status.filter((s) => s !== status)
-      : [...localFilters.status, status];
-    setLocalFilters({ ...localFilters, status: newStatuses });
-  };
-
   const handleApplyFilters = () => {
     onFiltersChange(localFilters);
   };
 
   const handleResetFilters = () => {
+    const defaultDates = getDefaultDateRange();
     const resetFilters: TransactionFiltersType = {
       search: "",
-      status: [],
-      fromDate: "",
-      toDate: "",
-      minAmount: 0,
-      maxAmount: 0,
-      accountIds: [],
-      orderIds: [],
+      status: null,
+      paymentType: null,
+      fromDate: defaultDates.fromDate,
+      toDate: defaultDates.toDate,
+      bankGatewayId: "",
+      nationalCode: "",
+      destinationIban: "",
+      accountNumber: "",
+      orderId: "",
+      transferFromDate: "",
+      transferToDate: "",
     };
     setLocalFilters(resetFilters);
     onFiltersChange(resetFilters);
   };
 
   const activeFiltersCount =
-    filters.status.length +
-    (filters.fromDate ? 1 : 0) +
-    (filters.toDate ? 1 : 0) +
-    (filters.minAmount > 0 ? 1 : 0) +
-    (filters.maxAmount > 0 ? 1 : 0);
+    (filters.status !== null ? 1 : 0) +
+    (filters.paymentType !== null ? 1 : 0) +
+    (filters.bankGatewayId && filters.bankGatewayId !== "all" ? 1 : 0) +
+    (filters.nationalCode ? 1 : 0) +
+    (filters.destinationIban ? 1 : 0) +
+    (filters.accountNumber ? 1 : 0) +
+    (filters.orderId ? 1 : 0) +
+    (filters.transferFromDate ? 1 : 0) +
+    (filters.transferToDate ? 1 : 0);
 
   const filterContent = (
     <div className="space-y-6">
+      {/* بخش حساب */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Building2 className="h-4 w-4 text-muted-foreground" />
+          <Label className="text-base font-semibold">حساب</Label>
+        </div>
+        <Separator />
+        <AccountSelector
+          value={localFilters.bankGatewayId}
+          onValueChange={(value) =>
+            setLocalFilters({ ...localFilters, bankGatewayId: value })
+          }
+          placeholder="انتخاب حساب"
+          showAllOption={true}
+        />
+      </div>
+
       {/* بخش وضعیت */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <CheckSquare className="h-4 w-4 text-muted-foreground" />
-          <Label className="text-base font-semibold">
-            {t("filters.status")}
-          </Label>
+          <Label className="text-base font-semibold">{t("filters.status")}</Label>
         </div>
         <Separator />
-        <div className="space-y-3">
-          {statusOptions.map((option) => (
-            <div
-              key={option.value}
-              className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted/50 transition-colors"
-            >
-              <Checkbox
-                id={`status-${option.value}`}
-                checked={localFilters.status.includes(option.value)}
-                onCheckedChange={() => handleStatusToggle(option.value)}
-              />
-              <Label
-                htmlFor={`status-${option.value}`}
-                className="text-sm font-normal cursor-pointer flex-1"
-              >
-                {option.label}
-              </Label>
-            </div>
-          ))}
-        </div>
+        <Select
+          value={localFilters.status?.toString() || "all"}
+          onValueChange={(value) =>
+            setLocalFilters({
+              ...localFilters,
+              status: value === "all" ? null : Number(value),
+            })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="همه وضعیت‌ها" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">همه وضعیت‌ها</SelectItem>
+            {Object.entries(TransactionStatusMap).map(([key, { label }]) => (
+              <SelectItem key={key} value={key}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* بخش بازه تاریخ */}
+      {/* بخش نوع پرداخت */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <CreditCard className="h-4 w-4 text-muted-foreground" />
+          <Label className="text-base font-semibold">نوع پرداخت</Label>
+        </div>
+        <Separator />
+        <Select
+          value={localFilters.paymentType?.toString() || "all"}
+          onValueChange={(value) =>
+            setLocalFilters({
+              ...localFilters,
+              paymentType: value === "all" ? null : Number(value),
+            })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="همه انواع" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">همه انواع</SelectItem>
+            {Object.entries(PaymentTypeMap).map(([key, { label }]) => (
+              <SelectItem key={key} value={key}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* بخش بازه تاریخ ثبت */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
-          <Label className="text-base font-semibold">
-            {t("reports.dateRange")}
-          </Label>
+          <Label className="text-base font-semibold">تاریخ ثبت</Label>
         </div>
         <Separator />
         <div className="space-y-3">
@@ -162,56 +208,104 @@ export function TransactionFilters({
         </div>
       </div>
 
-      {/* بخش بازه مبلغ */}
+      {/* بخش بازه تاریخ انتقال */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-          <Label className="text-base font-semibold">
-            {t("reports.amountRange")}
-          </Label>
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Label className="text-base font-semibold">تاریخ انتقال</Label>
         </div>
         <Separator />
         <div className="space-y-3">
           <div className="space-y-2">
-            <Label
-              htmlFor="minAmount"
-              className="text-sm text-muted-foreground"
-            >
-              {t("reports.minAmount")}
-            </Label>
-            <Input
-              id="minAmount"
-              type="number"
-              value={localFilters.minAmount || ""}
-              onChange={(e) =>
-                setLocalFilters({
-                  ...localFilters,
-                  minAmount: Number(e.target.value),
-                })
+            <Label className="text-sm text-muted-foreground">از تاریخ</Label>
+            <PersianDatePicker
+              value={localFilters.transferFromDate}
+              onChange={(date) =>
+                setLocalFilters({ ...localFilters, transferFromDate: date })
               }
-              placeholder="0"
-              className="w-full"
+              placeholder="از تاریخ انتقال"
             />
           </div>
           <div className="space-y-2">
-            <Label
-              htmlFor="maxAmount"
-              className="text-sm text-muted-foreground"
-            >
-              {t("reports.maxAmount")}
+            <Label className="text-sm text-muted-foreground">تا تاریخ</Label>
+            <PersianDatePicker
+              value={localFilters.transferToDate}
+              onChange={(date) =>
+                setLocalFilters({ ...localFilters, transferToDate: date })
+              }
+              placeholder="تا تاریخ انتقال"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* بخش فیلترهای متنی */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <FileText className="h-4 w-4 text-muted-foreground" />
+          <Label className="text-base font-semibold">سایر فیلترها</Label>
+        </div>
+        <Separator />
+        <div className="space-y-3">
+          <div className="space-y-2">
+            <Label className="text-sm text-muted-foreground flex items-center gap-2">
+              <User className="h-3 w-3" />
+              کد ملی
             </Label>
             <Input
-              id="maxAmount"
-              type="number"
-              value={localFilters.maxAmount || ""}
+              value={localFilters.nationalCode}
+              onChange={(e) =>
+                setLocalFilters({ ...localFilters, nationalCode: e.target.value })
+              }
+              placeholder="کد ملی"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm text-muted-foreground flex items-center gap-2">
+              <Hash className="h-3 w-3" />
+              شماره شبا مقصد
+            </Label>
+            <Input
+              value={localFilters.destinationIban}
               onChange={(e) =>
                 setLocalFilters({
                   ...localFilters,
-                  maxAmount: Number(e.target.value),
+                  destinationIban: e.target.value,
                 })
               }
-              placeholder="0"
-              className="w-full"
+              placeholder="IR..."
+              dir="ltr"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm text-muted-foreground flex items-center gap-2">
+              <Hash className="h-3 w-3" />
+              شماره حساب
+            </Label>
+            <Input
+              value={localFilters.accountNumber}
+              onChange={(e) =>
+                setLocalFilters({
+                  ...localFilters,
+                  accountNumber: e.target.value,
+                })
+              }
+              placeholder="شماره حساب"
+              dir="ltr"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm text-muted-foreground flex items-center gap-2">
+              <Hash className="h-3 w-3" />
+              شناسه دستور
+            </Label>
+            <Input
+              value={localFilters.orderId}
+              onChange={(e) =>
+                setLocalFilters({ ...localFilters, orderId: e.target.value })
+              }
+              placeholder="شناسه دستور پرداخت"
+              dir="ltr"
             />
           </div>
         </div>
@@ -300,43 +394,16 @@ export function TransactionFilters({
                 {t("filters.activeFilters")}:
               </div>
               <div className="flex flex-wrap gap-2 flex-1">
-                {/* وضعیت‌های فعال */}
-                {filters.status.map((status) => {
-                  const option = statusOptions.find(
-                    (opt) => opt.value === status
-                  );
-                  return (
-                    <Badge
-                      key={status}
-                      variant="secondary"
-                      className="gap-1 hover:bg-secondary/80 transition-colors"
-                    >
-                      {option?.label}
-                      <button
-                        onClick={() => {
-                          onFiltersChange({
-                            ...filters,
-                            status: filters.status.filter((s) => s !== status),
-                          });
-                        }}
-                        className="hover:bg-muted rounded-full p-0.5 transition-colors"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  );
-                })}
-
-                {/* تاریخ از */}
-                {filters.fromDate && (
+                {/* وضعیت */}
+                {filters.status !== null && (
                   <Badge
                     variant="secondary"
                     className="gap-1 hover:bg-secondary/80 transition-colors"
                   >
-                    {t("reports.fromDate")}: {filters.fromDate}
+                    {TransactionStatusMap[filters.status]?.label || "نامشخص"}
                     <button
                       onClick={() => {
-                        onFiltersChange({ ...filters, fromDate: "" });
+                        onFiltersChange({ ...filters, status: null });
                       }}
                       className="hover:bg-muted rounded-full p-0.5 transition-colors"
                     >
@@ -345,16 +412,16 @@ export function TransactionFilters({
                   </Badge>
                 )}
 
-                {/* تاریخ تا */}
-                {filters.toDate && (
+                {/* نوع پرداخت */}
+                {filters.paymentType !== null && (
                   <Badge
                     variant="secondary"
                     className="gap-1 hover:bg-secondary/80 transition-colors"
                   >
-                    {t("reports.toDate")}: {filters.toDate}
+                    {PaymentTypeMap[filters.paymentType]?.label || "نامشخص"}
                     <button
                       onClick={() => {
-                        onFiltersChange({ ...filters, toDate: "" });
+                        onFiltersChange({ ...filters, paymentType: null });
                       }}
                       className="hover:bg-muted rounded-full p-0.5 transition-colors"
                     >
@@ -363,17 +430,16 @@ export function TransactionFilters({
                   </Badge>
                 )}
 
-                {/* حداقل مبلغ */}
-                {filters.minAmount > 0 && (
+                {/* حساب */}
+                {filters.bankGatewayId && filters.bankGatewayId !== "all" && (
                   <Badge
                     variant="secondary"
                     className="gap-1 hover:bg-secondary/80 transition-colors"
                   >
-                    {t("reports.minAmount")}:{" "}
-                    {filters.minAmount.toLocaleString("fa-IR")}
+                    حساب انتخاب شده
                     <button
                       onClick={() => {
-                        onFiltersChange({ ...filters, minAmount: 0 });
+                        onFiltersChange({ ...filters, bankGatewayId: "" });
                       }}
                       className="hover:bg-muted rounded-full p-0.5 transition-colors"
                     >
@@ -382,17 +448,70 @@ export function TransactionFilters({
                   </Badge>
                 )}
 
-                {/* حداکثر مبلغ */}
-                {filters.maxAmount > 0 && (
+                {/* کد ملی */}
+                {filters.nationalCode && (
                   <Badge
                     variant="secondary"
                     className="gap-1 hover:bg-secondary/80 transition-colors"
                   >
-                    {t("reports.maxAmount")}:{" "}
-                    {filters.maxAmount.toLocaleString("fa-IR")}
+                    کد ملی: {filters.nationalCode}
                     <button
                       onClick={() => {
-                        onFiltersChange({ ...filters, maxAmount: 0 });
+                        onFiltersChange({ ...filters, nationalCode: "" });
+                      }}
+                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+
+                {/* شماره شبا */}
+                {filters.destinationIban && (
+                  <Badge
+                    variant="secondary"
+                    className="gap-1 hover:bg-secondary/80 transition-colors"
+                  >
+                    شبا: {filters.destinationIban.slice(0, 10)}...
+                    <button
+                      onClick={() => {
+                        onFiltersChange({ ...filters, destinationIban: "" });
+                      }}
+                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+
+                {/* شماره حساب */}
+                {filters.accountNumber && (
+                  <Badge
+                    variant="secondary"
+                    className="gap-1 hover:bg-secondary/80 transition-colors"
+                  >
+                    شماره حساب: {filters.accountNumber}
+                    <button
+                      onClick={() => {
+                        onFiltersChange({ ...filters, accountNumber: "" });
+                      }}
+                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+
+                {/* شناسه دستور */}
+                {filters.orderId && (
+                  <Badge
+                    variant="secondary"
+                    className="gap-1 hover:bg-secondary/80 transition-colors"
+                  >
+                    شناسه: {filters.orderId}
+                    <button
+                      onClick={() => {
+                        onFiltersChange({ ...filters, orderId: "" });
                       }}
                       className="hover:bg-muted rounded-full p-0.5 transition-colors"
                     >
