@@ -10,17 +10,16 @@ import { Eye, Edit, Users, Building2, Hash, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Account } from "@/types";
+import { AccountListItem } from "@/services/accountService";
 import useTranslation from "@/hooks/useTranslation";
-import { formatCurrency } from "@/lib/helpers";
 
 interface AccountsCardsProps {
-  accounts: Account[];
+  accounts: AccountListItem[];
 }
 
 export function AccountsCards({ accounts }: AccountsCardsProps) {
   const router = useRouter();
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
 
   const formatIBAN = (iban: string) => {
     return iban.replace(/(.{4})/g, "$1 ").trim();
@@ -49,7 +48,7 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
               <h3 className="font-semibold text-base mb-1">
-                {account.accountTitle}
+                {account.title}
               </h3>
               <p className="text-sm text-muted-foreground flex items-center gap-2">
                 <Building2 className="h-3.5 w-3.5" />
@@ -58,7 +57,7 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
             </div>
             <div onClick={(e) => e.stopPropagation()}>
               <Switch
-                checked={account.isActive}
+                checked={account.isEnable}
                 onCheckedChange={() => {
                   console.log("Toggle account status:", account.id);
                 }}
@@ -84,33 +83,18 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
                 {t("accounts.iban")}
               </span>
               <span className="text-xs font-mono text-end">
-                {formatIBAN(account.sheba)}
+                {formatIBAN(account.shebaNumber)}
               </span>
             </div>
 
-            {/* موجودی */}
-            <div className="flex items-center justify-between py-2 border-b">
-              <span className="text-sm text-muted-foreground">
-                {t("accounts.balance")}
-              </span>
-              <span className="text-sm font-semibold text-primary">
-                {formatCurrency(account.balance ?? 0, locale)}
-              </span>
-            </div>
-
-            {/* امضاها */}
+            {/* کارتابل */}
             <div className="flex items-center justify-between py-2">
               <span className="text-sm text-muted-foreground">
-                {t("accounts.signatures")}
+                {t("accounts.hasCartable")}
               </span>
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary">
-                  {t("accounts.min")}: {account.minimumSignatureCount}
-                </Badge>
-                <Badge variant="outline">
-                  {t("accounts.total")}: {account.signerIds.length}
-                </Badge>
-              </div>
+              <Badge variant={account.hasCartable ? "success" : "secondary"}>
+                {account.hasCartable ? t("common.yes") : t("common.no")}
+              </Badge>
             </div>
           </div>
 
@@ -128,14 +112,10 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
               <Eye className="me-2 h-4 w-4" />
               {t("common.buttons.view")}
             </Button>
-            <Button size="sm" variant="outline" className="flex-1">
-              <Edit className="me-2 h-4 w-4" />
-              {t("common.buttons.edit")}
-            </Button>
             <Button
               size="sm"
               variant="outline"
-              onClick={() => router.push(`/accounts/${account.id}?tab=signers`)}
+              onClick={() => router.push(`/accounts/${account.id}`)}
             >
               <Users className="h-4 w-4" />
             </Button>

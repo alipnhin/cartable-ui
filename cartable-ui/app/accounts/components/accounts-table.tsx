@@ -18,18 +18,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Account } from "@/types";
+import { AccountListItem } from "@/services/accountService";
 import useTranslation from "@/hooks/useTranslation";
-import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/lib/helpers";
 
 interface AccountsTableProps {
-  accounts: Account[];
+  accounts: AccountListItem[];
 }
 
 export function AccountsTable({ accounts }: AccountsTableProps) {
   const router = useRouter();
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
 
   const formatIBAN = (iban: string) => {
     // IR12 0100 0012 3456 7890 1234 56
@@ -57,13 +55,7 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
             </TableHead>
             <TableHead className="font-bold">{t("accounts.iban")}</TableHead>
             <TableHead className="text-center font-bold">
-              {t("accounts.balance")}
-            </TableHead>
-            <TableHead className="text-center font-bold">
-              {t("accounts.minSignatures")}
-            </TableHead>
-            <TableHead className="text-center font-bold">
-              {t("accounts.signersCount")}
+              {t("accounts.hasCartable")}
             </TableHead>
             <TableHead className="text-center font-bold">
               {t("common.status")}
@@ -76,7 +68,7 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
         <TableBody>
           {accounts.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={9} className="text-center py-8">
+              <TableCell colSpan={7} className="text-center py-8">
                 <p className="text-muted-foreground">
                   {t("accounts.noAccountsFound")}
                 </p>
@@ -90,32 +82,25 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
                 onClick={() => router.push(`/accounts/${account.id}`)}
               >
                 <TableCell className="font-medium">
-                  {account.accountTitle}
+                  {account.title}
                 </TableCell>
                 <TableCell>{account.bankName}</TableCell>
                 <TableCell className="font-mono text-sm">
                   {account.accountNumber}
                 </TableCell>
                 <TableCell className="font-mono text-xs">
-                  {formatIBAN(account.sheba)}
-                </TableCell>
-                <TableCell className="text-end font-semibold">
-                  {formatCurrency(account.balance ?? 0, locale)}
+                  {formatIBAN(account.shebaNumber)}
                 </TableCell>
                 <TableCell className="text-center">
-                  <Badge variant="secondary">
-                    {account.minimumSignatureCount}
+                  <Badge variant={account.hasCartable ? "success" : "secondary"}>
+                    {account.hasCartable ? t("common.yes") : t("common.no")}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-center">
-                  <Badge variant="outline">{account.signerIds.length}</Badge>
-                </TableCell>
-                <TableCell className="text-center">
                   <Switch
-                    checked={account.isActive}
+                    checked={account.isEnable}
                     onClick={(e) => e.stopPropagation()}
                     onCheckedChange={() => {
-                      // Mock: در اینجا باید تغییر وضعیت انجام شود
                       console.log("Toggle account status:", account.id);
                     }}
                   />
