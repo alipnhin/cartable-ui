@@ -58,7 +58,8 @@ export default function AccountDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [session?.accessToken, accountId, toast, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.accessToken, accountId]);
 
   useEffect(() => {
     fetchAccountDetail();

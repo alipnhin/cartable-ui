@@ -46,7 +46,7 @@ interface TransactionTableProps {
 }
 
 export function TransactionTable({
-  transactions,
+  transactions = [],
   totalRecords,
   currentPage,
   pageSize,
