@@ -1,10 +1,3 @@
-/**
- * Enhanced BottomDock Component - نسخه نهایی
- * منوی پایین موبایل با 2 مدل مختلف
- * Mode 1: Classic with Labels (دارای آیکون + متن)
- * Mode 2: Floating Center Button (دکمه وسطی برجسته)
- */
-
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -13,8 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { dockMenuItems, isRouteActive } from "@/config/navigation";
 import useTranslation from "@/hooks/useTranslation";
 import { Plus } from "lucide-react";
+import {
+  useMemo,
+  memo,
+  useState,
+  useTransition,
+  useEffect,
+  useRef,
+} from "react";
 
-type BottomDockMode = "classic" | "floating";
+type BottomDockMode = "classic" | "minimal-v2" | "floating" | "minimal";
 
 interface BottomDockProps {
   mode?: BottomDockMode;
@@ -25,78 +26,94 @@ export function BottomDock({
   mode = "floating",
   onCenterButtonClick,
 }: BottomDockProps) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const { t } = useTranslation();
-
   if (mode === "classic") {
     return <ClassicBottomDock />;
+  }
+
+  if (mode === "minimal-v2") {
+    return <MinimalV2BottomDock />;
+  }
+  if (mode === "minimal") {
+    return <MinimalBottomDock />;
   }
 
   return <FloatingBottomDock onCenterButtonClick={onCenterButtonClick} />;
 }
 
 /**
- * Floating Bottom Dock - Mode 2
- * منوی با دکمه وسطی برجسته و شناور
+ * Minimal Bottom Dock - Mode 3
  */
-function FloatingBottomDock({
-  onCenterButtonClick,
-}: {
-  onCenterButtonClick?: () => void;
-}) {
+/**
+ * Minimal Bottom Dock - Mode 3 نسخه حرفه‌ای (بدون Ping)
+ */
+/**
+ * Minimal Bottom Dock - Mode 3 نسخه حرفه‌ای
+ */
+function MinimalBottomDock() {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
+  const [isPending, startTransition] = useTransition();
+  const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
-  // برای مدل floating، آیتم وسطی را پیدا می‌کنیم
-  const centerIndex = Math.floor(dockMenuItems.length / 2);
-  const CenterIcon = dockMenuItems[centerIndex]?.icon || Plus;
+  const handleNavigation = (route: string) => {
+    setPendingRoute(route);
+    startTransition(() => {
+      router.push(route);
+    });
+  };
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden">
-      {/* Background با shadow بهتر + safe area برای iOS */}
       <div
-        className="relative bg-card/95 backdrop-blur-md border-t border-border/50 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.3)]"
+        className="relative bg-card border-t border-border/50 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.3)]"
         style={{
           paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
-          height: "calc(6rem + env(safe-area-inset-bottom))",
+          paddingTop: "0.75rem",
         }}
       >
-        {/* Menu Items */}
-        <div className="flex h-full items-end justify-around pb-3">
-          {dockMenuItems.map((item, index) => {
+        <div className="flex items-center justify-around px-2">
+          {dockMenuItems.map((item) => {
             const isActive = isRouteActive(pathname, item.route);
+            const isPendingThis = pendingRoute === item.route;
             const Icon = item.icon;
-            const isCenterItem = index === centerIndex;
-
-            // آیتم وسطی را رندر نمی‌کنیم (جای آن خالی می‌ماند)
-            if (isCenterItem) {
-              return <div key={item.title} className="w-14" />;
-            }
 
             return (
               <button
-                key={item.title}
-                onClick={() => router.push(item.route)}
+                key={item.route}
+                onClick={() => handleNavigation(item.route)}
+                disabled={isPending}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-1.5 px-3 py-2 transition-all duration-300 ease-out",
-                  "active:scale-95 hover:scale-105",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  "relative flex flex-col items-center justify-center gap-2 py-2 min-w-[68px] transition-all duration-300 ease-out group",
+                  "active:scale-90",
+                  "after:content-[''] after:absolute after:inset-[-10px]",
+                  isPending && !isPendingThis && "opacity-40"
                 )}
               >
-                {/* Icon با Badge */}
-                <div className="relative">
+                {/* Icon Container با انیمیشن */}
+                <div
+                  className={cn(
+                    "relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 mb-1",
+                    isActive || isPendingThis
+                      ? "bg-primary/15 scale-110 shadow-lg shadow-primary/20"
+                      : "bg-transparent group-hover:bg-muted/50 group-hover:scale-105"
+                  )}
+                >
                   <Icon
                     className={cn(
-                      "h-6 w-6 transition-all duration-300 ease-out",
-                      isActive && "scale-110"
+                      "h-6 w-6 transition-all duration-300",
+                      isActive || isPendingThis
+                        ? "text-primary scale-110"
+                        : "text-muted-foreground",
+                      isPendingThis && "animate-pulse"
                     )}
                   />
+
+                  {/* Badge */}
                   {item.badge && item.badge > 0 && (
                     <Badge
                       variant="destructive"
-                      className="absolute -top-2 -end-2 h-4 min-w-4 px-1 text-[10px] font-bold animate-pulse"
+                      className="absolute -top-1 -end-1 h-5 min-w-5 px-1.5 text-[10px] font-bold ring-2 ring-background shadow-md"
                     >
                       {item.badge > 9 ? "9+" : item.badge}
                     </Badge>
@@ -106,36 +123,110 @@ function FloatingBottomDock({
                 {/* Label */}
                 <span
                   className={cn(
-                    "text-[11px] font-medium transition-all duration-300 ease-out",
-                    isActive && "font-semibold scale-105"
+                    "text-[11px] font-medium transition-all duration-300 leading-tight",
+                    isActive || isPendingThis
+                      ? "text-primary font-semibold scale-105"
+                      : "text-muted-foreground group-hover:text-foreground"
                   )}
                 >
                   {t(`navigation.${item.title}`)}
                 </span>
 
-                {/* Active Indicator - Dot با انیمیشن */}
-                {isActive && (
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary animate-pulse" />
+                {/* Active Line Indicator - زیر متن */}
+                <div
+                  className={cn(
+                    "absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-primary transition-all duration-300 ease-out",
+                    isActive || isPendingThis
+                      ? "opacity-100 scale-x-100"
+                      : "opacity-0 scale-x-0"
+                  )}
+                />
+
+                {/* Dot Indicator - بالای آیکون */}
+                {(isActive || isPendingThis) && (
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-lg shadow-primary/50" />
                 )}
               </button>
             );
           })}
         </div>
+      </div>
+    </nav>
+  );
+}
 
-        {/* Floating Center Button (دکمه شناور وسطی) */}
+/**
+ * Floating Bottom Dock - Mode 2
+ */
+function FloatingBottomDock({
+  onCenterButtonClick,
+}: {
+  onCenterButtonClick?: () => void;
+}) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { t } = useTranslation();
+  const [isPending, startTransition] = useTransition();
+  const [pendingRoute, setPendingRoute] = useState<string | null>(null);
+
+  const centerIndex = useMemo(() => Math.floor(dockMenuItems.length / 2), []);
+  const CenterIcon = dockMenuItems[centerIndex]?.icon || Plus;
+
+  const handleNavigation = (route: string) => {
+    setPendingRoute(route);
+    startTransition(() => {
+      router.push(route);
+    });
+  };
+
+  return (
+    <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden">
+      <div
+        className="relative bg-card/95 backdrop-blur-md border-t border-border/50 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.3)]"
+        style={{
+          paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
+          height: "calc(6rem + env(safe-area-inset-bottom))",
+        }}
+      >
+        <div className="flex h-full items-end justify-around pb-3">
+          {dockMenuItems.map((item, index) => {
+            const isActive = isRouteActive(pathname, item.route);
+            const isPendingThis = pendingRoute === item.route;
+            const isCenterItem = index === centerIndex;
+
+            if (isCenterItem) {
+              return <div key={item.title} className="w-14" />;
+            }
+
+            return (
+              <DockItem
+                key={item.route}
+                item={item}
+                isActive={isActive || isPendingThis}
+                isPending={isPendingThis}
+                onClick={() => handleNavigation(item.route)}
+                t={t}
+                variant="floating"
+              />
+            );
+          })}
+        </div>
+
+        {/* Floating Center Button */}
         <button
           onClick={
             onCenterButtonClick ||
-            (() => router.push(dockMenuItems[centerIndex].route))
+            (() => handleNavigation(dockMenuItems[centerIndex].route))
           }
           className={cn(
             "absolute -top-4 left-1/2 -translate-x-1/2",
             "w-16 h-16 rounded-xl bg-primary text-primary-foreground",
             "flex items-center justify-center",
             "hover:scale-110 active:scale-95",
-            "transition-all duration-200",
+            "transition-transform duration-200",
             "border-4 border-background",
-            "group"
+            "group",
+            "after:content-[''] after:absolute after:inset-[-8px]"
           )}
           style={{
             boxShadow:
@@ -150,43 +241,67 @@ function FloatingBottomDock({
 }
 
 /**
- * Classic Bottom Dock - Mode 1
- * منوی کلاسیک با آیکون + متن در یک سطح
+ * Classic Bottom Dock - Mode 1 با انیمیشن انتقال
+ */
+/**
+ * Classic Bottom Dock - Mode 1 با انیمیشن انتقال بهبود یافته
+ */
+/**
+ * Classic Bottom Dock - Mode 1 با طراحی حرفه‌ای
  */
 function ClassicBottomDock() {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
+  const [isPending, startTransition] = useTransition();
+  const [pendingRoute, setPendingRoute] = useState<string | null>(null);
+
+  const handleNavigation = (route: string) => {
+    setPendingRoute(route);
+    startTransition(() => {
+      router.push(route);
+    });
+  };
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden">
       <div
         className="relative bg-card/95 backdrop-blur-md border-t border-border/50 shadow-[0_-2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_-2px_12px_rgba(0,0,0,0.25)]"
         style={{
-          paddingBottom: "env(safe-area-inset-bottom)",
-          height: "calc(6rem + env(safe-area-inset-bottom))",
+          paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
+          paddingTop: "0.75rem",
         }}
       >
-        <div className="flex h-full items-center justify-around px-2">
+        <div className="flex items-center justify-around px-2">
           {dockMenuItems.map((item) => {
             const isActive = isRouteActive(pathname, item.route);
+            const isPendingThis = pendingRoute === item.route;
             const Icon = item.icon;
 
             return (
               <button
-                key={item.title}
-                onClick={() => router.push(item.route)}
+                key={item.route}
+                onClick={() => handleNavigation(item.route)}
+                disabled={isPending}
                 className={cn(
-                  "relative flex items-center gap-2 px-4 mb-6 py-2 rounded-lg transition-all duration-200",
+                  "relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-xl min-w-[64px] transition-all duration-300",
                   "active:scale-95",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
+                  // افزایش محدوده تاچ
+                  "after:content-[''] after:absolute after:inset-[-8px]",
+                  isActive || isPendingThis
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
+                    : "text-muted-foreground hover:bg-muted/50",
+                  isPending && !isPendingThis && "opacity-50"
                 )}
               >
                 {/* Icon با Badge */}
                 <div className="relative">
-                  <Icon className="h-6 w-6" />
+                  <Icon
+                    className={cn(
+                      "h-6 w-6 transition-all duration-200",
+                      isPendingThis && "animate-pulse"
+                    )}
+                  />
                   {item.badge && item.badge > 0 && (
                     <Badge
                       variant="destructive"
@@ -197,11 +312,19 @@ function ClassicBottomDock() {
                   )}
                 </div>
 
-                {/* Label فقط برای آیتم فعال */}
-                {isActive && (
-                  <span className="text-sm font-semibold">
-                    {t(`navigation.${item.title}`)}
-                  </span>
+                {/* Label - همیشه نمایش داده میشه */}
+                <span
+                  className={cn(
+                    "text-[10px] font-medium transition-all duration-200",
+                    isActive || isPendingThis ? "font-bold" : "font-normal"
+                  )}
+                >
+                  {t(`navigation.${item.title}`)}
+                </span>
+
+                {/* Active Dot Indicator */}
+                {(isActive || isPendingThis) && (
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-foreground animate-pulse" />
                 )}
               </button>
             );
@@ -211,3 +334,255 @@ function ClassicBottomDock() {
     </nav>
   );
 }
+
+/**
+ * Minimal Bottom Dock - Mode 3 نسخه حرفه‌ای
+ */
+function MinimalV2BottomDock() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { t } = useTranslation();
+  const [isPending, startTransition] = useTransition();
+  const [pendingRoute, setPendingRoute] = useState<string | null>(null);
+
+  const handleNavigation = (route: string) => {
+    setPendingRoute(route);
+    startTransition(() => {
+      router.push(route);
+    });
+  };
+
+  return (
+    <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden">
+      <div
+        className="relative bg-card/95 backdrop-blur-md border-t border-border/50 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.3)]"
+        style={{
+          paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
+          paddingTop: "0.75rem",
+        }}
+      >
+        <div className="flex items-center justify-around px-2">
+          {dockMenuItems.map((item) => {
+            const isActive = isRouteActive(pathname, item.route);
+            const isPendingThis = pendingRoute === item.route;
+            const Icon = item.icon;
+
+            return (
+              <button
+                key={item.route}
+                onClick={() => handleNavigation(item.route)}
+                disabled={isPending}
+                className={cn(
+                  "relative flex flex-col items-center justify-center gap-1 py-2 min-w-[68px] transition-all duration-300 ease-out group",
+                  "active:scale-90",
+                  "after:content-[''] after:absolute after:inset-[-10px]",
+                  isPending && !isPendingThis && "opacity-40"
+                )}
+              >
+                {/* Icon Container با انیمیشن */}
+                <div
+                  className={cn(
+                    "relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300",
+                    isActive || isPendingThis
+                      ? "bg-primary/15 scale-110 shadow-lg shadow-primary/20"
+                      : "bg-transparent group-hover:bg-muted/50 group-hover:scale-105"
+                  )}
+                >
+                  <Icon
+                    className={cn(
+                      "h-6 w-6 transition-all duration-300",
+                      isActive || isPendingThis
+                        ? "text-primary scale-110"
+                        : "text-muted-foreground",
+                      isPendingThis && "animate-pulse"
+                    )}
+                  />
+
+                  {/* Badge */}
+                  {item.badge && item.badge > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -end-1 h-5 min-w-5 px-1.5 text-[10px] font-bold ring-2 ring-background shadow-md"
+                    >
+                      {item.badge > 9 ? "9+" : item.badge}
+                    </Badge>
+                  )}
+
+                  {/* Ripple Effect برای Active */}
+                  {(isActive || isPendingThis) && (
+                    <div
+                      className="absolute inset-0 rounded-2xl bg-primary/10 animate-ping"
+                      style={{ animationDuration: "2s" }}
+                    />
+                  )}
+                </div>
+
+                {/* Label */}
+                <span
+                  className={cn(
+                    "text-[11px] font-medium transition-all duration-300 leading-tight",
+                    isActive || isPendingThis
+                      ? "text-primary font-semibold scale-105"
+                      : "text-muted-foreground group-hover:text-foreground"
+                  )}
+                >
+                  {t(`navigation.${item.title}`)}
+                </span>
+
+                {/* Active Line Indicator - زیر متن */}
+                <div
+                  className={cn(
+                    "absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-primary transition-all duration-300 ease-out",
+                    isActive || isPendingThis
+                      ? "opacity-100 scale-x-100"
+                      : "opacity-0 scale-x-0"
+                  )}
+                />
+
+                {/* Dot Indicator - بالای آیکون */}
+                {(isActive || isPendingThis) && (
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-lg shadow-primary/50" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+/**
+ * Dock Item Component
+ */
+const DockItem = memo(
+  ({
+    item,
+    isActive,
+    isPending = false,
+    onClick,
+    t,
+    variant = "floating",
+  }: {
+    item: any;
+    isActive: boolean;
+    isPending?: boolean;
+    onClick: () => void;
+    t: any;
+    variant?: "floating" | "classic" | "minimal";
+  }) => {
+    const Icon = item.icon;
+
+    // Variant: Minimal
+    if (variant === "minimal") {
+      return (
+        <button
+          onClick={onClick}
+          disabled={isPending}
+          className={cn(
+            "relative flex flex-col items-center justify-center gap-1.5 py-2 min-w-[64px]",
+            "transition-colors duration-200",
+            "active:scale-95",
+            "after:content-[''] after:absolute after:inset-[-8px]",
+            isActive ? "text-primary" : "text-muted-foreground",
+            isPending && "opacity-70"
+          )}
+        >
+          {/* Icon با Badge و Loading State */}
+          <div className="relative">
+            <Icon
+              className={cn(
+                "h-6 w-6 transition-all duration-200",
+                isActive && "scale-110",
+                isPending && "animate-pulse"
+              )}
+            />
+            {item.badge && item.badge > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -top-2 -end-2 h-4 min-w-4 px-1 text-[10px] font-bold"
+              >
+                {item.badge > 9 ? "9+" : item.badge}
+              </Badge>
+            )}
+          </div>
+
+          {/* Label */}
+          <span
+            className={cn(
+              "text-[11px] font-medium transition-all duration-200",
+              isActive && "font-semibold"
+            )}
+          >
+            {t(`navigation.${item.title}`)}
+          </span>
+
+          {/* Active Indicator با عرض کامل */}
+          <div
+            className={cn(
+              "absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-primary transition-all duration-300",
+              isActive ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
+            )}
+          />
+        </button>
+      );
+    }
+
+    // Variant: Floating
+    if (variant === "floating") {
+      return (
+        <button
+          onClick={onClick}
+          disabled={isPending}
+          className={cn(
+            "relative flex flex-col items-center justify-center gap-1.5 px-3 py-2 min-w-[64px]",
+            "transition-colors duration-200",
+            "active:scale-95 hover:scale-105",
+            "after:content-[''] after:absolute after:inset-[-8px]",
+            isActive ? "text-primary" : "text-muted-foreground",
+            isPending && "opacity-70"
+          )}
+        >
+          <div className="relative">
+            <Icon
+              className={cn(
+                "h-6 w-6 transition-all duration-200",
+                isActive && "scale-110",
+                isPending && "animate-pulse"
+              )}
+            />
+            {item.badge && item.badge > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -top-2 -end-2 h-4 min-w-4 px-1 text-[10px] font-bold"
+              >
+                {item.badge > 9 ? "9+" : item.badge}
+              </Badge>
+            )}
+          </div>
+
+          <span
+            className={cn(
+              "text-[11px] font-medium transition-all duration-200",
+              isActive && "font-semibold"
+            )}
+          >
+            {t(`navigation.${item.title}`)}
+          </span>
+
+          {/* Active Indicator با عرض کامل */}
+          <div
+            className={cn(
+              "absolute -bottom-1 left-0 right-0 h-1 rounded-full bg-primary transition-all duration-300",
+              isActive ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
+            )}
+          />
+        </button>
+      );
+    }
+
+    return null;
+  }
+);
+
+DockItem.displayName = "DockItem";

@@ -14,6 +14,7 @@ import {
   X,
   Clock,
   Send,
+  Calendar,
 } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { formatCurrency, formatDate } from "@/lib/helpers";
@@ -74,10 +75,13 @@ export function OrderDetailHeader({
 
   // استخراج تاریخ و ساعت
   const orderDate = new Date(order.createdAt);
-  const timeString = orderDate.toLocaleTimeString(locale === "fa" ? "fa-IR" : "en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const timeString = orderDate.toLocaleTimeString(
+    locale === "fa" ? "fa-IR" : "en-US",
+    {
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  );
 
   return (
     <Card className="mb-6">
@@ -86,7 +90,7 @@ export function OrderDetailHeader({
         <div className="flex flex-wrap sm:flex-nowrap gap-4 mb-8">
           {/* لوگو */}
           {bankLogo && (
-            <div className="shrink-0">
+            <div className="shrink-0 order-2 sm:order-1">
               <div className="w-16 h-16 rounded-lg overflow-hidden bg-white shadow-sm flex items-center justify-center">
                 <Image
                   src={bankLogo}
@@ -100,23 +104,20 @@ export function OrderDetailHeader({
           )}
 
           {/* عنوان و اطلاعات */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 order-3 sm:order-2">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
               <h4 className="text-xl font-bold text-gray-900 dark:text-white">
                 {order.title}
               </h4>
             </div>
-
             {/* اطلاعات زیر عنوان */}
             <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
               <span className="flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
                 {order.bankName}
               </span>
-              <span className="flex items-center gap-2 font-mono">
-                {order.accountSheba}
-              </span>
               <span className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
                 {formatDate(order.createdAt, locale)}
               </span>
               <span className="flex items-center gap-2">
@@ -128,51 +129,53 @@ export function OrderDetailHeader({
 
           {/* دکمه‌های عملیات */}
           {(canInquiry || canApproveReject || canSendToBank) && (
-            <div className="flex flex-wrap gap-2 shrink-0">
-              {canInquiry && onInquiry && (
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={onInquiry}
-                  className="gap-2"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                  {t("orderDetail.header.inquiryRequest")}
-                </Button>
-              )}
-              {canSendToBank && onSendToBank && (
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={onSendToBank}
-                  className="gap-2"
-                >
-                  <Send className="h-4 w-4" />
-                  {t("orderDetail.header.sendToBank")}
-                </Button>
-              )}
-              {canApproveReject && onApprove && (
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={onApprove}
-                  className="gap-2"
-                >
-                  <Check className="h-4 w-4" />
-                  {t("common.buttons.approve")}
-                </Button>
-              )}
-              {canApproveReject && onReject && (
-                <Button
-                  variant="destructive"
-                  size="md"
-                  onClick={onReject}
-                  className="gap-2"
-                >
-                  <X className="h-4 w-4" />
-                  {t("common.buttons.reject")}
-                </Button>
-              )}
+            <div className="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto order-1 sm:order-3 items-end md:flex-wrap">
+              <div className="flex content-between items-end">
+                {canInquiry && onInquiry && (
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={onInquiry}
+                    className="gap-2"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    {t("orderDetail.header.inquiryRequest")}
+                  </Button>
+                )}
+                {canSendToBank && onSendToBank && (
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={onSendToBank}
+                    className="gap-2"
+                  >
+                    <Send className="h-4 w-4" />
+                    {t("orderDetail.header.sendToBank")}
+                  </Button>
+                )}
+                {canApproveReject && onApprove && (
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={onApprove}
+                    className="gap-2 me-4"
+                  >
+                    <Check className="h-4 w-4" />
+                    {t("common.buttons.approve")}
+                  </Button>
+                )}
+                {canApproveReject && onReject && (
+                  <Button
+                    variant="destructive"
+                    size="md"
+                    onClick={onReject}
+                    className="gap-2"
+                  >
+                    <X className="h-4 w-4" />
+                    {t("common.buttons.reject")}
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -188,7 +191,9 @@ export function OrderDetailHeader({
               <div className="text-lg font-bold text-gray-900 dark:text-white truncate">
                 {formatCurrency(order.totalAmount, locale)}
               </div>
-              <div className="text-xs text-muted-foreground">{t("orderDetail.header.totalAmountRial")}</div>
+              <div className="text-xs text-muted-foreground">
+                {t("orderDetail.header.totalAmountRial")}
+              </div>
             </div>
           </div>
 
@@ -201,7 +206,9 @@ export function OrderDetailHeader({
               <div className="text-lg font-bold text-gray-900 dark:text-white">
                 {order.numberOfTransactions}
               </div>
-              <div className="text-xs text-muted-foreground">{t("orderDetail.header.transactionCount")}</div>
+              <div className="text-xs text-muted-foreground">
+                {t("orderDetail.header.transactionCount")}
+              </div>
             </div>
           </div>
 
@@ -214,7 +221,9 @@ export function OrderDetailHeader({
               <div className="text-lg font-bold text-gray-900 dark:text-white">
                 {waitForBankCount}
               </div>
-              <div className="text-xs text-muted-foreground">{t("orderDetail.header.inBankProcessingQueue")}</div>
+              <div className="text-xs text-muted-foreground">
+                {t("orderDetail.header.inBankProcessingQueue")}
+              </div>
             </div>
           </div>
 
@@ -228,7 +237,9 @@ export function OrderDetailHeader({
                 {approvalCount}
               </div>
               <div className="text-xs text-muted-foreground">
-                {t("orderDetail.header.signaturesOf", { count: totalApprovers })}
+                {t("orderDetail.header.signaturesOf", {
+                  count: totalApprovers,
+                })}
               </div>
             </div>
           </div>
@@ -240,28 +251,40 @@ export function OrderDetailHeader({
           <div className="flex flex-col gap-4">
             {/* وضعیت درخواست */}
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">{t("orderDetail.header.requestStatus")}</span>
+              <span className="text-sm text-muted-foreground">
+                {t("orderDetail.header.requestStatus")}
+              </span>
               <OrderStatusBadge status={order.status} size="default" />
             </div>
 
             {/* شماره درخواست */}
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">{t("orderDetail.header.requestNumber")}</span>
-              <strong className="text-sm font-bold font-mono">{order.orderId}</strong>
+              <span className="text-sm text-muted-foreground">
+                {t("orderDetail.header.requestNumber")}
+              </span>
+              <strong className="text-sm font-bold font-mono">
+                {order.orderId}
+              </strong>
             </div>
 
             {/* کد رهگیری بانک */}
             {order.trackingId && (
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">{t("orderDetail.header.bankTrackingCode")}</span>
-                <strong className="text-sm font-bold font-mono">{order.trackingId}</strong>
+                <span className="text-sm text-muted-foreground">
+                  {t("orderDetail.header.bankTrackingCode")}
+                </span>
+                <strong className="text-sm font-bold font-mono">
+                  {order.trackingId}
+                </strong>
               </div>
             )}
 
             {/* توضیحات */}
             {order.description && (
               <div className="flex justify-between items-start gap-4">
-                <span className="text-sm text-muted-foreground shrink-0">{t("orderDetail.header.description")}</span>
+                <span className="text-sm text-muted-foreground shrink-0">
+                  {t("orderDetail.header.description")}
+                </span>
                 <strong className="text-sm font-medium text-right break-words">
                   {order.description}
                 </strong>
@@ -274,23 +297,35 @@ export function OrderDetailHeader({
             {/* عنوان حساب مبدا */}
             {order.accountTitle && (
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">{t("orderDetail.header.sourceAccountTitle")}</span>
-                <strong className="text-sm font-bold">{order.accountTitle}</strong>
+                <span className="text-sm text-muted-foreground">
+                  {t("orderDetail.header.sourceAccountTitle")}
+                </span>
+                <strong className="text-sm font-bold">
+                  {order.accountTitle}
+                </strong>
               </div>
             )}
 
             {/* شماره حساب مبداء */}
             {order.accountNumber && (
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">{t("orderDetail.header.sourceAccountNumber")}</span>
-                <strong className="text-sm font-bold font-mono">{order.accountNumber}</strong>
+                <span className="text-sm text-muted-foreground">
+                  {t("orderDetail.header.sourceAccountNumber")}
+                </span>
+                <strong className="text-sm font-bold font-mono">
+                  {order.accountNumber}
+                </strong>
               </div>
             )}
 
             {/* شباء مبدا */}
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">{t("orderDetail.header.sourceIban")}</span>
-              <strong className="text-sm font-bold font-mono">{order.accountSheba}</strong>
+              <span className="text-sm text-muted-foreground">
+                {t("orderDetail.header.sourceIban")}
+              </span>
+              <strong className="text-sm font-bold font-mono">
+                {order.accountSheba}
+              </strong>
             </div>
           </div>
         </div>

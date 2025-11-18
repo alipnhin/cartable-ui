@@ -48,7 +48,7 @@ export function AppLayout({
         <main
           className={cn(
             "flex-1 overflow-y-auto overflow-x-hidden",
-            isMobile ? "pb-20" : "pb-0", // فضای bottom nav
+            isMobile ? "pb-20" : "pb-0" // فضای bottom nav
           )}
         >
           <div className="px-4 md:px-6 py-6">{children}</div>

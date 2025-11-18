@@ -37,6 +37,7 @@ const yekanBakh = localFont({
   ],
   variable: "--font-yekanbakh",
   display: "swap",
+  preload: true,
 });
 
 export default function RootLayout({
@@ -51,16 +52,66 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <head>
+        {/* PWA Primary Meta Tags */}
+        <meta charSet="utf-8" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        />
+        <meta
+          name="description"
+          content="سیستم مدیریت و تأیید دستورهای پرداخت"
+        />
+
+        {/* PWA Manifest */}
         <link rel="manifest" href="/manifest.json" />
+
+        {/* Theme Color */}
         <meta name="theme-color" content="#27ae60" />
+        <meta name="msapplication-TileColor" content="#27ae60" />
+
+        {/* Apple Touch Icons */}
+        <link
+          rel="apple-touch-icon"
+          sizes="152x152"
+          href="/media/icons/icon-152x152.png"
+        />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/media/icons/icon-192x192.png"
+        />
+        <link rel="apple-touch-icon" href="/media/icons/icon-192x192.png" />
+
+        {/* Apple PWA Meta Tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="کارتابل" />
+
+        {/* Mobile Web App */}
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        <meta name="application-name" content="کارتابل" />
+
+        {/* Favicons */}
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/media/icons/icon-72x72.png"
         />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/media/icons/icon-72x72.png"
+        />
+
+        {/* MS Tiles */}
+        <meta name="msapplication-config" content="/browserconfig.xml" />
+
+        {/* Preconnect for performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
       </head>
       <body className={cn("text-base antialiased", yekanBakh.variable)}>
         <AppSplashLoader />
