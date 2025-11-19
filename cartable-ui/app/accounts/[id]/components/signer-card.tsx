@@ -28,6 +28,7 @@ import {
   PowerOff,
   Clock,
   XCircle,
+  CheckCircle2,
   Loader2,
 } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
@@ -72,48 +73,48 @@ export function SignerCard({
           label: "در انتظار فعالسازی",
           color: "bg-yellow-500",
           badgeVariant: "warning" as const,
+          badgeAppearance: "light" as const,
           icon: Clock,
-          canChange: false,
         };
       case SignerStatus.Enable:
         return {
           label: "فعال",
           color: "bg-green-500",
           badgeVariant: "success" as const,
-          icon: Power,
-          canChange: true,
+          badgeAppearance: "light" as const,
+          icon: CheckCircle2,
         };
       case SignerStatus.Disable:
         return {
           label: "غیرفعال",
           color: "bg-gray-400",
           badgeVariant: "secondary" as const,
+          badgeAppearance: "light" as const,
           icon: PowerOff,
-          canChange: true,
         };
       case SignerStatus.DisableRequested:
         return {
           label: "در انتظار غیرفعالسازی",
           color: "bg-orange-500",
           badgeVariant: "warning" as const,
+          badgeAppearance: "light" as const,
           icon: Clock,
-          canChange: false,
         };
       case SignerStatus.Rejected:
         return {
           label: "رد شده",
           color: "bg-red-500",
           badgeVariant: "destructive" as const,
+          badgeAppearance: "light" as const,
           icon: XCircle,
-          canChange: true,
         };
       default:
         return {
           label: "نامشخص",
           color: "bg-gray-400",
           badgeVariant: "secondary" as const,
+          badgeAppearance: "light" as const,
           icon: Clock,
-          canChange: false,
         };
     }
   };
@@ -183,7 +184,8 @@ export function SignerCard({
           {/* Status Badge */}
           <Badge
             variant={statusInfo.badgeVariant}
-            className="gap-1 mb-2 text-xs"
+            appearance={statusInfo.badgeAppearance}
+            className="gap-1 mb-2"
           >
             <statusInfo.icon className="h-3 w-3" />
             {statusInfo.label}
