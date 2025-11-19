@@ -43,8 +43,8 @@ export default function TransactionReportsPage() {
     const fromDate = new Date();
     fromDate.setDate(fromDate.getDate() - 7);
     return {
-      fromDate: fromDate.toISOString(),
-      toDate: toDate.toISOString(),
+      fromDate: fromDate.toISOString().split("T")[0],
+      toDate: toDate.toISOString().split("T")[0],
     };
   }, []);
 
