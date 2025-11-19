@@ -64,9 +64,9 @@ export const mainMenuItems: MenuItem[] = [
 ];
 
 /**
- * منوی dock موبایل (5 آیتم اول)
+ * منوی dock موبایل (همه آیتم‌ها)
  */
-export const dockMenuItems = mainMenuItems.slice(0, 5);
+export const dockMenuItems = mainMenuItems;
 
 /**
  * گرفتن آیتم منو بر اساس route
