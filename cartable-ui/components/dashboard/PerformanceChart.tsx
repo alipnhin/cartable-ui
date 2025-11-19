@@ -11,7 +11,12 @@ interface PerformanceChartProps {
   delay?: number;
 }
 
-const statusConfig = {
+const statusConfig: Record<number, {
+  icon: typeof Timer;
+  iconBg: string;
+  iconColor: string;
+  barColor: string;
+}> = {
   1: {
     icon: Timer,
     iconBg: "bg-warning/10",
@@ -36,6 +41,13 @@ const statusConfig = {
     iconColor: "text-primary",
     barColor: "bg-primary",
   },
+};
+
+const defaultConfig = {
+  icon: Timer,
+  iconBg: "bg-muted",
+  iconColor: "text-muted-foreground",
+  barColor: "bg-muted-foreground",
 };
 
 export default function PerformanceChart({
@@ -71,10 +83,7 @@ export default function PerformanceChart({
         ) : (
           <div className="space-y-5">
             {data.map((item, index) => {
-              const config =
-                statusConfig[item.status as keyof typeof statusConfig];
-              if (!config) return null;
-
+              const config = statusConfig[item.status] || defaultConfig;
               const Icon = config.icon;
               const barWidth = (item.transactionCount / maxCount) * 100;
 

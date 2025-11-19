@@ -11,7 +11,12 @@ interface TransactionStatusChartProps {
   delay?: number;
 }
 
-const statusConfig = {
+const statusConfig: Record<number, {
+  icon: typeof Timer;
+  iconBg: string;
+  iconColor: string;
+  progressColor: string;
+}> = {
   1: {
     icon: Timer,
     iconBg: "bg-warning/10",
@@ -36,6 +41,13 @@ const statusConfig = {
     iconColor: "text-primary",
     progressColor: "bg-primary",
   },
+};
+
+const defaultConfig = {
+  icon: Timer,
+  iconBg: "bg-muted",
+  iconColor: "text-muted-foreground",
+  progressColor: "bg-muted-foreground",
 };
 
 export default function TransactionStatusChart({
@@ -64,10 +76,7 @@ export default function TransactionStatusChart({
           </div>
         ) : (
           data.map((item, index) => {
-            const config =
-              statusConfig[item.status as keyof typeof statusConfig];
-            if (!config) return null;
-
+            const config = statusConfig[item.status] || defaultConfig;
             const Icon = config.icon;
 
             return (

@@ -74,7 +74,10 @@ export default function DashboardPage() {
     setFilters(newFilters);
   };
 
-  if (loading) {
+  // Show skeleton only on initial load, not on filter changes
+  const isInitialLoad = loading && !dashboardData;
+
+  if (isInitialLoad) {
     return (
       <AppLayout>
         <PageHeader
@@ -86,12 +89,20 @@ export default function DashboardPage() {
     );
   }
 
-  if (error || !dashboardData) {
+  if (error && !dashboardData) {
     return (
       <AppLayout>
         <PageHeader
           title={t("dashboard.pageTitle")}
           description={t("dashboard.pageSubtitle")}
+        />
+        <DashboardFilters
+          onFilterApply={handleFilterApply}
+          initialFilters={{
+            bankGatewayId: filters.bankGatewayId,
+            fromDate: filters.fromDate || "",
+            toDate: filters.toDate || "",
+          }}
         />
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
@@ -105,6 +116,10 @@ export default function DashboardPage() {
     );
   }
 
+  if (!dashboardData) {
+    return null;
+  }
+
   return (
     <AppLayout>
       <PageHeader
@@ -114,7 +129,23 @@ export default function DashboardPage() {
       />
 
       {/* Filters */}
-      <DashboardFilters onFilterApply={handleFilterApply} />
+      <DashboardFilters
+        onFilterApply={handleFilterApply}
+        initialFilters={{
+          bankGatewayId: filters.bankGatewayId,
+          fromDate: filters.fromDate || "",
+          toDate: filters.toDate || "",
+        }}
+      />
+
+      {/* Loading overlay for filter changes */}
+      {loading && (
+        <div className="fixed inset-0 bg-background/50 z-50 flex items-center justify-center">
+          <div className="bg-card p-4 rounded-lg shadow-lg border">
+            <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards Row */}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4 mb-5">

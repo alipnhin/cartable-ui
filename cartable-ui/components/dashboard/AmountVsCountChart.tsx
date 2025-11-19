@@ -11,7 +11,11 @@ interface AmountVsCountChartProps {
   delay?: number;
 }
 
-const statusConfig = {
+const statusConfig: Record<number, {
+  icon: typeof Timer;
+  iconBg: string;
+  iconColor: string;
+}> = {
   1: {
     icon: Timer,
     iconBg: "bg-warning/10",
@@ -32,6 +36,12 @@ const statusConfig = {
     iconBg: "bg-primary/10",
     iconColor: "text-primary",
   },
+};
+
+const defaultConfig = {
+  icon: Timer,
+  iconBg: "bg-muted",
+  iconColor: "text-muted-foreground",
 };
 
 export default function AmountVsCountChart({
@@ -64,10 +74,7 @@ export default function AmountVsCountChart({
         ) : (
           <div className="space-y-4">
             {data.map((item, index) => {
-              const config =
-                statusConfig[item.status as keyof typeof statusConfig];
-              if (!config) return null;
-
+              const config = statusConfig[item.status] || defaultConfig;
               const Icon = config.icon;
 
               return (
