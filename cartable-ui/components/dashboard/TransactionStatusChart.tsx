@@ -1,15 +1,9 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-} from "recharts";
+import { Timer, CheckCircle, XCircle, ArrowLeftRight } from "lucide-react";
 import type { TransactionStatusSummary } from "@/types/dashboard";
+import { formatNumber } from "@/lib/utils";
 import useTranslation from "@/hooks/useTranslation";
 
 interface TransactionStatusChartProps {
@@ -17,7 +11,32 @@ interface TransactionStatusChartProps {
   delay?: number;
 }
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+const statusConfig = {
+  1: {
+    icon: Timer,
+    iconBg: "bg-warning/10",
+    iconColor: "text-warning",
+    progressColor: "bg-warning",
+  },
+  3: {
+    icon: CheckCircle,
+    iconBg: "bg-success/10",
+    iconColor: "text-success",
+    progressColor: "bg-success",
+  },
+  4: {
+    icon: XCircle,
+    iconBg: "bg-destructive/10",
+    iconColor: "text-destructive",
+    progressColor: "bg-destructive",
+  },
+  5: {
+    icon: ArrowLeftRight,
+    iconBg: "bg-primary/10",
+    iconColor: "text-primary",
+    progressColor: "bg-primary",
+  },
+};
 
 export default function TransactionStatusChart({
   data,
@@ -25,64 +44,64 @@ export default function TransactionStatusChart({
 }: TransactionStatusChartProps) {
   const { t } = useTranslation();
 
-  const chartData = data.map((item) => ({
-    name: item.statusTitle,
-    value: item.transactionCount,
-    percent: item.percent,
-  }));
-
   return (
-    <Card className="animate-fade-in" style={{ animationDelay: `${delay}s` }}>
-      <div className="border-b px-6 pt-5 pb-4">
-        <h3 className="font-bold text-lg mb-1">
+    <Card
+      className="animate-fade-in border-2"
+      style={{ animationDelay: `${delay}s` }}
+    >
+      <div className="border-b px-5 py-4">
+        <h3 className="font-bold text-base">
           {t("dashboard.charts.transactionStatus.title")}
         </h3>
-        <p className="text-muted-foreground text-sm">
-          {t("dashboard.charts.transactionStatus.subtitle")}
-        </p>
       </div>
 
-      <div className="p-6">
-        <ResponsiveContainer width="100%" height={350}>
-          <PieChart>
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={100}
-              paddingAngle={0}
-              dataKey="value"
-            >
-              {chartData.map((entry, index) => {
-                const status = data[index].status;
-                return (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                );
-              })}
-            </Pie>
-            <Tooltip
-              formatter={(value: number) => value.toLocaleString("fa-IR")}
-              contentStyle={{
-                backgroundColor: "hsl(var(--background))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "var(--radius)",
-              }}
-            />
-            <Legend
-              verticalAlign="bottom"
-              align="center"
-              iconType="circle"
-              className="text-sm"
-              formatter={(value) => (
-                <span style={{ color: "hsl(var(--foreground))" }}>{value}</span>
-              )}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+      <div className="p-5 space-y-4">
+        {data.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground text-sm">
+              {t("dashboard.noData")}
+            </p>
+          </div>
+        ) : (
+          data.map((item, index) => {
+            const config =
+              statusConfig[item.status as keyof typeof statusConfig];
+            if (!config) return null;
+
+            const Icon = config.icon;
+
+            return (
+              <div key={index} className="flex items-center gap-4">
+                <div
+                  className={`w-10 h-10 rounded-lg ${config.iconBg} flex items-center justify-center shrink-0`}
+                >
+                  <Icon className={`w-5 h-5 ${config.iconColor}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-sm font-medium text-foreground truncate">
+                      {item.statusTitle}
+                    </span>
+                    <span className="text-sm font-bold text-foreground">
+                      {formatNumber(item.transactionCount)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${config.progressColor} transition-all duration-500`}
+                        style={{ width: `${Math.min(item.percent, 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-semibold text-muted-foreground w-10 text-left">
+                      {item.percent}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </Card>
   );

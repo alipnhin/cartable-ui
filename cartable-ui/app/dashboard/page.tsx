@@ -19,7 +19,6 @@ import TransactionStatusChart from "@/components/dashboard/TransactionStatusChar
 import PaymentTypeChart from "@/components/dashboard/PaymentTypeChart";
 import SuccessGaugeChart from "@/components/dashboard/SuccessGaugeChart";
 import PerformanceChart from "@/components/dashboard/PerformanceChart";
-import TransactionDetailTable from "@/components/dashboard/TransactionDetailTable";
 import DashboardFilters from "@/components/dashboard/DashboardFilters";
 import ExportButtons from "@/components/dashboard/ExportButtons";
 import AmountVsCountChart from "@/components/dashboard/AmountVsCountChart";
@@ -203,12 +202,6 @@ export default function DashboardPage() {
         />
         <ComparisonMetrics data={dashboardData} delay={1.0} />
       </div>
-
-      {/* Detail Table */}
-      <TransactionDetailTable
-        data={dashboardData.transactionStatusSummary}
-        delay={1.1}
-      />
     </AppLayout>
   );
 }

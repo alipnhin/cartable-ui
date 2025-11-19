@@ -1,18 +1,9 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import {
-  ComposedChart,
-  Bar,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { Timer, CheckCircle, XCircle, ArrowLeftRight, TrendingUp } from "lucide-react";
 import type { TransactionStatusSummary } from "@/types/dashboard";
+import { formatNumber } from "@/lib/utils";
 import useTranslation from "@/hooks/useTranslation";
 
 interface PerformanceChartProps {
@@ -20,108 +11,106 @@ interface PerformanceChartProps {
   delay?: number;
 }
 
+const statusConfig = {
+  1: {
+    icon: Timer,
+    iconBg: "bg-warning/10",
+    iconColor: "text-warning",
+    barColor: "bg-warning",
+  },
+  3: {
+    icon: CheckCircle,
+    iconBg: "bg-success/10",
+    iconColor: "text-success",
+    barColor: "bg-success",
+  },
+  4: {
+    icon: XCircle,
+    iconBg: "bg-destructive/10",
+    iconColor: "text-destructive",
+    barColor: "bg-destructive",
+  },
+  5: {
+    icon: ArrowLeftRight,
+    iconBg: "bg-primary/10",
+    iconColor: "text-primary",
+    barColor: "bg-primary",
+  },
+};
+
 export default function PerformanceChart({
   data,
   delay = 0,
 }: PerformanceChartProps) {
   const { t } = useTranslation();
 
-  const chartData = data.map((item) => ({
-    name: item.statusTitle,
-    count: item.transactionCount,
-    percent: item.percent,
-  }));
+  // Find max count for scaling
+  const maxCount = Math.max(...data.map((item) => item.transactionCount), 1);
 
   return (
     <Card
-      className="animate-fade-in"
+      className="animate-fade-in border-2"
       style={{ animationDelay: `${delay}s` }}
     >
-      <div className="border-b px-6 pt-5 pb-4">
-        <h3 className="font-bold text-lg mb-1">{t("dashboard.charts.performance.title")}</h3>
-        <p className="text-muted-foreground text-sm">{t("dashboard.charts.performance.subtitle")}</p>
+      <div className="border-b px-5 py-4 flex items-center justify-between">
+        <h3 className="font-bold text-base">
+          {t("dashboard.charts.performance.title")}
+        </h3>
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+          <TrendingUp className="w-4 h-4 text-primary" />
+        </div>
       </div>
 
-      <div className="p-6">
-        <ResponsiveContainer width="100%" height={350}>
-          <ComposedChart data={chartData}>
-            <defs>
-              <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#7239ea" stopOpacity={0.85} />
-                <stop offset="100%" stopColor="#7239ea" stopOpacity={0.85} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="4 4" stroke="hsl(var(--border))" />
-            <XAxis
-              dataKey="name"
-              tick={{ fill: "hsl(var(--foreground))" }}
-              style={{ fontFamily: "inherit", fontSize: "12px" }}
-            />
-            <YAxis
-              yAxisId="left"
-              tick={{ fill: "hsl(var(--foreground))" }}
-              style={{ fontFamily: "inherit", fontSize: "12px" }}
-              tickFormatter={(value) => value.toLocaleString("fa-IR")}
-              label={{
-                value: t("dashboard.charts.performance.transactionCount"),
-                angle: -90,
-                position: "insideLeft",
-                style: { fill: "hsl(var(--foreground))", fontWeight: 900 },
-              }}
-            />
-            <YAxis
-              yAxisId="right"
-              orientation="right"
-              tick={{ fill: "hsl(var(--foreground))" }}
-              style={{ fontFamily: "inherit", fontSize: "12px" }}
-              tickFormatter={(value) => `${value}%`}
-              label={{
-                value: t("dashboard.charts.performance.percent"),
-                angle: 90,
-                position: "insideRight",
-                style: { fill: "hsl(var(--foreground))", fontWeight: 900 },
-              }}
-            />
-            <Tooltip
-              formatter={(value: number, name: string) => {
-                if (name === t("dashboard.charts.performance.transactionCount")) {
-                  return value.toLocaleString("fa-IR");
-                }
-                return `${value}%`;
-              }}
-              contentStyle={{
-                backgroundColor: "hsl(var(--background))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "var(--radius)",
-                direction: "rtl",
-              }}
-            />
-            <Legend
-              verticalAlign="bottom"
-              align="center"
-              iconType="circle"
-              formatter={(value) => (
-                <span style={{ color: "hsl(var(--foreground))" }}>{value}</span>
-              )}
-            />
-            <Bar
-              yAxisId="left"
-              dataKey="count"
-              name={t("dashboard.charts.performance.transactionCount")}
-              fill="url(#barGradient)"
-              radius={[5, 5, 0, 0]}
-            />
-            <Line
-              yAxisId="right"
-              type="monotone"
-              dataKey="percent"
-              name={t("dashboard.charts.performance.percent")}
-              stroke="#009ef7"
-              strokeWidth={4}
-              dot={{ r: 0 }}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
+      <div className="p-5">
+        {data.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground text-sm">
+              {t("dashboard.noData")}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {data.map((item, index) => {
+              const config =
+                statusConfig[item.status as keyof typeof statusConfig];
+              if (!config) return null;
+
+              const Icon = config.icon;
+              const barWidth = (item.transactionCount / maxCount) * 100;
+
+              return (
+                <div key={index}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-7 h-7 rounded-md ${config.iconBg} flex items-center justify-center`}
+                      >
+                        <Icon className={`w-3.5 h-3.5 ${config.iconColor}`} />
+                      </div>
+                      <span className="text-sm font-medium text-foreground">
+                        {item.statusTitle}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-bold text-foreground">
+                        {formatNumber(item.transactionCount)}
+                      </span>
+                      <span className="text-xs font-semibold text-muted-foreground w-12 text-left">
+                        {item.percent}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${config.barColor} transition-all duration-700 ease-out`}
+                      style={{ width: `${barWidth}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </Card>
   );
