@@ -9,7 +9,7 @@ interface TransactionChartsProps {
   transactions: TransactionItem[];
 }
 
-export function TransactionCharts({ transactions }: TransactionChartsProps) {
+export function TransactionCharts({ transactions = [] }: TransactionChartsProps) {
   const { t } = useTranslation();
 
   // محاسبه داده‌های چارت وضعیت بر اساس status number از API

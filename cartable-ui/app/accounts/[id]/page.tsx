@@ -5,11 +5,17 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { AppLayout } from "@/components/layout";
-import { ArrowLeft, Users, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
+import {
+  ArrowLeft,
+  Users,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import useTranslation from "@/hooks/useTranslation";
@@ -39,33 +45,41 @@ export default function AccountDetailPage() {
   const [account, setAccount] = useState<AccountDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // واکشی اطلاعات حساب
-  const fetchAccountDetail = useCallback(async () => {
-    if (!session?.accessToken || !accountId) return;
-
-    setIsLoading(true);
-    try {
-      const data = await getAccountDetail(accountId, session.accessToken);
-      setAccount(data);
-    } catch (error) {
-      console.error("Error fetching account detail:", error);
-      toast({
-        title: t("toast.error"),
-        description: "خطا در دریافت اطلاعات حساب",
-        variant: "error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [session?.accessToken, accountId, toast, t]);
-
   useEffect(() => {
+    const fetchAccountDetail = async () => {
+      if (!session?.accessToken || !accountId) return;
+
+      setIsLoading(true);
+      try {
+        const data = await getAccountDetail(accountId, session.accessToken);
+        setAccount(data);
+      } catch (error) {
+        console.error("Error fetching account detail:", error);
+        toast({
+          title: t("toast.error"),
+          description: "خطا در دریافت اطلاعات حساب",
+          variant: "error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchAccountDetail();
-  }, [fetchAccountDetail]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.accessToken, accountId, refreshKey]);
+
+  // تابع برای refresh کردن داده‌ها
+  const handleRefresh = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
 
   // تعداد امضاداران فعال
-  const activeSignersCount = account?.users?.filter((u) => u.status === 1).length ?? 0;
+  const activeSignersCount =
+    account?.users?.filter((u) => u.status === 1).length ?? 0;
 
   // هندلر تغییر حداقل امضا
   const handleSaveMinSignatures = async (value: number) => {
@@ -85,7 +99,7 @@ export default function AccountDetailPage() {
         description: "حداقل امضا با موفقیت تغییر کرد",
         variant: "success",
       });
-      fetchAccountDetail();
+      handleRefresh();
     } catch (error) {
       console.error("Error changing minimum signature:", error);
       toast({
@@ -99,7 +113,10 @@ export default function AccountDetailPage() {
   };
 
   // هندلر تغییر وضعیت امضادار
-  const handleRequestStatusChange = async (signerId: string, currentStatus: boolean) => {
+  const handleRequestStatusChange = async (
+    signerId: string,
+    currentStatus: boolean
+  ) => {
     if (!session?.accessToken) return;
 
     setIsUpdating(true);
@@ -119,7 +136,7 @@ export default function AccountDetailPage() {
           variant: "success",
         });
       }
-      fetchAccountDetail();
+      handleRefresh();
     } catch (error) {
       console.error("Error changing signer status:", error);
       toast({
@@ -134,7 +151,7 @@ export default function AccountDetailPage() {
 
   // هندلر افزودن امضادار
   const handleAddSigner = () => {
-    fetchAccountDetail();
+    handleRefresh();
   };
 
   // Skeleton برای لودینگ
@@ -222,11 +239,13 @@ export default function AccountDetailPage() {
           </div>
           <Button
             variant="outline"
-            onClick={fetchAccountDetail}
+            onClick={handleRefresh}
             disabled={isUpdating}
             className="gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`}
+            />
             به‌روزرسانی
           </Button>
         </div>
@@ -256,7 +275,9 @@ export default function AccountDetailPage() {
             <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
               <div className="flex items-center gap-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{account.users?.length ?? 0}</div>
+                  <div className="text-2xl font-bold">
+                    {account.users?.length ?? 0}
+                  </div>
                   <div className="text-xs text-muted-foreground">
                     کل امضاداران
                   </div>

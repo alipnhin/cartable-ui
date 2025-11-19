@@ -46,7 +46,7 @@ interface TransactionTableProps {
 }
 
 export function TransactionTable({
-  transactions,
+  transactions = [],
   totalRecords,
   currentPage,
   pageSize,
@@ -60,9 +60,9 @@ export function TransactionTable({
   const { language } = useLanguage();
   const isMobile = useIsMobile();
 
-  const totalPages = Math.ceil(totalRecords / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, totalRecords);
+  const totalPages = Math.ceil((totalRecords || 0) / pageSize) || 0;
+  const startIndex = totalRecords > 0 ? (currentPage - 1) * pageSize : 0;
+  const endIndex = totalRecords > 0 ? Math.min(startIndex + pageSize, totalRecords) : 0;
 
   const handlePageSizeChange = (newSize: string) => {
     onPageSizeChange(Number(newSize));
@@ -112,8 +112,9 @@ export function TransactionTable({
         <CardContent className="p-4 space-y-4">
           <div className="flex justify-between items-center">
             <p className="text-sm text-muted-foreground">
-              {t("common.showing")} {startIndex + 1}-{endIndex} {t("common.of")}{" "}
-              {totalRecords}
+              {totalRecords > 0
+                ? `${t("common.showing")} ${startIndex + 1}-${endIndex} ${t("common.of")} ${totalRecords}`
+                : t("common.noData")}
             </p>
             <Button
               variant="outline"
@@ -335,12 +336,18 @@ export function TransactionTable({
         {/* Pagination دسکتاپ */}
         <div className="flex items-center justify-between mt-4 px-2">
           <div className="flex-1 text-sm text-muted-foreground">
-            {t("common.pagination.showing")}{" "}
-            <span className="font-medium text-foreground">{startIndex + 1}</span>{" "}
-            {t("common.pagination.to")}{" "}
-            <span className="font-medium text-foreground">{endIndex}</span>{" "}
-            {t("common.pagination.of")}{" "}
-            <span className="font-medium text-foreground">{totalRecords}</span>
+            {totalRecords > 0 ? (
+              <>
+                {t("common.pagination.showing")}{" "}
+                <span className="font-medium text-foreground">{startIndex + 1}</span>{" "}
+                {t("common.pagination.to")}{" "}
+                <span className="font-medium text-foreground">{endIndex}</span>{" "}
+                {t("common.pagination.of")}{" "}
+                <span className="font-medium text-foreground">{totalRecords}</span>
+              </>
+            ) : (
+              t("common.noData")
+            )}
           </div>
           <div className="flex items-center gap-6 lg:gap-8">
             <div className="flex items-center gap-2">

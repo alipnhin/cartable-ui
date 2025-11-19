@@ -14,7 +14,7 @@ interface TransactionStatsProps {
   transactions: TransactionItem[];
 }
 
-export function TransactionStats({ transactions }: TransactionStatsProps) {
+export function TransactionStats({ transactions = [] }: TransactionStatsProps) {
   const { t } = useTranslation();
 
   // محاسبه آمار بر اساس status number از API
