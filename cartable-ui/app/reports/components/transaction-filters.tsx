@@ -2,18 +2,23 @@
 
 import { TransactionFiltersType } from "../page";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input, InputWrapper } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Select,
   SelectContent,
@@ -22,7 +27,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { PersianDatePicker } from "@/components/ui/persian-datepicker";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -33,18 +37,12 @@ import {
   getDefaultDateRange,
 } from "@/services/transactionService";
 import {
-  Search,
   Filter,
   X,
-  Calendar,
-  CheckSquare,
-  CreditCard,
-  Building2,
-  Hash,
-  FileText,
-  User,
+  ChevronDown,
+  Search,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface TransactionFiltersProps {
   filters: TransactionFiltersType;
@@ -58,9 +56,17 @@ export function TransactionFilters({
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [localFilters, setLocalFilters] = useState(filters);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Sync local filters with props
+  useEffect(() => {
+    setLocalFilters(filters);
+  }, [filters]);
 
   const handleApplyFilters = () => {
     onFiltersChange(localFilters);
+    setIsDrawerOpen(false);
   };
 
   const handleResetFilters = () => {
@@ -83,10 +89,10 @@ export function TransactionFilters({
     onFiltersChange(resetFilters);
   };
 
-  const activeFiltersCount =
+  // Count advanced filters only
+  const advancedFiltersCount =
     (filters.status !== null ? 1 : 0) +
     (filters.paymentType !== null ? 1 : 0) +
-    (filters.bankGatewayId && filters.bankGatewayId !== "all" ? 1 : 0) +
     (filters.nationalCode ? 1 : 0) +
     (filters.destinationIban ? 1 : 0) +
     (filters.accountNumber ? 1 : 0) +
@@ -94,32 +100,12 @@ export function TransactionFilters({
     (filters.transferFromDate ? 1 : 0) +
     (filters.transferToDate ? 1 : 0);
 
-  const filterContent = (
-    <div className="space-y-6">
-      {/* بخش حساب */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Building2 className="h-4 w-4 text-muted-foreground" />
-          <Label className="text-base font-semibold">حساب</Label>
-        </div>
-        <Separator />
-        <AccountSelector
-          value={localFilters.bankGatewayId}
-          onValueChange={(value) =>
-            setLocalFilters({ ...localFilters, bankGatewayId: value })
-          }
-          placeholder="انتخاب حساب"
-          showAllOption={true}
-        />
-      </div>
-
-      {/* بخش وضعیت */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <CheckSquare className="h-4 w-4 text-muted-foreground" />
-          <Label className="text-base font-semibold">{t("filters.status")}</Label>
-        </div>
-        <Separator />
+  // Advanced filters content (shared between desktop accordion and mobile drawer)
+  const advancedFiltersContent = (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* وضعیت */}
+      <div className="space-y-2">
+        <Label className="text-sm">{t("filters.status")}</Label>
         <Select
           value={localFilters.status?.toString() || "all"}
           onValueChange={(value) =>
@@ -143,13 +129,9 @@ export function TransactionFilters({
         </Select>
       </div>
 
-      {/* بخش نوع پرداخت */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <CreditCard className="h-4 w-4 text-muted-foreground" />
-          <Label className="text-base font-semibold">نوع پرداخت</Label>
-        </div>
-        <Separator />
+      {/* نوع پرداخت */}
+      <div className="space-y-2">
+        <Label className="text-sm">نوع پرداخت</Label>
         <Select
           value={localFilters.paymentType?.toString() || "all"}
           onValueChange={(value) =>
@@ -173,18 +155,109 @@ export function TransactionFilters({
         </Select>
       </div>
 
-      {/* بخش بازه تاریخ ثبت */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <Label className="text-base font-semibold">تاریخ ثبت</Label>
+      {/* کد ملی */}
+      <div className="space-y-2">
+        <Label className="text-sm">کد ملی</Label>
+        <Input
+          value={localFilters.nationalCode}
+          onChange={(e) =>
+            setLocalFilters({ ...localFilters, nationalCode: e.target.value })
+          }
+          placeholder="کد ملی"
+        />
+      </div>
+
+      {/* شماره شبا مقصد */}
+      <div className="space-y-2">
+        <Label className="text-sm">شماره شبا مقصد</Label>
+        <Input
+          value={localFilters.destinationIban}
+          onChange={(e) =>
+            setLocalFilters({
+              ...localFilters,
+              destinationIban: e.target.value,
+            })
+          }
+          placeholder="IR..."
+          dir="ltr"
+        />
+      </div>
+
+      {/* شماره حساب */}
+      <div className="space-y-2">
+        <Label className="text-sm">شماره حساب</Label>
+        <Input
+          value={localFilters.accountNumber}
+          onChange={(e) =>
+            setLocalFilters({
+              ...localFilters,
+              accountNumber: e.target.value,
+            })
+          }
+          placeholder="شماره حساب"
+          dir="ltr"
+        />
+      </div>
+
+      {/* شناسه دستور */}
+      <div className="space-y-2">
+        <Label className="text-sm">شناسه دستور</Label>
+        <Input
+          value={localFilters.orderId}
+          onChange={(e) =>
+            setLocalFilters({ ...localFilters, orderId: e.target.value })
+          }
+          placeholder="شناسه دستور پرداخت"
+          dir="ltr"
+        />
+      </div>
+
+      {/* تاریخ انتقال از */}
+      <div className="space-y-2">
+        <Label className="text-sm">تاریخ انتقال از</Label>
+        <PersianDatePicker
+          value={localFilters.transferFromDate}
+          onChange={(date) =>
+            setLocalFilters({ ...localFilters, transferFromDate: date })
+          }
+          placeholder="از تاریخ انتقال"
+        />
+      </div>
+
+      {/* تاریخ انتقال تا */}
+      <div className="space-y-2">
+        <Label className="text-sm">تاریخ انتقال تا</Label>
+        <PersianDatePicker
+          value={localFilters.transferToDate}
+          onChange={(date) =>
+            setLocalFilters({ ...localFilters, transferToDate: date })
+          }
+          placeholder="تا تاریخ انتقال"
+        />
+      </div>
+    </div>
+  );
+
+  // Mobile filters in drawer
+  const mobileFiltersContent = (
+    <div className="space-y-4">
+      {/* فیلترهای اصلی */}
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label className="text-sm">انتخاب حساب</Label>
+          <AccountSelector
+            value={localFilters.bankGatewayId}
+            onValueChange={(value) =>
+              setLocalFilters({ ...localFilters, bankGatewayId: value })
+            }
+            placeholder="انتخاب حساب"
+            showAllOption={true}
+          />
         </div>
-        <Separator />
-        <div className="space-y-3">
+
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
-            <Label htmlFor="fromDate" className="text-sm text-muted-foreground">
-              {t("reports.fromDate")}
-            </Label>
+            <Label className="text-sm">{t("reports.fromDate")}</Label>
             <PersianDatePicker
               value={localFilters.fromDate}
               onChange={(date) =>
@@ -194,9 +267,7 @@ export function TransactionFilters({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="toDate" className="text-sm text-muted-foreground">
-              {t("reports.toDate")}
-            </Label>
+            <Label className="text-sm">{t("reports.toDate")}</Label>
             <PersianDatePicker
               value={localFilters.toDate}
               onChange={(date) =>
@@ -208,332 +279,229 @@ export function TransactionFilters({
         </div>
       </div>
 
-      {/* بخش بازه تاریخ انتقال */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <Label className="text-base font-semibold">تاریخ انتقال</Label>
-        </div>
-        <Separator />
-        <div className="space-y-3">
-          <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">از تاریخ</Label>
-            <PersianDatePicker
-              value={localFilters.transferFromDate}
-              onChange={(date) =>
-                setLocalFilters({ ...localFilters, transferFromDate: date })
-              }
-              placeholder="از تاریخ انتقال"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">تا تاریخ</Label>
-            <PersianDatePicker
-              value={localFilters.transferToDate}
-              onChange={(date) =>
-                setLocalFilters({ ...localFilters, transferToDate: date })
-              }
-              placeholder="تا تاریخ انتقال"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* بخش فیلترهای متنی */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-muted-foreground" />
-          <Label className="text-base font-semibold">سایر فیلترها</Label>
-        </div>
-        <Separator />
-        <div className="space-y-3">
-          <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground flex items-center gap-2">
-              <User className="h-3 w-3" />
-              کد ملی
-            </Label>
-            <Input
-              value={localFilters.nationalCode}
-              onChange={(e) =>
-                setLocalFilters({ ...localFilters, nationalCode: e.target.value })
-              }
-              placeholder="کد ملی"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground flex items-center gap-2">
-              <Hash className="h-3 w-3" />
-              شماره شبا مقصد
-            </Label>
-            <Input
-              value={localFilters.destinationIban}
-              onChange={(e) =>
-                setLocalFilters({
-                  ...localFilters,
-                  destinationIban: e.target.value,
-                })
-              }
-              placeholder="IR..."
-              dir="ltr"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground flex items-center gap-2">
-              <Hash className="h-3 w-3" />
-              شماره حساب
-            </Label>
-            <Input
-              value={localFilters.accountNumber}
-              onChange={(e) =>
-                setLocalFilters({
-                  ...localFilters,
-                  accountNumber: e.target.value,
-                })
-              }
-              placeholder="شماره حساب"
-              dir="ltr"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground flex items-center gap-2">
-              <Hash className="h-3 w-3" />
-              شناسه دستور
-            </Label>
-            <Input
-              value={localFilters.orderId}
-              onChange={(e) =>
-                setLocalFilters({ ...localFilters, orderId: e.target.value })
-              }
-              placeholder="شناسه دستور پرداخت"
-              dir="ltr"
-            />
-          </div>
-        </div>
-      </div>
+      {/* فیلترهای پیشرفته */}
+      {advancedFiltersContent}
     </div>
   );
 
-  return (
-    <div className="space-y-4">
-      {/* جستجو و دکمه فیلتر */}
+  // Mobile view - just a button to open drawer
+  if (isMobile) {
+    return (
       <Card>
         <CardContent className="p-4">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <InputWrapper>
-                <Search className="h-4 w-4" />
-                <Input
-                  placeholder={t("filters.searchPlaceholder")}
-                  value={filters.search}
-                  onChange={(e) =>
-                    onFiltersChange({ ...filters, search: e.target.value })
-                  }
-                  className="pe-10"
-                />
-              </InputWrapper>
-            </div>
-            <Sheet>
-              <SheetTrigger asChild>
+          <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+            <DrawerTrigger asChild>
+              <Button variant="outline" className="w-full gap-2">
+                <Filter className="h-4 w-4" />
+                فیلترها
+                {advancedFiltersCount > 0 && (
+                  <Badge variant="secondary" className="ms-1">
+                    {advancedFiltersCount}
+                  </Badge>
+                )}
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent className="max-h-[85vh]">
+              <DrawerHeader>
+                <DrawerTitle className="flex items-center gap-2">
+                  <Filter className="h-5 w-5" />
+                  فیلترها
+                </DrawerTitle>
+              </DrawerHeader>
+              <div className="px-4 pb-4 overflow-y-auto">
+                {mobileFiltersContent}
+              </div>
+              <DrawerFooter className="flex-row gap-2">
                 <Button
                   variant="outline"
-                  size={isMobile ? "md" : "sm"}
-                  className="gap-2 min-w-fit"
+                  onClick={handleResetFilters}
+                  className="flex-1 gap-2"
                 >
-                  <Filter className="h-4 w-4" />
-                  {!isMobile && t("filters.advancedFilters")}
-                  {activeFiltersCount > 0 && (
-                    <span className="ms-1 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full min-w-5 text-center">
-                      {activeFiltersCount}
-                    </span>
-                  )}
+                  <X className="h-4 w-4" />
+                  پاک کردن
                 </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="left"
-                className="w-full sm:max-w-md overflow-y-auto"
-              >
-                <SheetHeader>
-                  <SheetTitle className="flex items-center gap-2">
-                    <Filter className="h-5 w-5" />
-                    {t("filters.advancedFilters")}
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="py-6">{filterContent}</div>
-                <SheetFooter className="flex-col sm:flex-row gap-2">
+                <DrawerClose asChild>
                   <Button
-                    variant="outline"
-                    onClick={handleResetFilters}
+                    onClick={handleApplyFilters}
                     className="flex-1 gap-2"
                   >
-                    <X className="h-4 w-4" />
-                    {t("filters.reset")}
+                    <Search className="h-4 w-4" />
+                    اعمال فیلتر
                   </Button>
-                  <SheetClose asChild>
-                    <Button
-                      onClick={handleApplyFilters}
-                      className="flex-1 gap-2"
-                    >
-                      <Filter className="h-4 w-4" />
-                      {t("common.buttons.apply")}
-                    </Button>
-                  </SheetClose>
-                </SheetFooter>
-              </SheetContent>
-            </Sheet>
-          </div>
+                </DrawerClose>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
         </CardContent>
       </Card>
+    );
+  }
 
-      {/* نمایش فیلترهای فعال */}
-      {activeFiltersCount > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground shrink-0">
+  // Desktop view - inline main filters + collapsible advanced
+  return (
+    <Card>
+      <CardContent className="p-4 space-y-4">
+        {/* فیلترهای اصلی - سه ستونه */}
+        <div className="grid gap-4 md:grid-cols-3">
+          {/* انتخاب حساب */}
+          <div className="space-y-2">
+            <Label className="text-sm">انتخاب حساب</Label>
+            <AccountSelector
+              value={localFilters.bankGatewayId}
+              onValueChange={(value) => {
+                const newFilters = { ...localFilters, bankGatewayId: value };
+                setLocalFilters(newFilters);
+                onFiltersChange(newFilters);
+              }}
+              placeholder="همه حساب‌ها"
+              showAllOption={true}
+            />
+          </div>
+
+          {/* تاریخ ثبت از */}
+          <div className="space-y-2">
+            <Label className="text-sm">{t("reports.fromDate")}</Label>
+            <PersianDatePicker
+              value={localFilters.fromDate}
+              onChange={(date) => {
+                const newFilters = { ...localFilters, fromDate: date };
+                setLocalFilters(newFilters);
+                onFiltersChange(newFilters);
+              }}
+              placeholder={t("reports.fromDate")}
+            />
+          </div>
+
+          {/* تاریخ ثبت تا */}
+          <div className="space-y-2">
+            <Label className="text-sm">{t("reports.toDate")}</Label>
+            <PersianDatePicker
+              value={localFilters.toDate}
+              onChange={(date) => {
+                const newFilters = { ...localFilters, toDate: date };
+                setLocalFilters(newFilters);
+                onFiltersChange(newFilters);
+              }}
+              placeholder={t("reports.toDate")}
+            />
+          </div>
+        </div>
+
+        {/* فیلترهای پیشرفته - آکاردیون */}
+        <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              className="w-full justify-between hover:bg-muted/50"
+            >
+              <span className="flex items-center gap-2">
                 <Filter className="h-4 w-4" />
-                {t("filters.activeFilters")}:
-              </div>
-              <div className="flex flex-wrap gap-2 flex-1">
-                {/* وضعیت */}
-                {filters.status !== null && (
-                  <Badge
-                    variant="secondary"
-                    className="gap-1 hover:bg-secondary/80 transition-colors"
-                  >
-                    {TransactionStatusMap[filters.status]?.label || "نامشخص"}
-                    <button
-                      onClick={() => {
-                        onFiltersChange({ ...filters, status: null });
-                      }}
-                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
+                فیلترهای پیشرفته
+                {advancedFiltersCount > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    {advancedFiltersCount}
                   </Badge>
                 )}
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 transition-transform duration-200 ${
+                  isAdvancedOpen ? "rotate-180" : ""
+                }`}
+              />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-4">
+            <div className="space-y-4">
+              {advancedFiltersContent}
 
-                {/* نوع پرداخت */}
-                {filters.paymentType !== null && (
-                  <Badge
-                    variant="secondary"
-                    className="gap-1 hover:bg-secondary/80 transition-colors"
-                  >
-                    {PaymentTypeMap[filters.paymentType]?.label || "نامشخص"}
-                    <button
-                      onClick={() => {
-                        onFiltersChange({ ...filters, paymentType: null });
-                      }}
-                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
-
-                {/* حساب */}
-                {filters.bankGatewayId && filters.bankGatewayId !== "all" && (
-                  <Badge
-                    variant="secondary"
-                    className="gap-1 hover:bg-secondary/80 transition-colors"
-                  >
-                    حساب انتخاب شده
-                    <button
-                      onClick={() => {
-                        onFiltersChange({ ...filters, bankGatewayId: "" });
-                      }}
-                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
-
-                {/* کد ملی */}
-                {filters.nationalCode && (
-                  <Badge
-                    variant="secondary"
-                    className="gap-1 hover:bg-secondary/80 transition-colors"
-                  >
-                    کد ملی: {filters.nationalCode}
-                    <button
-                      onClick={() => {
-                        onFiltersChange({ ...filters, nationalCode: "" });
-                      }}
-                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
-
-                {/* شماره شبا */}
-                {filters.destinationIban && (
-                  <Badge
-                    variant="secondary"
-                    className="gap-1 hover:bg-secondary/80 transition-colors"
-                  >
-                    شبا: {filters.destinationIban.slice(0, 10)}...
-                    <button
-                      onClick={() => {
-                        onFiltersChange({ ...filters, destinationIban: "" });
-                      }}
-                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
-
-                {/* شماره حساب */}
-                {filters.accountNumber && (
-                  <Badge
-                    variant="secondary"
-                    className="gap-1 hover:bg-secondary/80 transition-colors"
-                  >
-                    شماره حساب: {filters.accountNumber}
-                    <button
-                      onClick={() => {
-                        onFiltersChange({ ...filters, accountNumber: "" });
-                      }}
-                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
-
-                {/* شناسه دستور */}
-                {filters.orderId && (
-                  <Badge
-                    variant="secondary"
-                    className="gap-1 hover:bg-secondary/80 transition-colors"
-                  >
-                    شناسه: {filters.orderId}
-                    <button
-                      onClick={() => {
-                        onFiltersChange({ ...filters, orderId: "" });
-                      }}
-                      className="hover:bg-muted rounded-full p-0.5 transition-colors"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
-
-                {/* دکمه پاک کردن همه */}
+              {/* دکمه‌های اکشن */}
+              <div className="flex justify-end gap-2 pt-2 border-t">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={handleResetFilters}
-                  className="h-6 text-xs hover:bg-muted"
+                  className="gap-2"
                 >
-                  {t("filters.clearAll")}
+                  <X className="h-4 w-4" />
+                  پاک کردن فیلترها
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleApplyFilters}
+                  className="gap-2"
+                >
+                  <Search className="h-4 w-4" />
+                  اعمال فیلتر
                 </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* نمایش فیلترهای فعال */}
+        {advancedFiltersCount > 0 && !isAdvancedOpen && (
+          <div className="flex flex-wrap gap-2 pt-2 border-t">
+            {filters.status !== null && (
+              <Badge
+                variant="secondary"
+                className="gap-1"
+              >
+                {TransactionStatusMap[filters.status]?.label || "نامشخص"}
+                <button
+                  onClick={() => onFiltersChange({ ...filters, status: null })}
+                  className="hover:bg-muted rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+            {filters.paymentType !== null && (
+              <Badge
+                variant="secondary"
+                className="gap-1"
+              >
+                {PaymentTypeMap[filters.paymentType]?.label || "نامشخص"}
+                <button
+                  onClick={() => onFiltersChange({ ...filters, paymentType: null })}
+                  className="hover:bg-muted rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+            {filters.nationalCode && (
+              <Badge variant="secondary" className="gap-1">
+                کد ملی: {filters.nationalCode}
+                <button
+                  onClick={() => onFiltersChange({ ...filters, nationalCode: "" })}
+                  className="hover:bg-muted rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+            {filters.orderId && (
+              <Badge variant="secondary" className="gap-1">
+                شناسه: {filters.orderId}
+                <button
+                  onClick={() => onFiltersChange({ ...filters, orderId: "" })}
+                  className="hover:bg-muted rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleResetFilters}
+              className="h-6 text-xs"
+            >
+              {t("filters.clearAll")}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

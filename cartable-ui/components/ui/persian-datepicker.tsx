@@ -24,8 +24,10 @@ interface PersianDatePickerProps {
 // تبدیل تاریخ ISO به فرمت DayValue
 const parseISODate = (isoDate: string): DayValue | null => {
   if (!isoDate) return null;
-  const [year, month, day] = isoDate.split("-").map(Number);
-  if (!year || !month || !day) return null;
+  // Handle full ISO strings like "2024-01-15T10:30:00.000Z"
+  const dateOnly = isoDate.split("T")[0];
+  const [year, month, day] = dateOnly.split("-").map(Number);
+  if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) return null;
   return { year, month, day };
 };
 
