@@ -9,6 +9,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { AppLayout, PageHeader } from "@/components/layout";
 import useTranslation from "@/hooks/useTranslation";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { AccountsTable } from "./components/accounts-table";
 import { AccountsCards } from "./components/accounts-cards";
@@ -34,6 +35,7 @@ export default function AccountsPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { data: session } = useSession();
+  const isMobile = useIsMobile();
 
   const [accounts, setAccounts] = useState<AccountListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,6 +43,13 @@ export default function AccountsPage() {
   const [selectedBank, setSelectedBank] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"list" | "card">("list");
+
+  // Set default view mode based on device
+  useEffect(() => {
+    if (isMobile) {
+      setViewMode("card");
+    }
+  }, [isMobile]);
 
   // واکشی لیست حساب‌ها
   useEffect(() => {
