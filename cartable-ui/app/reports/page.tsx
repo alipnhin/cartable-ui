@@ -43,8 +43,8 @@ export default function TransactionReportsPage() {
     const fromDate = new Date();
     fromDate.setDate(fromDate.getDate() - 7);
     return {
-      fromDate: fromDate.toISOString(),
-      toDate: toDate.toISOString(),
+      fromDate: fromDate.toISOString().split("T")[0],
+      toDate: toDate.toISOString().split("T")[0],
     };
   }, []);
 
@@ -67,7 +67,10 @@ export default function TransactionReportsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [sortField, setSortField] = useState<string>("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   // Combined filters for components
   const filters = useMemo(
@@ -128,14 +131,20 @@ export default function TransactionReportsPage() {
         if (transferFromDate) request.transferFromDate = transferFromDate;
         if (transferToDate) request.transferToDate = transferToDate;
 
+        // Add sorting
+        if (sortField) {
+          request.orderBy = `${sortField} ${sortDirection}`;
+        }
+
         const response = await getTransactionsList(request, session.accessToken);
-        setTransactions(response.data);
-        setTotalRecords(response.recordsFiltered);
+        setTransactions(response.items);
+        setTotalRecords(response.totalItemCount);
       } catch (error) {
         console.error("Error fetching transactions:", error);
         toast.error("خطا در دریافت لیست تراکنش‌ها");
       } finally {
         setLoading(false);
+        setInitialLoading(false);
       }
     };
 
@@ -155,7 +164,20 @@ export default function TransactionReportsPage() {
     orderId,
     transferFromDate,
     transferToDate,
+    sortField,
+    sortDirection,
   ]);
+
+  // Handle sort
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("desc");
+    }
+    setCurrentPage(1);
+  };
 
   // Handle export to Excel
   const handleExport = async () => {
@@ -223,8 +245,8 @@ export default function TransactionReportsPage() {
     setCurrentPage(1);
   };
 
-  // Loading skeleton
-  if (loading && transactions.length === 0) {
+  // Loading skeleton - only show on initial load
+  if (initialLoading) {
     return (
       <AppLayout>
         <div className="space-y-4">
@@ -290,6 +312,9 @@ export default function TransactionReportsPage() {
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
           onExport={handleExport}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSort={handleSort}
         />
       </div>
     </AppLayout>

@@ -1,6 +1,12 @@
 "use client";
 
-import { TransactionItem } from "@/services/transactionService";
+import {
+  TransactionItem,
+  formatAmount,
+  formatDateToPersian,
+  TransactionStatusInfo,
+  PaymentTypeInfo
+} from "@/services/transactionService";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -30,6 +36,10 @@ import {
   ChevronsRight,
   Download,
   Loader2,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  SearchX,
 } from "lucide-react";
 import { MobilePagination } from "@/components/common/mobile-pagination";
 
@@ -43,6 +53,9 @@ interface TransactionTableProps {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   onExport: () => void;
+  sortField?: string;
+  sortDirection?: "asc" | "desc";
+  onSort?: (field: string) => void;
 }
 
 export function TransactionTable({
@@ -55,10 +68,43 @@ export function TransactionTable({
   onPageChange,
   onPageSizeChange,
   onExport,
+  sortField,
+  sortDirection,
+  onSort,
 }: TransactionTableProps) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const isMobile = useIsMobile();
+
+  // Sortable column header component
+  const SortableHeader = ({
+    field,
+    children,
+  }: {
+    field: string;
+    children: React.ReactNode;
+  }) => {
+    const isActive = sortField === field;
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="-mx-3 h-8 data-[state=open]:bg-accent"
+        onClick={() => onSort?.(field)}
+      >
+        {children}
+        {isActive ? (
+          sortDirection === "asc" ? (
+            <ArrowUp className="ms-2 h-4 w-4" />
+          ) : (
+            <ArrowDown className="ms-2 h-4 w-4" />
+          )
+        ) : (
+          <ArrowUpDown className="ms-2 h-4 w-4" />
+        )}
+      </Button>
+    );
+  };
 
   const totalPages = Math.ceil((totalRecords || 0) / pageSize) || 0;
   const startIndex = totalRecords > 0 ? (currentPage - 1) * pageSize : 0;
@@ -73,9 +119,11 @@ export function TransactionTable({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Get badge variant based on status class
-  const getStatusVariant = (statusClass: string) => {
-    switch (statusClass) {
+  // Get badge variant based on status
+  const getStatusVariant = (status: string) => {
+    const statusInfo = TransactionStatusInfo[status];
+    if (!statusInfo) return "secondary";
+    switch (statusInfo.class) {
       case "success":
         return "success";
       case "danger":
@@ -89,9 +137,11 @@ export function TransactionTable({
     }
   };
 
-  // Get badge variant based on payment type class
-  const getPaymentTypeVariant = (paymentTypeClass: string) => {
-    switch (paymentTypeClass) {
+  // Get badge variant based on payment type
+  const getPaymentTypeVariant = (paymentType: string) => {
+    const typeInfo = PaymentTypeInfo[paymentType];
+    if (!typeInfo) return "secondary";
+    switch (typeInfo.class) {
       case "success":
         return "success";
       case "primary":
@@ -103,6 +153,16 @@ export function TransactionTable({
       default:
         return "secondary";
     }
+  };
+
+  // Get status label
+  const getStatusLabel = (status: string) => {
+    return TransactionStatusInfo[status]?.label || status;
+  };
+
+  // Get payment type label
+  const getPaymentTypeLabel = (paymentType: string) => {
+    return PaymentTypeInfo[paymentType]?.label || paymentType;
   };
 
   if (isMobile) {
@@ -144,6 +204,16 @@ export function TransactionTable({
                 </Card>
               ))}
             </div>
+          ) : transactions.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-12">
+              <SearchX className="h-12 w-12 text-muted-foreground/50" />
+              <div className="space-y-1 text-center">
+                <p className="font-medium text-muted-foreground">تراکنشی یافت نشد</p>
+                <p className="text-sm text-muted-foreground/70">
+                  فیلترهای جستجو را تغییر دهید
+                </p>
+              </div>
+            </div>
           ) : (
             transactions.map((tx) => (
               <Card key={tx.id} className="p-4">
@@ -152,8 +222,8 @@ export function TransactionTable({
                     <span className="font-medium text-sm">
                       {tx.destinationAccountOwner}
                     </span>
-                    <Badge variant={getStatusVariant(tx.statusClass)} className="text-xs">
-                      {tx.statusShow}
+                    <Badge variant={getStatusVariant(tx.status)} className="text-xs">
+                      {getStatusLabel(tx.status)}
                     </Badge>
                   </div>
                   <div className="text-sm space-y-1">
@@ -161,7 +231,7 @@ export function TransactionTable({
                       <span className="text-muted-foreground">
                         {t("transactions.amount")}:
                       </span>
-                      <span className="font-medium">{tx.amountShow}</span>
+                      <span className="font-medium">{formatAmount(tx.amount)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
@@ -174,22 +244,22 @@ export function TransactionTable({
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">نوع پرداخت:</span>
                       <Badge
-                        variant={getPaymentTypeVariant(tx.paymentTypeClass)}
+                        variant={getPaymentTypeVariant(tx.paymentType)}
                         className="text-xs"
                       >
-                        {tx.paymentTypeShow}
+                        {getPaymentTypeLabel(tx.paymentType)}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
                         {t("common.date")}:
                       </span>
-                      <span className="text-xs">{tx.createdDateTimeFa}</span>
+                      <span className="text-xs">{formatDateToPersian(tx.createdDateTime)}</span>
                     </div>
-                    {tx.transferDateTimeFa && tx.transferDateTimeFa !== "-" && (
+                    {tx.transferDateTime && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">تاریخ انتقال:</span>
-                        <span className="text-xs">{tx.transferDateTimeFa}</span>
+                        <span className="text-xs">{formatDateToPersian(tx.transferDateTime)}</span>
                       </div>
                     )}
                   </div>
@@ -214,8 +284,8 @@ export function TransactionTable({
   // نمایش جدولی در دسکتاپ
   return (
     <Card>
-      <CardContent className="p-6">
-        <div className="flex justify-between items-center mb-4">
+      <div className="p-4 border-b">
+        <div className="flex justify-between items-center">
           <p className="text-sm text-muted-foreground">
             {t("common.showing")} {startIndex + 1}-{endIndex} {t("common.of")}{" "}
             {totalRecords} {t("reports.transactions")}
@@ -234,19 +304,39 @@ export function TransactionTable({
             {t("common.buttons.export")}
           </Button>
         </div>
+      </div>
 
-        <div className="rounded-md border">
+      <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
-                <TableHead>{t("transactions.ownerName")}</TableHead>
+                <TableHead>
+                  <SortableHeader field="destinationAccountOwner">
+                    {t("transactions.ownerName")}
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>کد ملی</TableHead>
                 <TableHead>{t("transactions.iban")}</TableHead>
+                <TableHead>شماره حساب</TableHead>
+                <TableHead>کد مشتری</TableHead>
                 <TableHead>بانک</TableHead>
-                <TableHead>{t("transactions.amount")}</TableHead>
+                <TableHead>
+                  <SortableHeader field="amount">
+                    {t("transactions.amount")}
+                  </SortableHeader>
+                </TableHead>
                 <TableHead>نوع پرداخت</TableHead>
-                <TableHead>تاریخ ثبت</TableHead>
-                <TableHead>تاریخ انتقال</TableHead>
+                <TableHead>
+                  <SortableHeader field="createdDateTime">
+                    تاریخ ثبت
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="transferDateTime">
+                    تاریخ انتقال
+                  </SortableHeader>
+                </TableHead>
                 <TableHead>{t("common.status")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -255,39 +345,32 @@ export function TransactionTable({
                 // Loading skeleton
                 [...Array(pageSize > 10 ? 10 : pageSize)].map((_, index) => (
                   <TableRow key={index}>
-                    <TableCell>
-                      <Skeleton className="h-4 w-6" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-32" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-40" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-28" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-16" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-6 w-20" />
-                    </TableCell>
+                    <TableCell><Skeleton className="h-4 w-6" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                   </TableRow>
                 ))
               ) : transactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8">
-                    <p className="text-muted-foreground">تراکنشی یافت نشد</p>
+                  <TableCell colSpan={12} className="text-center py-16">
+                    <div className="flex flex-col items-center gap-3">
+                      <SearchX className="h-12 w-12 text-muted-foreground/50" />
+                      <div className="space-y-1">
+                        <p className="font-medium text-muted-foreground">تراکنشی یافت نشد</p>
+                        <p className="text-sm text-muted-foreground/70">
+                          فیلترهای جستجو را تغییر دهید یا تاریخ دیگری انتخاب کنید
+                        </p>
+                      </div>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -296,34 +379,43 @@ export function TransactionTable({
                     <TableCell className="font-medium">
                       {startIndex + index + 1}
                     </TableCell>
-                    <TableCell className="font-medium max-w-[200px] truncate">
+                    <TableCell className="font-medium max-w-[180px] truncate">
                       {tx.destinationAccountOwner}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {tx.nationalCode || "-"}
                     </TableCell>
                     <TableCell className="font-mono text-xs">
                       {tx.destinationIban}
                     </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {tx.accountNumber}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {tx.accountCode || "-"}
+                    </TableCell>
                     <TableCell className="text-sm">{tx.bankName}</TableCell>
-                    <TableCell className="font-medium">{tx.amountShow}</TableCell>
+                    <TableCell className="font-medium">{formatAmount(tx.amount)}</TableCell>
                     <TableCell>
                       <Badge
-                        variant={getPaymentTypeVariant(tx.paymentTypeClass)}
+                        variant={getPaymentTypeVariant(tx.paymentType)}
                         className="text-xs"
                       >
-                        {tx.paymentTypeShow}
+                        {getPaymentTypeLabel(tx.paymentType)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">
-                      {tx.createdDateTimeFa}
+                      {formatDateToPersian(tx.createdDateTime)}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {tx.transferDateTimeFa}
+                      {formatDateToPersian(tx.transferDateTime)}
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={getStatusVariant(tx.statusClass)}
+                        variant={getStatusVariant(tx.status)}
                         className="text-xs"
                       >
-                        {tx.statusShow}
+                        {getStatusLabel(tx.status)}
                       </Badge>
                     </TableCell>
                   </TableRow>
@@ -331,114 +423,113 @@ export function TransactionTable({
               )}
             </TableBody>
           </Table>
+      </div>
+
+      {/* Pagination دسکتاپ */}
+      <div className="flex items-center justify-between p-4 border-t">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {totalRecords > 0 ? (
+            <>
+              {t("common.pagination.showing")}{" "}
+              <span className="font-medium text-foreground">{startIndex + 1}</span>{" "}
+              {t("common.pagination.to")}{" "}
+              <span className="font-medium text-foreground">{endIndex}</span>{" "}
+              {t("common.pagination.of")}{" "}
+              <span className="font-medium text-foreground">{totalRecords}</span>
+            </>
+          ) : (
+            t("common.noData")
+          )}
         </div>
-
-        {/* Pagination دسکتاپ */}
-        <div className="flex items-center justify-between mt-4 px-2">
-          <div className="flex-1 text-sm text-muted-foreground">
-            {totalRecords > 0 ? (
-              <>
-                {t("common.pagination.showing")}{" "}
-                <span className="font-medium text-foreground">{startIndex + 1}</span>{" "}
-                {t("common.pagination.to")}{" "}
-                <span className="font-medium text-foreground">{endIndex}</span>{" "}
-                {t("common.pagination.of")}{" "}
-                <span className="font-medium text-foreground">{totalRecords}</span>
-              </>
-            ) : (
-              t("common.noData")
-            )}
+        <div className="flex items-center gap-6 lg:gap-8">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium">
+              {t("common.pagination.pageSize")}
+            </p>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={handlePageSizeChange}
+            >
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[10, 25, 50, 100].map((size) => (
+                  <SelectItem key={size} value={`${size}`}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="flex items-center gap-6 lg:gap-8">
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-medium">
-                {t("common.pagination.pageSize")}
-              </p>
-              <Select
-                value={pageSize.toString()}
-                onValueChange={handlePageSizeChange}
-              >
-                <SelectTrigger className="h-8 w-[70px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent side="top">
-                  {[10, 25, 50, 100].map((size) => (
-                    <SelectItem key={size} value={`${size}`}>
-                      {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
-            <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-              {t("common.pagination.page")} {currentPage}{" "}
-              {t("common.pagination.of")} {totalPages || 1}
-            </div>
+          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+            {t("common.pagination.page")} {currentPage}{" "}
+            {t("common.pagination.of")} {totalPages || 1}
+          </div>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                className="hidden h-8 w-8 lg:flex"
-                onClick={() => handlePageChange(1)}
-                disabled={currentPage === 1}
-              >
-                <span className="sr-only">{t("common.pagination.firstPage")}</span>
-                {language.direction === "rtl" ? (
-                  <ChevronsRight className="h-4 w-4" />
-                ) : (
-                  <ChevronsLeft className="h-4 w-4" />
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                <span className="sr-only">
-                  {t("common.pagination.previousPage")}
-                </span>
-                {language.direction === "rtl" ? (
-                  <ChevronRight className="h-4 w-4" />
-                ) : (
-                  <ChevronLeft className="h-4 w-4" />
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages || totalPages === 0}
-              >
-                <span className="sr-only">{t("common.pagination.nextPage")}</span>
-                {language.direction === "rtl" ? (
-                  <ChevronLeft className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="hidden h-8 w-8 lg:flex"
-                onClick={() => handlePageChange(totalPages)}
-                disabled={currentPage === totalPages || totalPages === 0}
-              >
-                <span className="sr-only">{t("common.pagination.lastPage")}</span>
-                {language.direction === "rtl" ? (
-                  <ChevronsLeft className="h-4 w-4" />
-                ) : (
-                  <ChevronsRight className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="hidden h-8 w-8 lg:flex"
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+            >
+              <span className="sr-only">{t("common.pagination.firstPage")}</span>
+              {language.direction === "rtl" ? (
+                <ChevronsRight className="h-4 w-4" />
+              ) : (
+                <ChevronsLeft className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <span className="sr-only">
+                {t("common.pagination.previousPage")}
+              </span>
+              {language.direction === "rtl" ? (
+                <ChevronRight className="h-4 w-4" />
+              ) : (
+                <ChevronLeft className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages || totalPages === 0}
+            >
+              <span className="sr-only">{t("common.pagination.nextPage")}</span>
+              {language.direction === "rtl" ? (
+                <ChevronLeft className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="hidden h-8 w-8 lg:flex"
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages || totalPages === 0}
+            >
+              <span className="sr-only">{t("common.pagination.lastPage")}</span>
+              {language.direction === "rtl" ? (
+                <ChevronsLeft className="h-4 w-4" />
+              ) : (
+                <ChevronsRight className="h-4 w-4" />
+              )}
+            </Button>
           </div>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 }

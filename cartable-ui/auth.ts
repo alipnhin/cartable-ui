@@ -12,7 +12,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       authorization: {
         params: {
           scope:
-            "openid profile email offline_access TadbirPay.Cartable.Api.Scope",
+            "openid profile email offline_access TadbirPay.Cartable.Api.Scope admin_ui_webhooks",
           response_type: "code",
         },
       },

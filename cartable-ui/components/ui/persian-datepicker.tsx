@@ -1,68 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import DatePicker, { DayValue } from "react-modern-calendar-datepicker";
-import "react-modern-calendar-datepicker/lib/DatePicker.css";
-import { Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import DatePicker, { DateObject } from "react-multi-date-picker";
+import type { Value } from "react-multi-date-picker";
+import persian from "react-date-object/calendars/persian";
+import persian_fa from "react-date-object/locales/persian_fa";
+import gregorian from "react-date-object/calendars/gregorian";
+import gregorian_en from "react-date-object/locales/gregorian_en";
+import "react-multi-date-picker/styles/colors/purple.css";
 import { cn } from "@/lib/utils";
 import useTranslation from "@/hooks/useTranslation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PersianDatePickerProps {
-  value?: string; // ISO date string (YYYY-MM-DD)
+  value?: string; // ISO date string (YYYY-MM-DD or full ISO)
   onChange?: (value: string) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
 }
-
-// تبدیل تاریخ ISO به فرمت DayValue
-const parseISODate = (isoDate: string): DayValue | null => {
-  if (!isoDate) return null;
-  const [year, month, day] = isoDate.split("-").map(Number);
-  if (!year || !month || !day) return null;
-  return { year, month, day };
-};
-
-// تبدیل DayValue به تاریخ ISO
-const formatToISO = (date: DayValue): string => {
-  if (!date) return "";
-  const { year, month, day } = date;
-  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-};
-
-// فرمت نمایش تاریخ
-const formatDisplayDate = (date: DayValue | null, locale: string): string => {
-  if (!date) return "";
-  const { year, month, day } = date;
-
-  if (locale === "fa") {
-    // نمایش فارسی
-    const persianMonths = [
-      "فروردین",
-      "اردیبهشت",
-      "خرداد",
-      "تیر",
-      "مرداد",
-      "شهریور",
-      "مهر",
-      "آبان",
-      "آذر",
-      "دی",
-      "بهمن",
-      "اسفند",
-    ];
-    return `${day} ${persianMonths[month - 1]} ${year}`;
-  }
-
-  // نمایش میلادی
-  return `${day}/${month}/${year}`;
-};
 
 export function PersianDatePicker({
   value,
@@ -72,60 +27,51 @@ export function PersianDatePicker({
   disabled = false,
 }: PersianDatePickerProps) {
   const { t, locale } = useTranslation();
-  const [selectedDay, setSelectedDay] = useState<DayValue | null>(
-    value ? parseISODate(value) : null
-  );
-  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useIsMobile();
 
-  // بروزرسانی selectedDay وقتی value از خارج تغییر می‌کند
-  useEffect(() => {
-    setSelectedDay(value ? parseISODate(value) : null);
-  }, [value]);
-
-  const handleDateChange = (date: DayValue) => {
-    setSelectedDay(date);
-    if (onChange) {
-      onChange(formatToISO(date));
+  const handleChange = (date: Value) => {
+    if (date && typeof date === "object" && "toDate" in date) {
+      const jsDate = (date as DateObject).toDate();
+      const isoDate = jsDate.toISOString().split("T")[0];
+      onChange?.(isoDate);
+    } else if (!date) {
+      onChange?.("");
     }
-    setIsOpen(false);
   };
 
-  const displayValue = selectedDay
-    ? formatDisplayDate(selectedDay, locale)
-    : placeholder || t("common.selectDate");
+  // Convert value to DateObject
+  let dateValue: Value = null;
+  if (value) {
+    // Parse ISO date string (YYYY-MM-DD)
+    const dateStr = value.split("T")[0];
+    const jsDate = new Date(dateStr + "T12:00:00"); // Add time to avoid timezone issues
 
-  // تنظیم locale برای تقویم
-  const calendarLocale = locale === "fa" ? "fa" : "en";
+    // Create DateObject from JavaScript Date
+    dateValue = new DateObject(jsDate);
+
+    // If locale is Persian, convert to Persian calendar
+    if (locale === "fa") {
+      dateValue = dateValue.convert(persian, persian_fa);
+    }
+  }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          disabled={disabled}
-          className={cn(
-            "w-full justify-start text-start font-normal",
-            !selectedDay && "text-muted-foreground",
-            className
-          )}
-        >
-          <Calendar className="me-2 h-4 w-4" />
-          {displayValue}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <div className="persian-datepicker-wrapper">
-          <DatePicker
-            value={selectedDay}
-            onChange={handleDateChange}
-            locale={calendarLocale}
-            shouldHighlightWeekends
-            calendarClassName="custom-calendar"
-            calendarTodayClassName="custom-today"
-            calendarSelectedDayClassName="custom-selected-day"
-          />
-        </div>
-      </PopoverContent>
-    </Popover>
+    <DatePicker
+      value={dateValue}
+      onChange={handleChange}
+      calendar={locale === "fa" ? persian : gregorian}
+      locale={locale === "fa" ? persian_fa : gregorian_en}
+      format={locale === "fa" ? "YYYY/MM/DD" : "YYYY-MM-DD"}
+      className={cn("purple", isMobile && "rmdp-mobile")}
+      calendarPosition={locale === "fa" ? "bottom-right" : "bottom-left"}
+      inputClass={cn(
+        "w-full px-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        isMobile ? "h-12 text-base" : "h-10",
+        className
+      )}
+      containerClassName="w-full"
+      placeholder={placeholder || t("common.selectDate")}
+      disabled={disabled}
+    />
   );
 }

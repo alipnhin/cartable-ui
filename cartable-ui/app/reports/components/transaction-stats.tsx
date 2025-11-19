@@ -1,6 +1,6 @@
 "use client";
 
-import { TransactionItem } from "@/services/transactionService";
+import { TransactionItem, SuccessStatuses, PendingStatuses } from "@/services/transactionService";
 import { Card, CardContent } from "@/components/ui/card";
 import useTranslation from "@/hooks/useTranslation";
 import {
@@ -17,21 +17,26 @@ interface TransactionStatsProps {
 export function TransactionStats({ transactions = [] }: TransactionStatsProps) {
   const { t } = useTranslation();
 
-  // محاسبه آمار بر اساس status number از API
-  // 3 = succeeded, 2 = waiting for execution, 5 = waiting for bank
-  // 4 = rejected by bank, 7 = canceled
+  // محاسبه آمار بر اساس status string از API
+  // موفق: BankSucceeded
+  // در انتظار: Registered, WaitForExecution, WaitForBank
+  // ناموفق: سایر وضعیت‌ها
+  const succeededCount = transactions.filter((tx) =>
+    SuccessStatuses.includes(tx.status)
+  ).length;
+
+  const pendingCount = transactions.filter((tx) =>
+    PendingStatuses.includes(tx.status)
+  ).length;
+
   const stats = {
     total: transactions.length,
-    succeeded: transactions.filter((tx) => tx.status === 3).length,
-    pending: transactions.filter(
-      (tx) => tx.status === 2 || tx.status === 5 || tx.status === 1
-    ).length,
-    failed: transactions.filter(
-      (tx) => tx.status === 4 || tx.status === 7 || tx.status === 6
-    ).length,
+    succeeded: succeededCount,
+    pending: pendingCount,
+    failed: transactions.length - succeededCount - pendingCount,
     totalAmount: transactions.reduce((sum, tx) => sum + tx.amount, 0),
     successAmount: transactions
-      .filter((tx) => tx.status === 3)
+      .filter((tx) => SuccessStatuses.includes(tx.status))
       .reduce((sum, tx) => sum + tx.amount, 0),
   };
 

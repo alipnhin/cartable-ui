@@ -8,31 +8,73 @@ export interface TransactionItem {
   destinationIban: string;
   accountNumber: string;
   bankName: string;
-  accountCode: string;
+  accountCode: string | null;
   orderId: string;
   amount: number;
-  amountShow: string;
-  status: number;
-  statusShow: string;
-  statusClass: string;
-  paymentType: number;
-  paymentTypeShow: string;
-  paymentTypeClass: string;
+  status: string; // "WaitForExecution", "Success", "Failed", etc.
+  paymentType: string; // "Paya", "Satna", "Internal"
   createdDateTime: string;
-  createdDateTimeFa: string;
   updatedDateTime: string | null;
-  updatedDateTimeFa: string;
   transferDateTime: string | null;
-  transferDateTimeFa: string;
   sendToBankDateTime: string | null;
-  sendToBankDateFa: string;
 }
 
+// Helper function to format amount
+export const formatAmount = (amount: number): string => {
+  return new Intl.NumberFormat("fa-IR").format(amount) + " ریال";
+};
+
+// Helper function to format date to Persian
+export const formatDateToPersian = (dateString: string | null): string => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat("fa-IR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+};
+
+// Status mapping
+export const TransactionStatusInfo: Record<string, { label: string; class: string }> = {
+  // موفق
+  BankSucceeded: { label: "موفق", class: "success" },
+  // در انتظار پردازش
+  Registered: { label: "ثبت شده", class: "info" },
+  WaitForExecution: { label: "در انتظار اجرا", class: "warning" },
+  WaitForBank: { label: "در انتظار بانک", class: "warning" },
+  // ناموفق
+  Failed: { label: "ناموفق", class: "danger" },
+  BankFailed: { label: "رد شده توسط بانک", class: "danger" },
+  Canceled: { label: "لغو شده", class: "secondary" },
+  Rejected: { label: "رد شده", class: "danger" },
+};
+
+// Status categories for stats
+export const SuccessStatuses = ["BankSucceeded"];
+export const PendingStatuses = ["Registered", "WaitForExecution", "WaitForBank"];
+
+// Payment type mapping
+export const PaymentTypeInfo: Record<string, { label: string; class: string }> = {
+  Paya: { label: "پایا", class: "info" },
+  Satna: { label: "ساتنا", class: "warning" },
+  Internal: { label: "درون بانکی", class: "success" },
+};
+
 export interface TransactionsResponse {
-  draw: number;
-  recordsTotal: number;
-  recordsFiltered: number;
-  data: TransactionItem[];
+  items: TransactionItem[];
+  pageNumber: number;
+  pageSize: number;
+  totalPageCount: number;
+  totalItemCount: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  isFirstPage: boolean;
+  isLastPage: boolean;
+  firstItemOnPage: number;
+  lastItemOnPage: number;
 }
 
 export interface TransactionsRequest {
@@ -125,8 +167,8 @@ export const getDefaultDateRange = (): { fromDate: string; toDate: string } => {
   fromDate.setDate(fromDate.getDate() - 7);
 
   return {
-    fromDate: fromDate.toISOString(),
-    toDate: toDate.toISOString(),
+    fromDate: fromDate.toISOString().split("T")[0],
+    toDate: toDate.toISOString().split("T")[0],
   };
 };
 

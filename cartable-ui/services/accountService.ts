@@ -38,7 +38,7 @@ export interface AccountUser {
   id: string;
   userId: string;
   bankGatewayId: string;
-  status: number; // 0 = inactive, 1 = active
+  status: number | string; // 0/EnableRequested, 1/Enable, 2/Disable, 3/DisableRequested, 4/Rejected
   fullName: string;
   createdDateTime: string;
   updatedDateTime: string;
