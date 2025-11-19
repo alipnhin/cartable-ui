@@ -29,12 +29,8 @@ export function PersianDatePicker({
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
 
-  // Convert ISO string to date value for the picker
-  const getDateValue = (): string => {
-    if (!value) return "";
-    // Handle full ISO strings like "2024-01-15T10:30:00.000Z"
-    return value.split("T")[0];
-  };
+  // Clean the value - remove time component if present
+  const cleanValue = value ? value.split("T")[0] : "";
 
   const handleChange = (date: Value) => {
     if (date && typeof date === "object" && "toDate" in date) {
@@ -47,7 +43,7 @@ export function PersianDatePicker({
 
   return (
     <DatePicker
-      value={getDateValue()}
+      value={cleanValue}
       onChange={handleChange}
       calendar={locale === "fa" ? persian : gregorian}
       locale={locale === "fa" ? persian_fa : gregorian_en}
