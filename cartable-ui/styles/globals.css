@@ -887,6 +887,15 @@ main {
     box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25) !important;
 }
 
+/* Z-index fix for DatePicker portal */
+.rmdp-container {
+    z-index: 9999 !important;
+}
+
+.rmdp-wrapper {
+    z-index: 9999 !important;
+}
+
 /* Dark mode for portal */
 .dark .rmdp-ep-shadow {
     background-color: var(--card) !important;

@@ -36,6 +36,9 @@ import {
   ChevronsRight,
   Download,
   Loader2,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { MobilePagination } from "@/components/common/mobile-pagination";
 
@@ -49,6 +52,9 @@ interface TransactionTableProps {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   onExport: () => void;
+  sortField?: string;
+  sortDirection?: "asc" | "desc";
+  onSort?: (field: string) => void;
 }
 
 export function TransactionTable({
@@ -61,10 +67,43 @@ export function TransactionTable({
   onPageChange,
   onPageSizeChange,
   onExport,
+  sortField,
+  sortDirection,
+  onSort,
 }: TransactionTableProps) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const isMobile = useIsMobile();
+
+  // Sortable column header component
+  const SortableHeader = ({
+    field,
+    children,
+  }: {
+    field: string;
+    children: React.ReactNode;
+  }) => {
+    const isActive = sortField === field;
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="-mx-3 h-8 data-[state=open]:bg-accent"
+        onClick={() => onSort?.(field)}
+      >
+        {children}
+        {isActive ? (
+          sortDirection === "asc" ? (
+            <ArrowUp className="ms-2 h-4 w-4" />
+          ) : (
+            <ArrowDown className="ms-2 h-4 w-4" />
+          )
+        ) : (
+          <ArrowUpDown className="ms-2 h-4 w-4" />
+        )}
+      </Button>
+    );
+  };
 
   const totalPages = Math.ceil((totalRecords || 0) / pageSize) || 0;
   const startIndex = totalRecords > 0 ? (currentPage - 1) * pageSize : 0;
@@ -261,13 +300,32 @@ export function TransactionTable({
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
-                <TableHead>{t("transactions.ownerName")}</TableHead>
+                <TableHead>
+                  <SortableHeader field="destinationAccountOwner">
+                    {t("transactions.ownerName")}
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>کد ملی</TableHead>
                 <TableHead>{t("transactions.iban")}</TableHead>
+                <TableHead>شماره حساب</TableHead>
+                <TableHead>کد مشتری</TableHead>
                 <TableHead>بانک</TableHead>
-                <TableHead>{t("transactions.amount")}</TableHead>
+                <TableHead>
+                  <SortableHeader field="amount">
+                    {t("transactions.amount")}
+                  </SortableHeader>
+                </TableHead>
                 <TableHead>نوع پرداخت</TableHead>
-                <TableHead>تاریخ ثبت</TableHead>
-                <TableHead>تاریخ انتقال</TableHead>
+                <TableHead>
+                  <SortableHeader field="createdDateTime">
+                    تاریخ ثبت
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="transferDateTime">
+                    تاریخ انتقال
+                  </SortableHeader>
+                </TableHead>
                 <TableHead>{t("common.status")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -276,38 +334,23 @@ export function TransactionTable({
                 // Loading skeleton
                 [...Array(pageSize > 10 ? 10 : pageSize)].map((_, index) => (
                   <TableRow key={index}>
-                    <TableCell>
-                      <Skeleton className="h-4 w-6" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-32" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-40" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-28" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-16" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-6 w-20" />
-                    </TableCell>
+                    <TableCell><Skeleton className="h-4 w-6" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                   </TableRow>
                 ))
               ) : transactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8">
+                  <TableCell colSpan={12} className="text-center py-8">
                     <p className="text-muted-foreground">تراکنشی یافت نشد</p>
                   </TableCell>
                 </TableRow>
@@ -317,11 +360,20 @@ export function TransactionTable({
                     <TableCell className="font-medium">
                       {startIndex + index + 1}
                     </TableCell>
-                    <TableCell className="font-medium max-w-[200px] truncate">
+                    <TableCell className="font-medium max-w-[180px] truncate">
                       {tx.destinationAccountOwner}
                     </TableCell>
                     <TableCell className="font-mono text-xs">
+                      {tx.nationalCode || "-"}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
                       {tx.destinationIban}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {tx.accountNumber}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {tx.accountCode || "-"}
                     </TableCell>
                     <TableCell className="text-sm">{tx.bankName}</TableCell>
                     <TableCell className="font-medium">{formatAmount(tx.amount)}</TableCell>

@@ -3,15 +3,23 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { getAccountsSelectData } from "@/services/accountService";
 import type { AccountSelectData } from "@/services/accountService";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AccountSelectorProps {
   value?: string;
@@ -38,6 +46,7 @@ export default function AccountSelector({
   const [accounts, setAccounts] = useState<AccountSelectData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -79,19 +88,73 @@ export default function AccountSelector({
     );
   }
 
+  const selectedAccount = accounts.find((acc) => acc.id === value);
+  const displayValue =
+    value === "all" || !value
+      ? showAllOption
+        ? "همه حساب‌ها"
+        : placeholder
+      : selectedAccount?.text || placeholder;
+
   return (
-    <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger className={className}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {showAllOption && <SelectItem value="all">همه حساب‌ها</SelectItem>}
-        {accounts.map((account) => (
-          <SelectItem key={account.id} value={account.id}>
-            {account.text}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          disabled={disabled}
+          className={cn("w-full justify-between", className)}
+        >
+          <span className="truncate">{displayValue}</span>
+          <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[300px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="جستجوی حساب..." />
+          <CommandList>
+            <CommandEmpty>حسابی یافت نشد</CommandEmpty>
+            <CommandGroup>
+              {showAllOption && (
+                <CommandItem
+                  value="all"
+                  onSelect={() => {
+                    onValueChange?.("all");
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "me-2 h-4 w-4",
+                      value === "all" || !value ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  همه حساب‌ها
+                </CommandItem>
+              )}
+              {accounts.map((account) => (
+                <CommandItem
+                  key={account.id}
+                  value={account.text}
+                  onSelect={() => {
+                    onValueChange?.(account.id);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "me-2 h-4 w-4",
+                      value === account.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {account.text}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
