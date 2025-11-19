@@ -224,7 +224,7 @@ export default function TransactionReportsPage() {
   };
 
   // Loading skeleton
-  if (loading && transactions.length === 0) {
+  if (loading && (transactions?.length ?? 0) === 0) {
     return (
       <AppLayout>
         <div className="space-y-4">
