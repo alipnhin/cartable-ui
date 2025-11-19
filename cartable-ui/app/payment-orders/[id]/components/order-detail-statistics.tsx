@@ -444,50 +444,6 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
           </CardContent>
         </Card>
       </div>
-
-      {/* ردیف سوم: آمار کد علت */}
-      {reasonCodeStatistics.breakdown.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              {t("orderDetail.statistics.reasonCodesDistribution")}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {t("orderDetail.statistics.paymentReasonCodesStats")}
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {reasonCodeStatistics.breakdown.map((reason) => (
-                <div key={reason.reasonCode} className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium truncate flex-1">
-                      {reason.reasonName}
-                    </span>
-                    <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary shrink-0 ms-2">
-                      {reason.percentage.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="space-y-1 text-xs text-muted-foreground">
-                    <div className="flex items-center justify-between">
-                      <span>{t("orderDetail.statistics.count")}</span>
-                      <span className="font-medium">{reason.count}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>{t("orderDetail.statistics.amount")}</span>
-                      <span className="font-medium">{formatCurrency(reason.amount, locale)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>{t("orderDetail.statistics.successRate")}</span>
-                      <span className="font-medium">{reason.successRate.toFixed(1)}%</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

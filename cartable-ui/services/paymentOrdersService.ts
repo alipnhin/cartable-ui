@@ -275,3 +275,42 @@ export const sendToBank = async (
 
   return response.data;
 };
+
+/**
+ * دانلود فایل اکسل تراکنش‌های دستور پرداخت
+ *
+ * @param orderId شناسه دستور پرداخت
+ * @param accessToken توکن دسترسی کاربر
+ * @returns فایل اکسل به صورت Blob
+ */
+export const exportOrderTransactionsToExcel = async (
+  orderId: string,
+  accessToken: string
+): Promise<Blob> => {
+  const response = await apiClient.post(
+    `/v1-Cartable/Withdrawal/ExportTransaction/${orderId}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      responseType: "blob",
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * Helper to download blob as file
+ */
+export const downloadBlobAsFile = (blob: Blob, filename: string): void => {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+};

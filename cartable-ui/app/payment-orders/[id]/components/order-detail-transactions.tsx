@@ -38,6 +38,7 @@ import {
   Hash,
   Wallet,
   FileText,
+  Download,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -73,6 +74,7 @@ interface OrderDetailTransactionsProps {
   onRefresh: () => void | Promise<void>;
   onFilterChange: (filters: Partial<TransactionFilterParams>) => void | Promise<void>;
   onInquiryTransaction: (transactionId: string) => void | Promise<void>;
+  onExport?: () => void | Promise<void>;
 }
 
 type SortField = "amount" | "destinationAccountOwner" | "nationalCode";
@@ -105,6 +107,7 @@ export function OrderDetailTransactions({
   onRefresh,
   onFilterChange,
   onInquiryTransaction,
+  onExport,
 }: OrderDetailTransactionsProps) {
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
@@ -259,6 +262,18 @@ export function OrderDetailTransactions({
 
             {/* Actions */}
             <div className="flex gap-2 w-full sm:w-auto ms-auto">
+              {/* Export Button */}
+              {onExport && (
+                <Button
+                  variant="outline"
+                  onClick={onExport}
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  {!isMobile && t("transactions.export")}
+                </Button>
+              )}
+
               {/* Refresh Button */}
               <Button
                 variant="outline"
