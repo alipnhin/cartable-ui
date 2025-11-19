@@ -73,19 +73,12 @@ export default function DashboardFilters({
   };
 
   return (
-    <Card className="mb-5 shadow-sm animate-fade-in">
-      <div className="p-5">
-        <div className="flex flex-wrap items-end gap-4">
-          {/* Filter Icon */}
-          <div className="hidden lg:flex items-center">
-            <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center ml-3">
-              <Filter className="w-5 h-5 text-primary" />
-            </div>
-          </div>
-
+    <Card className="mb-5 animate-fade-in border-2">
+      <div className="p-4 lg:p-5">
+        <div className="flex flex-wrap items-end gap-3 lg:gap-4">
           {/* Account Selection */}
-          <div className="flex-1 min-w-[200px] lg:flex-initial lg:w-64">
-            <Label className="text-sm font-medium mb-2 block">
+          <div className="flex-1 min-w-[200px] lg:flex-initial lg:w-56">
+            <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
               {t("dashboard.filters.bankAccount")}
             </Label>
             <AccountSelector
@@ -93,14 +86,13 @@ export default function DashboardFilters({
               onValueChange={setSelectedAccount}
               placeholder={t("dashboard.filters.allAccounts")}
               showAllOption={true}
-              className="bg-background"
+              className="bg-background h-9"
             />
           </div>
 
           {/* From Date */}
-          <div className="flex-1 min-w-[180px] lg:flex-initial lg:w-56">
-            <Label className="text-sm font-medium mb-2  flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
+          <div className="flex-1 min-w-[160px] lg:flex-initial lg:w-48">
+            <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
               {t("dashboard.filters.fromDate")}
             </Label>
             <PersianDatePicker
@@ -112,9 +104,8 @@ export default function DashboardFilters({
           </div>
 
           {/* To Date */}
-          <div className="flex-1 min-w-[180px] lg:flex-initial lg:w-56">
-            <Label className="text-sm font-medium mb-2  flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
+          <div className="flex-1 min-w-[160px] lg:flex-initial lg:w-48">
+            <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
               {t("dashboard.filters.toDate")}
             </Label>
             <PersianDatePicker
@@ -126,15 +117,13 @@ export default function DashboardFilters({
           </div>
 
           {/* Apply Filter Button */}
-          <div className="w-full lg:w-auto lg:mr-auto">
+          <div className="w-full lg:w-auto lg:ms-auto">
             <Button
               onClick={handleApplyFilters}
-              className="w-full lg:w-auto gap-2"
+              className="w-full lg:w-auto gap-2 h-9"
             >
               <Search className="w-4 h-4" />
-              <span className="text-sm font-semibold">
-                {t("dashboard.filters.applyFilter")}
-              </span>
+              {t("dashboard.filters.applyFilter")}
             </Button>
           </div>
         </div>

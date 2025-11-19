@@ -43,29 +43,23 @@ export function Sidebar({
               key={item.title}
               variant="ghost"
               className={cn(
-                "group relative w-full justify-start gap-3 transition-all duration-200",
-                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                "group relative w-full justify-start gap-3 transition-all duration-200 h-10",
+                "hover:bg-muted",
                 isCollapsed && "justify-center px-2",
                 isActive && [
-                  "bg-primary/10 text-primary font-semibold",
-                  "hover:bg-primary/15 hover:text-primary",
-                  "shadow-sm",
+                  "bg-primary text-primary-foreground font-medium",
+                  "hover:bg-primary/90 hover:text-primary-foreground",
                 ]
               )}
               onClick={() => router.push(item.route)}
               title={isCollapsed ? t(`navigation.${item.title}`) : undefined}
             >
-              {/* Active Indicator */}
-              {isActive && (
-                <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-e-full" />
-              )}
-
               {/* Icon */}
               <Icon
                 className={cn(
                   "h-5 w-5 shrink-0 transition-all duration-200",
                   isActive
-                    ? "text-primary scale-110"
+                    ? "text-primary-foreground"
                     : "text-muted-foreground group-hover:text-foreground"
                 )}
               />
@@ -75,18 +69,18 @@ export function Sidebar({
                 <>
                   <span
                     className={cn(
-                      "flex-1 text-start transition-colors duration-200",
+                      "flex-1 text-start transition-colors duration-200 text-sm",
                       isActive
-                        ? "text-primary"
-                        : "text-muted-foreground group-hover:text-foreground"
+                        ? "text-primary-foreground"
+                        : "text-foreground"
                     )}
                   >
                     {t(`navigation.${item.title}`)}
                   </span>
                   {item.badge && item.badge > 0 && (
                     <Badge
-                      variant="destructive"
-                      className="ms-auto rounded-full"
+                      variant={isActive ? "secondary" : "destructive"}
+                      className="ms-auto rounded-full h-5 min-w-5 text-xs"
                     >
                       {item.badge > 9 ? "9+" : item.badge}
                     </Badge>
@@ -96,7 +90,7 @@ export function Sidebar({
 
               {/* Collapsed Badge */}
               {isCollapsed && item.badge && item.badge > 0 && (
-                <div className="absolute -top-1 -end-1 w-2 h-2 bg-destructive rounded-full " />
+                <div className="absolute -top-0.5 -end-0.5 w-2 h-2 bg-destructive rounded-full" />
               )}
             </Button>
           );
@@ -105,23 +99,23 @@ export function Sidebar({
 
       {/* Footer */}
       {!isCollapsed && (
-        <div className="border-t p-4 space-y-3">
+        <div className="border-t p-3 space-y-3">
           {/* Account Group Switcher */}
-          <div className="px-1">
+          <div>
             <AccountGroupSwitcher
               value={selectedAccountGroup}
               onChange={onAccountGroupChange}
-              className="w-full h-11"
+              className="w-full h-10"
             />
           </div>
 
           {/* App Info */}
-          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/50">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-xs font-semibold text-primary">ک</span>
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-muted/50 border">
+            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-sm font-bold text-primary-foreground">ک</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{t("app.title")}</p>
+              <p className="text-sm font-semibold text-foreground truncate">{t("app.title")}</p>
               <p className="text-xs text-muted-foreground">
                 {t("app.version")} 1.0.0
               </p>
