@@ -29,6 +29,7 @@ import {
   ArrowUp,
   ArrowDown,
   LayoutList,
+  FileX,
 } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useLanguage } from "@/providers/i18n-provider";
@@ -141,8 +142,16 @@ export function DataTable<TData, TValue>({
   if (data.length === 0) {
     return (
       <div className="rounded-lg border bg-card">
-        <div className="p-12 text-center text-muted-foreground">
-          {t("orders.noOrders")}
+        <div className="flex flex-col items-center gap-3 py-16">
+          <FileX className="h-12 w-12 text-muted-foreground/50" />
+          <div className="space-y-1 text-center">
+            <p className="font-medium text-muted-foreground">
+              {t("orders.noOrders")}
+            </p>
+            <p className="text-sm text-muted-foreground/70">
+              فیلترهای جستجو را تغییر دهید یا دستور پرداخت جدید ایجاد کنید
+            </p>
+          </div>
         </div>
       </div>
     );

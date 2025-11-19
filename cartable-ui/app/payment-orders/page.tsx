@@ -6,9 +6,9 @@ import { AppLayout, PageHeader } from "@/components/layout";
 import { DataTable } from "./components/data-table";
 import { createColumns } from "./components/columns";
 import { OrderCard, OrderCardSkeleton } from "./components/order-card";
-import { FilterSheet } from "./components/filter-sheet";
+import { OrderFilters } from "./components/order-filters";
 import { Button } from "@/components/ui/button";
-import { Download, FileBadge, Filter, Timer } from "lucide-react";
+import { FileBadge, Timer, FileX } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,7 @@ import { PaymentStatusEnum } from "@/types/api";
 import { useRouter } from "next/navigation";
 import { MobilePagination } from "@/components/common/mobile-pagination";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import StatisticCard, { StatisticCardProps } from "./components/statistic-card";
 import { searchPaymentOrders } from "@/services/paymentOrdersService";
 import { mapPaymentListDtosToPaymentOrders } from "@/lib/api-mappers";
@@ -27,13 +28,13 @@ export default function PaymentOrdersPage() {
   const { toast } = useToast();
   const router = useRouter();
   const { data: session } = useSession();
-  const [showFilters, setShowFilters] = useState(false);
 
   /**
    * State مدیریت داده‌های صفحه
    */
   const [orders, setOrders] = useState<PaymentOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
@@ -56,11 +57,10 @@ export default function PaymentOrdersPage() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  // فیلترهای legacy برای FilterSheet
+  // فیلترهای یکپارچه برای کامپوننت
   const filters = useMemo(
     () => ({
       status: statusFilter,
-      search: "",
       orderTitle,
       orderNumber,
       trackingId,
@@ -146,6 +146,7 @@ export default function PaymentOrdersPage() {
         });
       } finally {
         setIsLoading(false);
+        setInitialLoading(false);
       }
     };
 
@@ -190,22 +191,6 @@ export default function PaymentOrdersPage() {
 
     return { total, pending, succeeded, totalAmount };
   }, [orders, totalItems]);
-
-  // Handlers
-  const handleExport = () => {
-    toast({
-      title: t("toast.info"),
-      description: t("toast.exportStarted"),
-    });
-
-    // Simulate export delay
-    setTimeout(() => {
-      toast({
-        title: t("common.success"),
-        description: t("paymentOrders.excelReady"),
-      });
-    }, 2000);
-  };
 
   /**
    * تغییر فیلترها
@@ -286,52 +271,76 @@ export default function PaymentOrdersPage() {
     },
   ];
 
-  const activeFiltersCount =
-    (filters.status ? 1 : 0) +
-    (filters.orderTitle ? 1 : 0) +
-    (filters.orderNumber ? 1 : 0) +
-    (filters.trackingId ? 1 : 0) +
-    (filters.search ? 1 : 0) +
-    (filters.dateFrom ? 1 : 0) +
-    (filters.dateTo ? 1 : 0) +
-    (filters.accountId && filters.accountId !== "all" ? 1 : 0);
+
+  // نمایش اسکلت لودینگ فقط در بارگذاری اولیه
+  if (initialLoading) {
+    return (
+      <AppLayout>
+        <PageHeader
+          title={t("paymentCartable.pageTitle")}
+          description={t("paymentCartable.pageSubtitle")}
+        />
+        {/* Filter skeleton */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+        {/* Stats skeleton */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-12 w-12 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        {/* Table skeleton */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex gap-4 py-3 border-b last:border-0">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
       <PageHeader
         title={t("paymentCartable.pageTitle")}
         description={t("paymentCartable.pageSubtitle")}
-        actions={
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              mode="default"
-              onClick={() => setShowFilters(true)}
-              className="hover:bg-muted/80 transition-colors"
-            >
-              <Filter className="" />
-              {t("common.buttons.filter")}
-              {activeFiltersCount > 0 && (
-                <span className="ms-2 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full min-w-5 text-center">
-                  {activeFiltersCount}
-                </span>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleExport}
-              mode={isMobile ? "icon" : "default"}
-              className="hover:bg-muted/80 transition-colors"
-            >
-              <Download className="" />
-              {!isMobile && t("common.buttons.export")}
-            </Button>
-          </div>
-        }
       />
 
       {/* Stats Cards */}
       <StatisticCard cards={statisticCards} />
+
+      {/* Inline Filters */}
+      <OrderFilters
+        filters={filters}
+        onFiltersChange={handleFilterChange}
+      />
 
       {/* Data Display */}
       {!isMobile ? (
@@ -356,13 +365,22 @@ export default function PaymentOrdersPage() {
             ))
           ) : (
             <>
-              {orders.map((order) => (
-                <OrderCard key={order.id} order={order} onView={handleViewOrder} />
-              ))}
-              {orders.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground">
-                  {t("orders.noOrders")}
+              {orders.length === 0 ? (
+                <div className="flex flex-col items-center gap-3 py-16">
+                  <FileX className="h-12 w-12 text-muted-foreground/50" />
+                  <div className="space-y-1 text-center">
+                    <p className="font-medium text-muted-foreground">
+                      {t("orders.noOrders")}
+                    </p>
+                    <p className="text-sm text-muted-foreground/70">
+                      فیلترهای جستجو را تغییر دهید یا دستور پرداخت جدید ایجاد کنید
+                    </p>
+                  </div>
                 </div>
+              ) : (
+                orders.map((order) => (
+                  <OrderCard key={order.id} order={order} onView={handleViewOrder} />
+                ))
               )}
               {totalPages > 1 && (
                 <MobilePagination
@@ -376,15 +394,6 @@ export default function PaymentOrdersPage() {
         </div>
       )}
 
-      {/* Filter Sheet */}
-      <FilterSheet
-        open={showFilters}
-        onOpenChange={setShowFilters}
-        filters={filters}
-        onFiltersChange={handleFilterChange}
-        onReset={handleResetFilters}
-        isLoading={isLoading}
-      />
     </AppLayout>
   );
 }

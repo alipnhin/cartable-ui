@@ -208,7 +208,9 @@
     "otpResentSuccess": "کد تایید مجدداً ارسال شد",
     "otpResendError": "خطا در ارسال مجدد کد تایید",
     "loading": "در حال بارگذاری...",
-    "orderNotFoundText": "دستور پرداخت یافت نشد",
+    "errorTitle": "خطا در بارگذاری",
+    "orderNotFound": "دستور پرداخت یافت نشد",
+    "orderNotFoundText": "دستور پرداخت مورد نظر یافت نشد یا ممکن است حذف شده باشد",
     "backToList": "بازگشت به لیست"
   },
   "statistics": {
@@ -540,14 +542,27 @@
   },
   "transactionStatus": {
     "draft": "پیش‌نویس",
+    "Draft": "پیش‌نویس",
+    "registered": "ثبت شده",
+    "Registered": "ثبت شده",
     "waiting_for_approval": "در انتظار تأیید",
     "approved": "تأیید شده",
-    "waitForBank": "ارسال شده به بانک",
+    "waitForBank": "در انتظار بانک",
+    "WaitForBank": "در انتظار بانک",
+    "waitForExecution": "در صف پردازش",
+    "WaitForExecution": "در صف پردازش",
     "bankSucceeded": "موفق",
+    "BankSucceeded": "موفق",
+    "bankRejected": "رد شده توسط بانک",
+    "BankRejected": "رد شده توسط بانک",
+    "BankFailed": "ناموفق بانک",
     "failed": "ناموفق",
-    "BankRejected": "رد شده",
+    "Failed": "ناموفق",
     "canceled": "لغو شده",
-    "waitForExecution": "در صف پردازش"
+    "Canceled": "لغو شده",
+    "expired": "منقضی شده",
+    "Expired": "منقضی شده",
+    "transactionRollback": "برگشت تراکنش"
   },
   "toast": {
     "success": "موفقیت",

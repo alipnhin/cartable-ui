@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -30,25 +30,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { X, Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { OrderStatus } from "@/types/order";
-import { mockAccounts } from "@/mocks/mockAccounts";
 import { cn } from "@/lib/utils";
-import DatePicker from "react-multi-date-picker";
-import type { Value } from "react-multi-date-picker";
-import persian from "react-date-object/calendars/persian";
-import persian_fa from "react-date-object/locales/persian_fa";
-import gregorian from "react-date-object/calendars/gregorian";
-import gregorian_en from "react-date-object/locales/gregorian_en";
-import "react-multi-date-picker/styles/colors/purple.css";
+import { PersianDatePicker } from "@/components/ui/persian-datepicker";
+import AccountSelector from "@/components/common/AccountSelector";
 
 interface FilterSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   filters: {
-    status: OrderStatus | ""; // تک انتخابی
+    status: OrderStatus | "";
     search: string;
     orderTitle: string;
     orderNumber: string;
@@ -59,7 +53,7 @@ interface FilterSheetProps {
   };
   onFiltersChange: (filters: FilterSheetProps["filters"]) => void;
   onReset: () => void;
-  isLoading?: boolean; // برای نمایش loading هنگام اعمال فیلتر
+  isLoading?: boolean;
 }
 
 export function FilterSheet({
@@ -70,17 +64,20 @@ export function FilterSheet({
   onReset,
   isLoading = false,
 }: FilterSheetProps) {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [localFilters, setLocalFilters] = useState(filters);
-  const [accountOpen, setAccountOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const isInitializedRef = useRef(false);
 
-  // فقط وقتی FilterSheet باز می‌شود، filters را به localFilters کپی می‌کنیم
-  // این مشکل از دست رفتن focus در textbox را حل می‌کند
+  // فقط یکبار وقتی دیالوگ باز می‌شود فیلترها را sync می‌کنیم
   useEffect(() => {
-    if (open) {
+    if (open && !isInitializedRef.current) {
       setLocalFilters(filters);
+      isInitializedRef.current = true;
+    }
+    if (!open) {
+      isInitializedRef.current = false;
     }
   }, [open, filters]);
 
@@ -127,10 +124,9 @@ export function FilterSheet({
     },
   ];
 
-  // تغییر وضعیت - تک انتخابی
   const handleStatusSelect = (status: OrderStatus | "") => {
-    setLocalFilters({ ...localFilters, status });
-    setStatusOpen(false); // بستن popover بعد از انتخاب
+    setLocalFilters((prev) => ({ ...prev, status }));
+    setStatusOpen(false);
   };
 
   const handleApply = () => {
@@ -139,6 +135,17 @@ export function FilterSheet({
   };
 
   const handleReset = () => {
+    const emptyFilters = {
+      status: "" as OrderStatus | "",
+      search: "",
+      orderTitle: "",
+      orderNumber: "",
+      trackingId: "",
+      dateFrom: "",
+      dateTo: "",
+      accountId: "",
+    };
+    setLocalFilters(emptyFilters);
     onReset();
     onOpenChange(false);
   };
@@ -153,11 +160,8 @@ export function FilterSheet({
     (localFilters.dateTo ? 1 : 0) +
     (localFilters.accountId && localFilters.accountId !== "all" ? 1 : 0);
 
-  const selectedAccount = mockAccounts.find(
-    (acc) => acc.id === localFilters.accountId
-  );
-
-  const FilterContent = () => (
+  // محتوای فیلترها - به صورت JSX نه function component
+  const filterContent = (
     <div className="space-y-6">
       {/* عنوان دستور پرداخت */}
       <div className="space-y-2">
@@ -166,7 +170,7 @@ export function FilterSheet({
           placeholder={t("filters.orderTitlePlaceholder")}
           value={localFilters.orderTitle}
           onChange={(e) =>
-            setLocalFilters({ ...localFilters, orderTitle: e.target.value })
+            setLocalFilters((prev) => ({ ...prev, orderTitle: e.target.value }))
           }
           className={cn("h-10", isMobile && "h-12 text-base")}
         />
@@ -179,7 +183,7 @@ export function FilterSheet({
           placeholder={t("filters.orderNumberPlaceholder")}
           value={localFilters.orderNumber}
           onChange={(e) =>
-            setLocalFilters({ ...localFilters, orderNumber: e.target.value })
+            setLocalFilters((prev) => ({ ...prev, orderNumber: e.target.value }))
           }
           className={cn("h-10", isMobile && "h-12 text-base")}
         />
@@ -192,7 +196,7 @@ export function FilterSheet({
           placeholder={t("filters.trackingIdPlaceholder")}
           value={localFilters.trackingId}
           onChange={(e) =>
-            setLocalFilters({ ...localFilters, trackingId: e.target.value })
+            setLocalFilters((prev) => ({ ...prev, trackingId: e.target.value }))
           }
           className={cn("h-10", isMobile && "h-12 text-base")}
         />
@@ -205,161 +209,36 @@ export function FilterSheet({
           placeholder={t("filters.searchPlaceholder")}
           value={localFilters.search}
           onChange={(e) =>
-            setLocalFilters({ ...localFilters, search: e.target.value })
+            setLocalFilters((prev) => ({ ...prev, search: e.target.value }))
           }
           className={cn("h-10", isMobile && "h-12 text-base")}
         />
       </div>
 
-      {/* Account Combobox */}
+      {/* Account Selector */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">{t("filters.account")}</Label>
-        {isMobile ? (
-          <button
-            onClick={() => setAccountOpen(true)}
-            className="w-full flex items-center justify-between h-12 px-4 rounded-lg border border-input bg-background text-start text-base"
-          >
-            <span className="truncate">
-              {selectedAccount
-                ? selectedAccount.accountTitle
-                : t("filters.allAccounts")}
-            </span>
-            <ChevronsUpDown className="ms-2 h-5 w-5 shrink-0 opacity-50" />
-          </button>
-        ) : (
-          <Popover open={accountOpen} onOpenChange={setAccountOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={accountOpen}
-                className="w-full justify-between h-10"
-              >
-                {selectedAccount
-                  ? selectedAccount.accountTitle
-                  : t("filters.allAccounts")}
-                <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-100 p-0" align="start">
-              <Command>
-                <CommandInput placeholder={t("filters.search")} />
-                <CommandList>
-                  <CommandEmpty>{t("filters.notFound")}</CommandEmpty>
-                  <CommandGroup>
-                    <CommandItem
-                      value="all"
-                      onSelect={() => {
-                        setLocalFilters({ ...localFilters, accountId: "all" });
-                        setAccountOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "me-2 h-4 w-4",
-                          localFilters.accountId === "all" ||
-                            !localFilters.accountId
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      />
-                      {t("filters.allAccounts")}
-                    </CommandItem>
-                    {mockAccounts.map((account) => (
-                      <CommandItem
-                        key={account.id}
-                        value={account.id}
-                        onSelect={() => {
-                          setLocalFilters({
-                            ...localFilters,
-                            accountId: account.id,
-                          });
-                          setAccountOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "me-2 h-4 w-4",
-                            localFilters.accountId === account.id
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                        {account.accountTitle}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        )}
+        <AccountSelector
+          value={localFilters.accountId || ""}
+          onValueChange={(value) =>
+            setLocalFilters((prev) => ({ ...prev, accountId: value }))
+          }
+          includeAll={true}
+        />
       </div>
 
-      {/* Mobile Drawer for Account Selection */}
-      {isMobile && (
-        <Drawer open={accountOpen} onOpenChange={setAccountOpen}>
-          <DrawerContent className="max-h-[70vh]">
-            <DrawerHeader>
-              <DrawerTitle>{t("filters.account")}</DrawerTitle>
-            </DrawerHeader>
-            <div className="overflow-y-auto p-4 space-y-2">
-              <button
-                onClick={() => {
-                  setLocalFilters({ ...localFilters, accountId: "all" });
-                  setAccountOpen(false);
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
-                  localFilters.accountId === "all" || !localFilters.accountId
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-muted"
-                )}
-              >
-                {(localFilters.accountId === "all" ||
-                  !localFilters.accountId) && <Check className="h-5 w-5" />}
-                <span className="flex-1">{t("filters.allAccounts")}</span>
-              </button>
-              {mockAccounts.map((account) => (
-                <button
-                  key={account.id}
-                  onClick={() => {
-                    setLocalFilters({
-                      ...localFilters,
-                      accountId: account.id,
-                    });
-                    setAccountOpen(false);
-                  }}
-                  className={cn(
-                    "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
-                    localFilters.accountId === account.id
-                      ? "bg-primary/10 text-primary"
-                      : "hover:bg-muted"
-                  )}
-                >
-                  {localFilters.accountId === account.id && (
-                    <Check className="h-5 w-5" />
-                  )}
-                  <span className="flex-1">{account.accountTitle}</span>
-                </button>
-              ))}
-            </div>
-          </DrawerContent>
-        </Drawer>
-      )}
-
-      {/* Status Single-select Combobox - تک انتخابی */}
+      {/* Status Single-select Combobox */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">{t("filters.status")}</Label>
         {isMobile ? (
           <button
+            type="button"
             onClick={() => setStatusOpen(true)}
             className="w-full flex items-center justify-between h-12 px-4 rounded-lg border border-input bg-background text-start text-base"
           >
             <span className="truncate">
               {localFilters.status
-                ? statusOptions.find((opt) => opt.value === localFilters.status)
-                    ?.label
+                ? statusOptions.find((opt) => opt.value === localFilters.status)?.label
                 : t("filters.allStatuses")}
             </span>
             <ChevronsUpDown className="ms-2 h-5 w-5 shrink-0 opacity-50" />
@@ -375,24 +254,19 @@ export function FilterSheet({
               >
                 <span className="truncate">
                   {localFilters.status
-                    ? statusOptions.find(
-                        (opt) => opt.value === localFilters.status
-                      )?.label
+                    ? statusOptions.find((opt) => opt.value === localFilters.status)?.label
                     : t("filters.allStatuses")}
                 </span>
                 <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-100 p-0" align="start">
+            <PopoverContent className="w-[300px] p-0" align="start">
               <Command>
                 <CommandInput placeholder={t("filters.search")} />
                 <CommandList>
                   <CommandEmpty>{t("filters.notFound")}</CommandEmpty>
                   <CommandGroup>
-                    <CommandItem
-                      value="all"
-                      onSelect={() => handleStatusSelect("")}
-                    >
+                    <CommandItem value="all" onSelect={() => handleStatusSelect("")}>
                       <Check
                         className={cn(
                           "me-2 h-4 w-4",
@@ -401,24 +275,21 @@ export function FilterSheet({
                       />
                       {t("filters.allStatuses")}
                     </CommandItem>
-                    {statusOptions.map((option) => {
-                      const isSelected = localFilters.status === option.value;
-                      return (
-                        <CommandItem
-                          key={option.value}
-                          value={option.value}
-                          onSelect={() => handleStatusSelect(option.value)}
-                        >
-                          <Check
-                            className={cn(
-                              "me-2 h-4 w-4",
-                              isSelected ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {option.label}
-                        </CommandItem>
-                      );
-                    })}
+                    {statusOptions.map((option) => (
+                      <CommandItem
+                        key={option.value}
+                        value={option.value}
+                        onSelect={() => handleStatusSelect(option.value)}
+                      >
+                        <Check
+                          className={cn(
+                            "me-2 h-4 w-4",
+                            localFilters.status === option.value ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {option.label}
+                      </CommandItem>
+                    ))}
                   </CommandGroup>
                 </CommandList>
               </Command>
@@ -427,7 +298,7 @@ export function FilterSheet({
         )}
       </div>
 
-      {/* Mobile Drawer for Status Selection - تک انتخابی */}
+      {/* Mobile Drawer for Status Selection */}
       {isMobile && (
         <Drawer open={statusOpen} onOpenChange={setStatusOpen}>
           <DrawerContent className="max-h-[70vh]">
@@ -436,89 +307,56 @@ export function FilterSheet({
             </DrawerHeader>
             <div className="overflow-y-auto p-4 space-y-2">
               <button
+                type="button"
                 onClick={() => handleStatusSelect("")}
                 className={cn(
                   "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
-                  !localFilters.status
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-muted"
+                  !localFilters.status ? "bg-primary/10 text-primary" : "hover:bg-muted"
                 )}
               >
                 {!localFilters.status && <Check className="h-5 w-5" />}
                 <span className="flex-1">{t("filters.allStatuses")}</span>
               </button>
-              {statusOptions.map((option) => {
-                const isSelected = localFilters.status === option.value;
-                return (
-                  <button
-                    key={option.value}
-                    onClick={() => handleStatusSelect(option.value)}
-                    className={cn(
-                      "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
-                      isSelected
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-muted"
-                    )}
-                  >
-                    {isSelected && <Check className="h-5 w-5" />}
-                    <span className="flex-1">{option.label}</span>
-                  </button>
-                );
-              })}
+              {statusOptions.map((option) => (
+                <button
+                  type="button"
+                  key={option.value}
+                  onClick={() => handleStatusSelect(option.value)}
+                  className={cn(
+                    "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
+                    localFilters.status === option.value
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-muted"
+                  )}
+                >
+                  {localFilters.status === option.value && <Check className="h-5 w-5" />}
+                  <span className="flex-1">{option.label}</span>
+                </button>
+              ))}
             </div>
           </DrawerContent>
         </Drawer>
       )}
 
-      {/* Date Range - تاریخ شمسی و میلادی */}
+      {/* Date Range */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label className="text-sm font-medium">{t("filters.fromDate")}</Label>
-          <DatePicker
+          <PersianDatePicker
             value={localFilters.dateFrom}
-            onChange={(date: Value) => {
-              if (date && typeof date === "object" && "toDate" in date) {
-                const isoDate = date.toDate().toISOString().split("T")[0];
-                setLocalFilters({ ...localFilters, dateFrom: isoDate });
-              } else if (!date) {
-                setLocalFilters({ ...localFilters, dateFrom: "" });
-              }
-            }}
-            calendar={locale === "fa" ? persian : gregorian}
-            locale={locale === "fa" ? persian_fa : gregorian_en}
-            format={locale === "fa" ? "YYYY/MM/DD" : "YYYY-MM-DD"}
-            className={cn("purple", isMobile && "rmdp-mobile")}
-            calendarPosition={locale === "fa" ? "bottom-right" : "bottom-left"}
-            inputClass={cn(
-              "w-full px-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-              isMobile ? "h-12 text-base" : "h-10"
-            )}
-            containerClassName="w-full"
+            onChange={(value) =>
+              setLocalFilters((prev) => ({ ...prev, dateFrom: value }))
+            }
             placeholder={t("common.selectDate")}
           />
         </div>
         <div className="space-y-2">
           <Label className="text-sm font-medium">{t("filters.toDate")}</Label>
-          <DatePicker
+          <PersianDatePicker
             value={localFilters.dateTo}
-            onChange={(date: Value) => {
-              if (date && typeof date === "object" && "toDate" in date) {
-                const isoDate = date.toDate().toISOString().split("T")[0];
-                setLocalFilters({ ...localFilters, dateTo: isoDate });
-              } else if (!date) {
-                setLocalFilters({ ...localFilters, dateTo: "" });
-              }
-            }}
-            calendar={locale === "fa" ? persian : gregorian}
-            locale={locale === "fa" ? persian_fa : gregorian_en}
-            format={locale === "fa" ? "YYYY/MM/DD" : "YYYY-MM-DD"}
-            className={cn("purple", isMobile && "rmdp-mobile")}
-            calendarPosition={locale === "fa" ? "bottom-right" : "bottom-left"}
-            inputClass={cn(
-              "w-full px-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-              isMobile ? "h-12 text-base" : "h-10"
-            )}
-            containerClassName="w-full"
+            onChange={(value) =>
+              setLocalFilters((prev) => ({ ...prev, dateTo: value }))
+            }
             placeholder={t("common.selectDate")}
           />
         </div>
@@ -528,7 +366,7 @@ export function FilterSheet({
       <div className="flex gap-3 pt-4 border-t">
         <Button
           variant="outline"
-          size={isMobile ? "lg" : "md"}
+          size={isMobile ? "lg" : "default"}
           className={cn("flex-1", isMobile && "text-base")}
           onClick={handleReset}
           disabled={isLoading}
@@ -536,7 +374,7 @@ export function FilterSheet({
           {t("filters.reset")}
         </Button>
         <Button
-          size={isMobile ? "lg" : "md"}
+          size={isMobile ? "lg" : "default"}
           className={cn("flex-1", isMobile && "text-base")}
           onClick={handleApply}
           disabled={isLoading}
@@ -562,7 +400,7 @@ export function FilterSheet({
             </DrawerTitle>
           </DrawerHeader>
           <div className="overflow-y-auto p-4 pb-8">
-            <FilterContent />
+            {filterContent}
           </div>
         </DrawerContent>
       </Drawer>
@@ -578,7 +416,7 @@ export function FilterSheet({
           </DialogTitle>
         </DialogHeader>
         <div className="py-4">
-          <FilterContent />
+          {filterContent}
         </div>
       </DialogContent>
     </Dialog>

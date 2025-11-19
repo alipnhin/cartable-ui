@@ -205,7 +205,9 @@
     "otpResentSuccess": "Verification code resent",
     "otpResendError": "Error resending verification code",
     "loading": "Loading...",
-    "orderNotFoundText": "Payment order not found",
+    "errorTitle": "Loading Error",
+    "orderNotFound": "Order Not Found",
+    "orderNotFoundText": "The payment order was not found or may have been deleted",
     "backToList": "Back to List"
   },
   "statistics": {
@@ -536,14 +538,27 @@
   },
   "transactionStatus": {
     "draft": "Draft",
+    "Draft": "Draft",
+    "registered": "Registered",
+    "Registered": "Registered",
     "waiting_for_approval": "Waiting for Approval",
     "approved": "Approved",
-    "waitForBank": "Submitted to Bank",
-    "succeeded": "Succeeded",
+    "waitForBank": "Wait for Bank",
+    "WaitForBank": "Wait for Bank",
+    "waitForExecution": "Wait for Execution",
+    "WaitForExecution": "Wait for Execution",
+    "bankSucceeded": "Succeeded",
+    "BankSucceeded": "Succeeded",
+    "bankRejected": "Bank Rejected",
+    "BankRejected": "Bank Rejected",
+    "BankFailed": "Bank Failed",
     "failed": "Failed",
-    "rejected": "Rejected",
+    "Failed": "Failed",
     "canceled": "Canceled",
-    "waitForExecution":"Wait For Execution"
+    "Canceled": "Canceled",
+    "expired": "Expired",
+    "Expired": "Expired",
+    "transactionRollback": "Transaction Rollback"
   },
   "toast": {
     "success": "Success",

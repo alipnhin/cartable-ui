@@ -28,10 +28,12 @@ import {
   Users,
   History,
   BarChart3,
-  Loader2,
+  AlertCircle,
+  FileX,
 } from "lucide-react";
 import Link from "next/link";
 import { FixHeader } from "@/components/layout/Fix-Header";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   getWithdrawalOrderDetails,
   getWithdrawalStatistics,
@@ -453,16 +455,72 @@ export default function PaymentOrderDetailPage() {
     }
   }, [orderId, session?.accessToken, transactionPage, orderDetails]);
 
-  // Loading state
+  // Loading state with Skeleton
   if (isLoading) {
     return (
       <>
         <FixHeader returnUrl="/payment-orders" />
-        <div className="container mx-auto p-4 md:p-6 mt-14">
-          <Card className="p-8">
-            <div className="flex flex-col items-center justify-center gap-4">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">{t("paymentOrders.loading")}</p>
+        <div className="container mx-auto p-4 md:p-6 space-y-6 mt-14">
+          {/* Header Skeleton */}
+          <Card className="p-6">
+            <div className="flex flex-wrap sm:flex-nowrap gap-4 mb-8">
+              <Skeleton className="w-16 h-16 rounded-lg shrink-0" />
+              <div className="flex-1 space-y-3">
+                <Skeleton className="h-6 w-48" />
+                <div className="flex flex-wrap gap-4">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Skeleton className="h-10 w-24" />
+              </div>
+            </div>
+
+            {/* Stats Cards Skeleton */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg">
+                  <Skeleton className="w-10 h-10 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Info Grid Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4">
+              {[1, 2].map((col) => (
+                <div key={col} className="flex flex-col gap-4">
+                  {[1, 2, 3].map((row) => (
+                    <div key={row} className="flex justify-between items-center">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Tabs Skeleton */}
+          <div className="rounded-lg border bg-card p-4">
+            <div className="flex justify-center gap-3">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-10 w-28 rounded-lg" />
+              ))}
+            </div>
+          </div>
+
+          {/* Content Skeleton */}
+          <Card className="p-6">
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-16 w-full rounded-lg" />
+              ))}
             </div>
           </Card>
         </div>
@@ -471,22 +529,65 @@ export default function PaymentOrderDetailPage() {
   }
 
   // Error state
-  if (error || !orderDetails) {
+  if (error) {
     return (
       <>
         <FixHeader returnUrl="/payment-orders" />
         <div className="container mx-auto p-4 md:p-6 mt-14">
-          <Card className="p-8 text-center">
-            <p className="text-lg text-muted-foreground">
-              {error || t("paymentOrders.orderNotFoundText")}
-            </p>
-            <Link
-              href="/payment-orders"
-              className="inline-flex items-center gap-2 mt-4 text-primary hover:underline"
-            >
-              <ArrowRight className="h-4 w-4" />
-              {t("paymentOrders.backToList")}
-            </Link>
+          <Card className="p-12">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertCircle className="h-8 w-8 text-destructive" />
+              </div>
+              <div className="space-y-2 text-center">
+                <h3 className="text-lg font-semibold text-foreground">
+                  {t("paymentOrders.errorTitle")}
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-sm">
+                  {error}
+                </p>
+              </div>
+              <Link
+                href="/payment-orders"
+                className="inline-flex items-center gap-2 mt-2 text-primary hover:underline text-sm font-medium"
+              >
+                <ArrowRight className="h-4 w-4" />
+                {t("paymentOrders.backToList")}
+              </Link>
+            </div>
+          </Card>
+        </div>
+      </>
+    );
+  }
+
+  // 404 state - Order not found
+  if (!orderDetails) {
+    return (
+      <>
+        <FixHeader returnUrl="/payment-orders" />
+        <div className="container mx-auto p-4 md:p-6 mt-14">
+          <Card className="p-12">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                <FileX className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <div className="space-y-2 text-center">
+                <h3 className="text-lg font-semibold text-foreground">
+                  {t("paymentOrders.orderNotFound")}
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-sm">
+                  {t("paymentOrders.orderNotFoundText")}
+                </p>
+              </div>
+              <Link
+                href="/payment-orders"
+                className="inline-flex items-center gap-2 mt-2 text-primary hover:underline text-sm font-medium"
+              >
+                <ArrowRight className="h-4 w-4" />
+                {t("paymentOrders.backToList")}
+              </Link>
+            </div>
           </Card>
         </div>
       </>

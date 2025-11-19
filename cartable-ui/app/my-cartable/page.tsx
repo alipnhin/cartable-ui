@@ -7,7 +7,7 @@ import { OrderCard, OrderCardSkeleton } from "./components/order-card";
 import { DataTable } from "./components/data-table";
 import { createColumns } from "./components/columns";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Download, X } from "lucide-react";
+import { CheckCircle, XCircle, Download, X, ClipboardCheck } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
@@ -703,8 +703,16 @@ export default function MyCartablePage() {
                   />
                 ))}
                 {orders.length === 0 && (
-                  <div className="text-center py-12 text-muted-foreground">
-                    {t("orders.noOrders")}
+                  <div className="flex flex-col items-center gap-3 py-16">
+                    <ClipboardCheck className="h-12 w-12 text-muted-foreground/50" />
+                    <div className="space-y-1 text-center">
+                      <p className="font-medium text-muted-foreground">
+                        دستوری برای تأیید وجود ندارد
+                      </p>
+                      <p className="text-sm text-muted-foreground/70">
+                        در حال حاضر هیچ دستور پرداختی در انتظار تأیید شما نیست
+                      </p>
+                    </div>
                   </div>
                 )}
               </>

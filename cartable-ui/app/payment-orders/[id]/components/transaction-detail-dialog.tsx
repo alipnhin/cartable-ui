@@ -6,19 +6,89 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Transaction } from "@/types/transaction";
+import { WithdrawalTransaction } from "@/types/api";
 import { BankLogo } from "@/components/common/bank-logo";
-import { PaymentTypeIcon } from "@/components/common/payment-type-icon";
 import { getBankCodeFromIban } from "@/lib/bank-logos";
 import { TransactionStatusBadge } from "@/components/ui/status-badge";
-import { formatCurrency, formatDate } from "@/lib/helpers";
+import { formatCurrency } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
+import { Copy, Check } from "lucide-react";
+import { useState } from "react";
 
 interface TransactionDetailDialogProps {
-  transaction: Transaction | null;
+  transaction: WithdrawalTransaction | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+// Helper to format date with time
+const formatDateTime = (dateString: string, locale: string): string => {
+  if (!dateString) return "-";
+
+  const date = new Date(dateString);
+  const dateFormatter = new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return dateFormatter.format(date);
+};
+
+// Copy to clipboard component
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="p-1 hover:bg-muted rounded transition-colors"
+      title="کپی"
+    >
+      {copied ? (
+        <Check className="h-3.5 w-3.5 text-success" />
+      ) : (
+        <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+      )}
+    </button>
+  );
+}
+
+// Info row component - minimal design
+function InfoRow({
+  label,
+  value,
+  mono = false,
+  copyable = false,
+}: {
+  label: string;
+  value: string | React.ReactNode;
+  mono?: boolean;
+  copyable?: boolean;
+}) {
+  return (
+    <div className="flex justify-between items-start py-2.5 border-b border-border/50 last:border-0">
+      <span className="text-sm text-muted-foreground shrink-0">{label}</span>
+      <div className="flex items-center gap-1.5">
+        <span className={`text-sm font-medium text-foreground text-left ${mono ? "font-mono" : ""}`}>
+          {value}
+        </span>
+        {copyable && typeof value === "string" && <CopyButton text={value} />}
+      </div>
+    </div>
+  );
 }
 
 export function TransactionDetailDialog({
@@ -32,127 +102,107 @@ export function TransactionDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-full">
-        <DialogHeader>
-          <DialogTitle>جزئیات تراکنش</DialogTitle>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto w-full">
+        <DialogHeader className="pb-4 border-b">
+          <div className="flex items-center justify-between gap-4 pe-8">
+            <DialogTitle className="text-lg font-semibold">جزئیات تراکنش</DialogTitle>
+            <TransactionStatusBadge status={transaction.status as any} size="sm" />
+          </div>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Status and Type */}
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <TransactionStatusBadge status={transaction.status} size="sm" />
-          </div>
-
-          {/* Amount */}
-          <div className="bg-primary/10 rounded-lg p-4">
-            <div className="text-sm text-muted-foreground mb-1">
-              مبلغ تراکنش
-            </div>
-            <div className="text-2xl font-bold text-primary">
-              {formatCurrency(transaction.amount, locale)}
+        <div className="py-4 space-y-6">
+          {/* Amount - prominent display */}
+          <div className="text-center py-4">
+            <div className="text-sm text-muted-foreground mb-1">مبلغ تراکنش</div>
+            <div className="text-3xl font-bold text-foreground">
+              {formatCurrency(parseFloat(transaction.amount) || 0, locale)}
             </div>
           </div>
 
-          {/* Beneficiary Info */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg border-b pb-2">
-              اطلاعات ذینفع
-            </h3>
+          {/* Two column layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Beneficiary Info */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b">
+                اطلاعات ذینفع
+              </h3>
+              <div className="space-y-0">
+                <InfoRow
+                  label={t("transactions.ownerName")}
+                  value={transaction.destinationAccountOwner}
+                />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">
-                  {t("transactions.ownerName")}
-                </div>
-                <div className="font-medium">{transaction.ownerName}</div>
-              </div>
+                {transaction.nationalCode && (
+                  <InfoRow
+                    label={t("transactions.nationalCode")}
+                    value={transaction.nationalCode}
+                    mono
+                    copyable
+                  />
+                )}
 
-              {transaction.nationalCode && (
-                <div>
-                  <div className="text-sm text-muted-foreground mb-1">
-                    {t("transactions.nationalCode")}
+                <InfoRow
+                  label={t("transactions.iban")}
+                  value={transaction.destinationIban}
+                  mono
+                  copyable
+                />
+
+                {bankCode && (
+                  <div className="flex justify-between items-center py-2.5 border-b border-border/50 last:border-0">
+                    <span className="text-sm text-muted-foreground">بانک مقصد</span>
+                    <BankLogo bankCode={bankCode} showName size="sm" />
                   </div>
-                  <div className="font-medium font-mono">
-                    {transaction.nationalCode}
-                  </div>
-                </div>
-              )}
-
-              <div className="md:col-span-2">
-                <div className="text-sm text-muted-foreground mb-1">
-                  {t("transactions.iban")}
-                </div>
-                <div className="font-medium font-mono text-sm break-all">
-                  {transaction.destinationIban}
-                </div>
+                )}
               </div>
+            </div>
 
-              {bankCode && (
-                <div className="md:col-span-2">
-                  <div className="text-sm text-muted-foreground mb-1">بانک</div>
-                  <BankLogo bankCode={bankCode} showName size="md" />
-                </div>
-              )}
+            {/* Transaction Info */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b">
+                اطلاعات تراکنش
+              </h3>
+              <div className="space-y-0">
+                <InfoRow
+                  label={t("transactions.orderId")}
+                  value={transaction.id}
+                  mono
+                  copyable
+                />
+
+                {transaction.trackingId && (
+                  <InfoRow
+                    label={t("transactions.trackingId")}
+                    value={transaction.trackingId}
+                    mono
+                    copyable
+                  />
+                )}
+
+                <InfoRow
+                  label={t("transactions.createdDateTime")}
+                  value={formatDateTime(transaction.createdDateTime, locale)}
+                />
+
+                {transaction.description && (
+                  <InfoRow
+                    label={t("transactions.description")}
+                    value={transaction.description}
+                  />
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Transaction Info */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg border-b pb-2">
-              اطلاعات تراکنش
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">
-                  {t("transactions.orderId")}
-                </div>
-                <div className="font-medium font-mono text-sm break-all">
-                  {transaction.id}
-                </div>
+          {/* Error Message */}
+          {transaction.providerMessage && (
+            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <div className="text-sm font-medium text-destructive mb-1">علت رد</div>
+              <div className="text-sm text-destructive">
+                {transaction.providerMessage}
               </div>
-
-              {transaction.trackingId && (
-                <div>
-                  <div className="text-sm text-muted-foreground mb-1">
-                    {t("transactions.trackingId")}
-                  </div>
-                  <div className="font-medium font-mono text-sm">
-                    {transaction.trackingId}
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">
-                  {t("transactions.createdDateTime")}
-                </div>
-                <div className="font-medium">
-                  {formatDate(transaction.createdDateTime)}
-                </div>
-              </div>
-
-              {transaction.description && (
-                <div className="md:col-span-2">
-                  <div className="text-sm text-muted-foreground mb-1">
-                    {t("transactions.description")}
-                  </div>
-                  <div className="font-medium">{transaction.description}</div>
-                </div>
-              )}
-
-              {transaction.providerMessage && (
-                <div className="md:col-span-2">
-                  <div className="text-sm text-muted-foreground mb-1">
-                    علت رد
-                  </div>
-                  <div className="font-medium text-red-600 dark:text-red-400">
-                    {transaction.providerMessage}
-                  </div>
-                </div>
-              )}
             </div>
-          </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

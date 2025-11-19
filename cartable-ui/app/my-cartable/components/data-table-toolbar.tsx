@@ -1,51 +1,52 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
-import { OrderStatus } from "@/types/order";
-import { mockAccounts } from "@/mocks";
+import { getAccountsSelectData, AccountSelectData } from "@/services/accountService";
 import useTranslation from "@/hooks/useTranslation";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
 
-const statusOptions = mockAccounts.map((account) => ({
-  label: account.accountTitle,
-  value: account.accountTitle,
-}));
-
-// const statusOptions = [
-//   {
-//     label: "waitingForApproval",
-//     value: OrderStatus.WaitingForOwnersApproval,
-//   },
-//   {
-//     label: "approved",
-//     value: OrderStatus.OwnersApproved,
-//   },
-//   {
-//     label: "submittedToBank",
-//     value: OrderStatus.SubmittedToBank,
-//   },
-//   {
-//     label: "succeeded",
-//     value: OrderStatus.Succeeded,
-//   },
-//   {
-//     label: "bankRejected",
-//     value: OrderStatus.Rejected,
-//   },
-// ];
-
 export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
-  const isFiltered = table.getState().columnFilters.length > 0;
+  const { data: session } = useSession();
   const { t } = useTranslation();
+  const [accounts, setAccounts] = useState<AccountSelectData[]>([]);
+  const isFiltered = table.getState().columnFilters.length > 0;
+
+  // Fetch accounts from API
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      if (!session?.accessToken) return;
+
+      try {
+        const response = await getAccountsSelectData(
+          { pageSize: 50, pageNum: 1 },
+          session.accessToken
+        );
+        setAccounts(response.results);
+      } catch (error) {
+        console.error("Error fetching accounts:", error);
+      }
+    };
+
+    fetchAccounts();
+  }, [session?.accessToken]);
+
+  // Convert accounts to options format for faceted filter
+  const accountOptions = accounts.map((account) => ({
+    label: account.text,
+    value: account.text,
+  }));
+
   return (
     <div className="flex items-center justify-between gap-2">
       <div className="flex flex-1 items-center gap-2">
@@ -59,11 +60,11 @@ export function DataTableToolbar<TData>({
           }
           className="h-9 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("status") && (
+        {table.getColumn("accountTitle") && accountOptions.length > 0 && (
           <DataTableFacetedFilter
             column={table.getColumn("accountTitle")}
             title={t(`orders.accountTitle`)}
-            options={statusOptions}
+            options={accountOptions}
           />
         )}
         {isFiltered && (
