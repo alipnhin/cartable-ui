@@ -113,15 +113,15 @@ export default function AccountDetailPage() {
    */
   const handleRequestStatusChange = async (
     signerId: string,
-    currentStatus: number
+    currentStatus: string | number
   ) => {
     if (!session?.accessToken) return;
 
     setIsUpdating(true);
     try {
-      // Status 1 = Enable, so we disable it
-      // Status 2 = Disable or 4 = Rejected, so we enable it
-      if (currentStatus === 1) {
+      // Status 1 or "Enable" = active, so we disable it
+      // Status 2 or "Disable" or 4 or "Rejected" = inactive, so we enable it
+      if (currentStatus === 1 || currentStatus === "Enable") {
         await disableSigner(signerId, session.accessToken);
         toast({
           title: t("toast.success"),

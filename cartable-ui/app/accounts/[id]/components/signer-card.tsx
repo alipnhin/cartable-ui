@@ -34,18 +34,18 @@ import {
 import useTranslation from "@/hooks/useTranslation";
 import { formatDate } from "@/lib/helpers";
 
-// Status enum values
+// Status values (API returns string)
 const SignerStatus = {
-  EnableRequested: 0,
-  Enable: 1,
-  Disable: 2,
-  DisableRequested: 3,
-  Rejected: 4,
+  EnableRequested: "EnableRequested",
+  Enable: "Enable",
+  Disable: "Disable",
+  DisableRequested: "DisableRequested",
+  Rejected: "Rejected",
 } as const;
 
 interface SignerCardProps {
   signer: AccountUser;
-  onRequestStatusChange: (signerId: string, currentStatus: number) => void;
+  onRequestStatusChange: (signerId: string, currentStatus: string | number) => void;
   isUpdating?: boolean;
 }
 
@@ -65,62 +65,70 @@ export function SignerCard({
     return fullName.substring(0, 2);
   };
 
-  // Get status info based on status code
-  const getStatusInfo = (status: number) => {
-    switch (status) {
-      case SignerStatus.EnableRequested:
-        return {
-          label: "در انتظار فعالسازی",
-          color: "bg-yellow-500",
-          badgeVariant: "warning" as const,
-          badgeAppearance: "light" as const,
-          icon: Clock,
-        };
-      case SignerStatus.Enable:
-        return {
-          label: "فعال",
-          color: "bg-green-500",
-          badgeVariant: "success" as const,
-          badgeAppearance: "light" as const,
-          icon: CheckCircle2,
-        };
-      case SignerStatus.Disable:
-        return {
-          label: "غیرفعال",
-          color: "bg-gray-400",
-          badgeVariant: "secondary" as const,
-          badgeAppearance: "light" as const,
-          icon: PowerOff,
-        };
-      case SignerStatus.DisableRequested:
-        return {
-          label: "در انتظار غیرفعالسازی",
-          color: "bg-orange-500",
-          badgeVariant: "warning" as const,
-          badgeAppearance: "light" as const,
-          icon: Clock,
-        };
-      case SignerStatus.Rejected:
-        return {
-          label: "رد شده",
-          color: "bg-red-500",
-          badgeVariant: "destructive" as const,
-          badgeAppearance: "light" as const,
-          icon: XCircle,
-        };
-      default:
-        return {
-          label: "نامشخص",
-          color: "bg-gray-400",
-          badgeVariant: "secondary" as const,
-          badgeAppearance: "light" as const,
-          icon: Clock,
-        };
+  // Get status info based on status code (supports both string and number)
+  const getStatusInfo = (status: string | number) => {
+    // EnableRequested = 0 or "EnableRequested"
+    if (status === 0 || status === "EnableRequested") {
+      return {
+        label: "در انتظار فعالسازی",
+        color: "bg-yellow-500",
+        badgeVariant: "warning" as const,
+        badgeAppearance: "light" as const,
+        icon: Clock,
+      };
     }
+    // Enable = 1 or "Enable"
+    if (status === 1 || status === "Enable") {
+      return {
+        label: "فعال",
+        color: "bg-green-500",
+        badgeVariant: "success" as const,
+        badgeAppearance: "light" as const,
+        icon: CheckCircle2,
+      };
+    }
+    // Disable = 2 or "Disable"
+    if (status === 2 || status === "Disable") {
+      return {
+        label: "غیرفعال",
+        color: "bg-gray-400",
+        badgeVariant: "secondary" as const,
+        badgeAppearance: "light" as const,
+        icon: PowerOff,
+      };
+    }
+    // DisableRequested = 3 or "DisableRequested"
+    if (status === 3 || status === "DisableRequested") {
+      return {
+        label: "در انتظار غیرفعالسازی",
+        color: "bg-orange-500",
+        badgeVariant: "warning" as const,
+        badgeAppearance: "light" as const,
+        icon: Clock,
+      };
+    }
+    // Rejected = 4 or "Rejected"
+    if (status === 4 || status === "Rejected") {
+      return {
+        label: "رد شده",
+        color: "bg-red-500",
+        badgeVariant: "destructive" as const,
+        badgeAppearance: "light" as const,
+        icon: XCircle,
+      };
+    }
+    // Default
+    return {
+      label: "نامشخص",
+      color: "bg-gray-400",
+      badgeVariant: "secondary" as const,
+      badgeAppearance: "light" as const,
+      icon: Clock,
+    };
   };
 
   const statusInfo = getStatusInfo(signer.status);
-  const isActive = signer.status === SignerStatus.Enable;
+  const isActive = signer.status === SignerStatus.Enable || signer.status === 1;
 
   const handleConfirm = () => {
     onRequestStatusChange(signer.id, signer.status);
@@ -129,7 +137,8 @@ export function SignerCard({
 
   // Get action button info
   const getActionInfo = () => {
-    if (signer.status === SignerStatus.Enable) {
+    const status = signer.status;
+    if (status === SignerStatus.Enable || status === 1) {
       return {
         label: "غیرفعال‌سازی",
         icon: PowerOff,
@@ -140,8 +149,10 @@ export function SignerCard({
         confirmClass: "bg-destructive hover:bg-destructive/90",
       };
     } else if (
-      signer.status === SignerStatus.Disable ||
-      signer.status === SignerStatus.Rejected
+      status === SignerStatus.Disable ||
+      status === SignerStatus.Rejected ||
+      status === 2 ||
+      status === 4
     ) {
       return {
         label: "فعال‌سازی",
