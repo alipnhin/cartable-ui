@@ -30,7 +30,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { X, Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { OrderStatus } from "@/types/order";
@@ -42,7 +42,7 @@ interface FilterSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   filters: {
-    status: OrderStatus | ""; // تک انتخابی
+    status: OrderStatus | "";
     search: string;
     orderTitle: string;
     orderNumber: string;
@@ -53,7 +53,7 @@ interface FilterSheetProps {
   };
   onFiltersChange: (filters: FilterSheetProps["filters"]) => void;
   onReset: () => void;
-  isLoading?: boolean; // برای نمایش loading هنگام اعمال فیلتر
+  isLoading?: boolean;
 }
 
 export function FilterSheet({
@@ -64,20 +64,21 @@ export function FilterSheet({
   onReset,
   isLoading = false,
 }: FilterSheetProps) {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [localFilters, setLocalFilters] = useState(filters);
   const [statusOpen, setStatusOpen] = useState(false);
-  const prevOpenRef = useRef(open);
+  const isInitializedRef = useRef(false);
 
-  // فقط وقتی FilterSheet باز می‌شود، filters را به localFilters کپی می‌کنیم
-  // این مشکل از دست رفتن focus در textbox را حل می‌کند
+  // فقط یکبار وقتی دیالوگ باز می‌شود فیلترها را sync می‌کنیم
   useEffect(() => {
-    // فقط وقتی از بسته به باز تغییر کند
-    if (open && !prevOpenRef.current) {
+    if (open && !isInitializedRef.current) {
       setLocalFilters(filters);
+      isInitializedRef.current = true;
     }
-    prevOpenRef.current = open;
+    if (!open) {
+      isInitializedRef.current = false;
+    }
   }, [open, filters]);
 
   const statusOptions = [
@@ -123,10 +124,9 @@ export function FilterSheet({
     },
   ];
 
-  // تغییر وضعیت - تک انتخابی
   const handleStatusSelect = (status: OrderStatus | "") => {
-    setLocalFilters({ ...localFilters, status });
-    setStatusOpen(false); // بستن popover بعد از انتخاب
+    setLocalFilters((prev) => ({ ...prev, status }));
+    setStatusOpen(false);
   };
 
   const handleApply = () => {
@@ -135,6 +135,17 @@ export function FilterSheet({
   };
 
   const handleReset = () => {
+    const emptyFilters = {
+      status: "" as OrderStatus | "",
+      search: "",
+      orderTitle: "",
+      orderNumber: "",
+      trackingId: "",
+      dateFrom: "",
+      dateTo: "",
+      accountId: "",
+    };
+    setLocalFilters(emptyFilters);
     onReset();
     onOpenChange(false);
   };
@@ -149,7 +160,8 @@ export function FilterSheet({
     (localFilters.dateTo ? 1 : 0) +
     (localFilters.accountId && localFilters.accountId !== "all" ? 1 : 0);
 
-  const FilterContent = () => (
+  // محتوای فیلترها - به صورت JSX نه function component
+  const filterContent = (
     <div className="space-y-6">
       {/* عنوان دستور پرداخت */}
       <div className="space-y-2">
@@ -158,7 +170,7 @@ export function FilterSheet({
           placeholder={t("filters.orderTitlePlaceholder")}
           value={localFilters.orderTitle}
           onChange={(e) =>
-            setLocalFilters({ ...localFilters, orderTitle: e.target.value })
+            setLocalFilters((prev) => ({ ...prev, orderTitle: e.target.value }))
           }
           className={cn("h-10", isMobile && "h-12 text-base")}
         />
@@ -171,7 +183,7 @@ export function FilterSheet({
           placeholder={t("filters.orderNumberPlaceholder")}
           value={localFilters.orderNumber}
           onChange={(e) =>
-            setLocalFilters({ ...localFilters, orderNumber: e.target.value })
+            setLocalFilters((prev) => ({ ...prev, orderNumber: e.target.value }))
           }
           className={cn("h-10", isMobile && "h-12 text-base")}
         />
@@ -184,7 +196,7 @@ export function FilterSheet({
           placeholder={t("filters.trackingIdPlaceholder")}
           value={localFilters.trackingId}
           onChange={(e) =>
-            setLocalFilters({ ...localFilters, trackingId: e.target.value })
+            setLocalFilters((prev) => ({ ...prev, trackingId: e.target.value }))
           }
           className={cn("h-10", isMobile && "h-12 text-base")}
         />
@@ -197,7 +209,7 @@ export function FilterSheet({
           placeholder={t("filters.searchPlaceholder")}
           value={localFilters.search}
           onChange={(e) =>
-            setLocalFilters({ ...localFilters, search: e.target.value })
+            setLocalFilters((prev) => ({ ...prev, search: e.target.value }))
           }
           className={cn("h-10", isMobile && "h-12 text-base")}
         />
@@ -209,24 +221,24 @@ export function FilterSheet({
         <AccountSelector
           value={localFilters.accountId || ""}
           onValueChange={(value) =>
-            setLocalFilters({ ...localFilters, accountId: value })
+            setLocalFilters((prev) => ({ ...prev, accountId: value }))
           }
           includeAll={true}
         />
       </div>
 
-      {/* Status Single-select Combobox - تک انتخابی */}
+      {/* Status Single-select Combobox */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">{t("filters.status")}</Label>
         {isMobile ? (
           <button
+            type="button"
             onClick={() => setStatusOpen(true)}
             className="w-full flex items-center justify-between h-12 px-4 rounded-lg border border-input bg-background text-start text-base"
           >
             <span className="truncate">
               {localFilters.status
-                ? statusOptions.find((opt) => opt.value === localFilters.status)
-                    ?.label
+                ? statusOptions.find((opt) => opt.value === localFilters.status)?.label
                 : t("filters.allStatuses")}
             </span>
             <ChevronsUpDown className="ms-2 h-5 w-5 shrink-0 opacity-50" />
@@ -242,24 +254,19 @@ export function FilterSheet({
               >
                 <span className="truncate">
                   {localFilters.status
-                    ? statusOptions.find(
-                        (opt) => opt.value === localFilters.status
-                      )?.label
+                    ? statusOptions.find((opt) => opt.value === localFilters.status)?.label
                     : t("filters.allStatuses")}
                 </span>
                 <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-100 p-0" align="start">
+            <PopoverContent className="w-[300px] p-0" align="start">
               <Command>
                 <CommandInput placeholder={t("filters.search")} />
                 <CommandList>
                   <CommandEmpty>{t("filters.notFound")}</CommandEmpty>
                   <CommandGroup>
-                    <CommandItem
-                      value="all"
-                      onSelect={() => handleStatusSelect("")}
-                    >
+                    <CommandItem value="all" onSelect={() => handleStatusSelect("")}>
                       <Check
                         className={cn(
                           "me-2 h-4 w-4",
@@ -268,24 +275,21 @@ export function FilterSheet({
                       />
                       {t("filters.allStatuses")}
                     </CommandItem>
-                    {statusOptions.map((option) => {
-                      const isSelected = localFilters.status === option.value;
-                      return (
-                        <CommandItem
-                          key={option.value}
-                          value={option.value}
-                          onSelect={() => handleStatusSelect(option.value)}
-                        >
-                          <Check
-                            className={cn(
-                              "me-2 h-4 w-4",
-                              isSelected ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {option.label}
-                        </CommandItem>
-                      );
-                    })}
+                    {statusOptions.map((option) => (
+                      <CommandItem
+                        key={option.value}
+                        value={option.value}
+                        onSelect={() => handleStatusSelect(option.value)}
+                      >
+                        <Check
+                          className={cn(
+                            "me-2 h-4 w-4",
+                            localFilters.status === option.value ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {option.label}
+                      </CommandItem>
+                    ))}
                   </CommandGroup>
                 </CommandList>
               </Command>
@@ -294,7 +298,7 @@ export function FilterSheet({
         )}
       </div>
 
-      {/* Mobile Drawer for Status Selection - تک انتخابی */}
+      {/* Mobile Drawer for Status Selection */}
       {isMobile && (
         <Drawer open={statusOpen} onOpenChange={setStatusOpen}>
           <DrawerContent className="max-h-[70vh]">
@@ -303,48 +307,45 @@ export function FilterSheet({
             </DrawerHeader>
             <div className="overflow-y-auto p-4 space-y-2">
               <button
+                type="button"
                 onClick={() => handleStatusSelect("")}
                 className={cn(
                   "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
-                  !localFilters.status
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-muted"
+                  !localFilters.status ? "bg-primary/10 text-primary" : "hover:bg-muted"
                 )}
               >
                 {!localFilters.status && <Check className="h-5 w-5" />}
                 <span className="flex-1">{t("filters.allStatuses")}</span>
               </button>
-              {statusOptions.map((option) => {
-                const isSelected = localFilters.status === option.value;
-                return (
-                  <button
-                    key={option.value}
-                    onClick={() => handleStatusSelect(option.value)}
-                    className={cn(
-                      "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
-                      isSelected
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-muted"
-                    )}
-                  >
-                    {isSelected && <Check className="h-5 w-5" />}
-                    <span className="flex-1">{option.label}</span>
-                  </button>
-                );
-              })}
+              {statusOptions.map((option) => (
+                <button
+                  type="button"
+                  key={option.value}
+                  onClick={() => handleStatusSelect(option.value)}
+                  className={cn(
+                    "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
+                    localFilters.status === option.value
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-muted"
+                  )}
+                >
+                  {localFilters.status === option.value && <Check className="h-5 w-5" />}
+                  <span className="flex-1">{option.label}</span>
+                </button>
+              ))}
             </div>
           </DrawerContent>
         </Drawer>
       )}
 
-      {/* Date Range - تاریخ شمسی و میلادی */}
+      {/* Date Range */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label className="text-sm font-medium">{t("filters.fromDate")}</Label>
           <PersianDatePicker
             value={localFilters.dateFrom}
             onChange={(value) =>
-              setLocalFilters({ ...localFilters, dateFrom: value })
+              setLocalFilters((prev) => ({ ...prev, dateFrom: value }))
             }
             placeholder={t("common.selectDate")}
           />
@@ -354,7 +355,7 @@ export function FilterSheet({
           <PersianDatePicker
             value={localFilters.dateTo}
             onChange={(value) =>
-              setLocalFilters({ ...localFilters, dateTo: value })
+              setLocalFilters((prev) => ({ ...prev, dateTo: value }))
             }
             placeholder={t("common.selectDate")}
           />
@@ -365,7 +366,7 @@ export function FilterSheet({
       <div className="flex gap-3 pt-4 border-t">
         <Button
           variant="outline"
-          size={isMobile ? "lg" : "md"}
+          size={isMobile ? "lg" : "default"}
           className={cn("flex-1", isMobile && "text-base")}
           onClick={handleReset}
           disabled={isLoading}
@@ -373,7 +374,7 @@ export function FilterSheet({
           {t("filters.reset")}
         </Button>
         <Button
-          size={isMobile ? "lg" : "md"}
+          size={isMobile ? "lg" : "default"}
           className={cn("flex-1", isMobile && "text-base")}
           onClick={handleApply}
           disabled={isLoading}
@@ -399,7 +400,7 @@ export function FilterSheet({
             </DrawerTitle>
           </DrawerHeader>
           <div className="overflow-y-auto p-4 pb-8">
-            <FilterContent />
+            {filterContent}
           </div>
         </DrawerContent>
       </Drawer>
@@ -415,7 +416,7 @@ export function FilterSheet({
           </DialogTitle>
         </DialogHeader>
         <div className="py-4">
-          <FilterContent />
+          {filterContent}
         </div>
       </DialogContent>
     </Dialog>

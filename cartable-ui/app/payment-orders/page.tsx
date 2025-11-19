@@ -17,6 +17,7 @@ import { PaymentStatusEnum } from "@/types/api";
 import { useRouter } from "next/navigation";
 import { MobilePagination } from "@/components/common/mobile-pagination";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import StatisticCard, { StatisticCardProps } from "./components/statistic-card";
 import { searchPaymentOrders } from "@/services/paymentOrdersService";
 import { mapPaymentListDtosToPaymentOrders } from "@/lib/api-mappers";
@@ -281,6 +282,56 @@ export default function PaymentOrdersPage() {
     (filters.dateFrom ? 1 : 0) +
     (filters.dateTo ? 1 : 0) +
     (filters.accountId && filters.accountId !== "all" ? 1 : 0);
+
+  // نمایش اسکلت لودینگ فقط در بارگذاری اولیه
+  if (initialLoading) {
+    return (
+      <AppLayout>
+        <PageHeader
+          title={t("paymentCartable.pageTitle")}
+          description={t("paymentCartable.pageSubtitle")}
+          actions={
+            <Button variant="outline" disabled>
+              <Filter className="" />
+              {t("common.buttons.filter")}
+            </Button>
+          }
+        />
+        {/* Stats skeleton */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-12 w-12 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        {/* Table skeleton */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex gap-4 py-3 border-b last:border-0">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
