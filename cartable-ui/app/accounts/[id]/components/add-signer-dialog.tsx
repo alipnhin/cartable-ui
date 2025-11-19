@@ -73,7 +73,8 @@ export function AddSignerDialog({
     };
 
     fetchUsers();
-  }, [session?.accessToken, open, toast, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.accessToken, open]);
 
   // فیلتر کاربران: فقط کاربرانی که امضادار نیستند
   const availableUsers = users.filter(
