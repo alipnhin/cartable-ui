@@ -39,6 +39,7 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  SearchX,
 } from "lucide-react";
 import { MobilePagination } from "@/components/common/mobile-pagination";
 
@@ -203,6 +204,16 @@ export function TransactionTable({
                 </Card>
               ))}
             </div>
+          ) : transactions.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-12">
+              <SearchX className="h-12 w-12 text-muted-foreground/50" />
+              <div className="space-y-1 text-center">
+                <p className="font-medium text-muted-foreground">تراکنشی یافت نشد</p>
+                <p className="text-sm text-muted-foreground/70">
+                  فیلترهای جستجو را تغییر دهید
+                </p>
+              </div>
+            </div>
           ) : (
             transactions.map((tx) => (
               <Card key={tx.id} className="p-4">
@@ -350,8 +361,16 @@ export function TransactionTable({
                 ))
               ) : transactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={12} className="text-center py-8">
-                    <p className="text-muted-foreground">تراکنشی یافت نشد</p>
+                  <TableCell colSpan={12} className="text-center py-16">
+                    <div className="flex flex-col items-center gap-3">
+                      <SearchX className="h-12 w-12 text-muted-foreground/50" />
+                      <div className="space-y-1">
+                        <p className="font-medium text-muted-foreground">تراکنشی یافت نشد</p>
+                        <p className="text-sm text-muted-foreground/70">
+                          فیلترهای جستجو را تغییر دهید یا تاریخ دیگری انتخاب کنید
+                        </p>
+                      </div>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (

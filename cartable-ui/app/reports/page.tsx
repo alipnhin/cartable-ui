@@ -67,6 +67,7 @@ export default function TransactionReportsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [sortField, setSortField] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -143,6 +144,7 @@ export default function TransactionReportsPage() {
         toast.error("خطا در دریافت لیست تراکنش‌ها");
       } finally {
         setLoading(false);
+        setInitialLoading(false);
       }
     };
 
@@ -243,8 +245,8 @@ export default function TransactionReportsPage() {
     setCurrentPage(1);
   };
 
-  // Loading skeleton
-  if (loading && (transactions?.length ?? 0) === 0) {
+  // Loading skeleton - only show on initial load
+  if (initialLoading) {
     return (
       <AppLayout>
         <div className="space-y-4">
