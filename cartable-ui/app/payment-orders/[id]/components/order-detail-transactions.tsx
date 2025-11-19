@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
+import { TransactionStatusBadge } from "@/components/ui/status-badge";
 import {
   Eye,
   ChevronLeft,
@@ -79,23 +80,6 @@ interface OrderDetailTransactionsProps {
 
 type SortField = "amount" | "destinationAccountOwner" | "nationalCode";
 
-// Helper function to convert API enum to display name
-const getStatusBadgeVariant = (status: TransactionStatusApiEnum) => {
-  switch (status) {
-    case TransactionStatusApiEnum.BankSucceeded:
-      return "success";
-    case TransactionStatusApiEnum.BankFailed:
-    case TransactionStatusApiEnum.Canceled:
-      return "destructive";
-    case TransactionStatusApiEnum.WaitForBank:
-    case TransactionStatusApiEnum.WaitForExecution:
-    case TransactionStatusApiEnum.Draft:
-      return "warning";
-    default:
-      return "secondary";
-  }
-};
-
 export function OrderDetailTransactions({
   transactions,
   isLoading,
@@ -113,25 +97,6 @@ export function OrderDetailTransactions({
   const isMobile = useIsMobile();
 
   // Helper functions with i18n
-  const getStatusLabel = (status: TransactionStatusApiEnum) => {
-    switch (status) {
-      case TransactionStatusApiEnum.Draft:
-        return t("transactions.statusLabels.draft");
-      case TransactionStatusApiEnum.WaitForExecution:
-        return t("transactions.statusLabels.waitForExecution");
-      case TransactionStatusApiEnum.WaitForBank:
-        return t("transactions.statusLabels.waitForBank");
-      case TransactionStatusApiEnum.BankSucceeded:
-        return t("transactions.statusLabels.bankSucceeded");
-      case TransactionStatusApiEnum.BankFailed:
-        return t("transactions.statusLabels.bankFailed");
-      case TransactionStatusApiEnum.Canceled:
-        return t("transactions.statusLabels.canceled");
-      default:
-        return status;
-    }
-  };
-
   const getPaymentTypeLabel = (type: PaymentTypeApiEnum) => {
     switch (type) {
       case PaymentTypeApiEnum.Paya:
@@ -267,7 +232,7 @@ export function OrderDetailTransactions({
                 <Button
                   variant="outline"
                   onClick={onExport}
-                  className="gap-2"
+                  className="gap-2 h-9"
                 >
                   <Download className="h-4 w-4" />
                   {!isMobile && t("transactions.export")}
@@ -279,86 +244,86 @@ export function OrderDetailTransactions({
                 variant="outline"
                 onClick={onRefresh}
                 disabled={isLoading}
-                className="gap-2"
+                className="gap-2 h-9"
               >
                 <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
                 {!isMobile && t("transactions.refresh")}
               </Button>
 
-              {/* Filter Button */}
-              <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" className="gap-2 relative">
-                    <FilterIcon className="h-4 w-4" />
-                    {!isMobile && t("transactions.filter")}
-                    {activeFiltersCount > 0 && (
-                      <span className="absolute -top-1 -left-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium">
-                        {activeFiltersCount}
-                      </span>
-                    )}
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto">
-                  <SheetHeader>
-                    <SheetTitle>{t("transactions.filterTitle")}</SheetTitle>
-                  </SheetHeader>
+              {/* Filter Button - Only on mobile */}
+              {isMobile && (
+                <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" className="gap-2 relative h-9">
+                      <FilterIcon className="h-4 w-4" />
+                      {activeFiltersCount > 0 && (
+                        <span className="absolute -top-1 -left-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium">
+                          {activeFiltersCount}
+                        </span>
+                      )}
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto">
+                    <SheetHeader>
+                      <SheetTitle>{t("transactions.filterTitle")}</SheetTitle>
+                    </SheetHeader>
 
-                  <div className="space-y-6 py-6">
-                    {/* Search */}
-                    <div className="space-y-2">
-                      <Label>{t("transactions.search")}</Label>
-                      <div className="relative">
-                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder={t("transactions.searchPlaceholder")}
-                          value={searchValue}
-                          onChange={(e) => setSearchValue(e.target.value)}
-                          className="pr-10"
-                        />
+                    <div className="space-y-6 py-6">
+                      {/* Search */}
+                      <div className="space-y-2">
+                        <Label>{t("transactions.search")}</Label>
+                        <div className="relative">
+                          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder={t("transactions.searchPlaceholder")}
+                            value={searchValue}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                            className="pr-10 h-10"
+                          />
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Status Filter */}
-                    <div className="space-y-2">
-                      <Label>{t("transactions.transactionStatus")}</Label>
-                      <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("transactions.allStatuses")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">{t("transactions.allStatuses")}</SelectItem>
-                          <SelectItem value={TransactionStatusApiEnum.BankSucceeded}>
-                            {t("transactions.statusLabels.bankSucceeded")}
-                          </SelectItem>
-                          <SelectItem value={TransactionStatusApiEnum.BankFailed}>
-                            {t("transactions.statusLabels.bankFailed")}
-                          </SelectItem>
-                          <SelectItem value={TransactionStatusApiEnum.WaitForBank}>
-                            {t("transactions.statusLabels.waitForBank")}
-                          </SelectItem>
-                          <SelectItem value={TransactionStatusApiEnum.WaitForExecution}>
-                            {t("transactions.statusLabels.waitForExecution")}
-                          </SelectItem>
-                          <SelectItem value={TransactionStatusApiEnum.Draft}>
-                            {t("transactions.statusLabels.draft")}
-                          </SelectItem>
-                          <SelectItem value={TransactionStatusApiEnum.Canceled}>
-                            {t("transactions.statusLabels.canceled")}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                      {/* Status Filter */}
+                      <div className="space-y-2">
+                        <Label>{t("transactions.transactionStatus")}</Label>
+                        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+                          <SelectTrigger className="h-10">
+                            <SelectValue placeholder={t("transactions.allStatuses")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">{t("transactions.allStatuses")}</SelectItem>
+                            <SelectItem value={TransactionStatusApiEnum.BankSucceeded}>
+                              {t("transactions.statusLabels.bankSucceeded")}
+                            </SelectItem>
+                            <SelectItem value={TransactionStatusApiEnum.BankFailed}>
+                              {t("transactions.statusLabels.bankFailed")}
+                            </SelectItem>
+                            <SelectItem value={TransactionStatusApiEnum.WaitForBank}>
+                              {t("transactions.statusLabels.waitForBank")}
+                            </SelectItem>
+                            <SelectItem value={TransactionStatusApiEnum.WaitForExecution}>
+                              {t("transactions.statusLabels.waitForExecution")}
+                            </SelectItem>
+                            <SelectItem value={TransactionStatusApiEnum.Draft}>
+                              {t("transactions.statusLabels.draft")}
+                            </SelectItem>
+                            <SelectItem value={TransactionStatusApiEnum.Canceled}>
+                              {t("transactions.statusLabels.canceled")}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                    {/* Payment Type Filter */}
-                    <div className="space-y-2">
-                      <Label>{t("transactions.paymentTypeLabel")}</Label>
-                      <Select value={paymentTypeFilter} onValueChange={(v) => setPaymentTypeFilter(v as any)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("transactions.allTypes")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">{t("transactions.allTypes")}</SelectItem>
-                          <SelectItem value={PaymentTypeApiEnum.Paya}>{t("transactions.paymentTypes.paya")}</SelectItem>
+                      {/* Payment Type Filter */}
+                      <div className="space-y-2">
+                        <Label>{t("transactions.paymentTypeLabel")}</Label>
+                        <Select value={paymentTypeFilter} onValueChange={(v) => setPaymentTypeFilter(v as any)}>
+                          <SelectTrigger className="h-10">
+                            <SelectValue placeholder={t("transactions.allTypes")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">{t("transactions.allTypes")}</SelectItem>
+                            <SelectItem value={PaymentTypeApiEnum.Paya}>{t("transactions.paymentTypes.paya")}</SelectItem>
                           <SelectItem value={PaymentTypeApiEnum.Satna}>{t("transactions.paymentTypes.satna")}</SelectItem>
                           <SelectItem value={PaymentTypeApiEnum.Rtgs}>{t("transactions.paymentTypes.rtgs")}</SelectItem>
                         </SelectContent>
@@ -369,7 +334,7 @@ export function OrderDetailTransactions({
                     <div className="space-y-2">
                       <Label>{t("transactions.reasonCode")}</Label>
                       <Select value={reasonCodeFilter} onValueChange={(v) => setReasonCodeFilter(v as any)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-10">
                           <SelectValue placeholder={t("transactions.allReasonCodes")} />
                         </SelectTrigger>
                         <SelectContent>
@@ -401,18 +366,119 @@ export function OrderDetailTransactions({
                     <Button
                       variant="outline"
                       onClick={handleResetFilters}
-                      className="flex-1"
+                      className="flex-1 h-10"
                     >
                       {t("transactions.clearFilters")}
                     </Button>
-                    <Button onClick={handleApplyFilters} className="flex-1">
+                    <Button onClick={handleApplyFilters} className="flex-1 h-10">
                       {t("transactions.applyFilters")}
                     </Button>
                   </SheetFooter>
                 </SheetContent>
               </Sheet>
+              )}
             </div>
           </div>
+
+          {/* Desktop Inline Filters */}
+          {!isMobile && (
+            <div className="flex flex-wrap items-center gap-3 p-4 border-b bg-muted/20">
+              {/* Search */}
+              <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder={t("transactions.searchPlaceholder")}
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  className="pr-10 h-9"
+                />
+              </div>
+
+              {/* Status Filter */}
+              <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as any); applyFilters(); }}>
+                <SelectTrigger className="w-[160px] h-9">
+                  <SelectValue placeholder={t("transactions.allStatuses")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("transactions.allStatuses")}</SelectItem>
+                  <SelectItem value={TransactionStatusApiEnum.BankSucceeded}>
+                    {t("transactions.statusLabels.bankSucceeded")}
+                  </SelectItem>
+                  <SelectItem value={TransactionStatusApiEnum.BankFailed}>
+                    {t("transactions.statusLabels.bankFailed")}
+                  </SelectItem>
+                  <SelectItem value={TransactionStatusApiEnum.WaitForBank}>
+                    {t("transactions.statusLabels.waitForBank")}
+                  </SelectItem>
+                  <SelectItem value={TransactionStatusApiEnum.WaitForExecution}>
+                    {t("transactions.statusLabels.waitForExecution")}
+                  </SelectItem>
+                  <SelectItem value={TransactionStatusApiEnum.Canceled}>
+                    {t("transactions.statusLabels.canceled")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Payment Type Filter */}
+              <Select value={paymentTypeFilter} onValueChange={(v) => { setPaymentTypeFilter(v as any); applyFilters(); }}>
+                <SelectTrigger className="w-[140px] h-9">
+                  <SelectValue placeholder={t("transactions.allTypes")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("transactions.allTypes")}</SelectItem>
+                  <SelectItem value={PaymentTypeApiEnum.Paya}>{t("transactions.paymentTypes.paya")}</SelectItem>
+                  <SelectItem value={PaymentTypeApiEnum.Satna}>{t("transactions.paymentTypes.satna")}</SelectItem>
+                  <SelectItem value={PaymentTypeApiEnum.Rtgs}>{t("transactions.paymentTypes.rtgs")}</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Reason Code Filter */}
+              <Select value={reasonCodeFilter} onValueChange={(v) => { setReasonCodeFilter(v as any); applyFilters(); }}>
+                <SelectTrigger className="w-[180px] h-9">
+                  <SelectValue placeholder={t("transactions.allReasonCodes")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("transactions.allReasonCodes")}</SelectItem>
+                  <SelectItem value={ReasonCodeApiEnum.InvestmentAndBourse}>
+                    {t("transactions.reasonCodes.investmentAndBourse")}
+                  </SelectItem>
+                  <SelectItem value={ReasonCodeApiEnum.SalaryAndWages}>
+                    {t("transactions.reasonCodes.salaryAndWages")}
+                  </SelectItem>
+                  <SelectItem value={ReasonCodeApiEnum.TaxAndDuties}>
+                    {t("transactions.reasonCodes.taxAndDuties")}
+                  </SelectItem>
+                  <SelectItem value={ReasonCodeApiEnum.LoanRepayment}>
+                    {t("transactions.reasonCodes.loanRepayment")}
+                  </SelectItem>
+                  <SelectItem value={ReasonCodeApiEnum.OtherPayments}>
+                    {t("transactions.reasonCodes.otherPayments")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Apply and Reset Buttons */}
+              <div className="flex gap-2 ms-auto">
+                {activeFiltersCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleResetFilters}
+                    className="h-9 text-xs"
+                  >
+                    {t("transactions.clearFilters")}
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  onClick={handleApplyFilters}
+                  className="h-9"
+                >
+                  {t("transactions.applyFilters")}
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Active Filters Display */}
           {activeFiltersCount > 0 && (
@@ -431,7 +497,7 @@ export function OrderDetailTransactions({
               )}
               {statusFilter && statusFilter !== "all" && (
                 <Badge variant="secondary" className="gap-1.5">
-                  {getStatusLabel(statusFilter)}
+                  {t(`transactions.statusLabels.${statusFilter.charAt(0).toLowerCase() + statusFilter.slice(1)}`)}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => {
@@ -488,7 +554,7 @@ export function OrderDetailTransactions({
             <>
               {isMobile ? (
                 // Mobile Cards View
-                <div className="p-4 space-y-3">
+                <div className="p-4 space-y-4">
                   {transactions.map((transaction, index) => {
                     const bankCode = getBankCodeFromIban(transaction.destinationIban);
                     const canInquiry = transaction.status === TransactionStatusApiEnum.WaitForBank ||
@@ -497,115 +563,100 @@ export function OrderDetailTransactions({
                     return (
                       <Card
                         key={transaction.id}
-                        className="border-2 hover:shadow-md transition-shadow"
+                        className="overflow-hidden"
                       >
-                        <CardContent className="p-4">
-                          <div className="space-y-3">
-                            {/* هدر کارت: نام و وضعیت */}
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
-                                {bankCode && (
-                                  <div className="shrink-0">
-                                    <BankLogo bankCode={bankCode} size="sm" />
-                                  </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-bold text-base truncate">
-                                    {transaction.destinationAccountOwner}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground mt-0.5">
-                                    {t("transactions.rowNumber")} {startIndex + index + 1}
-                                  </div>
-                                </div>
-                              </div>
-                              <Badge variant={getStatusBadgeVariant(transaction.status) as any} className="shrink-0">
-                                {getStatusLabel(transaction.status)}
-                              </Badge>
+                        {/* هدر با مبلغ برجسته */}
+                        <div className="bg-muted/50 p-4 border-b">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              {bankCode && <BankLogo bankCode={bankCode} size="sm" />}
+                              <span className="text-sm text-muted-foreground">
+                                #{startIndex + index + 1}
+                              </span>
                             </div>
-
-                            <div className="border-t" />
-
-                            {/* اطلاعات اصلی */}
-                            <div className="space-y-2.5">
-                              {/* مبلغ */}
-                              <div className="flex items-center gap-2">
-                                <Wallet className="h-4 w-4 text-primary shrink-0" />
-                                <span className="text-xs text-muted-foreground">{t("transactions.amountLabel")}</span>
-                                <span className="font-bold text-primary flex-1 truncate">
-                                  {formatCurrency(parseFloat(transaction.amount), locale)} {t("transactions.rial")}
-                                </span>
-                              </div>
-
-                              {/* کد ملی */}
-                              <div className="flex items-center gap-2">
-                                <Hash className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <span className="text-xs text-muted-foreground">{t("transactions.nationalCodeLabel")}</span>
-                                <span className="text-sm font-mono flex-1">
-                                  {transaction.nationalCode}
-                                </span>
-                              </div>
-
-                              {/* شماره شبا */}
-                              <div className="flex items-center gap-2">
-                                <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <span className="text-xs text-muted-foreground">{t("transactions.ibanLabel")}</span>
-                                <span className="text-xs font-mono flex-1 truncate">
-                                  {transaction.destinationIban}
-                                </span>
-                              </div>
-
-                              {/* نوع پرداخت */}
-                              <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <span className="text-xs text-muted-foreground">{t("transactions.typeLabel")}</span>
-                                <span className="text-sm font-medium">
-                                  {getPaymentTypeLabel(transaction.paymentType)}
-                                </span>
-                              </div>
-
-                              {/* کد علت */}
-                              <div className="flex items-start gap-2">
-                                <User className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                                <span className="text-xs text-muted-foreground">{t("transactions.reasonLabel")}</span>
-                                <span className="text-sm flex-1">
-                                  {getReasonCodeLabel(transaction.reasonCode)}
-                                </span>
-                              </div>
-
-                              {/* کد رهگیری */}
-                              {transaction.trackingId && (
-                                <div className="flex items-center gap-2 pt-2 border-t">
-                                  <span className="text-xs text-muted-foreground">{t("transactions.trackingIdLabel")}</span>
-                                  <span className="text-sm font-mono font-medium flex-1">
-                                    {transaction.trackingId}
-                                  </span>
-                                </div>
-                              )}
+                            <TransactionStatusBadge status={transaction.status} size="sm" />
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-foreground">
+                              {formatCurrency(parseFloat(transaction.amount), locale)}
                             </div>
+                            <div className="text-xs text-muted-foreground">{t("transactions.rial")}</div>
+                          </div>
+                        </div>
 
-                            {/* دکمه‌های عملیات */}
-                            <div className="pt-2 flex gap-2 border-t">
+                        <CardContent className="p-4 space-y-3">
+                          {/* نام ذینفع */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">{t("transactions.beneficiaryName")}</span>
+                            <span className="text-sm font-bold text-foreground truncate max-w-[60%] text-left">
+                              {transaction.destinationAccountOwner}
+                            </span>
+                          </div>
+
+                          {/* کد ملی */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">{t("transactions.nationalCodeLabel")}</span>
+                            <span className="text-sm font-mono font-medium text-foreground">
+                              {transaction.nationalCode}
+                            </span>
+                          </div>
+
+                          {/* شماره شبا */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">{t("transactions.ibanLabel")}</span>
+                            <span className="text-xs font-mono text-foreground truncate max-w-[55%]">
+                              {transaction.destinationIban}
+                            </span>
+                          </div>
+
+                          {/* نوع پرداخت */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">{t("transactions.typeLabel")}</span>
+                            <span className="text-sm font-medium text-foreground">
+                              {getPaymentTypeLabel(transaction.paymentType)}
+                            </span>
+                          </div>
+
+                          {/* کد علت */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">{t("transactions.reasonLabel")}</span>
+                            <span className="text-sm text-foreground truncate max-w-[50%] text-left">
+                              {getReasonCodeLabel(transaction.reasonCode)}
+                            </span>
+                          </div>
+
+                          {/* کد رهگیری */}
+                          {transaction.trackingId && (
+                            <div className="flex items-center justify-between pt-2 border-t">
+                              <span className="text-sm text-muted-foreground">{t("transactions.trackingIdLabel")}</span>
+                              <span className="text-sm font-mono font-bold text-foreground">
+                                {transaction.trackingId}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* دکمه‌های عملیات */}
+                          <div className="pt-3 flex gap-2 border-t">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewDetails(transaction)}
+                              className="flex-1 gap-2 h-9"
+                            >
+                              <Eye className="h-4 w-4" />
+                              {t("transactions.view")}
+                            </Button>
+                            {canInquiry && (
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleViewDetails(transaction)}
-                                className="flex-1 gap-2"
+                                onClick={() => handleInquiry(transaction)}
+                                className="gap-2 h-9"
                               >
-                                <Eye className="h-4 w-4" />
-                                {t("transactions.viewDetails")}
+                                <RefreshCw className="h-4 w-4" />
+                                {t("transactions.inquiry")}
                               </Button>
-                              {canInquiry && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleInquiry(transaction)}
-                                  className="gap-2"
-                                >
-                                  <RefreshCw className="h-4 w-4" />
-                                  {t("transactions.inquiry")}
-                                </Button>
-                              )}
-                            </div>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
@@ -725,30 +776,28 @@ export function OrderDetailTransactions({
                               {getReasonCodeLabel(transaction.reasonCode)}
                             </TableCell>
                             <TableCell>
-                              <Badge variant={getStatusBadgeVariant(transaction.status) as any}>
-                                {getStatusLabel(transaction.status)}
-                              </Badge>
+                              <TransactionStatusBadge status={transaction.status} size="sm" />
                             </TableCell>
                             <TableCell className="text-left">
-                              <div className="flex items-center gap-1 justify-end">
+                              <div className="flex items-center gap-2 justify-end">
                                 <Button
-                                  variant="ghost"
+                                  variant="outline"
                                   size="sm"
                                   onClick={() => handleViewDetails(transaction)}
-                                  className="h-8 w-8 p-0 hover:bg-primary/10"
-                                  title={t("transactions.viewDetailsTooltip")}
+                                  className="h-8 gap-1.5 text-xs"
                                 >
-                                  <Eye className="h-4 w-4" />
+                                  <Eye className="h-3.5 w-3.5" />
+                                  {t("transactions.view")}
                                 </Button>
                                 {canInquiry && (
                                   <Button
-                                    variant="ghost"
+                                    variant="outline"
                                     size="sm"
                                     onClick={() => handleInquiry(transaction)}
-                                    className="h-8 w-8 p-0 hover:bg-primary/10"
-                                    title={t("transactions.inquiryTooltip")}
+                                    className="h-8 gap-1.5 text-xs"
                                   >
-                                    <RefreshCw className="h-4 w-4" />
+                                    <RefreshCw className="h-3.5 w-3.5" />
+                                    {t("transactions.inquiry")}
                                   </Button>
                                 )}
                               </div>
