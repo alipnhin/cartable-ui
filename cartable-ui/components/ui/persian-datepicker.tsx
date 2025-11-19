@@ -1,6 +1,6 @@
 "use client";
 
-import DatePicker from "react-multi-date-picker";
+import DatePicker, { DateObject } from "react-multi-date-picker";
 import type { Value } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
@@ -29,21 +29,35 @@ export function PersianDatePicker({
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
 
-  // Clean the value - remove time component if present
-  const cleanValue = value ? value.split("T")[0] : "";
-
   const handleChange = (date: Value) => {
     if (date && typeof date === "object" && "toDate" in date) {
-      const isoDate = date.toDate().toISOString().split("T")[0];
+      const jsDate = (date as DateObject).toDate();
+      const isoDate = jsDate.toISOString().split("T")[0];
       onChange?.(isoDate);
     } else if (!date) {
       onChange?.("");
     }
   };
 
+  // Convert value to DateObject
+  let dateValue: Value = null;
+  if (value) {
+    // Parse ISO date string (YYYY-MM-DD)
+    const dateStr = value.split("T")[0];
+    const jsDate = new Date(dateStr + "T12:00:00"); // Add time to avoid timezone issues
+
+    // Create DateObject from JavaScript Date
+    dateValue = new DateObject(jsDate);
+
+    // If locale is Persian, convert to Persian calendar
+    if (locale === "fa") {
+      dateValue = dateValue.convert(persian, persian_fa);
+    }
+  }
+
   return (
     <DatePicker
-      value={cleanValue}
+      value={dateValue}
       onChange={handleChange}
       calendar={locale === "fa" ? persian : gregorian}
       locale={locale === "fa" ? persian_fa : gregorian_en}
