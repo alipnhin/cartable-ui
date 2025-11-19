@@ -113,24 +113,26 @@ export default function AccountDetailPage() {
    */
   const handleRequestStatusChange = async (
     signerId: string,
-    currentStatus: boolean
+    currentStatus: number
   ) => {
     if (!session?.accessToken) return;
 
     setIsUpdating(true);
     try {
-      if (currentStatus) {
+      // Status 1 = Enable, so we disable it
+      // Status 2 = Disable or 4 = Rejected, so we enable it
+      if (currentStatus === 1) {
         await disableSigner(signerId, session.accessToken);
         toast({
           title: t("toast.success"),
-          description: "امضادار غیرفعال شد",
+          description: "درخواست غیرفعال‌سازی ثبت شد",
           variant: "success",
         });
       } else {
         await enableSigner(signerId, session.accessToken);
         toast({
           title: t("toast.success"),
-          description: "امضادار فعال شد",
+          description: "درخواست فعال‌سازی ثبت شد",
           variant: "success",
         });
       }
@@ -225,17 +227,18 @@ export default function AccountDetailPage() {
               <Skeleton className="h-24 w-full rounded-lg" />
 
               {/* Signer cards skeleton */}
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <Card key={i} className="flex flex-col">
-                    <CardContent className="p-5 flex flex-col items-center pt-8">
-                      <Skeleton className="h-16 w-16 rounded-full mb-4" />
-                      <Skeleton className="h-5 w-32 mb-2" />
-                      <Skeleton className="h-4 w-24 mb-3" />
-                      <Skeleton className="h-3 w-28" />
+                    <CardContent className="p-4 flex flex-col items-center pt-6">
+                      <Skeleton className="h-14 w-14 rounded-full mb-3" />
+                      <Skeleton className="h-4 w-24 mb-1" />
+                      <Skeleton className="h-5 w-20 rounded-full mb-2" />
+                      <Skeleton className="h-3 w-16 mb-2" />
+                      <Skeleton className="h-3 w-20" />
                     </CardContent>
-                    <div className="flex items-center px-5 min-h-14 border-t justify-center">
-                      <Skeleton className="h-8 w-24" />
+                    <div className="flex items-center px-4 min-h-12 border-t justify-center">
+                      <Skeleton className="h-7 w-20" />
                     </div>
                   </Card>
                 ))}
@@ -377,7 +380,7 @@ export default function AccountDetailPage() {
 
             {/* لیست امضاداران */}
             {account.users && account.users.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {account.users.map((signer) => (
                   <SignerCard
                     key={signer.id}
