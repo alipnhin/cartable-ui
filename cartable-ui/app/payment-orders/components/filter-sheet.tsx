@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -34,15 +34,9 @@ import { X, Check, ChevronsUpDown } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { OrderStatus } from "@/types/order";
-import { mockAccounts } from "@/mocks/mockAccounts";
 import { cn } from "@/lib/utils";
-import DatePicker from "react-multi-date-picker";
-import type { Value } from "react-multi-date-picker";
-import persian from "react-date-object/calendars/persian";
-import persian_fa from "react-date-object/locales/persian_fa";
-import gregorian from "react-date-object/calendars/gregorian";
-import gregorian_en from "react-date-object/locales/gregorian_en";
-import "react-multi-date-picker/styles/colors/purple.css";
+import { PersianDatePicker } from "@/components/ui/persian-datepicker";
+import { AccountSelector } from "@/components/common/AccountSelector";
 
 interface FilterSheetProps {
   open: boolean;
@@ -73,15 +67,17 @@ export function FilterSheet({
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
   const [localFilters, setLocalFilters] = useState(filters);
-  const [accountOpen, setAccountOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const prevOpenRef = useRef(open);
 
   // فقط وقتی FilterSheet باز می‌شود، filters را به localFilters کپی می‌کنیم
   // این مشکل از دست رفتن focus در textbox را حل می‌کند
   useEffect(() => {
-    if (open) {
+    // فقط وقتی از بسته به باز تغییر کند
+    if (open && !prevOpenRef.current) {
       setLocalFilters(filters);
     }
+    prevOpenRef.current = open;
   }, [open, filters]);
 
   const statusOptions = [
@@ -153,10 +149,6 @@ export function FilterSheet({
     (localFilters.dateTo ? 1 : 0) +
     (localFilters.accountId && localFilters.accountId !== "all" ? 1 : 0);
 
-  const selectedAccount = mockAccounts.find(
-    (acc) => acc.id === localFilters.accountId
-  );
-
   const FilterContent = () => (
     <div className="space-y-6">
       {/* عنوان دستور پرداخت */}
@@ -211,142 +203,17 @@ export function FilterSheet({
         />
       </div>
 
-      {/* Account Combobox */}
+      {/* Account Selector */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">{t("filters.account")}</Label>
-        {isMobile ? (
-          <button
-            onClick={() => setAccountOpen(true)}
-            className="w-full flex items-center justify-between h-12 px-4 rounded-lg border border-input bg-background text-start text-base"
-          >
-            <span className="truncate">
-              {selectedAccount
-                ? selectedAccount.accountTitle
-                : t("filters.allAccounts")}
-            </span>
-            <ChevronsUpDown className="ms-2 h-5 w-5 shrink-0 opacity-50" />
-          </button>
-        ) : (
-          <Popover open={accountOpen} onOpenChange={setAccountOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={accountOpen}
-                className="w-full justify-between h-10"
-              >
-                {selectedAccount
-                  ? selectedAccount.accountTitle
-                  : t("filters.allAccounts")}
-                <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-100 p-0" align="start">
-              <Command>
-                <CommandInput placeholder={t("filters.search")} />
-                <CommandList>
-                  <CommandEmpty>{t("filters.notFound")}</CommandEmpty>
-                  <CommandGroup>
-                    <CommandItem
-                      value="all"
-                      onSelect={() => {
-                        setLocalFilters({ ...localFilters, accountId: "all" });
-                        setAccountOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "me-2 h-4 w-4",
-                          localFilters.accountId === "all" ||
-                            !localFilters.accountId
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      />
-                      {t("filters.allAccounts")}
-                    </CommandItem>
-                    {mockAccounts.map((account) => (
-                      <CommandItem
-                        key={account.id}
-                        value={account.id}
-                        onSelect={() => {
-                          setLocalFilters({
-                            ...localFilters,
-                            accountId: account.id,
-                          });
-                          setAccountOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "me-2 h-4 w-4",
-                            localFilters.accountId === account.id
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                        {account.accountTitle}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        )}
+        <AccountSelector
+          value={localFilters.accountId || ""}
+          onValueChange={(value) =>
+            setLocalFilters({ ...localFilters, accountId: value })
+          }
+          includeAll={true}
+        />
       </div>
-
-      {/* Mobile Drawer for Account Selection */}
-      {isMobile && (
-        <Drawer open={accountOpen} onOpenChange={setAccountOpen}>
-          <DrawerContent className="max-h-[70vh]">
-            <DrawerHeader>
-              <DrawerTitle>{t("filters.account")}</DrawerTitle>
-            </DrawerHeader>
-            <div className="overflow-y-auto p-4 space-y-2">
-              <button
-                onClick={() => {
-                  setLocalFilters({ ...localFilters, accountId: "all" });
-                  setAccountOpen(false);
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
-                  localFilters.accountId === "all" || !localFilters.accountId
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-muted"
-                )}
-              >
-                {(localFilters.accountId === "all" ||
-                  !localFilters.accountId) && <Check className="h-5 w-5" />}
-                <span className="flex-1">{t("filters.allAccounts")}</span>
-              </button>
-              {mockAccounts.map((account) => (
-                <button
-                  key={account.id}
-                  onClick={() => {
-                    setLocalFilters({
-                      ...localFilters,
-                      accountId: account.id,
-                    });
-                    setAccountOpen(false);
-                  }}
-                  className={cn(
-                    "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
-                    localFilters.accountId === account.id
-                      ? "bg-primary/10 text-primary"
-                      : "hover:bg-muted"
-                  )}
-                >
-                  {localFilters.accountId === account.id && (
-                    <Check className="h-5 w-5" />
-                  )}
-                  <span className="flex-1">{account.accountTitle}</span>
-                </button>
-              ))}
-            </div>
-          </DrawerContent>
-        </Drawer>
-      )}
 
       {/* Status Single-select Combobox - تک انتخابی */}
       <div className="space-y-2">
@@ -474,51 +341,21 @@ export function FilterSheet({
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label className="text-sm font-medium">{t("filters.fromDate")}</Label>
-          <DatePicker
+          <PersianDatePicker
             value={localFilters.dateFrom}
-            onChange={(date: Value) => {
-              if (date && typeof date === "object" && "toDate" in date) {
-                const isoDate = date.toDate().toISOString().split("T")[0];
-                setLocalFilters({ ...localFilters, dateFrom: isoDate });
-              } else if (!date) {
-                setLocalFilters({ ...localFilters, dateFrom: "" });
-              }
-            }}
-            calendar={locale === "fa" ? persian : gregorian}
-            locale={locale === "fa" ? persian_fa : gregorian_en}
-            format={locale === "fa" ? "YYYY/MM/DD" : "YYYY-MM-DD"}
-            className={cn("purple", isMobile && "rmdp-mobile")}
-            calendarPosition={locale === "fa" ? "bottom-right" : "bottom-left"}
-            inputClass={cn(
-              "w-full px-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-              isMobile ? "h-12 text-base" : "h-10"
-            )}
-            containerClassName="w-full"
+            onChange={(value) =>
+              setLocalFilters({ ...localFilters, dateFrom: value })
+            }
             placeholder={t("common.selectDate")}
           />
         </div>
         <div className="space-y-2">
           <Label className="text-sm font-medium">{t("filters.toDate")}</Label>
-          <DatePicker
+          <PersianDatePicker
             value={localFilters.dateTo}
-            onChange={(date: Value) => {
-              if (date && typeof date === "object" && "toDate" in date) {
-                const isoDate = date.toDate().toISOString().split("T")[0];
-                setLocalFilters({ ...localFilters, dateTo: isoDate });
-              } else if (!date) {
-                setLocalFilters({ ...localFilters, dateTo: "" });
-              }
-            }}
-            calendar={locale === "fa" ? persian : gregorian}
-            locale={locale === "fa" ? persian_fa : gregorian_en}
-            format={locale === "fa" ? "YYYY/MM/DD" : "YYYY-MM-DD"}
-            className={cn("purple", isMobile && "rmdp-mobile")}
-            calendarPosition={locale === "fa" ? "bottom-right" : "bottom-left"}
-            inputClass={cn(
-              "w-full px-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-              isMobile ? "h-12 text-base" : "h-10"
-            )}
-            containerClassName="w-full"
+            onChange={(value) =>
+              setLocalFilters({ ...localFilters, dateTo: value })
+            }
             placeholder={t("common.selectDate")}
           />
         </div>

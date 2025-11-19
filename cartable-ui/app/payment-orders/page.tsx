@@ -8,7 +8,7 @@ import { createColumns } from "./components/columns";
 import { OrderCard, OrderCardSkeleton } from "./components/order-card";
 import { FilterSheet } from "./components/filter-sheet";
 import { Button } from "@/components/ui/button";
-import { Download, FileBadge, Filter, Timer } from "lucide-react";
+import { FileBadge, Filter, Timer, FileX } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +34,7 @@ export default function PaymentOrdersPage() {
    */
   const [orders, setOrders] = useState<PaymentOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
@@ -146,6 +147,7 @@ export default function PaymentOrdersPage() {
         });
       } finally {
         setIsLoading(false);
+        setInitialLoading(false);
       }
     };
 
@@ -190,22 +192,6 @@ export default function PaymentOrdersPage() {
 
     return { total, pending, succeeded, totalAmount };
   }, [orders, totalItems]);
-
-  // Handlers
-  const handleExport = () => {
-    toast({
-      title: t("toast.info"),
-      description: t("toast.exportStarted"),
-    });
-
-    // Simulate export delay
-    setTimeout(() => {
-      toast({
-        title: t("common.success"),
-        description: t("paymentOrders.excelReady"),
-      });
-    }, 2000);
-  };
 
   /**
    * تغییر فیلترها
@@ -302,31 +288,20 @@ export default function PaymentOrdersPage() {
         title={t("paymentCartable.pageTitle")}
         description={t("paymentCartable.pageSubtitle")}
         actions={
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              mode="default"
-              onClick={() => setShowFilters(true)}
-              className="hover:bg-muted/80 transition-colors"
-            >
-              <Filter className="" />
-              {t("common.buttons.filter")}
-              {activeFiltersCount > 0 && (
-                <span className="ms-2 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full min-w-5 text-center">
-                  {activeFiltersCount}
-                </span>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleExport}
-              mode={isMobile ? "icon" : "default"}
-              className="hover:bg-muted/80 transition-colors"
-            >
-              <Download className="" />
-              {!isMobile && t("common.buttons.export")}
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            mode="default"
+            onClick={() => setShowFilters(true)}
+            className="hover:bg-muted/80 transition-colors"
+          >
+            <Filter className="" />
+            {t("common.buttons.filter")}
+            {activeFiltersCount > 0 && (
+              <span className="ms-2 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full min-w-5 text-center">
+                {activeFiltersCount}
+              </span>
+            )}
+          </Button>
         }
       />
 
@@ -356,13 +331,22 @@ export default function PaymentOrdersPage() {
             ))
           ) : (
             <>
-              {orders.map((order) => (
-                <OrderCard key={order.id} order={order} onView={handleViewOrder} />
-              ))}
-              {orders.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground">
-                  {t("orders.noOrders")}
+              {orders.length === 0 ? (
+                <div className="flex flex-col items-center gap-3 py-16">
+                  <FileX className="h-12 w-12 text-muted-foreground/50" />
+                  <div className="space-y-1 text-center">
+                    <p className="font-medium text-muted-foreground">
+                      {t("orders.noOrders")}
+                    </p>
+                    <p className="text-sm text-muted-foreground/70">
+                      فیلترهای جستجو را تغییر دهید یا دستور پرداخت جدید ایجاد کنید
+                    </p>
+                  </div>
                 </div>
+              ) : (
+                orders.map((order) => (
+                  <OrderCard key={order.id} order={order} onView={handleViewOrder} />
+                ))
               )}
               {totalPages > 1 && (
                 <MobilePagination
