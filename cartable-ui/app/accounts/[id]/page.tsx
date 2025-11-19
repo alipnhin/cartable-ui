@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { AppLayout } from "@/components/layout";
@@ -39,48 +39,43 @@ export default function AccountDetailPage() {
   const router = useRouter();
   const { toast } = useToast();
   const params = useParams();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const accountId = params?.id as string;
 
   const [account, setAccount] = useState<AccountDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-
-  // Use ref to store accessToken to avoid infinite loop
-  const accessTokenRef = useRef<string | undefined>(undefined);
-
-  // Update ref when session changes
-  useEffect(() => {
-    accessTokenRef.current = session?.accessToken;
-  }, [session?.accessToken]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // واکشی اطلاعات حساب
-  const fetchAccountDetail = useCallback(async () => {
-    if (!accessTokenRef.current || !accountId) return;
-
-    setIsLoading(true);
-    try {
-      const data = await getAccountDetail(accountId, accessTokenRef.current);
-      setAccount(data);
-    } catch (error) {
-      console.error("Error fetching account detail:", error);
-      toast({
-        title: t("toast.error"),
-        description: "خطا در دریافت اطلاعات حساب",
-        variant: "error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountId]);
-
-  // Fetch data when session is authenticated
   useEffect(() => {
-    if (status === "authenticated" && accountId) {
-      fetchAccountDetail();
-    }
-  }, [status, accountId, fetchAccountDetail]);
+    const fetchAccountDetail = async () => {
+      if (!session?.accessToken || !accountId) return;
+
+      setIsLoading(true);
+      try {
+        const data = await getAccountDetail(accountId, session.accessToken);
+        setAccount(data);
+      } catch (error) {
+        console.error("Error fetching account detail:", error);
+        toast({
+          title: t("toast.error"),
+          description: "خطا در دریافت اطلاعات حساب",
+          variant: "error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAccountDetail();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.accessToken, accountId, refreshKey]);
+
+  // تابع برای refresh کردن داده‌ها
+  const handleRefresh = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
 
   // تعداد امضاداران فعال
   const activeSignersCount =
@@ -88,7 +83,7 @@ export default function AccountDetailPage() {
 
   // هندلر تغییر حداقل امضا
   const handleSaveMinSignatures = async (value: number) => {
-    if (!accessTokenRef.current || !account) return;
+    if (!session?.accessToken || !account) return;
 
     setIsUpdating(true);
     try {
@@ -97,14 +92,14 @@ export default function AccountDetailPage() {
           minimumSignature: value,
           bankGatewayId: account.id,
         },
-        accessTokenRef.current
+        session.accessToken
       );
       toast({
         title: t("toast.success"),
         description: "حداقل امضا با موفقیت تغییر کرد",
         variant: "success",
       });
-      fetchAccountDetail();
+      handleRefresh();
     } catch (error) {
       console.error("Error changing minimum signature:", error);
       toast({
@@ -122,26 +117,26 @@ export default function AccountDetailPage() {
     signerId: string,
     currentStatus: boolean
   ) => {
-    if (!accessTokenRef.current) return;
+    if (!session?.accessToken) return;
 
     setIsUpdating(true);
     try {
       if (currentStatus) {
-        await disableSigner(signerId, accessTokenRef.current);
+        await disableSigner(signerId, session.accessToken);
         toast({
           title: t("toast.success"),
           description: "امضادار غیرفعال شد",
           variant: "success",
         });
       } else {
-        await enableSigner(signerId, accessTokenRef.current);
+        await enableSigner(signerId, session.accessToken);
         toast({
           title: t("toast.success"),
           description: "امضادار فعال شد",
           variant: "success",
         });
       }
-      fetchAccountDetail();
+      handleRefresh();
     } catch (error) {
       console.error("Error changing signer status:", error);
       toast({
@@ -156,7 +151,7 @@ export default function AccountDetailPage() {
 
   // هندلر افزودن امضادار
   const handleAddSigner = () => {
-    fetchAccountDetail();
+    handleRefresh();
   };
 
   // Skeleton برای لودینگ
@@ -244,7 +239,7 @@ export default function AccountDetailPage() {
           </div>
           <Button
             variant="outline"
-            onClick={fetchAccountDetail}
+            onClick={handleRefresh}
             disabled={isUpdating}
             className="gap-2"
           >
