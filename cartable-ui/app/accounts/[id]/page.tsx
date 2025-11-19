@@ -178,8 +178,16 @@ export default function AccountDetailPage() {
           <Skeleton className="h-5 w-64" />
         </div>
         <div className="space-y-6">
+          {/* Account Info Skeleton */}
           <Card>
             <CardContent className="p-6">
+              <div className="flex items-start gap-4 mb-6">
+                <Skeleton className="h-16 w-16 rounded-xl" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-4 w-48" />
+                </div>
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="space-y-2">
@@ -190,14 +198,46 @@ export default function AccountDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Signers Skeleton */}
           <Card>
             <CardHeader>
-              <Skeleton className="h-6 w-32" />
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-9 w-32" />
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
+              {/* Stats skeleton */}
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-6">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="text-center">
+                      <Skeleton className="h-8 w-8 mx-auto mb-1" />
+                      <Skeleton className="h-3 w-16" />
+                    </div>
+                  ))}
+                </div>
+                <Skeleton className="h-6 w-32 rounded-full" />
+              </div>
+
+              {/* Min signatures skeleton */}
+              <Skeleton className="h-24 w-full rounded-lg" />
+
+              {/* Signer cards skeleton */}
               <div className="grid gap-4 sm:grid-cols-2">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-32 w-full" />
+                  <Card key={i} className="flex flex-col">
+                    <CardContent className="p-5 flex flex-col items-center pt-8">
+                      <Skeleton className="h-16 w-16 rounded-full mb-4" />
+                      <Skeleton className="h-5 w-32 mb-2" />
+                      <Skeleton className="h-4 w-24 mb-3" />
+                      <Skeleton className="h-3 w-28" />
+                    </CardContent>
+                    <div className="flex items-center px-5 min-h-14 border-t justify-center">
+                      <Skeleton className="h-8 w-24" />
+                    </div>
+                  </Card>
                 ))}
               </div>
             </CardContent>
@@ -343,6 +383,7 @@ export default function AccountDetailPage() {
                     key={signer.id}
                     signer={signer}
                     onRequestStatusChange={handleRequestStatusChange}
+                    isUpdating={isUpdating}
                   />
                 ))}
               </div>
