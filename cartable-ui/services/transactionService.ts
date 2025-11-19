@@ -39,12 +39,22 @@ export const formatDateToPersian = (dateString: string | null): string => {
 
 // Status mapping
 export const TransactionStatusInfo: Record<string, { label: string; class: string }> = {
+  // موفق
+  BankSucceeded: { label: "موفق", class: "success" },
+  // در انتظار پردازش
+  Registered: { label: "ثبت شده", class: "info" },
   WaitForExecution: { label: "در انتظار اجرا", class: "warning" },
-  Success: { label: "موفق", class: "success" },
+  WaitForBank: { label: "در انتظار بانک", class: "warning" },
+  // ناموفق
   Failed: { label: "ناموفق", class: "danger" },
-  Pending: { label: "در انتظار", class: "info" },
+  BankFailed: { label: "رد شده توسط بانک", class: "danger" },
   Canceled: { label: "لغو شده", class: "secondary" },
+  Rejected: { label: "رد شده", class: "danger" },
 };
+
+// Status categories for stats
+export const SuccessStatuses = ["BankSucceeded"];
+export const PendingStatuses = ["Registered", "WaitForExecution", "WaitForBank"];
 
 // Payment type mapping
 export const PaymentTypeInfo: Record<string, { label: string; class: string }> = {
