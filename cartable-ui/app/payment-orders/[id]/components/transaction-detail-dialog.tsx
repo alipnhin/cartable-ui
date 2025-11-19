@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Transaction } from "@/types/transaction";
+import { WithdrawalTransaction } from "@/types/api";
 import { BankLogo } from "@/components/common/bank-logo";
 import { getBankCodeFromIban } from "@/lib/bank-logos";
 import { TransactionStatusBadge } from "@/components/ui/status-badge";
@@ -16,7 +16,7 @@ import { Copy, Check } from "lucide-react";
 import { useState } from "react";
 
 interface TransactionDetailDialogProps {
-  transaction: Transaction | null;
+  transaction: WithdrawalTransaction | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -104,9 +104,9 @@ export function TransactionDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto w-full">
         <DialogHeader className="pb-4 border-b">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 pe-8">
             <DialogTitle className="text-lg font-semibold">جزئیات تراکنش</DialogTitle>
-            <TransactionStatusBadge status={transaction.status} size="sm" />
+            <TransactionStatusBadge status={transaction.status as any} size="sm" />
           </div>
         </DialogHeader>
 
@@ -115,7 +115,7 @@ export function TransactionDetailDialog({
           <div className="text-center py-4">
             <div className="text-sm text-muted-foreground mb-1">مبلغ تراکنش</div>
             <div className="text-3xl font-bold text-foreground">
-              {formatCurrency(transaction.amount, locale)}
+              {formatCurrency(parseFloat(transaction.amount) || 0, locale)}
             </div>
           </div>
 
@@ -129,7 +129,7 @@ export function TransactionDetailDialog({
               <div className="space-y-0">
                 <InfoRow
                   label={t("transactions.ownerName")}
-                  value={transaction.ownerName}
+                  value={transaction.destinationAccountOwner}
                 />
 
                 {transaction.nationalCode && (
