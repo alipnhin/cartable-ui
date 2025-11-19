@@ -9,18 +9,29 @@ import { useState, useMemo, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { AppLayout, PageHeader } from "@/components/layout";
 import useTranslation from "@/hooks/useTranslation";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { AccountsTable } from "./components/accounts-table";
 import { AccountsCards } from "./components/accounts-cards";
-import { AccountsFilters } from "./components/accounts-filters";
 import { getAccountsList, AccountListItem } from "@/services/accountService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { LayoutGrid, List, Search } from "lucide-react";
 
 export default function AccountsPage() {
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
   const { toast } = useToast();
   const { data: session } = useSession();
 
@@ -29,6 +40,7 @@ export default function AccountsPage() {
   const [searchText, setSearchText] = useState("");
   const [selectedBank, setSelectedBank] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"list" | "card">("list");
 
   // واکشی لیست حساب‌ها
   useEffect(() => {
@@ -52,6 +64,7 @@ export default function AccountsPage() {
     };
 
     fetchAccounts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.accessToken]);
 
   // فیلتر کردن حساب‌ها
@@ -87,38 +100,40 @@ export default function AccountsPage() {
   // Skeleton برای لودینگ
   const AccountsSkeleton = () => (
     <div className="space-y-4">
-      {isMobile ? (
-        // Mobile skeleton
-        Array.from({ length: 3 }).map((_, i) => (
-          <Card key={i}>
-            <CardContent className="p-4 space-y-3">
-              <div className="flex justify-between">
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="h-5 w-16 rounded-full" />
-              </div>
-              <Skeleton className="h-4 w-40" />
-              <Skeleton className="h-4 w-48" />
-              <div className="flex justify-between">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-20" />
-              </div>
-            </CardContent>
-          </Card>
-        ))
+      {viewMode === "card" ? (
+        // Card skeleton
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex justify-between">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-5 w-10" />
+                </div>
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-48" />
+                <div className="flex justify-between pt-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-8 w-20" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       ) : (
-        // Desktop skeleton
+        // Table skeleton
         <Card>
           <CardContent className="p-4">
             <div className="space-y-3">
               <div className="flex gap-4 pb-3 border-b">
-                {Array.from({ length: 9 }).map((_, i) => (
-                  <Skeleton key={i} className="h-4 w-20" />
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <Skeleton key={i} className="h-4 flex-1" />
                 ))}
               </div>
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex gap-4 py-2">
-                  {Array.from({ length: 9 }).map((_, j) => (
-                    <Skeleton key={j} className="h-4 w-20" />
+                  {Array.from({ length: 7 }).map((_, j) => (
+                    <Skeleton key={j} className="h-4 flex-1" />
                   ))}
                 </div>
               ))}
@@ -136,22 +151,79 @@ export default function AccountsPage() {
         description={t("accounts.pageSubtitle")}
       />
 
-      {/* فیلترها */}
-      <AccountsFilters
-        searchText={searchText}
-        setSearchText={setSearchText}
-        selectedBank={selectedBank}
-        setSelectedBank={setSelectedBank}
-        selectedStatus={selectedStatus}
-        setSelectedStatus={setSelectedStatus}
-        uniqueBanks={uniqueBanks}
-      />
+      {/* فیلترها و کنترل‌ها */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        {/* سمت راست: جستجو */}
+        <div className="w-full sm:w-auto">
+          <InputGroup>
+            <InputGroupInput
+              className="w-full sm:w-72"
+              placeholder={t("accounts.searchPlaceholder") || "جستجو..."}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+            <InputGroupAddon>
+              <Search className="h-4 w-4" />
+            </InputGroupAddon>
+          </InputGroup>
+        </div>
+
+        {/* سمت چپ: فیلترها و view toggle */}
+        <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+          {/* فیلتر وضعیت */}
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <SelectTrigger className="w-28 h-8.5 text-[0.8125rem]">
+              <SelectValue placeholder={t("common.status")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("common.all") || "همه"}</SelectItem>
+              <SelectItem value="active">{t("common.active") || "فعال"}</SelectItem>
+              <SelectItem value="inactive">{t("common.inactive") || "غیرفعال"}</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* فیلتر بانک */}
+          <Select value={selectedBank} onValueChange={setSelectedBank}>
+            <SelectTrigger className="w-36 h-8.5 text-[0.8125rem]">
+              <SelectValue placeholder={t("accounts.selectBank")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("common.all") || "همه بانک‌ها"}</SelectItem>
+              {uniqueBanks.map((bank) => (
+                <SelectItem key={bank} value={bank}>
+                  {bank}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* View Toggle */}
+          <div className="flex items-center border rounded-md">
+            <Button
+              variant={viewMode === "list" ? "secondary" : "ghost"}
+              size="sm"
+              className="h-8.5 px-2.5 rounded-l-none"
+              onClick={() => setViewMode("list")}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "card" ? "secondary" : "ghost"}
+              size="sm"
+              className="h-8.5 px-2.5 rounded-r-none"
+              onClick={() => setViewMode("card")}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {/* نمایش جدول یا کارت‌ها */}
-      <div className="mt-6">
+      <div>
         {isLoading ? (
           <AccountsSkeleton />
-        ) : isMobile ? (
+        ) : viewMode === "card" ? (
           <AccountsCards accounts={filteredAccounts} />
         ) : (
           <AccountsTable accounts={filteredAccounts} />
@@ -161,8 +233,8 @@ export default function AccountsPage() {
       {/* تعداد نتایج */}
       {!isLoading && (
         <div className="mt-4 text-sm text-muted-foreground text-center">
-          {t("common.showing")} {filteredAccounts.length} {t("common.of")}{" "}
-          {accounts.length} {t("accounts.accounts")}
+          {t("common.showing") || "نمایش"} {filteredAccounts.length} {t("common.of") || "از"}{" "}
+          {accounts.length} {t("accounts.accounts") || "حساب"}
         </div>
       )}
     </AppLayout>
