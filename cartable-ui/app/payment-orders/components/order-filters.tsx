@@ -248,7 +248,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
   // Mobile view
   if (isMobile) {
     return (
-      <Card>
+      <Card className="mb-4">
         <CardContent className="p-4">
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
@@ -297,7 +297,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
 
   // Desktop view
   return (
-    <Card>
+    <Card className="mb-4">
       <CardContent className="p-4 space-y-4">
         {/* فیلترهای اصلی - سه ستونه */}
         <div className="grid gap-4 md:grid-cols-3">
