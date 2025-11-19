@@ -36,7 +36,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { OrderStatus } from "@/types/order";
 import { cn } from "@/lib/utils";
 import { PersianDatePicker } from "@/components/ui/persian-datepicker";
-import { AccountSelector } from "@/components/common/AccountSelector";
+import AccountSelector from "@/components/common/AccountSelector";
 
 interface FilterSheetProps {
   open: boolean;
