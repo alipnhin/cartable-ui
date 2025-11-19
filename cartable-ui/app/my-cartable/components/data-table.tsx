@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ClipboardCheck } from "lucide-react";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
 
@@ -147,9 +148,19 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
+                  className="h-48"
                 >
-                  دستوری یافت نشد
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <ClipboardCheck className="h-12 w-12 text-muted-foreground/50" />
+                    <div className="space-y-1 text-center">
+                      <p className="font-medium text-muted-foreground">
+                        دستوری برای تأیید وجود ندارد
+                      </p>
+                      <p className="text-sm text-muted-foreground/70">
+                        در حال حاضر هیچ دستور پرداختی در انتظار تأیید شما نیست
+                      </p>
+                    </div>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
