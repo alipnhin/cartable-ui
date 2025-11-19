@@ -341,18 +341,16 @@ export function TransactionFilters({
   return (
     <Card>
       <CardContent className="p-4 space-y-4">
-        {/* فیلترهای اصلی - سه ستونه */}
-        <div className="grid gap-4 md:grid-cols-3">
+        {/* فیلترهای اصلی - سه ستونه + دکمه جستجو */}
+        <div className="grid gap-4 md:grid-cols-4 items-end">
           {/* انتخاب حساب */}
           <div className="space-y-2">
             <Label className="text-sm">انتخاب حساب</Label>
             <AccountSelector
               value={localFilters.bankGatewayId}
-              onValueChange={(value) => {
-                const newFilters = { ...localFilters, bankGatewayId: value };
-                setLocalFilters(newFilters);
-                onFiltersChange(newFilters);
-              }}
+              onValueChange={(value) =>
+                setLocalFilters({ ...localFilters, bankGatewayId: value })
+              }
               placeholder="همه حساب‌ها"
               showAllOption={true}
             />
@@ -363,11 +361,9 @@ export function TransactionFilters({
             <Label className="text-sm">{t("reports.fromDate")}</Label>
             <PersianDatePicker
               value={localFilters.fromDate}
-              onChange={(date) => {
-                const newFilters = { ...localFilters, fromDate: date };
-                setLocalFilters(newFilters);
-                onFiltersChange(newFilters);
-              }}
+              onChange={(date) =>
+                setLocalFilters({ ...localFilters, fromDate: date })
+              }
               placeholder={t("reports.fromDate")}
             />
           </div>
@@ -377,14 +373,18 @@ export function TransactionFilters({
             <Label className="text-sm">{t("reports.toDate")}</Label>
             <PersianDatePicker
               value={localFilters.toDate}
-              onChange={(date) => {
-                const newFilters = { ...localFilters, toDate: date };
-                setLocalFilters(newFilters);
-                onFiltersChange(newFilters);
-              }}
+              onChange={(date) =>
+                setLocalFilters({ ...localFilters, toDate: date })
+              }
               placeholder={t("reports.toDate")}
             />
           </div>
+
+          {/* دکمه جستجو */}
+          <Button onClick={handleApplyFilters} className="gap-2">
+            <Search className="h-4 w-4" />
+            جستجو
+          </Button>
         </div>
 
         {/* فیلترهای پیشرفته - آکاردیون */}
