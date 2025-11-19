@@ -93,6 +93,7 @@
     "dashboard": "داشبورد",
     "paymentOrders": "پرداخت ها",
     "myCartable": "کارتابل",
+    "managerCartable": "کارتابل مدیر",
     "accounts": "حساب‌ها",
     "reports": "گزارش",
     "profile": "پروفایل",
@@ -492,6 +493,23 @@
     "totalTransactions": "کل تراکنش‌ها",
     "totalAmount": "مبلغ کل (ریال)",
     "selectedOrders": "انتخاب شده"
+  },
+  "managerCartable": {
+    "pageTitle": "کارتابل مدیر",
+    "pageSubtitle": "دستورهای پرداخت در انتظار تأیید مدیر",
+    "selectedCount": "{{count}} مورد انتخاب شده",
+    "totalOrders": "کل دستورات",
+    "totalTransactions": "کل تراکنش‌ها",
+    "totalAmount": "مبلغ کل (ریال)",
+    "selectedOrders": "انتخاب شده",
+    "errorLoading": "خطا در دریافت اطلاعات کارتابل مدیر",
+    "noOrders": "دستوری برای تأیید وجود ندارد",
+    "noOrdersDescription": "در حال حاضر هیچ دستور پرداختی در انتظار تأیید مدیر نیست",
+    "cancel": "لغو",
+    "cancelTitle": "تأیید لغو دستور",
+    "approved": "تأیید",
+    "canceled": "لغو",
+    "orderSuccessfully": "دستور با موفقیت"
   },
   "orders": {
     "orderNumber": "شماره دستور",

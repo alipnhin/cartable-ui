@@ -90,6 +90,7 @@
     "dashboard": "Dashboard",
     "paymentOrders": "Payments",
     "myCartable": "Cartable",
+    "managerCartable": "Manager Cartable",
     "accounts": "Accounts",
     "reports": "Reports",
     "profile": "Profile",
@@ -488,6 +489,23 @@
     "totalTransactions": "Total Transactions",
     "totalAmount": "Total Amount (IRR)",
     "selectedOrders": "Selected"
+  },
+  "managerCartable": {
+    "pageTitle": "Manager Cartable",
+    "pageSubtitle": "Payment Orders Awaiting Manager Approval",
+    "selectedCount": "{{count}} items selected",
+    "totalOrders": "Total Orders",
+    "totalTransactions": "Total Transactions",
+    "totalAmount": "Total Amount (IRR)",
+    "selectedOrders": "Selected",
+    "errorLoading": "Error loading manager cartable data",
+    "noOrders": "No orders to approve",
+    "noOrdersDescription": "There are currently no payment orders awaiting manager approval",
+    "cancel": "Cancel",
+    "cancelTitle": "Confirm Order Cancellation",
+    "approved": "approved",
+    "canceled": "canceled",
+    "orderSuccessfully": "order(s) successfully"
   },
   "orders": {
     "orderNumber": "Order Number",

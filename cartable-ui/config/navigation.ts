@@ -3,7 +3,7 @@
  * تنظیمات منوی اصلی برنامه
  */
 
-import { AreaChart } from "lucide-react";
+import { AreaChart, UserCheck } from "lucide-react";
 import {
   LayoutDashboard,
   Inbox,
@@ -38,6 +38,12 @@ export const mainMenuItems: MenuItem[] = [
     icon: Inbox,
     route: "/my-cartable",
     badge: 8,
+  },
+  {
+    title: "managerCartable",
+    icon: UserCheck,
+    route: "/manager-cartable",
+    badge: 3,
   },
   {
     title: "paymentOrders",
