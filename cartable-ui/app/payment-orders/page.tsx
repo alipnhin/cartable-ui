@@ -6,9 +6,9 @@ import { AppLayout, PageHeader } from "@/components/layout";
 import { DataTable } from "./components/data-table";
 import { createColumns } from "./components/columns";
 import { OrderCard, OrderCardSkeleton } from "./components/order-card";
-import { FilterSheet } from "./components/filter-sheet";
+import { OrderFilters } from "./components/order-filters";
 import { Button } from "@/components/ui/button";
-import { FileBadge, Filter, Timer, FileX } from "lucide-react";
+import { FileBadge, Timer, FileX } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
@@ -28,7 +28,6 @@ export default function PaymentOrdersPage() {
   const { toast } = useToast();
   const router = useRouter();
   const { data: session } = useSession();
-  const [showFilters, setShowFilters] = useState(false);
 
   /**
    * State مدیریت داده‌های صفحه
@@ -58,11 +57,10 @@ export default function PaymentOrdersPage() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  // فیلترهای legacy برای FilterSheet
+  // فیلترهای یکپارچه برای کامپوننت
   const filters = useMemo(
     () => ({
       status: statusFilter,
-      search: "",
       orderTitle,
       orderNumber,
       trackingId,
@@ -273,15 +271,6 @@ export default function PaymentOrdersPage() {
     },
   ];
 
-  const activeFiltersCount =
-    (filters.status ? 1 : 0) +
-    (filters.orderTitle ? 1 : 0) +
-    (filters.orderNumber ? 1 : 0) +
-    (filters.trackingId ? 1 : 0) +
-    (filters.search ? 1 : 0) +
-    (filters.dateFrom ? 1 : 0) +
-    (filters.dateTo ? 1 : 0) +
-    (filters.accountId && filters.accountId !== "all" ? 1 : 0);
 
   // نمایش اسکلت لودینگ فقط در بارگذاری اولیه
   if (initialLoading) {
@@ -290,13 +279,17 @@ export default function PaymentOrdersPage() {
         <PageHeader
           title={t("paymentCartable.pageTitle")}
           description={t("paymentCartable.pageSubtitle")}
-          actions={
-            <Button variant="outline" disabled>
-              <Filter className="" />
-              {t("common.buttons.filter")}
-            </Button>
-          }
         />
+        {/* Filter skeleton */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </CardContent>
+        </Card>
         {/* Stats skeleton */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
@@ -338,22 +331,12 @@ export default function PaymentOrdersPage() {
       <PageHeader
         title={t("paymentCartable.pageTitle")}
         description={t("paymentCartable.pageSubtitle")}
-        actions={
-          <Button
-            variant="outline"
-            mode="default"
-            onClick={() => setShowFilters(true)}
-            className="hover:bg-muted/80 transition-colors"
-          >
-            <Filter className="" />
-            {t("common.buttons.filter")}
-            {activeFiltersCount > 0 && (
-              <span className="ms-2 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full min-w-5 text-center">
-                {activeFiltersCount}
-              </span>
-            )}
-          </Button>
-        }
+      />
+
+      {/* Inline Filters */}
+      <OrderFilters
+        filters={filters}
+        onFiltersChange={handleFilterChange}
       />
 
       {/* Stats Cards */}
@@ -411,15 +394,6 @@ export default function PaymentOrdersPage() {
         </div>
       )}
 
-      {/* Filter Sheet */}
-      <FilterSheet
-        open={showFilters}
-        onOpenChange={setShowFilters}
-        filters={filters}
-        onFiltersChange={handleFilterChange}
-        onReset={handleResetFilters}
-        isLoading={isLoading}
-      />
     </AppLayout>
   );
 }
