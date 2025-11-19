@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { TransactionFilters } from "./components/transaction-filters";
 import { TransactionTable } from "./components/transaction-table";
 import { TransactionStats } from "./components/transaction-stats";
+import { ExportProgressDialog, ExportStatus } from "./components/export-progress-dialog";
 import useTranslation from "@/hooks/useTranslation";
 import { AppLayout, PageHeader } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -69,6 +70,9 @@ export default function TransactionReportsPage() {
   const [loading, setLoading] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportStatus, setExportStatus] = useState<ExportStatus>("idle");
+  const [exportError, setExportError] = useState<string>("");
   const [sortField, setSortField] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
@@ -184,6 +188,10 @@ export default function TransactionReportsPage() {
     if (!session?.accessToken) return;
 
     setExporting(true);
+    setExportDialogOpen(true);
+    setExportStatus("preparing");
+    setExportError("");
+
     try {
       const request: TransactionsRequest = {
         pageNumber: 1,
@@ -205,16 +213,25 @@ export default function TransactionReportsPage() {
       if (transferFromDate) request.transferFromDate = transferFromDate;
       if (transferToDate) request.transferToDate = transferToDate;
 
+      setExportStatus("downloading");
       const blob = await exportTransactionsToExcel(request, session.accessToken);
       const filename = `transactions-${new Date().toISOString().split("T")[0]}.xlsx`;
       downloadBlobAsFile(blob, filename);
-      toast.success("فایل اکسل با موفقیت دانلود شد");
+      setExportStatus("success");
     } catch (error) {
       console.error("Error exporting transactions:", error);
-      toast.error("خطا در دانلود فایل اکسل");
+      setExportError("خطا در دانلود فایل اکسل. لطفا دوباره تلاش کنید.");
+      setExportStatus("error");
     } finally {
       setExporting(false);
     }
+  };
+
+  // Handle cancel export
+  const handleCancelExport = () => {
+    setExporting(false);
+    setExportDialogOpen(false);
+    setExportStatus("idle");
   };
 
   // Handle filter changes
@@ -317,6 +334,16 @@ export default function TransactionReportsPage() {
           onSort={handleSort}
         />
       </div>
+
+      {/* Export Progress Dialog */}
+      <ExportProgressDialog
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+        status={exportStatus}
+        totalRecords={totalRecords}
+        onCancel={handleCancelExport}
+        errorMessage={exportError}
+      />
     </AppLayout>
   );
 }
