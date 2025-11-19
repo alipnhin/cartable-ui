@@ -171,13 +171,9 @@ export default function AccountDetailPage() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="mb-6">
-          <Skeleton className="h-9 w-24 mb-4" />
-          <div className="flex items-center gap-3 mb-2">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-6 w-16 rounded-full" />
-          </div>
-          <Skeleton className="h-5 w-64" />
+        <div className="flex items-center justify-between mb-6">
+          <Skeleton className="h-9 w-24" />
+          <Skeleton className="h-9 w-28" />
         </div>
         <div className="space-y-6">
           {/* Account Info Skeleton */}
@@ -211,20 +207,16 @@ export default function AccountDetailPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Stats skeleton */}
-              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                <div className="flex items-center gap-6">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="text-center">
-                      <Skeleton className="h-8 w-8 mx-auto mb-1" />
-                      <Skeleton className="h-3 w-16" />
-                    </div>
-                  ))}
+              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-16" />
                 </div>
-                <Skeleton className="h-6 w-32 rounded-full" />
+                <Skeleton className="h-5 w-28 rounded-full" />
               </div>
 
               {/* Min signatures skeleton */}
-              <Skeleton className="h-24 w-full rounded-lg" />
+              <Skeleton className="h-20 w-full rounded-lg" />
 
               {/* Signer cards skeleton */}
               <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -272,40 +264,27 @@ export default function AccountDetailPage() {
   return (
     <AppLayout>
       {/* Header */}
-      <div className="mb-6">
+      <div className="flex items-center justify-between mb-6">
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="mb-4 -ms-2"
+          className="-ms-2"
         >
           <ArrowLeft className="me-2 h-4 w-4" />
           بازگشت
         </Button>
-
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold">{account.title}</h1>
-              <Badge variant={account.isEnable ? "success" : "secondary"}>
-                {account.isEnable ? "فعال" : "غیرفعال"}
-              </Badge>
-            </div>
-            <p className="text-muted-foreground">
-              {account.bankName} - {account.shebaNumber}
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            onClick={fetchAccountDetail}
-            disabled={isUpdating}
-            className="gap-2"
-          >
-            <RefreshCw
-              className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`}
-            />
-            به‌روزرسانی
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchAccountDetail}
+          disabled={isUpdating}
+          className="gap-2"
+        >
+          <RefreshCw
+            className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`}
+          />
+          به‌روزرسانی
+        </Button>
       </div>
 
       <div className="space-y-6">
@@ -328,44 +307,28 @@ export default function AccountDetailPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* آمار امضاداران */}
-            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
-              <div className="flex items-center gap-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">
-                    {account.users?.length ?? 0}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    کل امضاداران
-                  </div>
+            {/* فرم حداقل امضا با آمار */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-muted/30 rounded-lg">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm text-muted-foreground">کل:</span>
+                  <span className="font-bold">{account.users?.length ?? 0}</span>
                 </div>
-                <div className="h-12 w-px bg-border" />
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-success">
-                    {activeSignersCount}
-                  </div>
-                  <div className="text-xs text-muted-foreground">فعال</div>
-                </div>
-                <div className="h-12 w-px bg-border" />
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {account.minimumSignature}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    حداقل مورد نیاز
-                  </div>
+                <div className="h-4 w-px bg-border" />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm text-muted-foreground">فعال:</span>
+                  <span className="font-bold text-success">{activeSignersCount}</span>
                 </div>
               </div>
-              {activeSignersCount < account.minimumSignature && (
-                <Badge variant="destructive" className="gap-1 flex-shrink-0">
+              {activeSignersCount < account.minimumSignature ? (
+                <Badge variant="destructive" className="gap-1">
                   <XCircle className="h-3 w-3" />
                   امضاداران فعال کافی نیست
                 </Badge>
-              )}
-              {activeSignersCount >= account.minimumSignature && (
-                <Badge className="gap-1 bg-success hover:bg-success/90 flex-shrink-0">
+              ) : (
+                <Badge className="gap-1 bg-success hover:bg-success/90">
                   <CheckCircle2 className="h-3 w-3" />
-                  تعداد امضادار کافی است
+                  تعداد کافی است
                 </Badge>
               )}
             </div>
@@ -391,20 +354,11 @@ export default function AccountDetailPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 bg-muted/30 rounded-lg border-2 border-dashed">
-                <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <h3 className="text-lg font-semibold mb-2">
-                  امضاداری تعریف نشده است
-                </h3>
-                <p className="text-muted-foreground mb-6">
-                  برای استفاده از این حساب، حداقل {account.minimumSignature}{" "}
-                  امضادار نیاز است.
+              <div className="text-center py-8 bg-muted/30 rounded-lg border-2 border-dashed">
+                <Users className="h-8 w-8 mx-auto mb-3 text-muted-foreground opacity-50" />
+                <p className="text-muted-foreground text-sm">
+                  امضاداری تعریف نشده است. از دکمه «افزودن امضادار» استفاده کنید.
                 </p>
-                <AddSignerDialog
-                  accountId={accountId}
-                  existingSignerIds={account.users?.map((u) => u.userId) ?? []}
-                  onAdd={handleAddSigner}
-                />
               </div>
             )}
           </CardContent>
