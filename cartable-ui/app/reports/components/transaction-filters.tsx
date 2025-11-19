@@ -411,30 +411,7 @@ export function TransactionFilters({
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-4">
-            <div className="space-y-4">
-              {advancedFiltersContent}
-
-              {/* دکمه‌های اکشن */}
-              <div className="flex justify-end gap-2 pt-2 border-t">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleResetFilters}
-                  className="gap-2"
-                >
-                  <X className="h-4 w-4" />
-                  پاک کردن فیلترها
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleApplyFilters}
-                  className="gap-2"
-                >
-                  <Search className="h-4 w-4" />
-                  اعمال فیلتر
-                </Button>
-              </div>
-            </div>
+            {advancedFiltersContent}
           </CollapsibleContent>
         </Collapsible>
 
