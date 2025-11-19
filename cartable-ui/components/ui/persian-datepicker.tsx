@@ -21,18 +21,94 @@ interface PersianDatePickerProps {
   disabled?: boolean;
 }
 
-// تبدیل تاریخ ISO به فرمت DayValue
-const parseISODate = (isoDate: string): DayValue | null => {
+// تبدیل تاریخ میلادی به شمسی
+const gregorianToJalali = (gy: number, gm: number, gd: number): [number, number, number] => {
+  const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+  let jy = gy <= 1600 ? 0 : 979;
+  gy = gy <= 1600 ? gy - 621 : gy - 1600;
+  const gy2 = gm > 2 ? gy + 1 : gy;
+  let days =
+    365 * gy +
+    Math.floor((gy2 + 3) / 4) -
+    Math.floor((gy2 + 99) / 100) +
+    Math.floor((gy2 + 399) / 400) -
+    80 +
+    gd +
+    g_d_m[gm - 1];
+  jy += 33 * Math.floor(days / 12053);
+  days %= 12053;
+  jy += 4 * Math.floor(days / 1461);
+  days %= 1461;
+  jy += Math.floor((days - 1) / 365);
+  if (days > 365) days = (days - 1) % 365;
+  const jm =
+    days < 186 ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
+  const jd = 1 + (days < 186 ? days % 31 : (days - 186) % 30);
+  return [jy, jm, jd];
+};
+
+// تبدیل تاریخ شمسی به میلادی
+const jalaliToGregorian = (jy: number, jm: number, jd: number): [number, number, number] => {
+  let gy = jy <= 979 ? 621 : 1600;
+  jy = jy <= 979 ? jy : jy - 979;
+  const days =
+    365 * jy +
+    Math.floor(jy / 33) * 8 +
+    Math.floor(((jy % 33) + 3) / 4) +
+    78 +
+    jd +
+    (jm < 7 ? (jm - 1) * 31 : (jm - 7) * 30 + 186);
+  gy += 400 * Math.floor(days / 146097);
+  let d = days % 146097;
+  if (d > 36524) {
+    gy += 100 * Math.floor(--d / 36524);
+    d %= 36524;
+    if (d >= 365) d++;
+  }
+  gy += 4 * Math.floor(d / 1461);
+  d %= 1461;
+  gy += Math.floor((d - 1) / 365);
+  if (d > 365) d = (d - 1) % 365;
+  const gd = d + 1;
+  const sal_a = [
+    0, 31, (gy % 4 === 0 && gy % 100 !== 0) || gy % 400 === 0 ? 29 : 28,
+    31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
+  ];
+  let gm = 0;
+  let v = gd;
+  for (gm = 0; gm < 13 && v > sal_a[gm]; gm++) v -= sal_a[gm];
+  return [gy, gm, v];
+};
+
+// تبدیل تاریخ ISO میلادی به DayValue شمسی
+const parseISOToJalali = (isoDate: string): DayValue | null => {
   if (!isoDate) return null;
-  // Handle full ISO strings like "2024-01-15T10:30:00.000Z"
+  const dateOnly = isoDate.split("T")[0];
+  const [year, month, day] = dateOnly.split("-").map(Number);
+  if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) return null;
+  const [jy, jm, jd] = gregorianToJalali(year, month, day);
+  return { year: jy, month: jm, day: jd };
+};
+
+// تبدیل تاریخ ISO میلادی به DayValue میلادی
+const parseISOToGregorian = (isoDate: string): DayValue | null => {
+  if (!isoDate) return null;
   const dateOnly = isoDate.split("T")[0];
   const [year, month, day] = dateOnly.split("-").map(Number);
   if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) return null;
   return { year, month, day };
 };
 
-// تبدیل DayValue به تاریخ ISO
-const formatToISO = (date: DayValue): string => {
+// تبدیل DayValue شمسی به تاریخ ISO میلادی
+const jalaliToISO = (date: DayValue): string => {
+  if (!date) return "";
+  const { year, month, day } = date;
+  const [gy, gm, gd] = jalaliToGregorian(year, month, day);
+  return `${gy}-${String(gm).padStart(2, "0")}-${String(gd).padStart(2, "0")}`;
+};
+
+// تبدیل DayValue میلادی به تاریخ ISO
+const gregorianToISO = (date: DayValue): string => {
   if (!date) return "";
   const { year, month, day } = date;
   return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -44,7 +120,6 @@ const formatDisplayDate = (date: DayValue | null, locale: string): string => {
   const { year, month, day } = date;
 
   if (locale === "fa") {
-    // نمایش فارسی
     const persianMonths = [
       "فروردین",
       "اردیبهشت",
@@ -62,7 +137,6 @@ const formatDisplayDate = (date: DayValue | null, locale: string): string => {
     return `${day} ${persianMonths[month - 1]} ${year}`;
   }
 
-  // نمایش میلادی
   return `${day}/${month}/${year}`;
 };
 
@@ -74,20 +148,30 @@ export function PersianDatePicker({
   disabled = false,
 }: PersianDatePickerProps) {
   const { t, locale } = useTranslation();
+  const isJalali = locale === "fa";
+
   const [selectedDay, setSelectedDay] = useState<DayValue | null>(
-    value ? parseISODate(value) : null
+    value
+      ? (isJalali ? parseISOToJalali(value) : parseISOToGregorian(value))
+      : null
   );
   const [isOpen, setIsOpen] = useState(false);
 
   // بروزرسانی selectedDay وقتی value از خارج تغییر می‌کند
   useEffect(() => {
-    setSelectedDay(value ? parseISODate(value) : null);
-  }, [value]);
+    setSelectedDay(
+      value
+        ? (isJalali ? parseISOToJalali(value) : parseISOToGregorian(value))
+        : null
+    );
+  }, [value, isJalali]);
 
   const handleDateChange = (date: DayValue) => {
     setSelectedDay(date);
     if (onChange) {
-      onChange(formatToISO(date));
+      // تبدیل به ISO میلادی برای ذخیره
+      const isoDate = isJalali ? jalaliToISO(date) : gregorianToISO(date);
+      onChange(isoDate);
     }
     setIsOpen(false);
   };
@@ -96,8 +180,7 @@ export function PersianDatePicker({
     ? formatDisplayDate(selectedDay, locale)
     : placeholder || t("common.selectDate");
 
-  // تنظیم locale برای تقویم
-  const calendarLocale = locale === "fa" ? "fa" : "en";
+  const calendarLocale = isJalali ? "fa" : "en";
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
