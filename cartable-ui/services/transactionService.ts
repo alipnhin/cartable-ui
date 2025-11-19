@@ -8,31 +8,63 @@ export interface TransactionItem {
   destinationIban: string;
   accountNumber: string;
   bankName: string;
-  accountCode: string;
+  accountCode: string | null;
   orderId: string;
   amount: number;
-  amountShow: string;
-  status: number;
-  statusShow: string;
-  statusClass: string;
-  paymentType: number;
-  paymentTypeShow: string;
-  paymentTypeClass: string;
+  status: string; // "WaitForExecution", "Success", "Failed", etc.
+  paymentType: string; // "Paya", "Satna", "Internal"
   createdDateTime: string;
-  createdDateTimeFa: string;
   updatedDateTime: string | null;
-  updatedDateTimeFa: string;
   transferDateTime: string | null;
-  transferDateTimeFa: string;
   sendToBankDateTime: string | null;
-  sendToBankDateFa: string;
 }
 
+// Helper function to format amount
+export const formatAmount = (amount: number): string => {
+  return new Intl.NumberFormat("fa-IR").format(amount) + " ریال";
+};
+
+// Helper function to format date to Persian
+export const formatDateToPersian = (dateString: string | null): string => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat("fa-IR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+};
+
+// Status mapping
+export const TransactionStatusInfo: Record<string, { label: string; class: string }> = {
+  WaitForExecution: { label: "در انتظار اجرا", class: "warning" },
+  Success: { label: "موفق", class: "success" },
+  Failed: { label: "ناموفق", class: "danger" },
+  Pending: { label: "در انتظار", class: "info" },
+  Canceled: { label: "لغو شده", class: "secondary" },
+};
+
+// Payment type mapping
+export const PaymentTypeInfo: Record<string, { label: string; class: string }> = {
+  Paya: { label: "پایا", class: "info" },
+  Satna: { label: "ساتنا", class: "warning" },
+  Internal: { label: "درون بانکی", class: "success" },
+};
+
 export interface TransactionsResponse {
-  draw: number;
-  recordsTotal: number;
-  recordsFiltered: number;
-  data: TransactionItem[];
+  items: TransactionItem[];
+  pageNumber: number;
+  pageSize: number;
+  totalPageCount: number;
+  totalItemCount: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  isFirstPage: boolean;
+  isLastPage: boolean;
+  firstItemOnPage: number;
+  lastItemOnPage: number;
 }
 
 export interface TransactionsRequest {

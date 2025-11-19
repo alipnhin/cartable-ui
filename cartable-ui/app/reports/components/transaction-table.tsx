@@ -1,6 +1,12 @@
 "use client";
 
-import { TransactionItem } from "@/services/transactionService";
+import {
+  TransactionItem,
+  formatAmount,
+  formatDateToPersian,
+  TransactionStatusInfo,
+  PaymentTypeInfo
+} from "@/services/transactionService";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -73,9 +79,11 @@ export function TransactionTable({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Get badge variant based on status class
-  const getStatusVariant = (statusClass: string) => {
-    switch (statusClass) {
+  // Get badge variant based on status
+  const getStatusVariant = (status: string) => {
+    const statusInfo = TransactionStatusInfo[status];
+    if (!statusInfo) return "secondary";
+    switch (statusInfo.class) {
       case "success":
         return "success";
       case "danger":
@@ -89,9 +97,11 @@ export function TransactionTable({
     }
   };
 
-  // Get badge variant based on payment type class
-  const getPaymentTypeVariant = (paymentTypeClass: string) => {
-    switch (paymentTypeClass) {
+  // Get badge variant based on payment type
+  const getPaymentTypeVariant = (paymentType: string) => {
+    const typeInfo = PaymentTypeInfo[paymentType];
+    if (!typeInfo) return "secondary";
+    switch (typeInfo.class) {
       case "success":
         return "success";
       case "primary":
@@ -103,6 +113,16 @@ export function TransactionTable({
       default:
         return "secondary";
     }
+  };
+
+  // Get status label
+  const getStatusLabel = (status: string) => {
+    return TransactionStatusInfo[status]?.label || status;
+  };
+
+  // Get payment type label
+  const getPaymentTypeLabel = (paymentType: string) => {
+    return PaymentTypeInfo[paymentType]?.label || paymentType;
   };
 
   if (isMobile) {
@@ -152,8 +172,8 @@ export function TransactionTable({
                     <span className="font-medium text-sm">
                       {tx.destinationAccountOwner}
                     </span>
-                    <Badge variant={getStatusVariant(tx.statusClass)} className="text-xs">
-                      {tx.statusShow}
+                    <Badge variant={getStatusVariant(tx.status)} className="text-xs">
+                      {getStatusLabel(tx.status)}
                     </Badge>
                   </div>
                   <div className="text-sm space-y-1">
@@ -161,7 +181,7 @@ export function TransactionTable({
                       <span className="text-muted-foreground">
                         {t("transactions.amount")}:
                       </span>
-                      <span className="font-medium">{tx.amountShow}</span>
+                      <span className="font-medium">{formatAmount(tx.amount)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
@@ -174,22 +194,22 @@ export function TransactionTable({
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">نوع پرداخت:</span>
                       <Badge
-                        variant={getPaymentTypeVariant(tx.paymentTypeClass)}
+                        variant={getPaymentTypeVariant(tx.paymentType)}
                         className="text-xs"
                       >
-                        {tx.paymentTypeShow}
+                        {getPaymentTypeLabel(tx.paymentType)}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
                         {t("common.date")}:
                       </span>
-                      <span className="text-xs">{tx.createdDateTimeFa}</span>
+                      <span className="text-xs">{formatDateToPersian(tx.createdDateTime)}</span>
                     </div>
-                    {tx.transferDateTimeFa && tx.transferDateTimeFa !== "-" && (
+                    {tx.transferDateTime && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">تاریخ انتقال:</span>
-                        <span className="text-xs">{tx.transferDateTimeFa}</span>
+                        <span className="text-xs">{formatDateToPersian(tx.transferDateTime)}</span>
                       </div>
                     )}
                   </div>
@@ -304,27 +324,27 @@ export function TransactionTable({
                       {tx.destinationIban}
                     </TableCell>
                     <TableCell className="text-sm">{tx.bankName}</TableCell>
-                    <TableCell className="font-medium">{tx.amountShow}</TableCell>
+                    <TableCell className="font-medium">{formatAmount(tx.amount)}</TableCell>
                     <TableCell>
                       <Badge
-                        variant={getPaymentTypeVariant(tx.paymentTypeClass)}
+                        variant={getPaymentTypeVariant(tx.paymentType)}
                         className="text-xs"
                       >
-                        {tx.paymentTypeShow}
+                        {getPaymentTypeLabel(tx.paymentType)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">
-                      {tx.createdDateTimeFa}
+                      {formatDateToPersian(tx.createdDateTime)}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {tx.transferDateTimeFa}
+                      {formatDateToPersian(tx.transferDateTime)}
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={getStatusVariant(tx.statusClass)}
+                        variant={getStatusVariant(tx.status)}
                         className="text-xs"
                       >
-                        {tx.statusShow}
+                        {getStatusLabel(tx.status)}
                       </Badge>
                     </TableCell>
                   </TableRow>

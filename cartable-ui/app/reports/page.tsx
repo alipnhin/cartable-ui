@@ -129,8 +129,8 @@ export default function TransactionReportsPage() {
         if (transferToDate) request.transferToDate = transferToDate;
 
         const response = await getTransactionsList(request, session.accessToken);
-        setTransactions(response.data);
-        setTotalRecords(response.recordsFiltered);
+        setTransactions(response.items);
+        setTotalRecords(response.totalItemCount);
       } catch (error) {
         console.error("Error fetching transactions:", error);
         toast.error("خطا در دریافت لیست تراکنش‌ها");
