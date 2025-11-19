@@ -786,3 +786,119 @@ main {
     background: hsl(var(--card));
     border-color: hsl(var(--border));
 }
+
+/* React Multi Date Picker - Dark Mode Styles */
+.dark .rmdp-wrapper,
+.dark .rmdp-calendar,
+.dark .rmdp-day-picker {
+    background-color: var(--card) !important;
+}
+
+.dark .rmdp-header {
+    background-color: var(--card) !important;
+}
+
+.dark .rmdp-header-values,
+.dark .rmdp-header-values span {
+    color: var(--foreground) !important;
+}
+
+.dark .rmdp-arrow {
+    border-color: var(--foreground) !important;
+}
+
+.dark .rmdp-arrow-container:hover {
+    background-color: var(--muted) !important;
+}
+
+.dark .rmdp-week-day {
+    color: var(--muted-foreground) !important;
+}
+
+.dark .rmdp-day span {
+    color: var(--foreground) !important;
+}
+
+.dark .rmdp-day.rmdp-deactive span {
+    color: var(--muted-foreground) !important;
+}
+
+.dark .rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden) span:hover {
+    background-color: var(--muted) !important;
+}
+
+.dark .rmdp-day.rmdp-today span {
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+}
+
+.dark .rmdp-day.rmdp-selected span:not(.highlight) {
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+}
+
+.dark .rmdp-month-picker,
+.dark .rmdp-year-picker {
+    background-color: var(--card) !important;
+}
+
+.dark .rmdp-ym .rmdp-day span {
+    color: var(--foreground) !important;
+}
+
+.dark .rmdp-panel-body li {
+    background-color: var(--muted) !important;
+    color: var(--foreground) !important;
+}
+
+.dark .rmdp-panel-body li:hover {
+    background-color: var(--accent) !important;
+}
+
+.dark .rmdp-border {
+    border-color: var(--border) !important;
+}
+
+/* Mobile Date Picker Styles */
+.rmdp-mobile .rmdp-calendar {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.rmdp-mobile .rmdp-day-picker {
+    width: 100% !important;
+}
+
+.rmdp-mobile .rmdp-week {
+    width: 100% !important;
+}
+
+.rmdp-mobile .rmdp-day {
+    width: calc(100% / 7) !important;
+    height: 48px !important;
+}
+
+.rmdp-mobile .rmdp-day span {
+    font-size: 16px !important;
+}
+
+/* Portal overlay for mobile */
+.rmdp-ep-shadow {
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25) !important;
+}
+
+/* Dark mode for portal */
+.dark .rmdp-ep-shadow {
+    background-color: var(--card) !important;
+    border: 1px solid var(--border) !important;
+}
+
+/* Mobile action buttons */
+.dark .rmdp-action-button {
+    color: var(--primary) !important;
+}
+
+.dark .rmdp-button {
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+}

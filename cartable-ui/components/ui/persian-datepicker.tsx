@@ -62,7 +62,7 @@ export function PersianDatePicker({
       calendar={locale === "fa" ? persian : gregorian}
       locale={locale === "fa" ? persian_fa : gregorian_en}
       format={locale === "fa" ? "YYYY/MM/DD" : "YYYY-MM-DD"}
-      className={cn("purple", isMobile && "rmdp-mobile")}
+      className={cn("purple rmdp-dark-mode", isMobile && "rmdp-mobile")}
       calendarPosition={locale === "fa" ? "bottom-right" : "bottom-left"}
       inputClass={cn(
         "w-full px-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
@@ -72,6 +72,26 @@ export function PersianDatePicker({
       containerClassName="w-full"
       placeholder={placeholder || t("common.selectDate")}
       disabled={disabled}
+      portal
+      portalTarget={typeof document !== "undefined" ? document.body : undefined}
+      mobileLabels={{
+        OK: locale === "fa" ? "تایید" : "OK",
+        CANCEL: locale === "fa" ? "لغو" : "Cancel",
+      }}
+      mobileButtons={[
+        {
+          label: locale === "fa" ? "امروز" : "Today",
+          type: "button",
+          className: "rmdp-button rmdp-action-button",
+          onClick: () => {
+            const today = new DateObject();
+            if (locale === "fa") {
+              today.convert(persian, persian_fa);
+            }
+            handleChange(today);
+          },
+        },
+      ]}
     />
   );
 }
