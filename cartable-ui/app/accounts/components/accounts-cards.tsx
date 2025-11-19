@@ -1,15 +1,15 @@
 /**
  * Accounts Cards Component
- * کامپوننت کارت‌های حساب‌های بانکی برای موبایل
+ * کامپوننت کارت‌های حساب‌های بانکی
  */
 
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Eye, Edit, Users, Building2, Hash, CreditCard } from "lucide-react";
+import { Eye, Hash, CreditCard, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+import { BankLogo } from "@/components/common/bank-logo";
 import { AccountListItem } from "@/services/accountService";
 import useTranslation from "@/hooks/useTranslation";
 
@@ -45,28 +45,29 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
           onClick={() => router.push(`/accounts/${account.id}`)}
         >
           {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h3 className="font-semibold text-base mb-1">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="flex-shrink-0">
+              <BankLogo bankCode={account.bankCode} size="md" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-base mb-1 truncate">
                 {account.title}
               </h3>
-              <p className="text-sm text-muted-foreground flex items-center gap-2">
-                <Building2 className="h-3.5 w-3.5" />
+              <p className="text-sm text-muted-foreground truncate">
                 {account.bankName}
               </p>
             </div>
-            <div onClick={(e) => e.stopPropagation()}>
-              <Switch
-                checked={account.isEnable}
-                onCheckedChange={() => {
-                  console.log("Toggle account status:", account.id);
-                }}
-              />
-            </div>
+            <Badge
+              variant={account.isEnable ? "success" : "secondary"}
+              appearance="light"
+              className="flex-shrink-0"
+            >
+              {account.isEnable ? t("common.active") : t("common.inactive")}
+            </Badge>
           </div>
 
           {/* Body */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {/* شماره حساب */}
             <div className="flex items-center justify-between py-2 border-b">
               <span className="text-sm text-muted-foreground flex items-center gap-2">
@@ -82,17 +83,21 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
                 <CreditCard className="h-3.5 w-3.5" />
                 {t("accounts.iban")}
               </span>
-              <span className="text-xs font-mono text-end">
+              <span className="text-xs font-mono text-end max-w-[180px] truncate">
                 {formatIBAN(account.shebaNumber)}
               </span>
             </div>
 
             {/* کارتابل */}
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-muted-foreground flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5" />
                 {t("accounts.hasCartable")}
               </span>
-              <Badge variant={account.hasCartable ? "success" : "secondary"}>
+              <Badge
+                variant={account.hasCartable ? "success" : "secondary"}
+                appearance="light"
+              >
                 {account.hasCartable ? t("common.yes") : t("common.no")}
               </Badge>
             </div>
@@ -100,24 +105,17 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
 
           {/* Footer Actions */}
           <div
-            className="flex gap-2 mt-4 pt-4 border-t"
+            className="mt-4 pt-4 border-t"
             onClick={(e) => e.stopPropagation()}
           >
             <Button
               size="sm"
               variant="outline"
-              className="flex-1"
+              className="w-full"
               onClick={() => router.push(`/accounts/${account.id}`)}
             >
               <Eye className="me-2 h-4 w-4" />
               {t("common.buttons.view")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => router.push(`/accounts/${account.id}`)}
-            >
-              <Users className="h-4 w-4" />
             </Button>
           </div>
         </div>

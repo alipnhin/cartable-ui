@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+import { BankLogo } from "@/components/common/bank-logo";
 import { AccountListItem } from "@/services/accountService";
 import useTranslation from "@/hooks/useTranslation";
 
@@ -44,6 +44,7 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
       <Table>
         <TableHeader className="bg-accent/60 font-bold">
           <TableRow>
+            <TableHead className="font-bold w-12"></TableHead>
             <TableHead className="font-bold">
               {t("accounts.accountTitle")}
             </TableHead>
@@ -68,7 +69,7 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
         <TableBody>
           {accounts.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-8">
+              <TableCell colSpan={8} className="text-center py-8">
                 <p className="text-muted-foreground">
                   {t("accounts.noAccountsFound")}
                 </p>
@@ -81,6 +82,9 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
                 className="cursor-pointer hover:bg-muted/50"
                 onClick={() => router.push(`/accounts/${account.id}`)}
               >
+                <TableCell className="w-12">
+                  <BankLogo bankCode={account.bankCode} size="sm" />
+                </TableCell>
                 <TableCell className="font-medium">
                   {account.title}
                 </TableCell>
@@ -92,18 +96,20 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
                   {formatIBAN(account.shebaNumber)}
                 </TableCell>
                 <TableCell className="text-center">
-                  <Badge variant={account.hasCartable ? "success" : "secondary"}>
+                  <Badge
+                    variant={account.hasCartable ? "success" : "secondary"}
+                    appearance="light"
+                  >
                     {account.hasCartable ? t("common.yes") : t("common.no")}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-center">
-                  <Switch
-                    checked={account.isEnable}
-                    onClick={(e) => e.stopPropagation()}
-                    onCheckedChange={() => {
-                      console.log("Toggle account status:", account.id);
-                    }}
-                  />
+                  <Badge
+                    variant={account.isEnable ? "success" : "secondary"}
+                    appearance="light"
+                  >
+                    {account.isEnable ? t("common.active") : t("common.inactive")}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   <div
