@@ -9,7 +9,13 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { AppLayout } from "@/components/layout";
-import { ArrowLeft, Users, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
+import {
+  ArrowLeft,
+  Users,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import useTranslation from "@/hooks/useTranslation";
@@ -33,7 +39,7 @@ export default function AccountDetailPage() {
   const router = useRouter();
   const { toast } = useToast();
   const params = useParams();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const accountId = params?.id as string;
 
   const [account, setAccount] = useState<AccountDetailResponse | null>(null);
@@ -41,8 +47,12 @@ export default function AccountDetailPage() {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Use ref to store accessToken to avoid infinite loop
-  const accessTokenRef = useRef<string | undefined>(session?.accessToken);
-  accessTokenRef.current = session?.accessToken;
+  const accessTokenRef = useRef<string | undefined>(undefined);
+
+  // Update ref when session changes
+  useEffect(() => {
+    accessTokenRef.current = session?.accessToken;
+  }, [session?.accessToken]);
 
   // واکشی اطلاعات حساب
   const fetchAccountDetail = useCallback(async () => {
@@ -65,14 +75,16 @@ export default function AccountDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountId]);
 
+  // Fetch data when session is authenticated
   useEffect(() => {
-    if (session?.accessToken) {
+    if (status === "authenticated" && accountId) {
       fetchAccountDetail();
     }
-  }, [session?.accessToken, fetchAccountDetail]);
+  }, [status, accountId, fetchAccountDetail]);
 
   // تعداد امضاداران فعال
-  const activeSignersCount = account?.users?.filter((u) => u.status === 1).length ?? 0;
+  const activeSignersCount =
+    account?.users?.filter((u) => u.status === 1).length ?? 0;
 
   // هندلر تغییر حداقل امضا
   const handleSaveMinSignatures = async (value: number) => {
@@ -106,7 +118,10 @@ export default function AccountDetailPage() {
   };
 
   // هندلر تغییر وضعیت امضادار
-  const handleRequestStatusChange = async (signerId: string, currentStatus: boolean) => {
+  const handleRequestStatusChange = async (
+    signerId: string,
+    currentStatus: boolean
+  ) => {
     if (!accessTokenRef.current) return;
 
     setIsUpdating(true);
@@ -233,7 +248,9 @@ export default function AccountDetailPage() {
             disabled={isUpdating}
             className="gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`}
+            />
             به‌روزرسانی
           </Button>
         </div>
@@ -263,7 +280,9 @@ export default function AccountDetailPage() {
             <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
               <div className="flex items-center gap-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{account.users?.length ?? 0}</div>
+                  <div className="text-2xl font-bold">
+                    {account.users?.length ?? 0}
+                  </div>
                   <div className="text-xs text-muted-foreground">
                     کل امضاداران
                   </div>
