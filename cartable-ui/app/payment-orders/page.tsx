@@ -333,14 +333,14 @@ export default function PaymentOrdersPage() {
         description={t("paymentCartable.pageSubtitle")}
       />
 
+      {/* Stats Cards */}
+      <StatisticCard cards={statisticCards} />
+
       {/* Inline Filters */}
       <OrderFilters
         filters={filters}
         onFiltersChange={handleFilterChange}
       />
-
-      {/* Stats Cards */}
-      <StatisticCard cards={statisticCards} />
 
       {/* Data Display */}
       {!isMobile ? (
