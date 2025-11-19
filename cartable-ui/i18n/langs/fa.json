@@ -208,7 +208,9 @@
     "otpResentSuccess": "کد تایید مجدداً ارسال شد",
     "otpResendError": "خطا در ارسال مجدد کد تایید",
     "loading": "در حال بارگذاری...",
-    "orderNotFoundText": "دستور پرداخت یافت نشد",
+    "errorTitle": "خطا در بارگذاری",
+    "orderNotFound": "دستور پرداخت یافت نشد",
+    "orderNotFoundText": "دستور پرداخت مورد نظر یافت نشد یا ممکن است حذف شده باشد",
     "backToList": "بازگشت به لیست"
   },
   "statistics": {

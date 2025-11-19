@@ -205,7 +205,9 @@
     "otpResentSuccess": "Verification code resent",
     "otpResendError": "Error resending verification code",
     "loading": "Loading...",
-    "orderNotFoundText": "Payment order not found",
+    "errorTitle": "Loading Error",
+    "orderNotFound": "Order Not Found",
+    "orderNotFoundText": "The payment order was not found or may have been deleted",
     "backToList": "Back to List"
   },
   "statistics": {
