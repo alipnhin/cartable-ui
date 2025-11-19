@@ -36,6 +36,8 @@
     "loading": "در حال بارگذاری...",
     "noResults": "نتیجه‌ای یافت نشد",
     "date": "تاریخ",
+    "no": "ندارد",
+    "yes": "دارد",
     "pagination": {
       "selectedRows": "ردیف‌های انتخاب‌شده",
       "pageSize": "تعداد در صفحه",
@@ -590,6 +592,7 @@
     "signatures": "امضاها",
     "min": "حداقل",
     "total": "کل",
+    "hasCartable": "کارتابل دارد",
     "accounts": "حساب",
     "noAccountsFound": "حسابی یافت نشد",
     "accountDetails": "جزئیات حساب",
