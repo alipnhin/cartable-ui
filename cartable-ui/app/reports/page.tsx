@@ -184,41 +184,37 @@ export default function TransactionReportsPage() {
     if (!session?.accessToken) return;
 
     setExporting(true);
+    try {
+      const request: TransactionsRequest = {
+        pageNumber: 1,
+        pageSize: totalRecords || 10000,
+        fromDate: fromDate,
+        toDate: toDate,
+      };
 
-    const request: TransactionsRequest = {
-      pageNumber: 1,
-      pageSize: totalRecords || 10000,
-      fromDate: fromDate,
-      toDate: toDate,
-    };
-
-    // Add optional filters
-    if (status !== null) request.status = status;
-    if (paymentType !== null) request.paymentType = paymentType;
-    if (bankGatewayId && bankGatewayId !== "all") {
-      request.bankGatewayId = bankGatewayId;
-    }
-    if (nationalCode) request.nationalCode = nationalCode;
-    if (destinationIban) request.destinationIban = destinationIban;
-    if (accountNumber) request.accountNumber = accountNumber;
-    if (orderId) request.orderId = orderId;
-    if (transferFromDate) request.transferFromDate = transferFromDate;
-    if (transferToDate) request.transferToDate = transferToDate;
-
-    toast.promise(
-      exportTransactionsToExcel(request, session.accessToken).then((blob) => {
-        const filename = `transactions-${new Date().toISOString().split("T")[0]}.xlsx`;
-        downloadBlobAsFile(blob, filename);
-        return blob;
-      }),
-      {
-        loading: `در حال آماده‌سازی فایل اکسل (${totalRecords.toLocaleString("fa-IR")} تراکنش)...`,
-        success: "فایل اکسل با موفقیت دانلود شد",
-        error: "خطا در دانلود فایل اکسل",
+      // Add optional filters
+      if (status !== null) request.status = status;
+      if (paymentType !== null) request.paymentType = paymentType;
+      if (bankGatewayId && bankGatewayId !== "all") {
+        request.bankGatewayId = bankGatewayId;
       }
-    ).finally(() => {
+      if (nationalCode) request.nationalCode = nationalCode;
+      if (destinationIban) request.destinationIban = destinationIban;
+      if (accountNumber) request.accountNumber = accountNumber;
+      if (orderId) request.orderId = orderId;
+      if (transferFromDate) request.transferFromDate = transferFromDate;
+      if (transferToDate) request.transferToDate = transferToDate;
+
+      const blob = await exportTransactionsToExcel(request, session.accessToken);
+      const filename = `transactions-${new Date().toISOString().split("T")[0]}.xlsx`;
+      downloadBlobAsFile(blob, filename);
+      toast.success("فایل اکسل با موفقیت دانلود شد");
+    } catch (error) {
+      console.error("Error exporting transactions:", error);
+      toast.error("خطا در دانلود فایل اکسل");
+    } finally {
       setExporting(false);
-    });
+    }
   };
 
   // Handle filter changes
