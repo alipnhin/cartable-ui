@@ -4,6 +4,21 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 const API_BASE_URL = "https://si-lab-tadbirpay.etadbir.com/api";
 // const API_BASE_URL = "https://localhost:8000/api";
 
+// متغیر برای جلوگیری از چندین درخواست refresh همزمان
+let isRefreshing = false;
+let refreshSubscribers: Array<() => void> = [];
+
+// اضافه کردن subscriber به لیست
+const subscribeTokenRefresh = (cb: () => void) => {
+  refreshSubscribers.push(cb);
+};
+
+// اجرای همه subscriber ها بعد از refresh موفق
+const onRefreshed = () => {
+  refreshSubscribers.forEach((cb) => cb());
+  refreshSubscribers = [];
+};
+
 // ایجاد instance از axios
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -52,20 +67,61 @@ apiClient.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+
     if (error.response) {
       // سرور پاسخ با status code خارج از 2xx داده
       console.error("API Error:", error.response.data);
 
       // اگر 401 بود، یعنی unauthorized - token منقضی شده یا invalid است
-      if (error.response.status === 401) {
-        // فقط error را throw می‌کنیم و در component handle می‌شود
-        // چون نمی‌توانیم اینجا signOut را صدا بزنیم
-        console.error("Unauthorized: Token is invalid or expired");
-
-        // اگر در browser هستیم، می‌توانیم یک custom event dispatch کنیم
+      if (error.response.status === 401 && !originalRequest._retry) {
+        // اگر در browser هستیم
         if (typeof window !== "undefined") {
+          // اگر در حال refresh هستیم، صبر کن تا تمام شود
+          if (isRefreshing) {
+            return new Promise((resolve) => {
+              subscribeTokenRefresh(() => {
+                // بعد از refresh، درخواست اصلی باید با توکن جدید از session گرفته شود
+                // این کار در component انجام می‌شود
+                resolve(Promise.reject(error));
+              });
+            });
+          }
+
+          originalRequest._retry = true;
+          isRefreshing = true;
+
+          console.error("Unauthorized: Token is invalid or expired - attempting refresh...");
+
+          // dispatch event برای refresh توکن
           window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+
+          // گوش دادن به event موفقیت refresh
+          return new Promise((resolve, reject) => {
+            const handleRefreshed = () => {
+              isRefreshing = false;
+              onRefreshed();
+              window.removeEventListener("auth:token-refreshed", handleRefreshed);
+              // بعد از refresh موفق، کاربر باید درخواست را دوباره انجام دهد
+              // چون توکن جدید از session گرفته می‌شود
+              reject(error);
+            };
+
+            const handleFailed = () => {
+              isRefreshing = false;
+              refreshSubscribers = [];
+              window.removeEventListener("auth:token-refreshed", handleRefreshed);
+              reject(error);
+            };
+
+            window.addEventListener("auth:token-refreshed", handleRefreshed);
+
+            // اگر بعد از 10 ثانیه هنوز refresh نشد، fail کن
+            setTimeout(() => {
+              handleFailed();
+            }, 10000);
+          });
         }
       }
     } else if (error.request) {
