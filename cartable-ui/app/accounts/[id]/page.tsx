@@ -1,6 +1,7 @@
 /**
- * Account Detail Page - Redesigned
- * صفحه جزئیات و مدیریت حساب بانکی (طراحی جدید بدون تب)
+ * Account Detail Page
+ * صفحه جزئیات و مدیریت حساب بانکی
+ * مرحله 1: فقط نمایش اطلاعات
  */
 
 "use client";
@@ -15,6 +16,7 @@ import {
   CheckCircle2,
   XCircle,
   RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,43 +47,36 @@ export default function AccountDetailPage() {
   const [account, setAccount] = useState<AccountDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
-  // واکشی اطلاعات حساب
-  useEffect(() => {
-    const fetchAccountDetail = async () => {
-      if (!session?.accessToken || !accountId) return;
+  /**
+   * واکشی اطلاعات حساب
+   */
+  const fetchAccountDetail = async () => {
+    if (!session?.accessToken || !accountId) return;
 
-      setIsLoading(true);
-      try {
-        const data = await getAccountDetail(accountId, session.accessToken);
-        setAccount(data);
-      } catch (error) {
-        console.error("Error fetching account detail:", error);
-        toast({
-          title: t("toast.error"),
-          description: "خطا در دریافت اطلاعات حساب",
-          variant: "error",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setIsLoading(true);
+    setError(null);
 
-    fetchAccountDetail();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.accessToken, accountId, refreshKey]);
-
-  // تابع برای refresh کردن داده‌ها
-  const handleRefresh = () => {
-    setRefreshKey((prev) => prev + 1);
+    try {
+      const data = await getAccountDetail(accountId, session.accessToken);
+      setAccount(data);
+    } catch (err) {
+      console.error("Error fetching account detail:", err);
+      setError("خطا در دریافت اطلاعات حساب");
+      toast({
+        title: t("toast.error"),
+        description: "خطا در دریافت اطلاعات حساب",
+        variant: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // تعداد امضاداران فعال
-  const activeSignersCount =
-    account?.users?.filter((u) => u.status === 1).length ?? 0;
-
-  // هندلر تغییر حداقل امضا
+  /**
+   * تغییر حداقل امضا
+   */
   const handleSaveMinSignatures = async (value: number) => {
     if (!session?.accessToken || !account) return;
 
@@ -99,9 +94,10 @@ export default function AccountDetailPage() {
         description: "حداقل امضا با موفقیت تغییر کرد",
         variant: "success",
       });
-      handleRefresh();
-    } catch (error) {
-      console.error("Error changing minimum signature:", error);
+      // Reload data
+      await fetchAccountDetail();
+    } catch (err) {
+      console.error("Error changing minimum signature:", err);
       toast({
         title: t("toast.error"),
         description: "خطا در تغییر حداقل امضا",
@@ -112,7 +108,9 @@ export default function AccountDetailPage() {
     }
   };
 
-  // هندلر تغییر وضعیت امضادار
+  /**
+   * تغییر وضعیت امضادار (فعال/غیرفعال)
+   */
   const handleRequestStatusChange = async (
     signerId: string,
     currentStatus: boolean
@@ -136,9 +134,10 @@ export default function AccountDetailPage() {
           variant: "success",
         });
       }
-      handleRefresh();
-    } catch (error) {
-      console.error("Error changing signer status:", error);
+      // Reload data
+      await fetchAccountDetail();
+    } catch (err) {
+      console.error("Error changing signer status:", err);
       toast({
         title: t("toast.error"),
         description: "خطا در تغییر وضعیت امضادار",
@@ -149,12 +148,24 @@ export default function AccountDetailPage() {
     }
   };
 
-  // هندلر افزودن امضادار
-  const handleAddSigner = () => {
-    handleRefresh();
+  /**
+   * افزودن امضادار جدید
+   */
+  const handleAddSigner = async () => {
+    // Reload data after adding signer
+    await fetchAccountDetail();
   };
 
-  // Skeleton برای لودینگ
+  // واکشی اولیه داده‌ها
+  useEffect(() => {
+    fetchAccountDetail();
+  }, [accountId, session?.accessToken]);
+
+  // تعداد امضاداران فعال
+  const activeSignersCount =
+    account?.users?.filter((u) => u.status === 1).length ?? 0;
+
+  // Loading state
   if (isLoading) {
     return (
       <AppLayout>
@@ -196,14 +207,17 @@ export default function AccountDetailPage() {
     );
   }
 
-  if (!account) {
+  // Error state
+  if (error || !account) {
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center min-h-[400px]">
           <h2 className="text-2xl font-bold mb-2">
             {t("common.messages.notFound")}
           </h2>
-          <p className="text-muted-foreground mb-6">حساب مورد نظر یافت نشد</p>
+          <p className="text-muted-foreground mb-6">
+            {error || "حساب مورد نظر یافت نشد"}
+          </p>
           <Button onClick={() => router.push("/accounts")}>
             بازگشت به لیست حساب‌ها
           </Button>
@@ -239,7 +253,7 @@ export default function AccountDetailPage() {
           </div>
           <Button
             variant="outline"
-            onClick={handleRefresh}
+            onClick={fetchAccountDetail}
             disabled={isUpdating}
             className="gap-2"
           >
