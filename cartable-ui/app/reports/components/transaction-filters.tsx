@@ -341,8 +341,8 @@ export function TransactionFilters({
   return (
     <Card>
       <CardContent className="p-4 space-y-4">
-        {/* فیلترهای اصلی - سه ستونه + دکمه جستجو */}
-        <div className="grid gap-4 md:grid-cols-4 items-end">
+        {/* فیلترهای اصلی - سه ستونه */}
+        <div className="grid gap-4 md:grid-cols-3">
           {/* انتخاب حساب */}
           <div className="space-y-2">
             <Label className="text-sm">انتخاب حساب</Label>
@@ -379,41 +379,54 @@ export function TransactionFilters({
               placeholder={t("reports.toDate")}
             />
           </div>
-
-          {/* دکمه جستجو */}
-          <Button onClick={handleApplyFilters} className="gap-2">
-            <Search className="h-4 w-4" />
-            جستجو
-          </Button>
         </div>
 
         {/* فیلترهای پیشرفته - آکاردیون */}
         <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
-          <CollapsibleTrigger asChild>
-            <Button
-              variant="ghost"
-              className="w-full justify-between hover:bg-muted/50"
-            >
-              <span className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                فیلترهای پیشرفته
-                {advancedFiltersCount > 0 && (
-                  <Badge variant="secondary" className="text-xs">
-                    {advancedFiltersCount}
-                  </Badge>
-                )}
-              </span>
-              <ChevronDown
-                className={`h-4 w-4 transition-transform duration-200 ${
-                  isAdvancedOpen ? "rotate-180" : ""
-                }`}
-              />
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="pt-4">
+          <CollapsibleContent className="pb-4">
             {advancedFiltersContent}
           </CollapsibleContent>
         </Collapsible>
+
+        {/* دکمه‌ها */}
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+            className="gap-2"
+          >
+            <Filter className="h-4 w-4" />
+            فیلترهای بیشتر
+            {advancedFiltersCount > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {advancedFiltersCount}
+              </Badge>
+            )}
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${
+                isAdvancedOpen ? "rotate-180" : ""
+              }`}
+            />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleResetFilters}
+            className="gap-2"
+          >
+            <X className="h-4 w-4" />
+            بازنشانی
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleApplyFilters}
+            className="gap-2 ms-auto"
+          >
+            <Search className="h-4 w-4" />
+            اعمال فیلتر
+          </Button>
+        </div>
 
         {/* نمایش فیلترهای فعال */}
         {advancedFiltersCount > 0 && !isAdvancedOpen && (
