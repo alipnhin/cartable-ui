@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api-client";
+import apiClient from "@/lib/api-client";
 
 // API Types matching the response structure
 export interface TransactionItem {
@@ -53,7 +53,10 @@ export interface TransactionsRequest {
 }
 
 // Status mapping
-export const TransactionStatusMap: Record<number, { label: string; class: string }> = {
+export const TransactionStatusMap: Record<
+  number,
+  { label: string; class: string }
+> = {
   1: { label: "ثبت شده", class: "secondary" },
   2: { label: "در انتظار اجرا", class: "info" },
   3: { label: "تراکنش انجام شده", class: "success" },
@@ -65,12 +68,13 @@ export const TransactionStatusMap: Record<number, { label: string; class: string
 };
 
 // Payment type mapping
-export const PaymentTypeMap: Record<number, { label: string; class: string }> = {
-  0: { label: "داخلی", class: "success" },
-  1: { label: "پایا", class: "info" },
-  2: { label: "ساتنا", class: "primary" },
-  3: { label: "کارت به کارت", class: "warning" },
-};
+export const PaymentTypeMap: Record<number, { label: string; class: string }> =
+  {
+    0: { label: "داخلی", class: "success" },
+    1: { label: "پایا", class: "info" },
+    2: { label: "ساتنا", class: "primary" },
+    3: { label: "کارت به کارت", class: "warning" },
+  };
 
 /**
  * Get paginated list of transactions
