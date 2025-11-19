@@ -40,7 +40,6 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState<AccountListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const [selectedBank, setSelectedBank] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"list" | "card">("list");
 
@@ -84,11 +83,8 @@ export default function AccountsPage() {
         !searchText ||
         account.title.toLowerCase().includes(searchText.toLowerCase()) ||
         account.accountNumber.includes(searchText) ||
-        account.shebaNumber.includes(searchText);
-
-      // فیلتر بانک
-      const matchBank =
-        selectedBank === "all" || account.bankName === selectedBank;
+        account.shebaNumber.includes(searchText) ||
+        account.bankName.toLowerCase().includes(searchText.toLowerCase());
 
       // فیلتر وضعیت
       const matchStatus =
@@ -96,15 +92,9 @@ export default function AccountsPage() {
         (selectedStatus === "active" && account.isEnable) ||
         (selectedStatus === "inactive" && !account.isEnable);
 
-      return matchSearch && matchBank && matchStatus;
+      return matchSearch && matchStatus;
     });
-  }, [accounts, searchText, selectedBank, selectedStatus]);
-
-  // لیست بانک‌های منحصر به فرد
-  const uniqueBanks = useMemo(() => {
-    const banks = Array.from(new Set(accounts.map((acc) => acc.bankName)));
-    return banks;
-  }, [accounts]);
+  }, [accounts, searchText, selectedStatus]);
 
   // Skeleton برای لودینگ
   const AccountsSkeleton = () => (
@@ -188,21 +178,6 @@ export default function AccountsPage() {
               <SelectItem value="all">{t("common.all") || "همه"}</SelectItem>
               <SelectItem value="active">{t("common.active") || "فعال"}</SelectItem>
               <SelectItem value="inactive">{t("common.inactive") || "غیرفعال"}</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* فیلتر بانک */}
-          <Select value={selectedBank} onValueChange={setSelectedBank}>
-            <SelectTrigger className="w-36 h-8.5 text-[0.8125rem]">
-              <SelectValue placeholder={t("accounts.selectBank")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("common.all") || "همه بانک‌ها"}</SelectItem>
-              {uniqueBanks.map((bank) => (
-                <SelectItem key={bank} value={bank}>
-                  {bank}
-                </SelectItem>
-              ))}
             </SelectContent>
           </Select>
 

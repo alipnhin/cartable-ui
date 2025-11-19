@@ -165,7 +165,7 @@ export default function AccountDetailPage() {
 
   // تعداد امضاداران فعال
   const activeSignersCount =
-    account?.users?.filter((u) => u.status === 1).length ?? 0;
+    account?.users?.filter((u) => u.status === 1 || u.status === "Enable").length ?? 0;
 
   // Loading state
   if (isLoading) {
