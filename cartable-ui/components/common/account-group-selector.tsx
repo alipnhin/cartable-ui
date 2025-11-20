@@ -1,6 +1,17 @@
+/**
+ * Account Group Switcher Component
+ * کامپوننت انتخاب‌گر گروه حساب
+ *
+ * این کامپوننت به کاربر امکان می‌دهد بین گروه‌های مختلف حساب جابجا شود.
+ * داده‌ها از API واکشی می‌شوند (فعلاً از داده‌های موک استفاده می‌شود).
+ *
+ * @module components/common/account-group-selector
+ */
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,37 +20,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Building2, ChevronsUpDown } from "lucide-react";
+import {
+  Building2,
+  ChevronsUpDown,
+  Layers,
+  Briefcase,
+  TrendingUp,
+  DollarSign,
+  PiggyBank,
+  LucideIcon,
+} from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { cn } from "@/lib/utils";
+import { AccountGroup } from "@/types/account";
+import { getAccountGroups } from "@/services/accountGroupService";
+import logger from "@/lib/logger";
 
-interface AccountGroup {
-  id: string;
-  name_fa: string;
-  name_en: string;
-  accountsCount: number;
-}
-
-const mockAccountGroups: AccountGroup[] = [
-  {
-    id: "all",
-    name_fa: "همه حساب‌ها",
-    name_en: "All Accounts",
-    accountsCount: 5,
-  },
-  {
-    id: "group_1",
-    name_fa: "حساب‌های اصلی",
-    name_en: "Main Accounts",
-    accountsCount: 2,
-  },
-  {
-    id: "group_2",
-    name_fa: "حساب‌های فرعی",
-    name_en: "Sub Accounts",
-    accountsCount: 3,
-  },
-];
+// نقشه آیکون‌ها - برای تبدیل نام آیکون به کامپوننت
+const ICON_MAP: Record<string, LucideIcon> = {
+  Layers,
+  Briefcase,
+  TrendingUp,
+  DollarSign,
+  PiggyBank,
+  Building2,
+};
 
 interface AccountGroupSwitcherProps {
   value?: string;
@@ -48,6 +53,14 @@ interface AccountGroupSwitcherProps {
   compact?: boolean;
 }
 
+/**
+ * کامپوننت انتخاب‌گر گروه حساب
+ *
+ * @param value - شناسه گروه انتخاب شده
+ * @param onChange - تابعی که هنگام تغییر گروه فراخوانی می‌شود
+ * @param className - کلاس‌های CSS اضافی
+ * @param compact - حالت فشرده برای موبایل
+ */
 export function AccountGroupSwitcher({
   value,
   onChange,
@@ -55,57 +68,120 @@ export function AccountGroupSwitcher({
   compact = false,
 }: AccountGroupSwitcherProps) {
   const { t, locale } = useTranslation();
-  const [activeGroup, setActiveGroup] = useState<AccountGroup>(
-    mockAccountGroups.find((g) => g.id === value) || mockAccountGroups[0]
-  );
+  const { data: session } = useSession();
+  const [accountGroups, setAccountGroups] = useState<AccountGroup[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeGroup, setActiveGroup] = useState<AccountGroup | null>(null);
+
+  // واکشی گروه‌های حساب از API
+  useEffect(() => {
+    const fetchAccountGroups = async () => {
+      if (!session?.accessToken) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const groups = await getAccountGroups(session.accessToken);
+        setAccountGroups(groups);
+
+        // اگر value مشخص شده، آن گروه را انتخاب کن
+        // در غیر این صورت، گروه "all" را انتخاب کن
+        const selectedGroup = value
+          ? groups.find((g) => g.id === value)
+          : groups.find((g) => g.id === "all");
+
+        if (selectedGroup) {
+          setActiveGroup(selectedGroup);
+        } else if (groups.length > 0) {
+          setActiveGroup(groups[0]);
+        }
+      } catch (error) {
+        logger.error("Error fetching account groups:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccountGroups();
+  }, [session, value]);
 
   const handleChange = (group: AccountGroup) => {
     setActiveGroup(group);
     onChange?.(group.id);
   };
 
+  // اگر در حال بارگذاری است یا هیچ گروهی وجود ندارد
+  if (loading || !activeGroup) {
+    return (
+      <Button
+        variant="outline"
+        disabled
+        className={cn(
+          compact ? "h-9 px-3 gap-2 max-w-[160px]" : "w-[200px]",
+          className
+        )}
+      >
+        <Building2 className="h-4 w-4 shrink-0 animate-pulse" />
+        {!compact && (
+          <span className="text-xs">{t("common.loading") || "در حال بارگذاری..."}</span>
+        )}
+      </Button>
+    );
+  }
+
+  // دریافت آیکون گروه
+  const GroupIcon = activeGroup.icon
+    ? ICON_MAP[activeGroup.icon] || Building2
+    : Building2;
+
   if (compact) {
-    // نمایش فشرده برای موبایل - نام گروه انتخاب شده هم نمایش داده شود
+    // نمایش فشرده برای موبایل
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            className="h-9 px-3 gap-2 max-w-[160px]"
-          >
-            <Building2 className="h-4 w-4 shrink-0" />
+          <Button variant="outline" className="h-9 px-3 gap-2 max-w-[160px]">
+            <GroupIcon className="h-4 w-4 shrink-0" />
             <span className="text-xs font-medium truncate">
-              {locale === "fa" ? activeGroup.name_fa : activeGroup.name_en}
+              {activeGroup.title}
             </span>
             <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px]" align="end">
           <DropdownMenuLabel className="text-xs text-muted-foreground">
-            {t("accountGroup.selectGroup")}
+            {t("accountGroup.selectGroup") || "انتخاب گروه حساب"}
           </DropdownMenuLabel>
-          {mockAccountGroups.map((group) => (
-            <DropdownMenuItem
-              key={group.id}
-              onClick={() => handleChange(group)}
-              className={cn(
-                "gap-2 p-2",
-                activeGroup.id === group.id && "bg-accent"
-              )}
-            >
-              <div className="flex h-6 w-6 items-center justify-center rounded-md border bg-background">
-                <Building2 className="h-3.5 w-3.5" />
-              </div>
-              <div className="flex flex-col flex-1">
-                <span className="text-sm">
-                  {locale === "fa" ? group.name_fa : group.name_en}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {group.accountsCount} {t("common.account")}
-                </span>
-              </div>
-            </DropdownMenuItem>
-          ))}
+          {accountGroups.map((group) => {
+            const Icon = group.icon ? ICON_MAP[group.icon] || Building2 : Building2;
+            return (
+              <DropdownMenuItem
+                key={group.id}
+                onClick={() => handleChange(group)}
+                className={cn(
+                  "gap-2 p-2",
+                  activeGroup.id === group.id && "bg-accent"
+                )}
+              >
+                <div
+                  className="flex h-6 w-6 items-center justify-center rounded-md border bg-background"
+                  style={group.color ? { borderColor: group.color } : undefined}
+                >
+                  <Icon
+                    className="h-3.5 w-3.5"
+                    style={group.color ? { color: group.color } : undefined}
+                  />
+                </div>
+                <div className="flex flex-col flex-1">
+                  <span className="text-sm">{group.title}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {group.accountCount} {t("common.account") || "حساب"}
+                  </span>
+                </div>
+              </DropdownMenuItem>
+            );
+          })}
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -124,16 +200,26 @@ export function AccountGroupSwitcher({
             className
           )}
         >
-          <div className="flex items-center gap-2 flex-1 min-w-0 ">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md border bg-background shrink-0">
-              <Building2 className="h-4.5 w-4.5" />
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div
+              className="flex h-7 w-7 items-center justify-center rounded-md border bg-background shrink-0"
+              style={
+                activeGroup.color ? { borderColor: activeGroup.color } : undefined
+              }
+            >
+              <GroupIcon
+                className="h-4.5 w-4.5"
+                style={
+                  activeGroup.color ? { color: activeGroup.color } : undefined
+                }
+              />
             </div>
             <div className="flex flex-col items-start flex-1 min-w-0">
               <span className="text-xs text-start font-medium truncate w-full">
-                {locale === "fa" ? activeGroup.name_fa : activeGroup.name_en}
+                {activeGroup.title}
               </span>
               <span className="text-xs text-muted-foreground">
-                {activeGroup.accountsCount} {t("common.account")}
+                {activeGroup.accountCount} {t("common.account") || "حساب"}
               </span>
             </div>
           </div>
@@ -142,27 +228,34 @@ export function AccountGroupSwitcher({
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-[200px]" align="start">
         <DropdownMenuLabel className="text-xs text-muted-foreground">
-          {t("accountGroup.selectGroup")}
+          {t("accountGroup.selectGroup") || "انتخاب گروه حساب"}
         </DropdownMenuLabel>
-        {mockAccountGroups.map((group) => (
-          <DropdownMenuItem
-            key={group.id}
-            onClick={() => handleChange(group)}
-            className="gap-2 p-2"
-          >
-            <div className="flex h-6 w-6 items-center justify-center rounded-md border bg-background">
-              <Building2 className="h-3.5 w-3.5" />
-            </div>
-            <div className="flex flex-col flex-1">
-              <span className="text-sm">
-                {locale === "fa" ? group.name_fa : group.name_en}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {group.accountsCount} {t("common.account")}
-              </span>
-            </div>
-          </DropdownMenuItem>
-        ))}
+        {accountGroups.map((group) => {
+          const Icon = group.icon ? ICON_MAP[group.icon] || Building2 : Building2;
+          return (
+            <DropdownMenuItem
+              key={group.id}
+              onClick={() => handleChange(group)}
+              className="gap-2 p-2"
+            >
+              <div
+                className="flex h-6 w-6 items-center justify-center rounded-md border bg-background"
+                style={group.color ? { borderColor: group.color } : undefined}
+              >
+                <Icon
+                  className="h-3.5 w-3.5"
+                  style={group.color ? { color: group.color } : undefined}
+                />
+              </div>
+              <div className="flex flex-col flex-1">
+                <span className="text-sm">{group.title}</span>
+                <span className="text-xs text-muted-foreground">
+                  {group.accountCount} {t("common.account") || "حساب"}
+                </span>
+              </div>
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );

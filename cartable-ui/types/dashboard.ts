@@ -33,6 +33,7 @@ export interface TransactionProgressResponse {
 
 export interface DashboardFilterParams {
   bankGatewayId?: string;
+  accountGroupId?: string | null; // شناسه گروه حساب - اگر null باشد یعنی همه گروه‌ها
   fromDate?: string; // ISO date string
   toDate?: string; // ISO date string
 }

@@ -28,6 +28,7 @@ export const getApproverCartable = async (
     pageSize = 10,
     orderBy = "createdDateTime",
     bankGatewayId,
+    accountGroupId,
   } = params;
 
   // ساخت query parameters
@@ -40,6 +41,12 @@ export const getApproverCartable = async (
   // اگر bankGatewayId وجود داشت، اضافه کن
   if (bankGatewayId) {
     queryParams.append("bankGatewayId", bankGatewayId);
+  }
+
+  // اگر accountGroupId وجود داشت و "all" نبود، اضافه کن
+  // اگر "all" باشد یا undefined، null ارسال می‌شود
+  if (accountGroupId && accountGroupId !== "all") {
+    queryParams.append("accountGroupId", accountGroupId);
   }
 
   const response = await apiClient.post<PaymentListResponse>(

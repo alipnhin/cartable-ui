@@ -35,14 +35,24 @@ export interface Account {
   updatedAt?: string;
 }
 
-// Account Group (برای دسته‌بندی حساب‌ها)
+/**
+ * Account Group
+ * گروه حساب - برای دسته‌بندی حساب‌های بانکی
+ *
+ * @property id - شناسه یکتای گروه حساب
+ * @property title - عنوان گروه حساب
+ * @property accountCount - تعداد حساب‌های موجود در این گروه
+ * @property icon - نام آیکن برای نمایش (از lucide-react)
+ * @property description - توضیحات اختیاری درباره گروه
+ * @property color - رنگ اختیاری برای UI
+ */
 export interface AccountGroup {
   id: string;
-  name: string;
+  title: string;
+  accountCount: number;
+  icon?: string;
   description?: string;
   color?: string;
-  accountIds: string[];
-  icon?: string;
 }
 
 export enum AccountGroup_OLD {
