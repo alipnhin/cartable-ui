@@ -31,6 +31,7 @@ export const getManagerCartable = async (
     pageSize = 10,
     orderBy = "createdDateTime",
     bankGatewayId,
+    accountGroupId,
   } = params;
 
   // ساخت query parameters
@@ -43,6 +44,12 @@ export const getManagerCartable = async (
   // اگر bankGatewayId وجود داشت، اضافه کن
   if (bankGatewayId) {
     queryParams.append("bankGatewayId", bankGatewayId);
+  }
+
+  // اگر accountGroupId وجود داشت و "all" نبود، اضافه کن
+  // اگر "all" باشد یا undefined، null ارسال می‌شود
+  if (accountGroupId && accountGroupId !== "all") {
+    queryParams.append("accountGroupId", accountGroupId);
   }
 
   // TODO: تغییر URL به endpoint مخصوص مدیر پس از آماده شدن API

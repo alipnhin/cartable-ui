@@ -16,9 +16,11 @@ const inputVariants = cva(
   {
     variants: {
       variant: {
-        lg: 'h-10 px-4 text-sm rounded-md file:pe-4 file:me-4',
-        md: 'h-9 px-3 text-sm rounded-md file:pe-3 file:me-3',
-        sm: 'h-8 px-2.5 text-xs rounded-md file:pe-2.5 file:me-2.5',
+        // سایز بهینه برای تاچ موبایل (استاندارد 44-48px)
+        touch: 'h-12 min-h-[48px] px-4 text-sm rounded-md file:pe-4 file:me-4 md:h-10 md:min-h-[40px]',
+        lg: 'h-11 min-h-[44px] px-4 text-sm rounded-md file:pe-4 file:me-4',
+        md: 'h-10 min-h-[40px] px-3 text-sm rounded-md file:pe-3 file:me-3',
+        sm: 'h-9 min-h-[36px] px-2.5 text-xs rounded-md file:pe-2.5 file:me-2.5',
       },
     },
     defaultVariants: {
@@ -32,9 +34,10 @@ const inputAddonVariants = cva(
   {
     variants: {
       variant: {
-        lg: 'rounded-md h-10 min-w-10 px-4 text-sm [&_svg:not([class*=size-])]:size-4.5',
-        md: 'rounded-md h-9 min-w-9 px-3 text-sm [&_svg:not([class*=size-])]:size-4.5',
-        sm: 'rounded-md h-8 min-w-7 text-xs px-2.5 [&_svg:not([class*=size-])]:size-3.5',
+        touch: 'rounded-md h-12 min-h-[48px] min-w-12 px-4 text-sm [&_svg:not([class*=size-])]:size-4.5 md:h-10 md:min-h-[40px] md:min-w-10',
+        lg: 'rounded-md h-11 min-h-[44px] min-w-11 px-4 text-sm [&_svg:not([class*=size-])]:size-4.5',
+        md: 'rounded-md h-10 min-h-[40px] min-w-10 px-3 text-sm [&_svg:not([class*=size-])]:size-4.5',
+        sm: 'rounded-md h-9 min-h-[36px] min-w-9 text-xs px-2.5 [&_svg:not([class*=size-])]:size-3.5',
       },
       mode: {
         default: '',
@@ -113,6 +116,7 @@ const inputWrapperVariants = cva(
   {
     variants: {
       variant: {
+        touch: 'gap-1.5 [&_svg:not([class*=size-])]:size-4',
         sm: 'gap-1.25 [&_svg:not([class*=size-])]:size-3.5',
         md: 'gap-1.5 [&_svg:not([class*=size-])]:size-4',
         lg: 'gap-1.5 [&_svg:not([class*=size-])]:size-4',

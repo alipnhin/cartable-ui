@@ -51,6 +51,7 @@ export const searchPaymentOrders = async (
     name,
     sourceIban,
     bankGatewayId,
+    accountGroupId,
     status,
     fromDate,
     toDate,
@@ -70,6 +71,11 @@ export const searchPaymentOrders = async (
   if (name) requestBody.name = name;
   if (sourceIban) requestBody.sourceIban = sourceIban;
   if (bankGatewayId) requestBody.bankGatewayId = bankGatewayId;
+  // اگر accountGroupId وجود داشت و "all" نبود، اضافه کن
+  // اگر "all" باشد یا undefined، null ارسال می‌شود
+  if (accountGroupId && accountGroupId !== "all") {
+    requestBody.accountGroupId = accountGroupId;
+  }
   if (status) requestBody.status = status; // enum به صورت string ارسال می‌شود
   if (fromDate) requestBody.fromDate = fromDate;
   if (toDate) requestBody.toDate = toDate;

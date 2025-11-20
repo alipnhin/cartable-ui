@@ -12,6 +12,7 @@ import { OfflineIndicator } from "@/components/common/offline-indicator";
 import { SessionProvider } from "next-auth/react";
 import { UnauthorizedHandler } from "@/components/auth/unauthorized-handler";
 import { NavigationProgressProvider } from "@/providers/navigation-progress-provider";
+import ErrorBoundary from "@/components/common/error-boundary";
 import localFont from "next/font/local";
 
 const yekanBakh = localFont({
@@ -118,21 +119,23 @@ export default function RootLayout({
         <AppSplashLoader />
         <OfflineIndicator />
         <PWAInstaller />
-        <SessionProvider>
-          <UnauthorizedHandler />
-          <ThemeProvider>
-            <I18nProvider>
-              <TooltipsProvider>
-                <DirectionProvider dir="rtl">
-                  <NavigationProgressProvider>
-                    {children}
-                  </NavigationProgressProvider>
-                  <Toaster />
-                </DirectionProvider>
-              </TooltipsProvider>
-            </I18nProvider>
-          </ThemeProvider>
-        </SessionProvider>
+        <ErrorBoundary>
+          <SessionProvider>
+            <UnauthorizedHandler />
+            <ThemeProvider>
+              <I18nProvider>
+                <TooltipsProvider>
+                  <DirectionProvider dir="rtl">
+                    <NavigationProgressProvider>
+                      {children}
+                    </NavigationProgressProvider>
+                    <Toaster />
+                  </DirectionProvider>
+                </TooltipsProvider>
+              </I18nProvider>
+            </ThemeProvider>
+          </SessionProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

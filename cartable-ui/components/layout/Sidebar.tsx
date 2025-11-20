@@ -1,10 +1,26 @@
+/**
+ * Sidebar Component
+ * کامپوننت منوی کناری (دسکتاپ)
+ *
+ * این کامپوننت منوی اصلی برنامه را در سمت راست صفحه نمایش می‌دهد.
+ * آیتم‌های منو بر اساس نقش کاربر فیلتر می‌شوند.
+ *
+ * @module components/layout/Sidebar
+ */
+
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mainMenuItems, isRouteActive } from "@/config/navigation";
+import {
+  getFilteredMenuItems,
+  getUserRolesFromSession,
+  isRouteActive,
+} from "@/config/navigation";
 import { AccountGroupSwitcher } from "@/components/common/account-group-selector";
 import useTranslation from "@/hooks/useTranslation";
 
@@ -24,6 +40,13 @@ export function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
+  const { data: session } = useSession();
+
+  // Filter menu items based on user roles
+  const menuItems = useMemo(() => {
+    const userRoles = getUserRolesFromSession(session);
+    return getFilteredMenuItems(userRoles, !!session);
+  }, [session]);
 
   return (
     <aside
@@ -34,7 +57,7 @@ export function Sidebar({
       )}
     >
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {mainMenuItems.map((item) => {
+        {menuItems.map((item) => {
           const isActive = isRouteActive(pathname, item.route);
           const Icon = item.icon;
 

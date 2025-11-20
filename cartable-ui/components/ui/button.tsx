@@ -36,11 +36,13 @@ const buttonVariants = cva(
         dashed: '',
       },
       size: {
-        lg: 'h-10 px-4 text-sm gap-1.5 [&_svg:not([class*=size-])]:size-4',
-        md: 'h-9 px-3 gap-1.5 text-sm [&_svg:not([class*=size-])]:size-4',
-        sm: 'h-8 px-2.5 gap-1.25 text-xs [&_svg:not([class*=size-])]:size-3.5',
-        xs: 'h-7 px-2 gap-1 text-xs [&_svg:not([class*=size-])]:size-3.5',
-        icon: 'size-9 [&_svg:not([class*=size-])]:size-4 shrink-0',
+        // سایز بهینه برای تاچ موبایل (استاندارد 44-48px)
+        touch: 'h-12 min-h-[48px] px-4 text-sm gap-1.5 [&_svg:not([class*=size-])]:size-4 md:h-10 md:min-h-[40px]',
+        lg: 'h-11 min-h-[44px] px-4 text-sm gap-1.5 [&_svg:not([class*=size-])]:size-4',
+        md: 'h-10 min-h-[40px] px-3 gap-1.5 text-sm [&_svg:not([class*=size-])]:size-4',
+        sm: 'h-9 min-h-[36px] px-2.5 gap-1.25 text-xs [&_svg:not([class*=size-])]:size-3.5',
+        xs: 'h-8 min-h-[32px] px-2 gap-1 text-xs [&_svg:not([class*=size-])]:size-3.5',
+        icon: 'size-10 min-w-[40px] min-h-[40px] [&_svg:not([class*=size-])]:size-4 shrink-0',
       },
       autoHeight: {
         true: '',
@@ -103,26 +105,31 @@ const buttonVariants = cva(
         className: '[&_svg:not([role=img]):not([class*=text-]):not([class*=opacity-])]:opacity-60',
       },
 
-      // Auto height
+      // Auto height - بهینه شده برای تاچ
+      {
+        size: 'touch',
+        autoHeight: true,
+        className: 'h-auto min-h-[48px] md:min-h-[40px]',
+      },
       {
         size: 'xs',
         autoHeight: true,
-        className: 'h-auto min-h-7',
-      },
-      {
-        size: 'md',
-        autoHeight: true,
-        className: 'h-auto min-h-9',
+        className: 'h-auto min-h-[32px]',
       },
       {
         size: 'sm',
         autoHeight: true,
-        className: 'h-auto min-h-8',
+        className: 'h-auto min-h-[36px]',
+      },
+      {
+        size: 'md',
+        autoHeight: true,
+        className: 'h-auto min-h-[40px]',
       },
       {
         size: 'lg',
         autoHeight: true,
-        className: 'h-auto min-h-10',
+        className: 'h-auto min-h-[44px]',
       },
 
       // Shadow support
@@ -306,30 +313,35 @@ const buttonVariants = cva(
         className: 'text-muted-foreground',
       },
 
-      // Size
+      // Size - بهینه شده برای تاچ موبایل
+      {
+        size: 'touch',
+        mode: 'icon',
+        className: 'w-12 h-12 min-w-[48px] min-h-[48px] p-0 [&_svg:not([class*=size-])]:size-5 md:w-10 md:h-10 md:min-w-[40px] md:min-h-[40px] md:[&_svg:not([class*=size-])]:size-4',
+      },
       {
         size: 'xs',
         mode: 'icon',
-        className: 'w-7 h-7 p-0 [[&_svg:not([class*=size-])]:size-3.5',
+        className: 'w-8 h-8 min-w-[32px] min-h-[32px] p-0 [&_svg:not([class*=size-])]:size-3.5',
       },
       {
         size: 'sm',
         mode: 'icon',
-        className: 'w-8 h-8 p-0 [[&_svg:not([class*=size-])]:size-3.5',
+        className: 'w-9 h-9 min-w-[36px] min-h-[36px] p-0 [&_svg:not([class*=size-])]:size-3.5',
       },
       {
         size: 'md',
         mode: 'icon',
-        className: 'w-9 h-9 p-0 [&_svg:not([class*=size-])]:size-4',
+        className: 'w-10 h-10 min-w-[40px] min-h-[40px] p-0 [&_svg:not([class*=size-])]:size-4',
       },
       {
         size: 'icon',
-        className: 'w-9 h-9 p-0 [&_svg:not([class*=size-])]:size-4',
+        className: 'w-10 h-10 min-w-[40px] min-h-[40px] p-0 [&_svg:not([class*=size-])]:size-4',
       },
       {
         size: 'lg',
         mode: 'icon',
-        className: 'w-10 h-10 p-0 [&_svg:not([class*=size-])]:size-4',
+        className: 'w-11 h-11 min-w-[44px] min-h-[44px] p-0 [&_svg:not([class*=size-])]:size-4',
       },
 
       // Input mode

@@ -1,9 +1,27 @@
+/**
+ * Bottom Dock Component
+ * کامپوننت منوی پایین (موبایل)
+ *
+ * این کامپوننت منوی اصلی برنامه را در پایین صفحه (موبایل) نمایش می‌دهد.
+ * آیتم‌های منو بر اساس نقش کاربر فیلتر می‌شوند.
+ *
+ * چهار حالت مختلف دارد: classic, minimal-v2, floating, minimal
+ *
+ * @module components/layout/BottomDock
+ */
+
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { dockMenuItems, isRouteActive } from "@/config/navigation";
+import {
+  getFilteredMenuItems,
+  getUserRolesFromSession,
+  isRouteActive,
+  type MenuItem,
+} from "@/config/navigation";
 import useTranslation from "@/hooks/useTranslation";
 import { useNavigationProgress } from "@/providers/navigation-progress-provider";
 import { Plus } from "lucide-react";
@@ -27,30 +45,38 @@ export function BottomDock({
   mode = "floating",
   onCenterButtonClick,
 }: BottomDockProps) {
+  const { data: session } = useSession();
+
+  // Filter menu items based on user roles
+  const menuItems = useMemo(() => {
+    const userRoles = getUserRolesFromSession(session);
+    return getFilteredMenuItems(userRoles, !!session);
+  }, [session]);
+
   if (mode === "classic") {
-    return <ClassicBottomDock />;
+    return <ClassicBottomDock menuItems={menuItems} />;
   }
 
   if (mode === "minimal-v2") {
-    return <MinimalV2BottomDock />;
+    return <MinimalV2BottomDock menuItems={menuItems} />;
   }
   if (mode === "minimal") {
-    return <MinimalBottomDock />;
+    return <MinimalBottomDock menuItems={menuItems} />;
   }
 
-  return <FloatingBottomDock onCenterButtonClick={onCenterButtonClick} />;
+  return (
+    <FloatingBottomDock
+      menuItems={menuItems}
+      onCenterButtonClick={onCenterButtonClick}
+    />
+  );
 }
 
 /**
  * Minimal Bottom Dock - Mode 3
+ * حالت مینیمال با انیمیشن‌های ساده
  */
-/**
- * Minimal Bottom Dock - Mode 3 نسخه حرفه‌ای (بدون Ping)
- */
-/**
- * Minimal Bottom Dock - Mode 3 نسخه حرفه‌ای
- */
-function MinimalBottomDock() {
+function MinimalBottomDock({ menuItems }: { menuItems: MenuItem[] }) {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
@@ -77,7 +103,7 @@ function MinimalBottomDock() {
         }}
       >
         <div className="flex items-center justify-around px-2">
-          {dockMenuItems.map((item) => {
+          {menuItems.map((item) => {
             const isActive = isRouteActive(pathname, item.route);
             const isPendingThis = pendingRoute === item.route;
             const Icon = item.icon;
@@ -88,9 +114,9 @@ function MinimalBottomDock() {
                 onClick={() => handleNavigation(item.route)}
                 disabled={isPending}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-2 py-2 min-w-[68px] transition-all duration-300 ease-out group",
+                  "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-[72px] min-h-[56px] transition-all duration-300 ease-out group",
                   "active:scale-90",
-                  "after:content-[''] after:absolute after:inset-[-10px]",
+                  "after:content-[''] after:absolute after:inset-[-8px]",
                   isPending && !isPendingThis && "opacity-40"
                 )}
               >
@@ -161,10 +187,13 @@ function MinimalBottomDock() {
 
 /**
  * Floating Bottom Dock - Mode 2
+ * حالت شناور با دکمه مرکزی
  */
 function FloatingBottomDock({
+  menuItems,
   onCenterButtonClick,
 }: {
+  menuItems: MenuItem[];
   onCenterButtonClick?: () => void;
 }) {
   const pathname = usePathname();
@@ -174,8 +203,8 @@ function FloatingBottomDock({
   const [isPending, startTransition] = useTransition();
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
-  const centerIndex = useMemo(() => Math.floor(dockMenuItems.length / 2), []);
-  const CenterIcon = dockMenuItems[centerIndex]?.icon || Plus;
+  const centerIndex = useMemo(() => Math.floor(menuItems.length / 2), [menuItems]);
+  const CenterIcon = menuItems[centerIndex]?.icon || Plus;
 
   const handleNavigation = (route: string) => {
     if (route === pathname) return;
@@ -196,7 +225,7 @@ function FloatingBottomDock({
         }}
       >
         <div className="flex h-full items-end justify-around pb-3">
-          {dockMenuItems.map((item, index) => {
+          {menuItems.map((item, index) => {
             const isActive = isRouteActive(pathname, item.route);
             const isPendingThis = pendingRoute === item.route;
             const isCenterItem = index === centerIndex;
@@ -223,11 +252,11 @@ function FloatingBottomDock({
         <button
           onClick={
             onCenterButtonClick ||
-            (() => handleNavigation(dockMenuItems[centerIndex].route))
+            (() => handleNavigation(menuItems[centerIndex].route))
           }
           className={cn(
             "absolute -top-4 left-1/2 -translate-x-1/2",
-            "w-16 h-16 rounded-xl bg-primary text-primary-foreground",
+            "w-[68px] h-[68px] min-w-[68px] min-h-[68px] rounded-xl bg-primary text-primary-foreground",
             "flex items-center justify-center",
             "hover:scale-110 active:scale-95",
             "transition-transform duration-200",
@@ -248,15 +277,10 @@ function FloatingBottomDock({
 }
 
 /**
- * Classic Bottom Dock - Mode 1 با انیمیشن انتقال
+ * Classic Bottom Dock - Mode 1
+ * حالت کلاسیک با طراحی حرفه‌ای
  */
-/**
- * Classic Bottom Dock - Mode 1 با انیمیشن انتقال بهبود یافته
- */
-/**
- * Classic Bottom Dock - Mode 1 با طراحی حرفه‌ای
- */
-function ClassicBottomDock() {
+function ClassicBottomDock({ menuItems }: { menuItems: MenuItem[] }) {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
@@ -283,7 +307,7 @@ function ClassicBottomDock() {
         }}
       >
         <div className="flex items-center justify-around px-2">
-          {dockMenuItems.map((item) => {
+          {menuItems.map((item) => {
             const isActive = isRouteActive(pathname, item.route);
             const isPendingThis = pendingRoute === item.route;
             const Icon = item.icon;
@@ -294,7 +318,7 @@ function ClassicBottomDock() {
                 onClick={() => handleNavigation(item.route)}
                 disabled={isPending}
                 className={cn(
-                  "relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-xl min-w-[64px] transition-all duration-300",
+                  "relative flex flex-col items-center gap-2 px-3 py-2.5 rounded-xl min-w-[68px] min-h-[56px] transition-all duration-300",
                   "active:scale-95",
                   // افزایش محدوده تاچ
                   "after:content-[''] after:absolute after:inset-[-8px]",
@@ -346,9 +370,10 @@ function ClassicBottomDock() {
 }
 
 /**
- * Minimal Bottom Dock - Mode 3 نسخه حرفه‌ای
+ * Minimal V2 Bottom Dock - Mode 4
+ * حالت مینیمال نسخه 2 با افکت ripple
  */
-function MinimalV2BottomDock() {
+function MinimalV2BottomDock({ menuItems }: { menuItems: MenuItem[] }) {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
@@ -375,7 +400,7 @@ function MinimalV2BottomDock() {
         }}
       >
         <div className="flex items-center justify-around px-2">
-          {dockMenuItems.map((item) => {
+          {menuItems.map((item) => {
             const isActive = isRouteActive(pathname, item.route);
             const isPendingThis = pendingRoute === item.route;
             const Icon = item.icon;
@@ -386,9 +411,9 @@ function MinimalV2BottomDock() {
                 onClick={() => handleNavigation(item.route)}
                 disabled={isPending}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-1 py-2 min-w-[68px] transition-all duration-300 ease-out group",
+                  "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-[72px] min-h-[56px] transition-all duration-300 ease-out group",
                   "active:scale-90",
-                  "after:content-[''] after:absolute after:inset-[-10px]",
+                  "after:content-[''] after:absolute after:inset-[-8px]",
                   isPending && !isPendingThis && "opacity-40"
                 )}
               >
@@ -493,7 +518,7 @@ const DockItem = memo(
           onClick={onClick}
           disabled={isPending}
           className={cn(
-            "relative flex flex-col items-center justify-center gap-1.5 py-2 min-w-[64px]",
+            "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-[68px] min-h-[56px]",
             "transition-colors duration-200",
             "active:scale-95",
             "after:content-[''] after:absolute after:inset-[-8px]",
@@ -548,7 +573,7 @@ const DockItem = memo(
           onClick={onClick}
           disabled={isPending}
           className={cn(
-            "relative flex flex-col items-center justify-center gap-1.5 px-3 py-2 min-w-[64px]",
+            "relative flex flex-col items-center justify-center gap-2 px-3 py-2.5 min-w-[68px] min-h-[56px]",
             "transition-colors duration-200",
             "active:scale-95 hover:scale-105",
             "after:content-[''] after:absolute after:inset-[-8px]",

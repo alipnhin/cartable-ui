@@ -1,6 +1,8 @@
 /**
  * Navigation Configuration
  * تنظیمات منوی اصلی برنامه
+ *
+ * @module config/navigation
  */
 
 import { AreaChart, UserCheck } from "lucide-react";
@@ -13,6 +15,7 @@ import {
   Settings,
   type LucideIcon,
 } from "lucide-react";
+import { canAccessRoute, UserRole } from "./permissions";
 
 export interface MenuItem {
   title: string;
@@ -84,4 +87,61 @@ export const isRouteActive = (
 ): boolean => {
   if (itemRoute === "/") return currentPath === "/";
   return currentPath.startsWith(itemRoute);
+};
+
+/**
+ * فیلتر کردن آیتم‌های منو بر اساس نقش‌های کاربر
+ *
+ * @param userRoles - نقش‌های کاربر جاری
+ * @param isAuthenticated - وضعیت احراز هویت کاربر
+ * @returns آیتم‌های منویی که کاربر به آن‌ها دسترسی دارد
+ *
+ * @example
+ * ```tsx
+ * const { data: session } = useSession();
+ * const userRoles = getUserRolesFromSession(session);
+ * const filteredItems = getFilteredMenuItems(userRoles, !!session);
+ * ```
+ */
+export const getFilteredMenuItems = (
+  userRoles: string[],
+  isAuthenticated: boolean
+): MenuItem[] => {
+  return mainMenuItems.filter((item) =>
+    canAccessRoute(item.route, userRoles, isAuthenticated)
+  );
+};
+
+/**
+ * استخراج نقش‌های کاربر از session
+ *
+ * @param session - session object از NextAuth
+ * @returns آرایه‌ای از نقش‌های کاربر
+ *
+ * @example
+ * ```tsx
+ * const { data: session } = useSession();
+ * const userRoles = getUserRolesFromSession(session);
+ * ```
+ */
+export const getUserRolesFromSession = (session: any): string[] => {
+  if (!session?.accessToken) {
+    return [];
+  }
+
+  try {
+    // Decode JWT token to extract roles
+    const tokenPayload = JSON.parse(
+      Buffer.from(session.accessToken.split(".")[1], "base64").toString()
+    );
+
+    // Roles might be in 'role' or 'roles' claim
+    const roles = tokenPayload.role || tokenPayload.roles || [];
+
+    // Ensure it's always an array
+    return Array.isArray(roles) ? roles : [roles];
+  } catch (error) {
+    console.error("Error extracting roles from session:", error);
+    return [];
+  }
 };

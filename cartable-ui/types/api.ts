@@ -40,6 +40,8 @@ export interface CartableFilterParams extends PaginationParams {
   sourceIban?: string;
   /** شناسه درگاه بانکی */
   bankGatewayId?: string;
+  /** شناسه گروه حساب - اگر null باشد یعنی همه گروه‌ها */
+  accountGroupId?: string | null;
   /** وضعیت دستور پرداخت (به صورت رشته‌ای ارسال می‌شود) */
   status?: PaymentStatusEnum;
   /** از تاریخ (ISO 8601 format) */

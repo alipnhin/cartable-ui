@@ -18,6 +18,7 @@ const tabsListVariants = cva('flex items-center shrink-0', {
       pill: '',
     },
     size: {
+      touch: 'gap-3',
       lg: 'gap-2.5',
       md: 'gap-2',
       sm: 'gap-1.5',
@@ -25,6 +26,7 @@ const tabsListVariants = cva('flex items-center shrink-0', {
     },
   },
   compoundVariants: [
+    { variant: 'default', size: 'touch', className: 'p-1.5 gap-3' },
     { variant: 'default', size: 'lg', className: 'p-1.5 gap-2.5' },
     { variant: 'default', size: 'md', className: 'p-1 gap-2' },
     { variant: 'default', size: 'sm', className: 'p-1 gap-1.5' },
@@ -55,6 +57,7 @@ const tabsListVariants = cva('flex items-center shrink-0', {
       className: 'rounded-md',
     },
 
+    { variant: 'line', size: 'touch', className: 'gap-10' },
     { variant: 'line', size: 'lg', className: 'gap-9' },
     { variant: 'line', size: 'md', className: 'gap-8' },
     { variant: 'line', size: 'sm', className: 'gap-4' },
@@ -90,23 +93,27 @@ const tabsTriggerVariants = cva(
         line: 'border-b-2 text-muted-foreground border-transparent data-[state=active]:border-primary hover:text-primary data-[state=active]:text-primary data-[state=active]:border-primary data-[state=active]:text-primary',
       },
       size: {
-        lg: 'gap-2.5 [&_svg]:size-5 text-sm',
-        md: 'gap-2 [&_svg]:size-4 text-sm',
-        sm: 'gap-1.5 [&_svg]:size-3.5 text-xs',
-        xs: 'gap-1 [&_svg]:size-3.5 text-xs',
+        touch: 'gap-3 [&_svg]:size-5 text-sm min-h-[48px]',
+        lg: 'gap-2.5 [&_svg]:size-5 text-sm min-h-[44px]',
+        md: 'gap-2 [&_svg]:size-4 text-sm min-h-[40px]',
+        sm: 'gap-1.5 [&_svg]:size-3.5 text-xs min-h-[36px]',
+        xs: 'gap-1 [&_svg]:size-3.5 text-xs min-h-[32px]',
       },
     },
     compoundVariants: [
+      { variant: 'default', size: 'touch', className: 'py-3 px-4 rounded-md' },
       { variant: 'default', size: 'lg', className: 'py-2.5 px-4 rounded-md' },
       { variant: 'default', size: 'md', className: 'py-1.5 px-3 rounded-md' },
       { variant: 'default', size: 'sm', className: 'py-1.5 px-2.5 rounded-sm' },
       { variant: 'default', size: 'xs', className: 'py-1 px-2 rounded-sm' },
 
+      { variant: 'button', size: 'touch', className: 'py-3.5 px-5 rounded-lg' },
       { variant: 'button', size: 'lg', className: 'py-3 px-4 rounded-lg' },
       { variant: 'button', size: 'md', className: 'py-2.5 px-3 rounded-lg' },
       { variant: 'button', size: 'sm', className: 'py-2 px-2.5 rounded-md' },
       { variant: 'button', size: 'xs', className: 'py-1.5 px-2 rounded-md' },
 
+      { variant: 'line', size: 'touch', className: 'py-3.5' },
       { variant: 'line', size: 'lg', className: 'py-3' },
       { variant: 'line', size: 'md', className: 'py-2.5' },
       { variant: 'line', size: 'sm', className: 'py-2' },
@@ -137,7 +144,7 @@ const tabsContentVariants = cva(
 // Context
 type TabsContextType = {
   variant?: 'default' | 'button' | 'line';
-  size?: 'lg' | 'sm' | 'xs' | 'md';
+  size?: 'touch' | 'lg' | 'md' | 'sm' | 'xs';
 };
 const TabsContext = React.createContext<TabsContextType>({
   variant: 'default',

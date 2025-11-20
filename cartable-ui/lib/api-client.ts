@@ -1,8 +1,14 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 
-// Base URL برای API
-const API_BASE_URL = "https://si-lab-tadbirpay.etadbir.com/api";
-// const API_BASE_URL = "https://localhost:8000/api";
+// Base URL برای API - از environment variable استفاده می‌شود
+// در صورت عدم وجود، از مقدار پیش‌فرض استفاده می‌شود
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "https://si-lab-tadbirpay.etadbir.com/api";
+
+// Timeout برای درخواست‌های API
+const API_TIMEOUT =
+  parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || "30000", 10);
 
 // متغیر برای جلوگیری از چندین درخواست refresh همزمان
 let isRefreshing = false;
@@ -29,7 +35,7 @@ const apiClient: AxiosInstance = axios.create({
     Pragma: "no-cache",
     Expires: "0",
   },
-  timeout: 30000, // 30 seconds
+  timeout: API_TIMEOUT,
 });
 
 // Interceptor برای اضافه کردن Authorization token و timestamp برای cache busting

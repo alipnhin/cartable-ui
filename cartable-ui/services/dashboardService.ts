@@ -8,10 +8,17 @@ export const getTransactionProgress = async (
   params: DashboardFilterParams,
   accessToken: string
 ): Promise<TransactionProgressResponse> => {
+  // اگر accountGroupId مقدار "all" داشته باشد، null ارسال می‌کنیم
+  const accountGroupId =
+    params.accountGroupId && params.accountGroupId !== "all"
+      ? params.accountGroupId
+      : null;
+
   const response = await apiClient.post<TransactionProgressResponse>(
     "/v1-Cartable/Withdrawal/transaction-progress",
     {
       bankGatewayId: params.bankGatewayId || null,
+      accountGroupId,
       fromDate: params.fromDate,
       toDate: params.toDate,
     },
