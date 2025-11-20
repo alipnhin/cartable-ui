@@ -147,49 +147,68 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {succeededCount > 0 && (
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="h-4 w-4 text-success" />
+            {/* موفق */}
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="h-4 w-4 text-success" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium">{t("statistics.succeeded")}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold">{succeededCount}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success font-medium">
+                      {overallSuccessRate.toFixed(1)}%
+                    </span>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium">{t("statistics.succeeded")}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{succeededCount}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success">
-                        {overallSuccessRate.toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {formatCurrency(financialStatistics.successfulAmount, locale)} {t("statistics.rial")}
-                  </div>
+                <div className="text-xs text-muted-foreground">
+                  {formatCurrency(financialStatistics.successfulAmount, locale)} {t("statistics.rial")}
                 </div>
               </div>
-            )}
+            </div>
 
-            {failedCount > 0 && (
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
-                  <XCircle className="h-4 w-4 text-destructive" />
+            {/* ناموفق */}
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
+                <XCircle className="h-4 w-4 text-destructive" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium">{t("statistics.failed")}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold">{failedCount}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-medium">
+                      {statusStatistics.failureRate.toFixed(1)}%
+                    </span>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium">{t("statistics.failed")}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{failedCount}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">
-                        {statusStatistics.failureRate.toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {formatCurrency(financialStatistics.failedAmount, locale)} {t("statistics.rial")}
-                  </div>
+                <div className="text-xs text-muted-foreground">
+                  {formatCurrency(financialStatistics.failedAmount, locale)} {t("statistics.rial")}
                 </div>
               </div>
-            )}
+            </div>
+
+            {/* در انتظار */}
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center shrink-0">
+                <Clock className="h-4 w-4 text-warning" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium">{t("statistics.pending")}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold">{pendingCount}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-warning/10 text-warning font-medium">
+                      {(100 - overallSuccessRate - statusStatistics.failureRate).toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {formatCurrency(financialStatistics.pendingAmount, locale)} {t("statistics.rial")}
+                </div>
+              </div>
+            </div>
 
             {reasonCodeStatistics.breakdown.length > 0 && (
               <div className="pt-3 border-t">
@@ -197,7 +216,7 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                   <span className="text-sm font-medium">
                     {t("orderDetail.statistics.mostUsedReasonCode")}
                   </span>
-                  <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                  <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">
                     {reasonCodeStatistics.mostUsedReasonPercentage.toFixed(1)}%
                   </span>
                 </div>
@@ -210,88 +229,72 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
         </Card>
 
         {/* خلاصه مالی */}
-        <Card className="lg:col-span-1 overflow-hidden">
-          <div className="bg-gradient-to-br from-primary to-primary/80 p-6 text-primary-foreground">
-            <h3 className="text-base font-semibold mb-1">
+        <Card className="lg:col-span-1">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">
               {t("statistics.financialSummary")}
-            </h3>
-            <div className="text-center mt-4">
-              <div className="text-xs opacity-80">
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* مبلغ کل */}
+            <div className="text-center py-4 border-b">
+              <div className="text-sm text-muted-foreground mb-1">
                 {t("orderDetail.statistics.totalTransactionAmount")}
               </div>
-              <div className="text-2xl font-bold mt-1">
+              <div className="text-3xl font-bold text-foreground">
                 {formatCurrency(financialStatistics.totalAmount, locale)}
               </div>
-              <div className="text-xs opacity-80">{t("statistics.rial")}</div>
+              <div className="text-sm text-muted-foreground">{t("statistics.rial")}</div>
             </div>
-          </div>
 
-          <CardContent className="pt-6 space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
-                <ArrowUpCircle className="h-5 w-5 text-success" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs text-muted-foreground">
-                  {t("statistics.successfulAmount")}
+            {/* جزئیات مبالغ */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between py-2 border-b border-border/50">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-success"></div>
+                  <span className="text-sm text-muted-foreground">
+                    {t("statistics.successfulAmount")}
+                  </span>
                 </div>
-                <div className="font-medium text-sm truncate">
+                <span className="text-sm font-bold text-foreground">
                   {formatCurrency(financialStatistics.successfulAmount, locale)}
-                  <span className="text-xs text-muted-foreground ms-1">
-                    {t("statistics.rial")}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between py-2 border-b border-border/50">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-destructive"></div>
+                  <span className="text-sm text-muted-foreground">
+                    {t("statistics.failedAmount")}
                   </span>
                 </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
-                <ArrowDownCircle className="h-5 w-5 text-destructive" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs text-muted-foreground">
-                  {t("statistics.failedAmount")}
-                </div>
-                <div className="font-medium text-sm truncate">
+                <span className="text-sm font-bold text-foreground">
                   {formatCurrency(financialStatistics.failedAmount, locale)}
-                  <span className="text-xs text-muted-foreground ms-1">
-                    {t("statistics.rial")}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between py-2 border-b border-border/50">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-warning"></div>
+                  <span className="text-sm text-muted-foreground">
+                    {t("statistics.pendingAmount")}
                   </span>
                 </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center">
-                <Timer className="h-5 w-5 text-warning" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs text-muted-foreground">
-                  {t("statistics.pendingAmount")}
-                </div>
-                <div className="font-medium text-sm truncate">
+                <span className="text-sm font-bold text-foreground">
                   {formatCurrency(financialStatistics.pendingAmount, locale)}
-                  <span className="text-xs text-muted-foreground ms-1">
-                    {t("statistics.rial")}
-                  </span>
-                </div>
+                </span>
               </div>
-            </div>
 
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Activity className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs text-muted-foreground">
-                  {t("statistics.averageTransaction")}
-                </div>
-                <div className="font-medium text-sm truncate">
-                  {formatCurrency(financialStatistics.averageAmount, locale)}
-                  <span className="text-xs text-muted-foreground ms-1">
-                    {t("statistics.rial")}
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-primary"></div>
+                  <span className="text-sm text-muted-foreground">
+                    {t("statistics.averageTransaction")}
                   </span>
                 </div>
+                <span className="text-sm font-bold text-foreground">
+                  {formatCurrency(financialStatistics.averageAmount, locale)}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -441,50 +444,6 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
           </CardContent>
         </Card>
       </div>
-
-      {/* ردیف سوم: آمار کد علت */}
-      {reasonCodeStatistics.breakdown.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              {t("orderDetail.statistics.reasonCodesDistribution")}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {t("orderDetail.statistics.paymentReasonCodesStats")}
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {reasonCodeStatistics.breakdown.map((reason) => (
-                <div key={reason.reasonCode} className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium truncate flex-1">
-                      {reason.reasonName}
-                    </span>
-                    <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary shrink-0 ms-2">
-                      {reason.percentage.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="space-y-1 text-xs text-muted-foreground">
-                    <div className="flex items-center justify-between">
-                      <span>{t("orderDetail.statistics.count")}</span>
-                      <span className="font-medium">{reason.count}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>{t("orderDetail.statistics.amount")}</span>
-                      <span className="font-medium">{formatCurrency(reason.amount, locale)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>{t("orderDetail.statistics.successRate")}</span>
-                      <span className="font-medium">{reason.successRate.toFixed(1)}%</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

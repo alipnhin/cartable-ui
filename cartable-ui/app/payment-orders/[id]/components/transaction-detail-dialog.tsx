@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { WithdrawalTransaction } from "@/types/api";
 import { BankLogo } from "@/components/common/bank-logo";
-import { getBankCodeFromIban } from "@/lib/bank-logos";
+import { getBankCodeFromIban, getBankName } from "@/lib/bank-logos";
 import { TransactionStatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
@@ -99,6 +99,7 @@ export function TransactionDetailDialog({
   if (!transaction) return null;
   const { t, locale } = useTranslation();
   const bankCode = getBankCodeFromIban(transaction.destinationIban);
+  const bankName = bankCode ? getBankName(bankCode) : "";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -111,8 +112,13 @@ export function TransactionDetailDialog({
         </DialogHeader>
 
         <div className="py-4 space-y-6">
-          {/* Amount - prominent display */}
+          {/* Bank Logo and Amount */}
           <div className="text-center py-4">
+            {bankCode && (
+              <div className="flex justify-center mb-4">
+                <BankLogo bankCode={bankCode} size="xl" />
+              </div>
+            )}
             <div className="text-sm text-muted-foreground mb-1">مبلغ تراکنش</div>
             <div className="text-3xl font-bold text-foreground">
               {formatCurrency(parseFloat(transaction.amount) || 0, locale)}
@@ -148,11 +154,11 @@ export function TransactionDetailDialog({
                   copyable
                 />
 
-                {bankCode && (
-                  <div className="flex justify-between items-center py-2.5 border-b border-border/50 last:border-0">
-                    <span className="text-sm text-muted-foreground">بانک مقصد</span>
-                    <BankLogo bankCode={bankCode} showName size="sm" />
-                  </div>
+                {bankName && (
+                  <InfoRow
+                    label="بانک مقصد"
+                    value={bankName}
+                  />
                 )}
               </div>
             </div>

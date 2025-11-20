@@ -75,14 +75,14 @@ export default function RootLayout({
         <link
           rel="apple-touch-icon"
           sizes="152x152"
-          href="/media/icons/icon-152x152.png"
+          href="/media/icons/new/icon-152x152.png"
         />
         <link
           rel="apple-touch-icon"
           sizes="180x180"
-          href="/media/icons/icon-192x192.png"
+          href="/media/icons/new/icon-192x192.png"
         />
-        <link rel="apple-touch-icon" href="/media/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" href="/media/icons/new/icon-192x192.png" />
 
         {/* Apple PWA Meta Tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -98,21 +98,21 @@ export default function RootLayout({
           rel="icon"
           type="image/png"
           sizes="32x32"
-          href="/media/icons/icon-72x72.png"
+          href="/media/icons/new/icon-72x72.png"
         />
         <link
           rel="icon"
           type="image/png"
           sizes="16x16"
-          href="/media/icons/icon-72x72.png"
+          href="/media/icons/new/icon-72x72.png"
         />
 
         {/* MS Tiles */}
         <meta name="msapplication-config" content="/browserconfig.xml" />
 
         {/* Preconnect for performance */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        {/* <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" /> */}
       </head>
       <body className={cn("text-base antialiased", yekanBakh.variable)}>
         <AppSplashLoader />

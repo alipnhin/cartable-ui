@@ -1,5 +1,46 @@
 import NextAuth from "next-auth";
 
+/**
+ * تابع برای refresh کردن access token با استفاده از refresh token
+ */
+async function refreshAccessToken(token: any) {
+  try {
+    const response = await fetch(`${process.env.AUTH_ISSUER}/connect/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: process.env.AUTH_CLIENT_ID!,
+        client_secret: process.env.AUTH_CLIENT_SECRET!,
+        grant_type: "refresh_token",
+        refresh_token: token.refreshToken as string,
+      }),
+    });
+
+    const refreshedTokens = await response.json();
+
+    if (!response.ok) {
+      throw refreshedTokens;
+    }
+
+    return {
+      ...token,
+      accessToken: refreshedTokens.access_token,
+      expiresAt: Math.floor(Date.now() / 1000) + refreshedTokens.expires_in,
+      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
+      idToken: refreshedTokens.id_token ?? token.idToken,
+    };
+  } catch (error) {
+    console.error("Error refreshing access token:", error);
+
+    return {
+      ...token,
+      error: "RefreshAccessTokenError",
+    };
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     {
@@ -31,18 +72,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, account, profile }) {
       // ذخیره access token و refresh token در اولین ورود
       if (account) {
-        token.accessToken = account.access_token;
-        token.refreshToken = account.refresh_token;
-        token.expiresAt = account.expires_at;
-        token.idToken = account.id_token;
+        return {
+          ...token,
+          accessToken: account.access_token,
+          refreshToken: account.refresh_token,
+          expiresAt: account.expires_at,
+          idToken: account.id_token,
+        };
       }
 
-      // اگر توکن expire شده، رفرش کن
-      if (token.expiresAt && Date.now() < (token.expiresAt as number) * 1000) {
+      // اگر توکن هنوز معتبر است، برگردان
+      // 60 ثانیه قبل از انقضا refresh می‌کنیم
+      if (token.expiresAt && Date.now() < ((token.expiresAt as number) * 1000 - 60000)) {
         return token;
       }
 
-      // TODO: Implement refresh token logic
+      // توکن منقضی شده یا نزدیک انقضا است - refresh کن
+      if (token.refreshToken) {
+        return await refreshAccessToken(token);
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -50,6 +99,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token) {
         session.accessToken = token.accessToken as string;
         session.user.id = token.sub as string;
+        // اگر refresh token خطا داشت، error را به session اضافه کن
+        if (token.error) {
+          session.error = token.error as string;
+        }
       }
       return session;
     },

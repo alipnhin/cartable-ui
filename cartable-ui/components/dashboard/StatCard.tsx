@@ -38,38 +38,46 @@ export default function StatCard({
 
   return (
     <Card
-      className="hover:shadow-md transition-shadow animate-fade-in"
+      className="hover:shadow-lg transition-all duration-300 animate-fade-in border-2 hover:border-primary/20"
       style={{ animationDelay: `${delay}s` }}
     >
-      <div className="p-6">
-        <div className={`w-12 h-12 rounded-lg ${iconBgColor} flex items-center justify-center mb-5`}>
-          <Icon className={`w-6 h-6 ${iconColor}`} />
-        </div>
-
-        <div className="flex items-center">
-          <div className="flex flex-col">
-            <span className="text-foreground font-semibold text-sm mb-2">
-              {title}
-            </span>
-            <span className="text-muted-foreground font-semibold text-base my-3">
-              {formattedAmount} ریال
-            </span>
+      <div className="p-5">
+        {/* Header with icon and badge */}
+        <div className="flex items-start justify-between mb-4">
+          <div className={`w-11 h-11 rounded-xl ${iconBgColor} flex items-center justify-center`}>
+            <Icon className={`w-5 h-5 ${iconColor}`} />
           </div>
-        </div>
-
-        <div className="flex items-center justify-between pt-2">
-          <span className="text-foreground font-bold text-3xl leading-none">
-            {formattedValue}
-          </span>
           {badge && (
             <span
-              className={`px-3 py-1 rounded text-sm font-semibold ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
                 badgeStyles[badge.variant]
               }`}
             >
               {badge.value}
             </span>
           )}
+        </div>
+
+        {/* Title */}
+        <div className="mb-3">
+          <span className="text-muted-foreground text-sm font-medium">
+            {title}
+          </span>
+        </div>
+
+        {/* Value */}
+        <div className="mb-2">
+          <span className="text-foreground font-bold text-3xl">
+            {formattedValue}
+          </span>
+        </div>
+
+        {/* Amount */}
+        <div className="pt-3 border-t">
+          <span className="text-sm font-semibold text-foreground">
+            {formattedAmount}
+          </span>
+          <span className="text-xs text-muted-foreground ms-1">ریال</span>
         </div>
       </div>
     </Card>

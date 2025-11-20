@@ -30,7 +30,9 @@ import {
   BarChart3,
   AlertCircle,
   FileX,
+  RefreshCw,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { FixHeader } from "@/components/layout/Fix-Header";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,7 +43,10 @@ import {
   inquiryOrderById,
   inquiryTransactionById,
   sendToBank,
+  exportOrderTransactionsToExcel,
+  downloadBlobAsFile,
 } from "@/services/paymentOrdersService";
+import { ExportProgressDialog, ExportStatus } from "@/app/reports/components/export-progress-dialog";
 import {
   sendOperationOtp,
   approvePayment,
@@ -90,6 +95,11 @@ export default function PaymentOrderDetailPage() {
     type: "approve",
     isRequestingOtp: false,
   });
+
+  // Export state
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportStatus, setExportStatus] = useState<ExportStatus>("idle");
+  const [exportError, setExportError] = useState<string>("");
 
   /**
    * واکشی جزئیات دستور پرداخت و آمار
@@ -443,6 +453,37 @@ export default function PaymentOrderDetailPage() {
     }
   };
 
+  /**
+   * دانلود فایل اکسل تراکنش‌ها
+   */
+  const handleExportExcel = async () => {
+    if (!session?.accessToken || !orderId) return;
+
+    setExportDialogOpen(true);
+    setExportStatus("preparing");
+    setExportError("");
+
+    try {
+      setExportStatus("downloading");
+      const blob = await exportOrderTransactionsToExcel(orderId, session.accessToken);
+      const filename = `transactions-${orderDetails?.orderId || orderId}-${new Date().toISOString().split("T")[0]}.xlsx`;
+      downloadBlobAsFile(blob, filename);
+      setExportStatus("success");
+    } catch (error) {
+      console.error("Error exporting transactions:", error);
+      setExportError(t("paymentOrders.exportError"));
+      setExportStatus("error");
+    }
+  };
+
+  /**
+   * لغو دانلود
+   */
+  const handleCancelExport = () => {
+    setExportDialogOpen(false);
+    setExportStatus("idle");
+  };
+
   // واکشی اولیه داده‌ها
   useEffect(() => {
     fetchOrderData();
@@ -631,7 +672,17 @@ export default function PaymentOrderDetailPage() {
 
   return (
     <>
-      <FixHeader returnUrl="/payment-orders" />
+      <FixHeader returnUrl="/payment-orders">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={reloadPage}
+          className="gap-2"
+        >
+          <RefreshCw className="h-4 w-4" />
+          {t("common.refresh")}
+        </Button>
+      </FixHeader>
       <div className="container mx-auto p-4 md:p-6 space-y-6 mt-14">
         {/* Header با کارت‌های آماری */}
         <OrderDetailHeader
@@ -709,6 +760,7 @@ export default function PaymentOrderDetailPage() {
               onRefresh={refreshTransactions}
               onFilterChange={fetchTransactions}
               onInquiryTransaction={handleInquiryTransaction}
+              onExport={handleExportExcel}
             />
           </TabsContent>
 
@@ -761,6 +813,16 @@ export default function PaymentOrderDetailPage() {
           onConfirm={handleOtpConfirm}
           onResend={handleOtpResend}
           isRequestingOtp={otpDialog.isRequestingOtp}
+        />
+
+        {/* دایالوگ پیشرفت دانلود اکسل */}
+        <ExportProgressDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+          status={exportStatus}
+          totalRecords={totalTransactions}
+          onCancel={handleCancelExport}
+          errorMessage={exportError}
         />
       </div>
     </>

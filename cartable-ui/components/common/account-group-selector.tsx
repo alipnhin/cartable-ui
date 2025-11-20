@@ -65,12 +65,19 @@ export function AccountGroupSwitcher({
   };
 
   if (compact) {
-    // نمایش فشرده برای موبایل - فقط آیکن
+    // نمایش فشرده برای موبایل - نام گروه انتخاب شده هم نمایش داده شود
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon" className="h-10 w-10">
-            <Building2 className="h-5 w-5" />
+          <Button
+            variant="outline"
+            className="h-9 px-3 gap-2 max-w-[160px]"
+          >
+            <Building2 className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-medium truncate">
+              {locale === "fa" ? activeGroup.name_fa : activeGroup.name_en}
+            </span>
+            <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px]" align="end">
@@ -81,7 +88,10 @@ export function AccountGroupSwitcher({
             <DropdownMenuItem
               key={group.id}
               onClick={() => handleChange(group)}
-              className="gap-2 p-2"
+              className={cn(
+                "gap-2 p-2",
+                activeGroup.id === group.id && "bg-accent"
+              )}
             >
               <div className="flex h-6 w-6 items-center justify-center rounded-md border bg-background">
                 <Building2 className="h-3.5 w-3.5" />

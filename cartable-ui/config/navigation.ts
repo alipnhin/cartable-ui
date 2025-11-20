@@ -3,7 +3,7 @@
  * تنظیمات منوی اصلی برنامه
  */
 
-import { AreaChart } from "lucide-react";
+import { AreaChart, UserCheck } from "lucide-react";
 import {
   LayoutDashboard,
   Inbox,
@@ -40,6 +40,12 @@ export const mainMenuItems: MenuItem[] = [
     badge: 8,
   },
   {
+    title: "managerCartable",
+    icon: UserCheck,
+    route: "/manager-cartable",
+    badge: 3,
+  },
+  {
     title: "paymentOrders",
     icon: FileText,
     route: "/payment-orders",
@@ -58,9 +64,9 @@ export const mainMenuItems: MenuItem[] = [
 ];
 
 /**
- * منوی dock موبایل (5 آیتم اول)
+ * منوی dock موبایل (همه آیتم‌ها)
  */
-export const dockMenuItems = mainMenuItems.slice(0, 5);
+export const dockMenuItems = mainMenuItems;
 
 /**
  * گرفتن آیتم منو بر اساس route
