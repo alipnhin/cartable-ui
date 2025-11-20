@@ -31,6 +31,7 @@ import { horizontalListSortingStrategy, SortableContext, useSortable } from '@dn
 import { CSS } from '@dnd-kit/utilities';
 import { Cell, flexRender, Header, HeaderGroup, Row } from '@tanstack/react-table';
 import { GripVertical } from 'lucide-react';
+import logger from '@/lib/logger';
 
 function DataGridTableDndHeader<TData>({ header }: { header: Header<TData, unknown> }) {
   const { props } = useDataGrid();
@@ -112,7 +113,7 @@ function DataGridTableDnd<TData>({ handleDragEnd }: { handleDragEnd: (event: Dra
         <DataGridTableBase>
           <DataGridTableHead>
             {table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>, index) => {
-              console.log('table.getState().columnOrder:', table.getState().columnOrder);
+              logger.debug('table.getState().columnOrder:', table.getState().columnOrder);
 
               return (
                 <DataGridTableHeadRow headerGroup={headerGroup} key={index}>

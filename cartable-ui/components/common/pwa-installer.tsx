@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import logger from "@/lib/logger";
 
 export function PWAInstaller() {
   const [isInstalled, setIsInstalled] = useState(false);
@@ -11,10 +12,10 @@ export function PWAInstaller() {
       navigator.serviceWorker
         .register("/sw.js")
         .then((registration) => {
-          console.log("Service Worker registered:", registration);
+          logger.info("Service Worker registered:", registration);
         })
         .catch((error) => {
-          console.error("Service Worker registration failed:", error);
+          logger.error("Service Worker registration failed:", error);
         });
     }
 
