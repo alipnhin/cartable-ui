@@ -157,7 +157,7 @@ export function SignerCard({
       return {
         label: "فعال‌سازی",
         icon: Power,
-        variant: "default" as const,
+        variant: "primary" as const,
         confirmTitle: "فعال‌سازی امضادار",
         confirmDesc: `آیا مطمئن هستید که می‌خواهید "${signer.fullName}" را فعال کنید؟ این کاربر قادر به امضای دستورات پرداخت خواهد شد.`,
         confirmAction: "فعال کن",
