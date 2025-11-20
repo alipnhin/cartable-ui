@@ -18,6 +18,7 @@ const checkboxVariants = cva(
   {
     variants: {
       size: {
+        touch: 'size-6 [&_svg]:size-4.5',
         sm: 'size-4.5 [&_svg]:size-3',
         md: 'size-5 [&_svg]:size-3.5',
         lg: 'size-5.5 [&_svg]:size-4',

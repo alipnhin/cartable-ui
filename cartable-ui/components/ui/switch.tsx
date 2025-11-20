@@ -34,6 +34,7 @@ const switchVariants = cva(
         square: 'rounded-md',
       },
       size: {
+        touch: 'h-8 w-14 min-h-[32px]',
         sm: 'h-5 w-8',
         md: 'h-6 w-10',
         lg: 'h-8 w-14',
