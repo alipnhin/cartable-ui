@@ -1,6 +1,18 @@
+/**
+ * PWA Installer Component
+ * کامپوننت نصب Progressive Web App
+ *
+ * این کامپوننت راهنمای نصب اپلیکیشن را برای Android و iOS نمایش می‌دهد.
+ * - Android Chrome: نصب با یک کلیک
+ * - iOS Safari: راهنمای گام به گام
+ *
+ * @module components/common/pwa-installer
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";
+import useTranslation from "@/hooks/useTranslation";
 import logger from "@/lib/logger";
 import {
   RiDownloadLine,
@@ -40,6 +52,7 @@ const getDeviceInfo = () => {
 };
 
 export function PWAInstaller() {
+  const { t } = useTranslation();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
@@ -172,10 +185,10 @@ export function PWAInstaller() {
 
             <div className="flex-1">
               <h3 className="font-semibold text-card-foreground">
-                نصب اپلیکیشن کارتابل
+                {t("pwa.installApp")}
               </h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                برای دسترسی سریع‌تر و تجربه بهتر، اپلیکیشن را نصب کنید
+                {t("pwa.description")}
               </p>
 
               <div className="mt-3 flex gap-2">
@@ -185,14 +198,14 @@ export function PWAInstaller() {
                 >
                   <span className="flex items-center justify-center gap-2">
                     <RiAndroidLine className="h-4 w-4" />
-                    نصب
+                    {t("pwa.install")}
                   </span>
                 </button>
                 <button
                   onClick={handleDismiss}
                   className="rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
                 >
-                  بعداً
+                  {t("pwa.later")}
                 </button>
               </div>
             </div>
@@ -200,7 +213,7 @@ export function PWAInstaller() {
             <button
               onClick={handleDismiss}
               className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="بستن"
+              aria-label={t("pwa.close")}
             >
               <RiCloseLine className="h-5 w-5" />
             </button>
@@ -222,15 +235,15 @@ export function PWAInstaller() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-card-foreground">
-                  نصب اپلیکیشن کارتابل
+                  {t("pwa.installApp")}
                 </h3>
-                <p className="text-sm text-muted-foreground">بر روی iPhone/iPad</p>
+                <p className="text-sm text-muted-foreground">{t("pwa.iosSubtitle")}</p>
               </div>
             </div>
             <button
               onClick={handleDismiss}
               className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="بستن"
+              aria-label={t("pwa.close")}
             >
               <RiCloseLine className="h-6 w-6" />
             </button>
@@ -238,7 +251,7 @@ export function PWAInstaller() {
 
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              برای نصب این برنامه به عنوان اپلیکیشن، مراحل زیر را دنبال کنید:
+              {t("pwa.iosIntro")}
             </p>
 
             <div className="space-y-3">
@@ -249,17 +262,17 @@ export function PWAInstaller() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-card-foreground">
-                    دکمه اشتراک‌گذاری را بزنید
+                    {t("pwa.iosStep1Title")}
                   </p>
                   <div className="mt-2 flex items-center gap-2 text-muted-foreground">
                     <span className="text-xs">
-                      روی آیکون
+                      {t("pwa.iosStep1Tap")}
                     </span>
                     <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500">
                       <RiShareLine className="h-4 w-4 text-white" />
                     </div>
                     <span className="text-xs">
-                      در پایین صفحه کلیک کنید
+                      {t("pwa.iosStep1At")}
                     </span>
                   </div>
                 </div>
@@ -272,11 +285,11 @@ export function PWAInstaller() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-card-foreground">
-                    "Add to Home Screen" را انتخاب کنید
+                    {t("pwa.iosStep2Title")}
                   </p>
                   <div className="mt-2 flex items-center gap-2 text-muted-foreground">
                     <span className="text-xs">
-                      در منوی باز شده، گزینه
+                      {t("pwa.iosStep2Select")}
                     </span>
                     <div className="flex items-center gap-1 rounded bg-gray-200 px-2 py-1 dark:bg-gray-700">
                       <RiHomeLine className="h-3 w-3" />
@@ -293,10 +306,10 @@ export function PWAInstaller() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-card-foreground">
-                    روی "افزودن" کلیک کنید
+                    {t("pwa.iosStep3Title")}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    در صفحه باز شده، دکمه Add را بزنید تا اپلیکیشن به صفحه اصلی اضافه شود
+                    {t("pwa.iosStep3Desc")}
                   </p>
                 </div>
               </div>
@@ -306,8 +319,7 @@ export function PWAInstaller() {
               <div className="flex gap-2">
                 <RiAppleLine className="h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
                 <p className="text-xs text-blue-800 dark:text-blue-200">
-                  <strong>نکته:</strong> بعد از نصب، می‌توانید برنامه را مانند سایر اپلیکیشن‌ها
-                  از صفحه اصلی گوشی خود اجرا کنید.
+                  <strong>{t("pwa.iosNoteTitle")}</strong> {t("pwa.iosNoteDesc")}
                 </p>
               </div>
             </div>
@@ -316,7 +328,7 @@ export function PWAInstaller() {
               onClick={handleDismiss}
               className="w-full rounded-lg bg-secondary px-4 py-3 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors"
             >
-              متوجه شدم
+              {t("pwa.understood")}
             </button>
           </div>
         </div>
