@@ -574,7 +574,7 @@ export function OrderDetailTransactions({
                                 #{startIndex + index + 1}
                               </span>
                             </div>
-                            <TransactionStatusBadge status={transaction.status} size="sm" />
+                            <TransactionStatusBadge status={transaction.status as any} size="sm" />
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-foreground">
@@ -776,7 +776,7 @@ export function OrderDetailTransactions({
                               {getReasonCodeLabel(transaction.reasonCode)}
                             </TableCell>
                             <TableCell>
-                              <TransactionStatusBadge status={transaction.status} size="sm" />
+                              <TransactionStatusBadge status={transaction.status as any} size="sm" />
                             </TableCell>
                             <TableCell className="text-left">
                               <div className="flex items-center gap-2 justify-end">

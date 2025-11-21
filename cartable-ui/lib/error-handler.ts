@@ -6,6 +6,33 @@
  */
 
 /**
+ * Type guard to check if error is an axios-like error
+ * بررسی اینکه آیا خطا از نوع axios error است
+ */
+function isAxiosError(error: unknown): error is {
+  response?: {
+    data?: unknown;
+    status?: number;
+  };
+  request?: unknown;
+  message?: string;
+} {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    ('response' in error || 'request' in error || 'message' in error)
+  );
+}
+
+/**
+ * Type guard to check if value is a record
+ * بررسی اینکه آیا مقدار یک object است
+ */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
  * استخراج پیغام خطا از response سرور
  *
  * این تابع پیغام خطا را از فرمت‌های مختلف response استخراج می‌کند:
@@ -21,14 +48,30 @@
  * @returns پیغام خطا به زبان فارسی برای نمایش به کاربر
  *
  * @example
+ * ```ts
  * try {
  *   await apiCall();
  * } catch (error) {
  *   const message = getErrorMessage(error);
  *   toast.error(message);
  * }
+ * ```
  */
-export function getErrorMessage(error: any): string {
+export function getErrorMessage(error: unknown): string {
+  // Check if error is axios-like error
+  if (!isAxiosError(error)) {
+    // If it's a simple error with message
+    if (isRecord(error) && typeof error.message === 'string') {
+      return error.message;
+    }
+    // If it's a string
+    if (typeof error === 'string') {
+      return error;
+    }
+    // Default message for unknown errors
+    return "خطای نامشخص رخ داده است";
+  }
+
   // اگر خطا axios error است
   if (error.response) {
     const response = error.response;
@@ -38,39 +81,45 @@ export function getErrorMessage(error: any): string {
       return response.data;
     }
 
-    // اگر پیغام در فیلد message است
-    if (response.data?.message) {
-      return response.data.message;
-    }
+    // Check if data is a record
+    if (isRecord(response.data)) {
+      // اگر پیغام در فیلد message است
+      if (typeof response.data.message === 'string') {
+        return response.data.message;
+      }
 
-    // اگر پیغام در فیلد error است
-    if (response.data?.error) {
-      return response.data.error;
-    }
+      // اگر پیغام در فیلد error است
+      if (typeof response.data.error === 'string') {
+        return response.data.error;
+      }
 
-    // اگر پیغام در فیلد title است (ASP.NET Core format)
-    if (response.data?.title) {
-      return response.data.title;
-    }
+      // اگر پیغام در فیلد title است (ASP.NET Core format)
+      if (typeof response.data.title === 'string') {
+        return response.data.title;
+      }
 
-    // اگر آرایه‌ای از errors است (validation errors)
-    if (response.data?.errors && typeof response.data.errors === "object") {
-      const errors = response.data.errors;
-      const errorMessages = Object.keys(errors)
-        .map((key) => {
-          const messages = errors[key];
-          return Array.isArray(messages) ? messages.join(", ") : messages;
-        })
-        .filter(Boolean)
-        .join("; ");
+      // اگر آرایه‌ای از errors است (validation errors)
+      if (isRecord(response.data.errors)) {
+        const errors = response.data.errors;
+        const errorMessages = Object.keys(errors)
+          .map((key) => {
+            const messages = errors[key];
+            if (Array.isArray(messages)) {
+              return messages.filter((msg): msg is string => typeof msg === 'string').join(", ");
+            }
+            return typeof messages === 'string' ? messages : '';
+          })
+          .filter(Boolean)
+          .join("; ");
 
-      if (errorMessages) {
-        return errorMessages;
+        if (errorMessages) {
+          return errorMessages;
+        }
       }
     }
 
     // اگر status code معلوم است
-    if (response.status) {
+    if (typeof response.status === 'number') {
       switch (response.status) {
         case 400:
           return "درخواست نامعتبر است";
@@ -94,7 +143,7 @@ export function getErrorMessage(error: any): string {
   }
 
   // اگر پیغام خطا مستقیماً وجود دارد
-  if (error.message) {
+  if (typeof error.message === 'string') {
     return error.message;
   }
 

@@ -10,15 +10,15 @@ import { subtractDays, now } from "@/lib/date";
 export const mockAccountGroups: AccountGroup[] = [
   {
     id: "group-1",
-    name: "صندوق درآمد ثابت",
+    title: "صندوق درآمد ثابت",
     color: "blue",
-    accountIds: ["acc-1", "acc-2"],
+    accountCount: 2,
   },
   {
     id: "group-2",
-    name: "صندوق طلا",
+    title: "صندوق طلا",
     color: "green",
-    accountIds: ["acc-3", "acc-4", "acc-5"],
+    accountCount: 3,
   },
 ];
 

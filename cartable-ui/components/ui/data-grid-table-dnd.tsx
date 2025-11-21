@@ -113,7 +113,7 @@ function DataGridTableDnd<TData>({ handleDragEnd }: { handleDragEnd: (event: Dra
         <DataGridTableBase>
           <DataGridTableHead>
             {table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>, index) => {
-              logger.debug('table.getState().columnOrder:', table.getState().columnOrder);
+              logger.debug(`table.getState().columnOrder: ${JSON.stringify(table.getState().columnOrder)}`);
 
               return (
                 <DataGridTableHeadRow headerGroup={headerGroup} key={index}>
