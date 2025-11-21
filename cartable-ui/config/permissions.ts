@@ -15,13 +15,13 @@
  */
 export enum UserRole {
   /** امضادار - دسترسی به کارتابل من */
-  CARTABLE_APPROVER = "cartable-approver",
+  CARTABLE_APPROVER = "cartableapprover.role",
 
   /** مدیر - دسترسی به کارتابل مدیر و مدیریت حساب‌ها */
-  CARTABLE_MANAGER = "cartable-manager",
+  CARTABLE_MANAGER = "cartableadmin.role",
 
   /** ادمین سیستم - دسترسی کامل */
-  ADMIN = "admin",
+  ADMIN = "Administrator",
 }
 
 /**
