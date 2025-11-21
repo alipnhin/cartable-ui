@@ -98,7 +98,7 @@ export function AccountGroupSwitcher({
           setActiveGroup(groups[0]);
         }
       } catch (error) {
-        logger.error("Error fetching account groups:", error);
+        logger.error("Error fetching account groups:", error instanceof Error ? error : undefined);
       } finally {
         setLoading(false);
       }

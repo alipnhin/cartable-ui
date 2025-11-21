@@ -145,7 +145,7 @@ export function TransactionTable({
       case "success":
         return "success";
       case "primary":
-        return "default";
+        return "primary";
       case "info":
         return "info";
       case "warning":

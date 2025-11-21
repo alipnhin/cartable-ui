@@ -67,6 +67,7 @@ const switchThumbVariants = cva(
         md: '',
         lg: '',
         xl: '',
+        touch: '',
       },
     },
     compoundVariants: [

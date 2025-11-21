@@ -109,8 +109,21 @@
     "integrations": "Integrations",
     "logout": "Logout",
     "changeLanguage": "Change Language",
+    "changeTheme": "Change Theme",
     "darkMode": "Dark Mode",
     "lightMode": "Light Mode"
+  },
+  "themes": {
+    "default": "Default Green",
+    "defaultDesc": "Classic and calming green theme",
+    "blue": "Sky Blue",
+    "blueDesc": "Modern and professional blue theme",
+    "violet": "Dream Violet",
+    "violetDesc": "Creative and attractive violet theme",
+    "emeraldFinance": "Emerald Finance",
+    "emeraldFinanceDesc": "Ideal for financial systems",
+    "indigoPro": "Indigo Professional",
+    "indigoProDesc": "Modern and corporate theme"
   },
   "paymentCartable": {
     "pageTitle": "Payment Orders",

@@ -30,7 +30,7 @@ export function UnauthorizedHandler() {
           window.dispatchEvent(new CustomEvent("auth:token-refreshed"));
         }
       } catch (error) {
-        logger.error("Error refreshing token:", error);
+        logger.error("Error refreshing token:", error instanceof Error ? error : undefined);
         await signOut({ callbackUrl: "/" });
       }
     };

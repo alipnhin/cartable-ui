@@ -106,8 +106,21 @@
     "integrations": "التكاملات",
     "logout": "تسجيل الخروج",
     "changeLanguage": "تغيير اللغة",
+    "changeTheme": "تغيير السمة",
     "darkMode": "الوضع الداكن",
     "lightMode": "الوضع الفاتح"
+  },
+  "themes": {
+    "default": "الأخضر الافتراضي",
+    "defaultDesc": "سمة خضراء كلاسيكية ومريحة",
+    "blue": "الأزرق السماوي",
+    "blueDesc": "سمة زرقاء حديثة واحترافية",
+    "violet": "البنفسجي الحالم",
+    "violetDesc": "سمة بنفسجية إبداعية وجذابة",
+    "emeraldFinance": "الزمردي المالي",
+    "emeraldFinanceDesc": "مثالي للأنظمة المالية",
+    "indigoPro": "النيلي الاحترافي",
+    "indigoProDesc": "سمة حديثة ومؤسسية"
   },
   "paymentCartable": {
     "pageTitle": "أوامر الدفع",

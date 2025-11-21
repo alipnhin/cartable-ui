@@ -112,8 +112,21 @@
     "integrations": "یکپارچه‌سازی",
     "logout": "خروج",
     "changeLanguage": "تغییر زبان",
+    "changeTheme": "تغییر تم",
     "darkMode": "حالت تاریک",
     "lightMode": "حالت روشن"
+  },
+  "themes": {
+    "default": "سبز پیش‌فرض",
+    "defaultDesc": "تم سبز کلاسیک و آرامش‌بخش",
+    "blue": "آبی آسمانی",
+    "blueDesc": "تم آبی مدرن و حرفه‌ای",
+    "violet": "بنفش رویایی",
+    "violetDesc": "تم بنفش خلاقانه و جذاب",
+    "emeraldFinance": "زمردی مالی",
+    "emeraldFinanceDesc": "مناسب برای سیستم‌های مالی",
+    "indigoPro": "نیلی حرفه‌ای",
+    "indigoProDesc": "تم مدرن و سازمانی"
   },
   "paymentCartable": {
     "pageTitle": "دستورهای پرداخت",

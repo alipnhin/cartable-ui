@@ -222,7 +222,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
             onValueChange={(value) =>
               setLocalFilters((prev) => ({ ...prev, accountId: value }))
             }
-            includeAll={true}
+            showAllOption={true}
           />
         </div>
 
@@ -335,7 +335,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
               onValueChange={(value) =>
                 setLocalFilters((prev) => ({ ...prev, accountId: value }))
               }
-              includeAll={true}
+              showAllOption={true}
             />
           </div>
 
