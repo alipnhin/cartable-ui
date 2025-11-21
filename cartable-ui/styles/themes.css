@@ -1,606 +1,73 @@
-.theme-default .theme-container,
-.theme-default [data-radix-popper-content-wrapper] {
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
+/* Color Themes using data attributes */
+
+/* Blue Theme */
+[data-color-theme="theme-blue"] {
+  --primary: #1D4ED8;
+  --primary-foreground: #EFF6FF;
+  --ring: #3B82F6;
+  --sidebar-primary: #2563EB;
+  --sidebar-primary-foreground: #EFF6FF;
+  --sidebar-ring: #60A5FA;
 }
 
-.theme-mono .theme-container,
-.theme-mono [data-radix-popper-content-wrapper] {
-  --font-sans: var(--font-mono);
-  --primary: var(--color-stone-600);
-  --primary-foreground: var(--color-stone-50);
-  --chart-1: var(--color-stone-300);
-  --chart-2: var(--color-stone-500);
-  --chart-3: var(--color-stone-600);
-  --chart-4: var(--color-stone-700);
-  --chart-5: var(--color-stone-800);
-  --sidebar-primary: var(--color-stone-600);
-  --sidebar-primary-foreground: var(--color-stone-50);
-  --sidebar-ring: var(--color-stone-400);
-
-  @variant dark {
-    --primary: var(--color-stone-500);
-    --primary-foreground: var(--color-stone-50);
-    --sidebar-primary: var(--color-stone-500);
-    --sidebar-primary-foreground: var(--color-stone-50);
-    --sidebar-ring: var(--color-stone-900);
-  }
-
-  @media (min-width: 1024px) {
-    --font-sans: var(--font-mono);
-    --radius: 0.45em;
-    --text-lg: 1rem;
-    --text-xl: 1.1rem;
-    --text-2xl: 1.2rem;
-    --text-3xl: 1.3rem;
-    --text-4xl: 1.4rem;
-    --text-5xl: 1.5rem;
-    --text-6xl: 1.6rem;
-    --text-7xl: 1.7rem;
-    --text-8xl: 1.8rem;
-    --text-base: 0.85rem;
-    --text-sm: 0.8rem;
-    --spacing: 0.222222rem;
-  }
-
-  .rounded-xs,
-  .rounded-sm,
-  .rounded-md,
-  .rounded-lg,
-  .rounded-xl {
-    border-radius: 0;
-  }
-
-  .shadow-xs,
-  .shadow-sm,
-  .shadow-md,
-  .shadow-lg,
-  .shadow-xl {
-    box-shadow: none;
-  }
-
-  [data-slot="toggle-group"],
-  [data-slot="toggle-group-item"],
-  [data-slot="checkbox"],
-  [data-slot="radio"],
-  [data-slot="switch"],
-  [data-slot="switch-thumb"] {
-    @apply rounded-none ! shadow-none !;
-  }
+[data-color-theme="theme-blue"].dark {
+  --primary: #60A5FA;
+  --primary-foreground: #1E3A8A;
+  --sidebar-primary: #3B82F6;
+  --sidebar-primary-foreground: #1E3A8A;
+  --sidebar-ring: #1E3A8A;
 }
 
-.theme-scaled .theme-container,
-.theme-scaled [data-radix-popper-content-wrapper] {
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-
-  @media (min-width: 1024px) {
-    --radius: 0.45em;
-    --text-lg: 1rem;
-    --text-xl: 1.1rem;
-    --text-2xl: 1.2rem;
-    --text-3xl: 1.3rem;
-    --text-4xl: 1.4rem;
-    --text-5xl: 1.5rem;
-    --text-6xl: 1.6rem;
-    --text-7xl: 1.7rem;
-    --text-8xl: 1.8rem;
-    --text-base: 0.85rem;
-    --text-sm: 0.8rem;
-    --spacing: 0.2rem;
-  }
-
-  [data-slot="select-trigger"],
-  [data-slot="toggle-group-item"] {
-    --spacing: 0.2rem;
-  }
-
-  [data-slot="card"] {
-    border-radius: var(--radius);
-    padding-block: calc(var(--spacing) * 4);
-    gap: calc(var(--spacing) * 2);
-  }
-
-  [data-slot="card"].pb-0 {
-    padding-bottom: 0;
-  }
+/* Violet Theme */
+[data-color-theme="theme-violet"] {
+  --primary: #7C3AED;
+  --primary-foreground: #F5F3FF;
+  --ring: #8B5CF6;
+  --sidebar-primary: #7C3AED;
+  --sidebar-primary-foreground: #F5F3FF;
+  --sidebar-ring: #A78BFA;
 }
 
-.theme-rounded-none .theme-container,
-.theme-rounded-none [data-radix-popper-content-wrapper] {
-  --radius: 0;
+[data-color-theme="theme-violet"].dark {
+  --primary: #A78BFA;
+  --primary-foreground: #4C1D95;
+  --sidebar-primary: #8B5CF6;
+  --sidebar-primary-foreground: #4C1D95;
+  --sidebar-ring: #4C1D95;
 }
 
-.theme-rounded-small .theme-container,
-.theme-rounded-small [data-radix-popper-content-wrapper] {
-  --radius: 0.4rem;
-}
-
-.theme-rounded-medium .theme-container,
-.theme-rounded-medium [data-radix-popper-content-wrapper] {
-  --radius: 0.65rem;
-}
-
-.theme-rounded-large .theme-container,
-.theme-rounded-large [data-radix-popper-content-wrapper] {
-  --radius: 1rem;
-}
-
-.theme-rounded-full .theme-container,
-.theme-rounded-full [data-radix-popper-content-wrapper] {
-  --radius: 1.2rem;
-}
-
-.theme-inter .theme-container,
-.theme-inter [data-radix-popper-content-wrapper] {
-  --font-sans: var(--font-inter);
-}
-
-.theme-noto-sans .theme-container,
-.theme-noto-sans [data-radix-popper-content-wrapper] {
-  --font-sans: var(--font-noto-sans);
-}
-
-.theme-nunito-sans .theme-container,
-.theme-nunito-sans [data-radix-popper-content-wrapper] {
-  --font-sans: var(--font-nunito-sans);
-}
-
-.theme-figtree .theme-container,
-.theme-figtree [data-radix-popper-content-wrapper] {
-  --font-sans: var(--font-figtree);
-}
-
-.theme-blue .theme-container,
-.theme-blue [data-radix-popper-content-wrapper] {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  /* --ring: var(--color-blue-100); */
-  --sidebar-primary: var(--color-blue-600);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  /* --sidebar-ring: var(--color-blue-400); */
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-
-  @variant dark {
-    --primary: var(--color-blue-700);
-    --primary-foreground: var(--color-blue-50);
-    /* --ring: var(--color-blue-900); */
-    --sidebar-primary: var(--color-blue-500);
-    --sidebar-primary-foreground: var(--color-blue-50);
-    /* --sidebar-ring: var(--color-blue-900); */
-  }
-}
-
-.theme-green .theme-container,
-.theme-green [data-radix-popper-content-wrapper] {
-  --primary: var(--color-lime-600);
-  --primary-foreground: var(--color-lime-50);
-  --ring: var(--color-lime-400);
-  --chart-1: var(--color-green-300);
-  --chart-2: var(--color-green-500);
-  --chart-3: var(--color-green-600);
-  --chart-4: var(--color-green-700);
-  --chart-5: var(--color-green-800);
-  --sidebar-primary: var(--color-lime-600);
-  --sidebar-primary-foreground: var(--color-lime-50);
-  --sidebar-ring: var(--color-lime-400);
-
-  @variant dark {
-    --primary: var(--color-lime-600);
-    --primary-foreground: var(--color-lime-50);
-    --ring: var(--color-lime-900);
-    --sidebar-primary: var(--color-lime-500);
-    --sidebar-primary-foreground: var(--color-lime-50);
-    --sidebar-ring: var(--color-lime-900);
-  }
-}
-
-.theme-amber .theme-container,
-.theme-amber [data-radix-popper-content-wrapper] {
-  --primary: var(--color-amber-600);
-  --primary-foreground: var(--color-amber-50);
-  --ring: var(--color-amber-400);
-  --chart-1: var(--color-amber-300);
-  --chart-2: var(--color-amber-500);
-  --chart-3: var(--color-amber-600);
-  --chart-4: var(--color-amber-700);
-  --chart-5: var(--color-amber-800);
-  --sidebar-primary: var(--color-amber-600);
-  --sidebar-primary-foreground: var(--color-amber-50);
-  --sidebar-ring: var(--color-amber-400);
-
-  @variant dark {
-    --primary: var(--color-amber-500);
-    --primary-foreground: var(--color-amber-50);
-    --ring: var(--color-amber-900);
-    --sidebar-primary: var(--color-amber-500);
-    --sidebar-primary-foreground: var(--color-amber-50);
-    --sidebar-ring: var(--color-amber-900);
-  }
-}
-
-.theme-rose .theme-container,
-.theme-rose [data-radix-popper-content-wrapper] {
-  --primary: var(--color-rose-600);
-  --primary-foreground: var(--color-rose-50);
-  --ring: var(--color-rose-400);
-  --chart-1: var(--color-rose-300);
-  --chart-2: var(--color-rose-500);
-  --chart-3: var(--color-rose-600);
-  --chart-4: var(--color-rose-700);
-  --chart-5: var(--color-rose-800);
-  --sidebar-primary: var(--color-rose-600);
-  --sidebar-primary-foreground: var(--color-rose-50);
-  --sidebar-ring: var(--color-rose-400);
-
-  @variant dark {
-    --primary: var(--color-rose-500);
-    --primary-foreground: var(--color-rose-50);
-    --ring: var(--color-rose-900);
-    --sidebar-primary: var(--color-rose-500);
-    --sidebar-primary-foreground: var(--color-rose-50);
-    --sidebar-ring: var(--color-rose-900);
-  }
-}
-
-.theme-purple .theme-container,
-.theme-purple [data-radix-popper-content-wrapper] {
-  --primary: var(--color-purple-600);
-  --primary-foreground: var(--color-purple-50);
-  --ring: var(--color-purple-400);
-  --chart-1: var(--color-purple-300);
-  --chart-2: var(--color-purple-500);
-  --chart-3: var(--color-purple-600);
-  --chart-4: var(--color-purple-700);
-  --chart-5: var(--color-purple-800);
-  --sidebar-primary: var(--color-purple-600);
-  --sidebar-primary-foreground: var(--color-purple-50);
-  --sidebar-ring: var(--color-purple-400);
-
-  @variant dark {
-    --primary: var(--color-purple-500);
-    --primary-foreground: var(--color-purple-50);
-    --ring: var(--color-purple-900);
-    --sidebar-primary: var(--color-purple-500);
-    --sidebar-primary-foreground: var(--color-purple-50);
-    --sidebar-ring: var(--color-purple-900);
-  }
-}
-
-.theme-orange .theme-container,
-.theme-orange [data-radix-popper-content-wrapper] {
-  --primary: var(--color-orange-600);
-  --primary-foreground: var(--color-orange-50);
-  --ring: var(--color-orange-400);
-  --chart-1: var(--color-orange-300);
-  --chart-2: var(--color-orange-500);
-  --chart-3: var(--color-orange-600);
-  --chart-4: var(--color-orange-700);
-  --chart-5: var(--color-orange-800);
-  --sidebar-primary: var(--color-orange-600);
-  --sidebar-primary-foreground: var(--color-orange-50);
-  --sidebar-ring: var(--color-orange-400);
-
-  @variant dark {
-    --primary: var(--color-orange-500);
-    --primary-foreground: var(--color-orange-50);
-    --ring: var(--color-orange-900);
-    --sidebar-primary: var(--color-orange-500);
-    --sidebar-primary-foreground: var(--color-orange-50);
-    --sidebar-ring: var(--color-orange-900);
-  }
-}
-
-.theme-teal .theme-container,
-.theme-teal [data-radix-popper-content-wrapper] {
-  --primary: var(--color-teal-600);
-  --primary-foreground: var(--color-teal-50);
-  --chart-1: var(--color-teal-300);
-  --chart-2: var(--color-teal-500);
-  --chart-3: var(--color-teal-600);
-  --chart-4: var(--color-teal-700);
-  --chart-5: var(--color-teal-800);
-  --sidebar-primary: var(--color-teal-600);
-  --sidebar-primary-foreground: var(--color-teal-50);
-  --sidebar-ring: var(--color-teal-400);
-
-  @variant dark {
-    --primary: var(--color-teal-500);
-    --primary-foreground: var(--color-teal-50);
-    --sidebar-primary: var(--color-teal-500);
-    --sidebar-primary-foreground: var(--color-teal-50);
-    --sidebar-ring: var(--color-teal-900);
-  }
-}
-
-.theme-red .theme-container,
-.theme-red [data-radix-popper-content-wrapper] {
-  --primary: var(--color-red-600);
-  --primary-foreground: var(--color-red-50);
-  --ring: var(--color-red-400);
-  --chart-1: var(--color-red-300);
-  --chart-2: var(--color-red-500);
-  --chart-3: var(--color-red-600);
-  --chart-4: var(--color-red-700);
-  --chart-5: var(--color-red-800);
-  --sidebar-primary: var(--color-red-600);
-  --sidebar-primary-foreground: var(--color-red-50);
-  --sidebar-ring: var(--color-red-400);
-
-  @variant dark {
-    --primary: var(--color-red-500);
-    --primary-foreground: var(--color-red-50);
-    --ring: var(--color-red-900);
-    --sidebar-primary: var(--color-red-500);
-    --sidebar-primary-foreground: var(--color-red-50);
-    --sidebar-ring: var(--color-red-900);
-  }
-}
-
-.theme-yellow .theme-container,
-.theme-yellow [data-radix-popper-content-wrapper] {
-  --primary: var(--color-yellow-400);
-  --primary-foreground: var(--color-yellow-900);
-  --ring: var(--color-yellow-400);
-  --chart-1: var(--color-yellow-300);
-  --chart-2: var(--color-yellow-500);
-  --chart-3: var(--color-yellow-600);
-  --chart-4: var(--color-yellow-700);
-  --chart-5: var(--color-yellow-800);
-  --sidebar-primary: var(--color-yellow-600);
-  --sidebar-primary-foreground: var(--color-yellow-50);
-  --sidebar-ring: var(--color-yellow-400);
-
-  @variant dark {
-    --primary: var(--color-yellow-500);
-    --primary-foreground: var(--color-yellow-900);
-    --ring: var(--color-yellow-900);
-    --sidebar-primary: var(--color-yellow-500);
-    --sidebar-primary-foreground: var(--color-yellow-50);
-    --sidebar-ring: var(--color-yellow-900);
-  }
-}
-
-.theme-violet .theme-container,
-.theme-violet [data-radix-popper-content-wrapper] {
-  --primary: var(--color-violet-600);
-  --primary-foreground: var(--color-violet-50);
-  --ring: var(--color-violet-400);
-  --chart-1: var(--color-violet-300);
-  --chart-2: var(--color-violet-500);
-  --chart-3: var(--color-violet-600);
-  --chart-4: var(--color-violet-700);
-  --chart-5: var(--color-violet-800);
-  --sidebar-primary: var(--color-violet-600);
-  --sidebar-primary-foreground: var(--color-violet-50);
-  --sidebar-ring: var(--color-violet-400);
-
-  @variant dark {
-    --primary: var(--color-violet-500);
-    --primary-foreground: var(--color-violet-50);
-    --ring: var(--color-violet-900);
-    --sidebar-primary: var(--color-violet-500);
-    --sidebar-primary-foreground: var(--color-violet-50);
-    --sidebar-ring: var(--color-violet-900);
-  }
-}
-
-/* ==========================================
-   تم زمردی - Emerald Finance Theme
-   مناسب برای سیستم‌های مالی، القاء کننده اعتماد و ثبات
-   ========================================== */
-.theme-emerald-finance .theme-container,
-.theme-emerald-finance [data-radix-popper-content-wrapper] {
-  /* رنگ‌های اصلی سبز زمردی */
+/* Emerald Finance Theme */
+[data-color-theme="theme-emerald-finance"] {
   --primary: #059669;
   --primary-foreground: #ECFDF5;
   --ring: #10B981;
-
-  /* رنگ‌های ثانویه */
-  --secondary: #D1FAE5;
-  --secondary-foreground: #064E3B;
-
-  /* رنگ‌های muted */
-  --muted: #F0FDF4;
-  --muted-foreground: #4B5563;
-
-  /* رنگ‌های surface */
-  --surface: #F0FDF4;
-  --surface-foreground: #1F2937;
-
-  /* رنگ‌های sidebar */
-  --sidebar: #ECFDF5;
-  --sidebar-foreground: #064E3B;
-  --sidebar-primary: #059669;
+  --sidebar-primary: #047857;
   --sidebar-primary-foreground: #ECFDF5;
-  --sidebar-accent: #D1FAE5;
-  --sidebar-accent-foreground: #064E3B;
-  --sidebar-border: #A7F3D0;
-  --sidebar-ring: #10B981;
-
-  /* رنگ‌های نمودار */
-  --chart-1: #6EE7B7;
-  --chart-2: #34D399;
-  --chart-3: #10B981;
-  --chart-4: #059669;
-  --chart-5: #047857;
-
-  /* رنگ‌های selection */
-  --selection: #A7F3D0;
-  --selection-foreground: #064E3B;
-
-  /* رنگ‌های code */
-  --code: #D1FAE5;
-  --code-foreground: #064E3B;
-  --code-highlight: #A7F3D0;
-
-  @variant dark {
-    /* رنگ‌های اصلی - حالت تاریک */
-    --background: #022C22;
-    --foreground: #ECFDF5;
-    --card: #064E3B;
-    --card-foreground: #ECFDF5;
-    --popover: #064E3B;
-    --popover-foreground: #ECFDF5;
-
-    --primary: #34D399;
-    --primary-foreground: #022C22;
-
-    --secondary: #065F46;
-    --secondary-foreground: #ECFDF5;
-
-    --muted: #064E3B;
-    --muted-foreground: #9CA3AF;
-
-    --accent: #065F46;
-    --accent-foreground: #ECFDF5;
-
-    --border: rgba(236, 253, 245, 0.15);
-    --input: rgba(236, 253, 245, 0.2);
-    --ring: #34D399;
-
-    /* sidebar تاریک */
-    --sidebar: #064E3B;
-    --sidebar-foreground: #ECFDF5;
-    --sidebar-primary: #34D399;
-    --sidebar-primary-foreground: #022C22;
-    --sidebar-accent: #065F46;
-    --sidebar-accent-foreground: #ECFDF5;
-    --sidebar-border: rgba(236, 253, 245, 0.15);
-    --sidebar-ring: #34D399;
-
-    /* surface تاریک */
-    --surface: #064E3B;
-    --surface-foreground: #ECFDF5;
-
-    /* code تاریک */
-    --code: #064E3B;
-    --code-foreground: #ECFDF5;
-    --code-highlight: #065F46;
-
-    /* selection تاریک */
-    --selection: rgba(52, 211, 153, 0.3);
-    --selection-foreground: #ECFDF5;
-  }
+  --sidebar-ring: #34D399;
 }
 
-/* ==========================================
-   تم نیلی حرفه‌ای - Indigo Professional Theme
-   مدرن، شیک و حرفه‌ای برای سیستم‌های سازمانی
-   ========================================== */
-.theme-indigo-pro .theme-container,
-.theme-indigo-pro [data-radix-popper-content-wrapper] {
-  /* رنگ‌های اصلی نیلی */
+[data-color-theme="theme-emerald-finance"].dark {
+  --primary: #34D399;
+  --primary-foreground: #064E3B;
+  --sidebar-primary: #10B981;
+  --sidebar-primary-foreground: #064E3B;
+  --sidebar-ring: #064E3B;
+}
+
+/* Indigo Professional Theme */
+[data-color-theme="theme-indigo-pro"] {
   --primary: #4F46E5;
   --primary-foreground: #EEF2FF;
   --ring: #6366F1;
-
-  /* رنگ‌های ثانویه */
-  --secondary: #E0E7FF;
-  --secondary-foreground: #312E81;
-
-  /* رنگ‌های muted */
-  --muted: #EEF2FF;
-  --muted-foreground: #6B7280;
-
-  /* رنگ‌های background */
-  --background: #FAFBFF;
-  --foreground: #1E1B4B;
-  --card: #FFFFFF;
-  --card-foreground: #1E1B4B;
-  --popover: #FFFFFF;
-  --popover-foreground: #1E1B4B;
-
-  /* رنگ‌های surface */
-  --surface: #EEF2FF;
-  --surface-foreground: #1E1B4B;
-
-  /* رنگ‌های border و input */
-  --border: #C7D2FE;
-  --input: #C7D2FE;
-
-  /* رنگ‌های sidebar */
-  --sidebar: #F5F7FF;
-  --sidebar-foreground: #1E1B4B;
-  --sidebar-primary: #4F46E5;
+  --sidebar-primary: #4338CA;
   --sidebar-primary-foreground: #EEF2FF;
-  --sidebar-accent: #E0E7FF;
-  --sidebar-accent-foreground: #312E81;
-  --sidebar-border: #C7D2FE;
-  --sidebar-ring: #6366F1;
+  --sidebar-ring: #818CF8;
+}
 
-  /* رنگ‌های نمودار */
-  --chart-1: #A5B4FC;
-  --chart-2: #818CF8;
-  --chart-3: #6366F1;
-  --chart-4: #4F46E5;
-  --chart-5: #4338CA;
-
-  /* رنگ‌های selection */
-  --selection: #C7D2FE;
-  --selection-foreground: #1E1B4B;
-
-  /* رنگ‌های code */
-  --code: #E0E7FF;
-  --code-foreground: #1E1B4B;
-  --code-highlight: #C7D2FE;
-
-  @variant dark {
-    /* رنگ‌های اصلی - حالت تاریک */
-    --background: #0F0E1F;
-    --foreground: #EEF2FF;
-    --card: #1E1B4B;
-    --card-foreground: #EEF2FF;
-    --popover: #1E1B4B;
-    --popover-foreground: #EEF2FF;
-
-    --primary: #818CF8;
-    --primary-foreground: #0F0E1F;
-
-    --secondary: #312E81;
-    --secondary-foreground: #EEF2FF;
-
-    --muted: #1E1B4B;
-    --muted-foreground: #A5B4FC;
-
-    --accent: #312E81;
-    --accent-foreground: #EEF2FF;
-
-    --border: rgba(238, 242, 255, 0.12);
-    --input: rgba(238, 242, 255, 0.18);
-    --ring: #818CF8;
-
-    /* sidebar تاریک */
-    --sidebar: #1E1B4B;
-    --sidebar-foreground: #EEF2FF;
-    --sidebar-primary: #818CF8;
-    --sidebar-primary-foreground: #0F0E1F;
-    --sidebar-accent: #312E81;
-    --sidebar-accent-foreground: #EEF2FF;
-    --sidebar-border: rgba(238, 242, 255, 0.12);
-    --sidebar-ring: #818CF8;
-
-    /* surface تاریک */
-    --surface: #1E1B4B;
-    --surface-foreground: #EEF2FF;
-
-    /* code تاریک */
-    --code: #1E1B4B;
-    --code-foreground: #EEF2FF;
-    --code-highlight: #312E81;
-
-    /* selection تاریک */
-    --selection: rgba(129, 140, 248, 0.3);
-    --selection-foreground: #EEF2FF;
-  }
+[data-color-theme="theme-indigo-pro"].dark {
+  --primary: #818CF8;
+  --primary-foreground: #312E81;
+  --sidebar-primary: #6366F1;
+  --sidebar-primary-foreground: #312E81;
+  --sidebar-ring: #312E81;
 }

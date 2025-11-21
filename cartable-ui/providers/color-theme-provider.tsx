@@ -36,22 +36,17 @@ export function ColorThemeProvider({ children }: { children: React.ReactNode }) 
     setMounted(true);
   }, []);
 
-  // Apply theme class to body
+  // Apply theme data attribute to body
   React.useEffect(() => {
     if (!mounted) return;
 
     const body = document.body;
 
-    // Remove all theme classes
-    COLOR_THEMES.forEach((theme) => {
-      if (theme.id !== 'default') {
-        body.classList.remove(theme.id);
-      }
-    });
-
-    // Add current theme class
+    // Set data attribute for theme
     if (colorThemeId !== 'default') {
-      body.classList.add(colorThemeId);
+      body.setAttribute('data-color-theme', colorThemeId);
+    } else {
+      body.removeAttribute('data-color-theme');
     }
 
     // Save to localStorage

@@ -1,5 +1,6 @@
 "use client";
 import "@/styles/globals.css";
+import "@/styles/themes.css";
 import { cn } from "@/lib/utils";
 import { DirectionProvider } from "@radix-ui/react-direction";
 import { I18nProvider } from "@/providers/i18n-provider";
