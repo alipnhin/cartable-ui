@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { DirectionProvider } from "@radix-ui/react-direction";
 import { I18nProvider } from "@/providers/i18n-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { ColorThemeProvider } from "@/providers/color-theme-provider";
 import { TooltipsProvider } from "@/providers/tooltips-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { PWAInstaller } from "@/components/common/pwa-installer";
@@ -123,6 +124,7 @@ export default function RootLayout({
           <SessionProvider>
             <UnauthorizedHandler />
             <ThemeProvider>
+              <ColorThemeProvider>
               <I18nProvider>
                 <TooltipsProvider>
                   <DirectionProvider dir="rtl">
@@ -133,6 +135,7 @@ export default function RootLayout({
                   </DirectionProvider>
                 </TooltipsProvider>
               </I18nProvider>
+              </ColorThemeProvider>
             </ThemeProvider>
           </SessionProvider>
         </ErrorBoundary>

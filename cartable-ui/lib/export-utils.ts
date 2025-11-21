@@ -27,7 +27,6 @@ export const exportDashboardToExcel = async (
 
   // ===== Sheet 1: Summary Stats =====
   const summarySheet = workbook.addWorksheet("خلاصه", {
-    properties: { rightToLeft: true },
     views: [{ rightToLeft: true }],
   });
 
@@ -147,7 +146,6 @@ export const exportDashboardToExcel = async (
 
   // ===== Sheet 2: Status Summary =====
   const statusSheet = workbook.addWorksheet("وضعیت تراکنش‌ها", {
-    properties: { rightToLeft: true },
     views: [{ rightToLeft: true }],
   });
 
@@ -237,7 +235,6 @@ export const exportDashboardToExcel = async (
 
   // ===== Sheet 3: Payment Type Summary =====
   const paymentSheet = workbook.addWorksheet("انواع پرداخت", {
-    properties: { rightToLeft: true },
     views: [{ rightToLeft: true }],
   });
 
@@ -342,7 +339,6 @@ export const exportDashboardToExcel = async (
 
   // ===== Sheet 4: Key Metrics =====
   const metricsSheet = workbook.addWorksheet("شاخص‌های کلیدی", {
-    properties: { rightToLeft: true },
     views: [{ rightToLeft: true }],
   });
 

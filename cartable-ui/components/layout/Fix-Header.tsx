@@ -13,9 +13,10 @@ import { useLanguage } from "@/providers/i18n-provider";
 
 interface HeaderProps {
   returnUrl?: Url;
+  children?: React.ReactNode;
 }
 
-export function FixHeader({ returnUrl }: HeaderProps) {
+export function FixHeader({ returnUrl, children }: HeaderProps) {
   const router = useRouter();
   const isMobile = useIsMobile();
   const { t } = useTranslation();
@@ -37,7 +38,9 @@ export function FixHeader({ returnUrl }: HeaderProps) {
           />
         </div>
 
-        <div className="flex-1 min-w-0" />
+        <div className="flex-1 min-w-0 flex items-center gap-2">
+          {children}
+        </div>
         <Button variant="outline" onClick={() => router.push(`${returnUrl}`)}>
           {isRTL ? <ArrowRight /> : <ArrowLeft />}
           {t("common.back")}

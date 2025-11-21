@@ -1,9 +1,14 @@
 import NextAuth from "next-auth";
+import type { JWT } from "next-auth/jwt";
+import type { OIDCTokenResponse } from "@/types/next-auth";
 
 /**
  * تابع برای refresh کردن access token با استفاده از refresh token
+ *
+ * @param token - JWT token object
+ * @returns Updated token with new access token or error
  */
-async function refreshAccessToken(token: any) {
+async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {
     const response = await fetch(`${process.env.AUTH_ISSUER}/connect/token`, {
       method: "POST",
@@ -18,10 +23,10 @@ async function refreshAccessToken(token: any) {
       }),
     });
 
-    const refreshedTokens = await response.json();
+    const refreshedTokens: OIDCTokenResponse = await response.json();
 
     if (!response.ok) {
-      throw refreshedTokens;
+      throw new Error(`Token refresh failed: ${response.status}`);
     }
 
     return {

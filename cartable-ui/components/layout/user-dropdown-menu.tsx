@@ -2,7 +2,7 @@
 import { ReactNode, useState } from "react";
 import Link from "next/link";
 import { I18N_LANGUAGES, Language } from "@/i18n/config";
-import { FileText, Globe, LogOut, Moon, User } from "lucide-react";
+import { FileText, Globe, LogOut, Moon, Palette, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,7 @@ import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSession, signOut } from "next-auth/react";
+import { useColorTheme } from "@/providers/color-theme-provider";
 
 export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const { t } = useTranslation();
@@ -32,6 +33,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const { data: session } = useSession();
+  const { colorTheme, colorThemeId, setColorTheme, availableThemes } = useColorTheme();
 
   // اطلاعات کاربر از session
   const userName = session?.user?.name || "کاربر";
@@ -121,6 +123,39 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
                       {item.name}
                     </span>
                     {language.code === item.code && (
+                      <div className="w-2 h-2 rounded-full bg-primary" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Theme Selection */}
+            <div className="mb-4">
+              <div className="text-sm font-medium text-muted-foreground mb-2 px-4">
+                {t("userMenu.changeTheme")}
+              </div>
+              <div className="space-y-1">
+                {availableThemes.map((themeItem) => (
+                  <button
+                    key={themeItem.id}
+                    onClick={() => setColorTheme(themeItem.id)}
+                    className={`w-full flex items-center gap-3 p-4 rounded-lg transition-colors ${
+                      colorThemeId === themeItem.id
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-muted active:bg-muted/80"
+                    }`}
+                  >
+                    <div
+                      className="w-6 h-6 rounded-full border border-border"
+                      style={{
+                        background: `linear-gradient(135deg, ${themeItem.previewColor} 50%, ${themeItem.previewColorSecondary || themeItem.previewColor} 50%)`,
+                      }}
+                    />
+                    <span className="text-base flex-1 text-start">
+                      {t(themeItem.nameKey)}
+                    </span>
+                    {colorThemeId === themeItem.id && (
                       <div className="w-2 h-2 rounded-full bg-primary" />
                     )}
                   </button>
@@ -236,6 +271,47 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
                     alt={item.name}
                   />
                   <span>{item.name}</span>
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+
+        {/* Theme Submenu with Radio Group */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center gap-2 **:data-[slot=dropdown-menu-sub-trigger-indicator]:hidden hover:**:data-[slot=badge]:border-input data-[state=open]:**:data-[slot=badge]:border-input">
+            <Palette />
+            <span className="flex items-center justify-between gap-2 grow relative">
+              {t("userMenu.changeTheme")}
+              <Badge
+                variant="outline"
+                className="absolute end-0 top-1/2 -translate-y-1/2"
+              >
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: colorTheme.previewColor }}
+                />
+              </Badge>
+            </span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-52">
+            <DropdownMenuRadioGroup
+              value={colorThemeId}
+              onValueChange={(value) => setColorTheme(value)}
+            >
+              {availableThemes.map((themeItem) => (
+                <DropdownMenuRadioItem
+                  key={themeItem.id}
+                  value={themeItem.id}
+                  className="flex items-center gap-2"
+                >
+                  <div
+                    className="w-4 h-4 rounded-full border border-border"
+                    style={{
+                      background: `linear-gradient(135deg, ${themeItem.previewColor} 50%, ${themeItem.previewColorSecondary || themeItem.previewColor} 50%)`,
+                    }}
+                  />
+                  <span>{t(themeItem.nameKey)}</span>
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>

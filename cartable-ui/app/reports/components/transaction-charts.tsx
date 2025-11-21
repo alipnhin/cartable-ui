@@ -16,12 +16,12 @@ export function TransactionCharts({ transactions = [] }: TransactionChartsProps)
   // 3 = succeeded, 2 = waiting for execution, 5 = waiting for bank
   // 4 = rejected by bank, 7 = canceled
   const statusData = {
-    succeeded: transactions.filter((tx) => tx.status === 3).length,
+    succeeded: transactions.filter((tx) => Number(tx.status) === 3).length,
     pending: transactions.filter(
-      (tx) => tx.status === 2 || tx.status === 5 || tx.status === 1
+      (tx) => Number(tx.status) === 2 || Number(tx.status) === 5 || Number(tx.status) === 1
     ).length,
     failed: transactions.filter(
-      (tx) => tx.status === 4 || tx.status === 7 || tx.status === 6
+      (tx) => Number(tx.status) === 4 || Number(tx.status) === 7 || Number(tx.status) === 6
     ).length,
   };
 

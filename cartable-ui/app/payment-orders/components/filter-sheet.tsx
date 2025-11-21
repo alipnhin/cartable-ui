@@ -223,7 +223,7 @@ export function FilterSheet({
           onValueChange={(value) =>
             setLocalFilters((prev) => ({ ...prev, accountId: value }))
           }
-          includeAll={true}
+          showAllOption={true}
         />
       </div>
 
@@ -366,7 +366,7 @@ export function FilterSheet({
       <div className="flex gap-3 pt-4 border-t">
         <Button
           variant="outline"
-          size={isMobile ? "lg" : "default"}
+          size={isMobile ? "lg" : "md"}
           className={cn("flex-1", isMobile && "text-base")}
           onClick={handleReset}
           disabled={isLoading}
@@ -374,7 +374,7 @@ export function FilterSheet({
           {t("filters.reset")}
         </Button>
         <Button
-          size={isMobile ? "lg" : "default"}
+          size={isMobile ? "lg" : "md"}
           className={cn("flex-1", isMobile && "text-base")}
           onClick={handleApply}
           disabled={isLoading}

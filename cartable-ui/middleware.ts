@@ -21,6 +21,9 @@ import {
   UserRole,
 } from "@/config/permissions";
 
+import { extractRolesFromToken } from "@/lib/jwt-utils";
+import type { Session } from "next-auth";
+
 /**
  * Extract user roles from session token
  * استخراج نقش‌های کاربر از توکن session
@@ -28,30 +31,12 @@ import {
  * @param session - نشست کاربر
  * @returns آرایه‌ای از نقش‌های کاربر
  */
-function getUserRoles(session: any): string[] {
+function getUserRoles(session: Session | null): string[] {
   if (!session?.accessToken) {
     return [];
   }
 
-  try {
-    // Parse JWT token to extract roles
-    const tokenPayload = JSON.parse(
-      Buffer.from(session.accessToken.split(".")[1], "base64").toString()
-    );
-
-    // Roles can be in different claim types depending on Identity Server config
-    const roles =
-      tokenPayload.role ||
-      tokenPayload.roles ||
-      tokenPayload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
-      [];
-
-    // Ensure roles is always an array
-    return Array.isArray(roles) ? roles : [roles];
-  } catch (error) {
-    console.error("Error parsing user roles from token:", error);
-    return [];
-  }
+  return extractRolesFromToken(session.accessToken);
 }
 
 /**

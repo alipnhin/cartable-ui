@@ -71,11 +71,11 @@ export function PWAInstaller() {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/sw.js")
-        .then((registration) => {
-          logger.info("Service Worker registered:", registration);
+        .then(() => {
+          logger.info("Service Worker registered");
         })
         .catch((error) => {
-          logger.error("Service Worker registration failed:", error);
+          logger.error("Service Worker registration failed:", error instanceof Error ? error : undefined);
         });
     }
 
@@ -149,7 +149,7 @@ export function PWAInstaller() {
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
 
-      logger.info("User choice:", outcome);
+      logger.info(`User choice: ${outcome}`);
 
       if (outcome === "accepted") {
         setShowInstallPrompt(false);
@@ -157,7 +157,7 @@ export function PWAInstaller() {
 
       setDeferredPrompt(null);
     } catch (error) {
-      logger.error("Error during installation:", error);
+      logger.error("Error during installation:", error instanceof Error ? error : undefined);
     }
   };
 
