@@ -28,6 +28,7 @@ import {
 export type BadgeVariant =
   | "default"
   | "success"
+  | "successLight"
   | "warning"
   | "danger"
   | "info"
@@ -43,7 +44,9 @@ interface StatusBadgeProps {
 const variantStyles: Record<BadgeVariant, string> = {
   default: "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20",
   success:
-    "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20 hover:bg-green-500/20",
+    "bg-green-600/15 text-green-700 dark:text-green-400 border-green-600/25 hover:bg-green-600/25",
+  successLight:
+    "bg-green-500/10 text-green-600 dark:text-green-300 border-green-500/20 hover:bg-green-500/20",
   warning:
     "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 hover:bg-amber-500/20",
   danger:
@@ -188,7 +191,7 @@ export function getTransactionStatusBadge(status: TransactionStatus): {
       icon: Clock,
     },
     [TransactionStatus.BankSucceeded]: {
-      variant: "success",
+      variant: "success", // سبز تیره - موفق
       icon: CheckCircle2,
     },
     [TransactionStatus.WaitForExecution]: {
@@ -200,11 +203,11 @@ export function getTransactionStatusBadge(status: TransactionStatus): {
       icon: CheckCircle2,
     },
     [TransactionStatus.Failed]: {
-      variant: "danger",
+      variant: "successLight", // سبز روشن - انجام شده با خطا
       icon: XCircle,
     },
     [TransactionStatus.BankRejected]: {
-      variant: "danger",
+      variant: "successLight", // سبز روشن - انجام شده با خطا
       icon: Ban,
     },
     [TransactionStatus.Expired]: {
