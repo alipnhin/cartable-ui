@@ -6,13 +6,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WithdrawalTransaction } from "@/types/api";
 import { BankLogo } from "@/components/common/bank-logo";
 import { getBankCodeFromIban, getBankName } from "@/lib/bank-logos";
 import { TransactionStatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Clock } from "lucide-react";
 import { useState } from "react";
 
 interface TransactionDetailDialogProps {
@@ -111,105 +112,147 @@ export function TransactionDetailDialog({
           </div>
         </DialogHeader>
 
-        <div className="py-4 space-y-6">
-          {/* Bank Logo and Amount */}
-          <div className="text-center py-4">
-            {bankCode && (
-              <div className="flex justify-center mb-4">
-                <BankLogo bankCode={bankCode} size="xl" />
+        <Tabs defaultValue="details" className="py-4">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="details">جزئیات</TabsTrigger>
+            <TabsTrigger value="history">تاریخچه تغییرات</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="details" className="space-y-6">
+            {/* Bank Logo and Amount */}
+            <div className="text-center py-4">
+              {bankCode && (
+                <div className="flex justify-center mb-4">
+                  <BankLogo bankCode={bankCode} size="xl" />
+                </div>
+              )}
+              <div className="text-sm text-muted-foreground mb-1">مبلغ تراکنش</div>
+              <div className="text-3xl font-bold text-foreground">
+                {formatCurrency(parseFloat(transaction.amount) || 0, locale)}
+              </div>
+            </div>
+
+            {/* Two column layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Beneficiary Info */}
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b">
+                  اطلاعات ذینفع
+                </h3>
+                <div className="space-y-0">
+                  <InfoRow
+                    label={t("transactions.ownerName")}
+                    value={transaction.destinationAccountOwner}
+                  />
+
+                  {transaction.nationalCode && (
+                    <InfoRow
+                      label={t("transactions.nationalCode")}
+                      value={transaction.nationalCode}
+                      mono
+                      copyable
+                    />
+                  )}
+
+                  <InfoRow
+                    label={t("transactions.iban")}
+                    value={transaction.destinationIban}
+                    mono
+                    copyable
+                  />
+
+                  {bankName && (
+                    <InfoRow
+                      label="بانک مقصد"
+                      value={bankName}
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Transaction Info */}
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b">
+                  اطلاعات تراکنش
+                </h3>
+                <div className="space-y-0">
+                  <InfoRow
+                    label={t("transactions.orderId")}
+                    value={transaction.id}
+                    mono
+                    copyable
+                  />
+
+                  {transaction.trackingId && (
+                    <InfoRow
+                      label={t("transactions.trackingId")}
+                      value={transaction.trackingId}
+                      mono
+                      copyable
+                    />
+                  )}
+
+                  <InfoRow
+                    label={t("transactions.createdDateTime")}
+                    value={formatDateTime(transaction.createdDateTime, locale)}
+                  />
+
+                  {transaction.description && (
+                    <InfoRow
+                      label={t("transactions.description")}
+                      value={transaction.description}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {transaction.providerMessage && (
+              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <div className="text-sm font-medium text-destructive mb-1">علت رد</div>
+                <div className="text-sm text-destructive">
+                  {transaction.providerMessage}
+                </div>
               </div>
             )}
-            <div className="text-sm text-muted-foreground mb-1">مبلغ تراکنش</div>
-            <div className="text-3xl font-bold text-foreground">
-              {formatCurrency(parseFloat(transaction.amount) || 0, locale)}
-            </div>
-          </div>
+          </TabsContent>
 
-          {/* Two column layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Beneficiary Info */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b">
-                اطلاعات ذینفع
-              </h3>
-              <div className="space-y-0">
-                <InfoRow
-                  label={t("transactions.ownerName")}
-                  value={transaction.destinationAccountOwner}
-                />
-
-                {transaction.nationalCode && (
-                  <InfoRow
-                    label={t("transactions.nationalCode")}
-                    value={transaction.nationalCode}
-                    mono
-                    copyable
-                  />
-                )}
-
-                <InfoRow
-                  label={t("transactions.iban")}
-                  value={transaction.destinationIban}
-                  mono
-                  copyable
-                />
-
-                {bankName && (
-                  <InfoRow
-                    label="بانک مقصد"
-                    value={bankName}
-                  />
-                )}
+          <TabsContent value="history">
+            {transaction.changeHistory && transaction.changeHistory.length > 0 ? (
+              <div className="space-y-3">
+                {transaction.changeHistory.map((entry, index) => (
+                  <div
+                    key={entry.id || index}
+                    className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-sm font-medium text-foreground">
+                            {entry.description}
+                          </span>
+                          <TransactionStatusBadge status={entry.status as any} size="sm" />
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {formatDateTime(entry.createdDateTime, locale)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-
-            {/* Transaction Info */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b">
-                اطلاعات تراکنش
-              </h3>
-              <div className="space-y-0">
-                <InfoRow
-                  label={t("transactions.orderId")}
-                  value={transaction.id}
-                  mono
-                  copyable
-                />
-
-                {transaction.trackingId && (
-                  <InfoRow
-                    label={t("transactions.trackingId")}
-                    value={transaction.trackingId}
-                    mono
-                    copyable
-                  />
-                )}
-
-                <InfoRow
-                  label={t("transactions.createdDateTime")}
-                  value={formatDateTime(transaction.createdDateTime, locale)}
-                />
-
-                {transaction.description && (
-                  <InfoRow
-                    label={t("transactions.description")}
-                    value={transaction.description}
-                  />
-                )}
+            ) : (
+              <div className="text-center py-12">
+                <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                <p className="text-sm text-muted-foreground">تاریخچه تغییراتی وجود ندارد</p>
               </div>
-            </div>
-          </div>
-
-          {/* Error Message */}
-          {transaction.providerMessage && (
-            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <div className="text-sm font-medium text-destructive mb-1">علت رد</div>
-              <div className="text-sm text-destructive">
-                {transaction.providerMessage}
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
