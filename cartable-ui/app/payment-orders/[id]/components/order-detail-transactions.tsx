@@ -88,11 +88,15 @@ type SortField = "amount" | "destinationAccountOwner" | "nationalCode";
 // Mapper functions: UI Enum -> API Enum
 const mapTransactionStatusToApi = (status: TransactionStatus): TransactionStatusApiEnum | undefined => {
   const mapping: Record<string, TransactionStatusApiEnum> = {
+    [TransactionStatus.Registered]: TransactionStatusApiEnum.Draft,
     [TransactionStatus.WaitForExecution]: TransactionStatusApiEnum.WaitForExecution,
     [TransactionStatus.WaitForBank]: TransactionStatusApiEnum.WaitForBank,
     [TransactionStatus.BankSucceeded]: TransactionStatusApiEnum.BankSucceeded,
     [TransactionStatus.BankRejected]: TransactionStatusApiEnum.BankFailed,
+    [TransactionStatus.TransactionRollback]: TransactionStatusApiEnum.BankFailed,
+    [TransactionStatus.Failed]: TransactionStatusApiEnum.BankFailed,
     [TransactionStatus.Canceled]: TransactionStatusApiEnum.Canceled,
+    [TransactionStatus.Expired]: TransactionStatusApiEnum.Canceled,
   };
   return mapping[status];
 };
@@ -101,6 +105,7 @@ const mapPaymentMethodToApi = (method: PaymentMethodEnum): PaymentTypeApiEnum | 
   const mapping: Record<string, PaymentTypeApiEnum> = {
     [PaymentMethodEnum.Paya]: PaymentTypeApiEnum.Paya,
     [PaymentMethodEnum.Satna]: PaymentTypeApiEnum.Satna,
+    // Unknown, Internal, Card در API وجود ندارند
   };
   return mapping[method];
 };
@@ -108,7 +113,25 @@ const mapPaymentMethodToApi = (method: PaymentMethodEnum): PaymentTypeApiEnum | 
 const mapTransactionReasonToApi = (reason: TransactionReasonEnum): ReasonCodeApiEnum | undefined => {
   const mapping: Record<string, ReasonCodeApiEnum> = {
     [TransactionReasonEnum.InvestmentAndBourse]: ReasonCodeApiEnum.InvestmentAndBourse,
+    [TransactionReasonEnum.StuffsPurchase]: ReasonCodeApiEnum.ImportGoods,
     [TransactionReasonEnum.SalaryDeposit]: ReasonCodeApiEnum.SalaryAndWages,
+    [TransactionReasonEnum.CustomsDuties]: ReasonCodeApiEnum.TaxAndDuties,
+    [TransactionReasonEnum.TaxSettle]: ReasonCodeApiEnum.TaxAndDuties,
+    [TransactionReasonEnum.DebtPayment]: ReasonCodeApiEnum.LoanRepayment,
+    [TransactionReasonEnum.FacilitiesAndCommitments]: ReasonCodeApiEnum.LoanRepayment,
+    [TransactionReasonEnum.GeneralAndDailyCosts]: ReasonCodeApiEnum.OtherPayments,
+    [TransactionReasonEnum.ServicesPurchase]: ReasonCodeApiEnum.OtherPayments,
+    [TransactionReasonEnum.ServicesInsurance]: ReasonCodeApiEnum.OtherPayments,
+    [TransactionReasonEnum.Therapeutic]: ReasonCodeApiEnum.OtherPayments,
+    [TransactionReasonEnum.LegalCurrencyActivities]: ReasonCodeApiEnum.OtherPayments,
+    [TransactionReasonEnum.Retirement]: ReasonCodeApiEnum.OtherPayments,
+    [TransactionReasonEnum.MovableProperties]: ReasonCodeApiEnum.OtherPayments,
+    [TransactionReasonEnum.ImmovableProperties]: ReasonCodeApiEnum.OtherPayments,
+    [TransactionReasonEnum.CashManagement]: ReasonCodeApiEnum.OtherPayments,
+    [TransactionReasonEnum.OtherGovernmentServices]: ReasonCodeApiEnum.OtherPayments,
+    [TransactionReasonEnum.BondReturn]: ReasonCodeApiEnum.OtherPayments,
+    [TransactionReasonEnum.Charity]: ReasonCodeApiEnum.OtherPayments,
+    // Unknown در API وجود ندارد
   };
   return mapping[reason];
 };
