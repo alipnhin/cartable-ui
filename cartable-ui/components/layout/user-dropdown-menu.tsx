@@ -33,7 +33,8 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const { data: session } = useSession();
-  const { colorTheme, colorThemeId, setColorTheme, availableThemes } = useColorTheme();
+  const { colorTheme, colorThemeId, setColorTheme, availableThemes } =
+    useColorTheme();
 
   // اطلاعات کاربر از session
   const userName = session?.user?.name || "کاربر";
@@ -149,7 +150,12 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
                     <div
                       className="w-6 h-6 rounded-full border border-border"
                       style={{
-                        background: `linear-gradient(135deg, ${themeItem.previewColor} 50%, ${themeItem.previewColorSecondary || themeItem.previewColor} 50%)`,
+                        background: `linear-gradient(135deg, ${
+                          themeItem.previewColor
+                        } 50%, ${
+                          themeItem.previewColorSecondary ||
+                          themeItem.previewColor
+                        } 50%)`,
                       }}
                     />
                     <span className="text-base flex-1 text-start">
@@ -178,7 +184,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             {/* Logout Button */}
             <Button
               size="lg"
-              variant="destructive"
+              variant="primary"
               className="w-full gap-2"
               onClick={handleLogout}
             >
@@ -308,7 +314,12 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
                   <div
                     className="w-4 h-4 rounded-full border border-border"
                     style={{
-                      background: `linear-gradient(135deg, ${themeItem.previewColor} 50%, ${themeItem.previewColorSecondary || themeItem.previewColor} 50%)`,
+                      background: `linear-gradient(135deg, ${
+                        themeItem.previewColor
+                      } 50%, ${
+                        themeItem.previewColorSecondary ||
+                        themeItem.previewColor
+                      } 50%)`,
                     }}
                   />
                   <span>{t(themeItem.nameKey)}</span>
@@ -338,7 +349,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
         <div className="p-2 mt-1">
           <Button
             size="sm"
-            variant="destructive"
+            variant="primary"
             className="w-full gap-2"
             onClick={handleLogout}
           >

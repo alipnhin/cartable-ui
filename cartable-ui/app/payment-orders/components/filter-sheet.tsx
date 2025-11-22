@@ -165,7 +165,9 @@ export function FilterSheet({
     <div className="space-y-6">
       {/* عنوان دستور پرداخت */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">{t("filters.orderTitleLabel")}</Label>
+        <Label className="text-sm font-medium">
+          {t("filters.orderTitleLabel")}
+        </Label>
         <Input
           placeholder={t("filters.orderTitlePlaceholder")}
           value={localFilters.orderTitle}
@@ -178,12 +180,17 @@ export function FilterSheet({
 
       {/* شماره دستور پرداخت */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">{t("filters.orderNumberLabel")}</Label>
+        <Label className="text-sm font-medium">
+          {t("filters.orderNumberLabel")}
+        </Label>
         <Input
           placeholder={t("filters.orderNumberPlaceholder")}
           value={localFilters.orderNumber}
           onChange={(e) =>
-            setLocalFilters((prev) => ({ ...prev, orderNumber: e.target.value }))
+            setLocalFilters((prev) => ({
+              ...prev,
+              orderNumber: e.target.value,
+            }))
           }
           className={cn("h-10", isMobile && "h-12 text-base")}
         />
@@ -191,7 +198,9 @@ export function FilterSheet({
 
       {/* کد رهگیری */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">{t("filters.trackingIdLabel")}</Label>
+        <Label className="text-sm font-medium">
+          {t("filters.trackingIdLabel")}
+        </Label>
         <Input
           placeholder={t("filters.trackingIdPlaceholder")}
           value={localFilters.trackingId}
@@ -238,7 +247,8 @@ export function FilterSheet({
           >
             <span className="truncate">
               {localFilters.status
-                ? statusOptions.find((opt) => opt.value === localFilters.status)?.label
+                ? statusOptions.find((opt) => opt.value === localFilters.status)
+                    ?.label
                 : t("filters.allStatuses")}
             </span>
             <ChevronsUpDown className="ms-2 h-5 w-5 shrink-0 opacity-50" />
@@ -250,11 +260,13 @@ export function FilterSheet({
                 variant="outline"
                 role="combobox"
                 aria-expanded={statusOpen}
-                className="w-full justify-between h-10"
+                className="w-full justify-between h-12"
               >
                 <span className="truncate">
                   {localFilters.status
-                    ? statusOptions.find((opt) => opt.value === localFilters.status)?.label
+                    ? statusOptions.find(
+                        (opt) => opt.value === localFilters.status
+                      )?.label
                     : t("filters.allStatuses")}
                 </span>
                 <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
@@ -266,7 +278,10 @@ export function FilterSheet({
                 <CommandList>
                   <CommandEmpty>{t("filters.notFound")}</CommandEmpty>
                   <CommandGroup>
-                    <CommandItem value="all" onSelect={() => handleStatusSelect("")}>
+                    <CommandItem
+                      value="all"
+                      onSelect={() => handleStatusSelect("")}
+                    >
                       <Check
                         className={cn(
                           "me-2 h-4 w-4",
@@ -284,7 +299,9 @@ export function FilterSheet({
                         <Check
                           className={cn(
                             "me-2 h-4 w-4",
-                            localFilters.status === option.value ? "opacity-100" : "opacity-0"
+                            localFilters.status === option.value
+                              ? "opacity-100"
+                              : "opacity-0"
                           )}
                         />
                         {option.label}
@@ -310,8 +327,10 @@ export function FilterSheet({
                 type="button"
                 onClick={() => handleStatusSelect("")}
                 className={cn(
-                  "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors",
-                  !localFilters.status ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                  "w-full flex items-center gap-3 p-4 rounded-lg text-base text-start transition-colors h-12",
+                  !localFilters.status
+                    ? "bg-primary/10 text-primary"
+                    : "hover:bg-muted"
                 )}
               >
                 {!localFilters.status && <Check className="h-5 w-5" />}
@@ -329,7 +348,9 @@ export function FilterSheet({
                       : "hover:bg-muted"
                   )}
                 >
-                  {localFilters.status === option.value && <Check className="h-5 w-5" />}
+                  {localFilters.status === option.value && (
+                    <Check className="h-5 w-5" />
+                  )}
                   <span className="flex-1">{option.label}</span>
                 </button>
               ))}
@@ -399,9 +420,7 @@ export function FilterSheet({
               {t("filters.title")}
             </DrawerTitle>
           </DrawerHeader>
-          <div className="overflow-y-auto p-4 pb-8">
-            {filterContent}
-          </div>
+          <div className="overflow-y-auto p-4 pb-8">{filterContent}</div>
         </DrawerContent>
       </Drawer>
     );
@@ -415,9 +434,7 @@ export function FilterSheet({
             {t("filters.title")}
           </DialogTitle>
         </DialogHeader>
-        <div className="py-4">
-          {filterContent}
-        </div>
+        <div className="py-4">{filterContent}</div>
       </DialogContent>
     </Dialog>
   );

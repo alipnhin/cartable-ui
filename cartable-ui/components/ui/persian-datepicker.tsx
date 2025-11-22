@@ -6,7 +6,7 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
 import gregorian_en from "react-date-object/locales/gregorian_en";
-import "react-multi-date-picker/styles/colors/purple.css";
+import "react-multi-date-picker/styles/layouts/mobile.css";
 import { cn } from "@/lib/utils";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -62,7 +62,7 @@ export function PersianDatePicker({
       calendar={locale === "fa" ? persian : gregorian}
       locale={locale === "fa" ? persian_fa : gregorian_en}
       format={locale === "fa" ? "YYYY/MM/DD" : "YYYY-MM-DD"}
-      className={cn("purple", isMobile && "rmdp-mobile")}
+      className={cn(isMobile && "rmdp-mobile")}
       calendarPosition={locale === "fa" ? "bottom-right" : "bottom-left"}
       inputClass={cn(
         "w-full px-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",

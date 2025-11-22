@@ -117,15 +117,15 @@
     "lightMode": "حالت روشن"
   },
   "themes": {
-    "default": "سبز پیش‌فرض",
+    "default": "پیش‌فرض",
     "defaultDesc": "تم سبز کلاسیک و آرامش‌بخش",
-    "blue": "آبی آسمانی",
+    "blue": "آبی",
     "blueDesc": "تم آبی مدرن و حرفه‌ای",
-    "violet": "بنفش رویایی",
+    "violet": "بنفش",
     "violetDesc": "تم بنفش خلاقانه و جذاب",
     "emeraldFinance": "زمردی مالی",
     "emeraldFinanceDesc": "مناسب برای سیستم‌های مالی",
-    "indigoPro": "نیلی حرفه‌ای",
+    "indigoPro": "نیلی",
     "indigoProDesc": "تم مدرن و سازمانی"
   },
   "paymentCartable": {
@@ -412,6 +412,7 @@
     "total": "کل"
   },
   "dashboard": {
+    "noData": "داده برای نمایش وجو ندارد",
     "pageTitle": "داشبورد",
     "pageSubtitle": "نمای کلی تراکنش‌ها و آمار پرداخت",
     "filters": {

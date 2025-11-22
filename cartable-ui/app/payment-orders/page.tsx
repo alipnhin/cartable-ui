@@ -68,7 +68,15 @@ export default function PaymentOrdersPage() {
       dateTo,
       accountId,
     }),
-    [statusFilter, orderTitle, orderNumber, trackingId, dateFrom, dateTo, accountId]
+    [
+      statusFilter,
+      orderTitle,
+      orderNumber,
+      trackingId,
+      dateFrom,
+      dateTo,
+      accountId,
+    ]
   );
 
   /**
@@ -250,27 +258,30 @@ export default function PaymentOrdersPage() {
       accentColor: "primary",
       value: stats.total.toString(),
       label: t("paymentCartable.allOrders"),
+      currency: false,
     },
     {
       icon: Timer,
       accentColor: "success",
       value: stats.succeeded.toString(),
       label: t("paymentCartable.succeededOrders"),
+      currency: false,
     },
     {
       icon: Timer,
       accentColor: "warning",
       value: stats.pending.toString(),
       label: t("paymentCartable.ordersInQueue"),
+      currency: false,
     },
     {
       icon: Timer,
       accentColor: "info",
       value: stats.totalAmount,
       label: t("paymentCartable.totalOrdersAmount"),
+      currency: true,
     },
   ];
-
 
   // نمایش اسکلت لودینگ فقط در بارگذاری اولیه
   if (initialLoading) {
@@ -337,10 +348,7 @@ export default function PaymentOrdersPage() {
       <StatisticCard cards={statisticCards} />
 
       {/* Inline Filters */}
-      <OrderFilters
-        filters={filters}
-        onFiltersChange={handleFilterChange}
-      />
+      <OrderFilters filters={filters} onFiltersChange={handleFilterChange} />
 
       {/* Data Display */}
       {!isMobile ? (
@@ -373,13 +381,18 @@ export default function PaymentOrdersPage() {
                       {t("orders.noOrders")}
                     </p>
                     <p className="text-sm text-muted-foreground/70">
-                      فیلترهای جستجو را تغییر دهید یا دستور پرداخت جدید ایجاد کنید
+                      فیلترهای جستجو را تغییر دهید یا دستور پرداخت جدید ایجاد
+                      کنید
                     </p>
                   </div>
                 </div>
               ) : (
                 orders.map((order) => (
-                  <OrderCard key={order.id} order={order} onView={handleViewOrder} />
+                  <OrderCard
+                    key={order.id}
+                    order={order}
+                    onView={handleViewOrder}
+                  />
                 ))
               )}
               {totalPages > 1 && (
@@ -393,7 +406,6 @@ export default function PaymentOrdersPage() {
           )}
         </div>
       )}
-
     </AppLayout>
   );
 }

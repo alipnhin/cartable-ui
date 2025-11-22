@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
@@ -7,6 +8,7 @@ export interface StatisticCardProps {
   accentColor?: "primary" | "success" | "warning" | "info" | "destructive";
   value: string | number;
   label: string;
+  currency: boolean;
 }
 
 interface StatisticCardsProps {
@@ -61,7 +63,9 @@ export default function StatisticCard({ cards }: StatisticCardsProps) {
               {/* Value & Label */}
               <div className="space-y-0.5">
                 <div className="text-2xl font-bold text-foreground leading-none">
-                  {card.value}
+                  {card.currency && typeof card.value === "number"
+                    ? formatCurrency(card.value)
+                    : card.value}
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {card.label}

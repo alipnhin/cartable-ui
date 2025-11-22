@@ -15,10 +15,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import {
-  Collapsible,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import {
   Select,
   SelectContent,
@@ -200,7 +197,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
               }))
             }
           >
-            <SelectTrigger>
+            <SelectTrigger size="lg" className="h-10">
               <SelectValue placeholder={t("filters.allStatuses")} />
             </SelectTrigger>
             <SelectContent>
@@ -232,7 +229,10 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
           <Input
             value={localFilters.orderNumber}
             onChange={(e) =>
-              setLocalFilters((prev) => ({ ...prev, orderNumber: e.target.value }))
+              setLocalFilters((prev) => ({
+                ...prev,
+                orderNumber: e.target.value,
+              }))
             }
             placeholder={t("filters.orderNumberPlaceholder")}
             dir="ltr"
@@ -313,7 +313,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
                 }))
               }
             >
-              <SelectTrigger>
+              <SelectTrigger size="lg">
                 <SelectValue placeholder={t("filters.allStatuses")} />
               </SelectTrigger>
               <SelectContent>
@@ -345,7 +345,10 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
             <Input
               value={localFilters.orderNumber}
               onChange={(e) =>
-                setLocalFilters((prev) => ({ ...prev, orderNumber: e.target.value }))
+                setLocalFilters((prev) => ({
+                  ...prev,
+                  orderNumber: e.target.value,
+                }))
               }
               placeholder={t("filters.orderNumberPlaceholder")}
               dir="ltr"
@@ -438,7 +441,11 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
                 بازه تاریخ
                 <button
                   onClick={() => {
-                    const updated = { ...localFilters, dateFrom: "", dateTo: "" };
+                    const updated = {
+                      ...localFilters,
+                      dateFrom: "",
+                      dateTo: "",
+                    };
                     setLocalFilters(updated);
                     onFiltersChange(updated);
                   }}

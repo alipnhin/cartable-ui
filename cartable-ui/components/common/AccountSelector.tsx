@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
   Command,
+  CommandCheck,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -124,13 +125,8 @@ export default function AccountSelector({
                     setOpen(false);
                   }}
                 >
-                  <Check
-                    className={cn(
-                      "me-2 h-4 w-4",
-                      value === "all" || !value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  همه حساب‌ها
+                  <span className="truncate"> همه حساب‌ها</span>
+                  {value === "all" && <CommandCheck />}
                 </CommandItem>
               )}
               {accounts.map((account) => (
@@ -142,13 +138,8 @@ export default function AccountSelector({
                     setOpen(false);
                   }}
                 >
-                  <Check
-                    className={cn(
-                      "me-2 h-4 w-4",
-                      value === account.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {account.text}
+                  <span className="truncate">{account.text}</span>
+                  {value === account.id && <CommandCheck />}
                 </CommandItem>
               ))}
             </CommandGroup>
