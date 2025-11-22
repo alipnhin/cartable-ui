@@ -690,7 +690,7 @@ export function OrderDetailTransactions({
               )}
               {paymentTypeFilter && paymentTypeFilter !== "all" && (
                 <Badge variant="secondary" className="gap-1.5">
-                  {getPaymentTypeLabel(paymentTypeFilter)}
+                  {getPaymentMethodLabel(paymentTypeFilter)}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => {
@@ -702,7 +702,7 @@ export function OrderDetailTransactions({
               )}
               {reasonCodeFilter && reasonCodeFilter !== "all" && (
                 <Badge variant="secondary" className="gap-1.5">
-                  {getReasonCodeLabel(reasonCodeFilter)}
+                  {getTransactionReasonLabel(reasonCodeFilter)}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => {

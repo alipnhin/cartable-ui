@@ -170,16 +170,16 @@ export const applyBadgesToMenuItems = (
 
     switch (item.route) {
       case "/my-cartable":
-        badge = counts.myCartableCount;
+        badge = counts.myCartableCount > 0 ? counts.myCartableCount : undefined;
         break;
       case "/manager-cartable":
-        badge = counts.managerCartableCount;
+        badge = counts.managerCartableCount > 0 ? counts.managerCartableCount : undefined;
         break;
       case "/payment-orders":
-        badge = counts.openPaymentOrdersCount;
+        badge = counts.openPaymentOrdersCount > 0 ? counts.openPaymentOrdersCount : undefined;
         break;
       default:
-        badge = item.badge; // برای سایر آیتم‌ها، badge قبلی را حفظ کن
+        badge = item.badge && item.badge > 0 ? item.badge : undefined; // برای سایر آیتم‌ها، badge قبلی را حفظ کن
     }
 
     return {
