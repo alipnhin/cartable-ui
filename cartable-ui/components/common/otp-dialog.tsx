@@ -68,7 +68,7 @@ export function OtpDialog({
   if (isRequestingOtp) {
     if (isMobile) {
       return (
-        <Drawer open={open} onOpenChange={onOpenChange}>
+        <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
           <DrawerContent>
             <DrawerHeader>
               <DrawerTitle>{title}</DrawerTitle>
@@ -89,7 +89,11 @@ export function OtpDialog({
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent
+          className="sm:max-w-md"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>
@@ -107,7 +111,7 @@ export function OtpDialog({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
+      <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>{title}</DrawerTitle>
@@ -127,7 +131,11 @@ export function OtpDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="sm:max-w-md"
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

@@ -71,3 +71,39 @@
   --sidebar-primary-foreground: #312E81;
   --sidebar-ring: #312E81;
 }
+
+/* Red Elegant Theme */
+[data-color-theme="theme-red-elegant"] {
+  --primary: #DC2626;
+  --primary-foreground: #FEF2F2;
+  --ring: #EF4444;
+  --sidebar-primary: #B91C1C;
+  --sidebar-primary-foreground: #FEF2F2;
+  --sidebar-ring: #F87171;
+}
+
+[data-color-theme="theme-red-elegant"].dark {
+  --primary: #F87171;
+  --primary-foreground: #7F1D1D;
+  --sidebar-primary: #EF4444;
+  --sidebar-primary-foreground: #7F1D1D;
+  --sidebar-ring: #7F1D1D;
+}
+
+/* Rose Passion Theme */
+[data-color-theme="theme-rose-passion"] {
+  --primary: #E11D48;
+  --primary-foreground: #FFF1F2;
+  --ring: #F43F5E;
+  --sidebar-primary: #BE123C;
+  --sidebar-primary-foreground: #FFF1F2;
+  --sidebar-ring: #FB7185;
+}
+
+[data-color-theme="theme-rose-passion"].dark {
+  --primary: #FB7185;
+  --primary-foreground: #881337;
+  --sidebar-primary: #F43F5E;
+  --sidebar-primary-foreground: #881337;
+  --sidebar-ring: #881337;
+}
