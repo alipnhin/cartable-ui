@@ -425,3 +425,16 @@ export interface TransactionFilterParams extends PaginationParams {
   /** نوع پرداخت */
   paymentType?: PaymentTypeApiEnum;
 }
+
+/**
+ * پاسخ تعداد آیتم‌های منو
+ * برای نمایش Badge در منوهای مختلف
+ */
+export interface MenuCountsResponse {
+  /** تعداد دستورات در کارتابل من (در انتظار تایید من) */
+  myCartableCount: number;
+  /** تعداد دستورات در کارتابل مدیر (در انتظار تایید مدیر) */
+  managerCartableCount: number;
+  /** تعداد دستورات باز (Draft + WaitingForApproval + Approved + SubmittedToBank) */
+  openPaymentOrdersCount: number;
+}

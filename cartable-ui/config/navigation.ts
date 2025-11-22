@@ -16,6 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { canAccessRoute, UserRole } from "./permissions";
+import type { MenuCountsResponse } from "@/types/api";
 
 export interface MenuItem {
   title: string;
@@ -144,4 +145,46 @@ export const getUserRolesFromSession = (session: any): string[] => {
     console.error("Error extracting roles from session:", error);
     return [];
   }
+};
+
+/**
+ * بروزرسانی badge های منو با تعداد واقعی از API
+ *
+ * @param menuItems - آیتم‌های منو
+ * @param counts - تعداد آیتم‌های دریافت شده از API
+ * @returns آیتم‌های منو با badge های بروزرسانی شده
+ *
+ * @example
+ * ```tsx
+ * const { counts } = useMenuCounts();
+ * const menuItemsWithBadges = applyBadgesToMenuItems(mainMenuItems, counts);
+ * ```
+ */
+export const applyBadgesToMenuItems = (
+  menuItems: MenuItem[],
+  counts: MenuCountsResponse
+): MenuItem[] => {
+  return menuItems.map((item) => {
+    // بروزرسانی badge بر اساس route
+    let badge: number | undefined = undefined;
+
+    switch (item.route) {
+      case "/my-cartable":
+        badge = counts.myCartableCount;
+        break;
+      case "/manager-cartable":
+        badge = counts.managerCartableCount;
+        break;
+      case "/payment-orders":
+        badge = counts.openPaymentOrdersCount;
+        break;
+      default:
+        badge = item.badge; // برای سایر آیتم‌ها، badge قبلی را حفظ کن
+    }
+
+    return {
+      ...item,
+      badge,
+    };
+  });
 };

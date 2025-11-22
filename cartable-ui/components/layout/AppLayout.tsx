@@ -17,7 +17,16 @@ export function AppLayout({
   showAccountGroupSwitcher = true,
 }: AppLayoutProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [selectedAccountGroup, setSelectedAccountGroup] = useState("all");
+
+  // مقداردهی اولیه از localStorage
+  const [selectedAccountGroup, setSelectedAccountGroup] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("selected-account-group");
+      return saved || "all";
+    }
+    return "all";
+  });
+
   const isMobile = useIsMobile();
 
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);

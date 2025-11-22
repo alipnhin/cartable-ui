@@ -20,10 +20,12 @@ import {
   getFilteredMenuItems,
   getUserRolesFromSession,
   isRouteActive,
+  applyBadgesToMenuItems,
   type MenuItem,
 } from "@/config/navigation";
 import useTranslation from "@/hooks/useTranslation";
 import { useNavigationProgress } from "@/providers/navigation-progress-provider";
+import { useMenuCounts } from "@/hooks/useMenuCounts";
 import { Plus } from "lucide-react";
 import {
   useMemo,
@@ -47,11 +49,16 @@ export function BottomDock({
 }: BottomDockProps) {
   const { data: session } = useSession();
 
-  // Filter menu items based on user roles
+  // دریافت تعداد واقعی از API
+  const { counts } = useMenuCounts();
+
+  // Filter menu items based on user roles and apply real badges
   const menuItems = useMemo(() => {
     const userRoles = getUserRolesFromSession(session);
-    return getFilteredMenuItems(userRoles, !!session);
-  }, [session]);
+    const filteredItems = getFilteredMenuItems(userRoles, !!session);
+    // اعمال badge های واقعی
+    return applyBadgesToMenuItems(filteredItems, counts);
+  }, [session, counts]);
 
   if (mode === "classic") {
     return <ClassicBottomDock menuItems={menuItems} />;
