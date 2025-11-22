@@ -115,6 +115,11 @@ export default function TransactionReportsPage() {
 
       setLoading(true);
       try {
+        // خواندن accountGroupId از localStorage
+        const savedGroupId = typeof window !== "undefined"
+          ? localStorage.getItem("selected-account-group")
+          : null;
+
         const request: TransactionsRequest = {
           pageNumber: currentPage,
           pageSize: pageSize,
@@ -127,6 +132,9 @@ export default function TransactionReportsPage() {
         if (paymentType !== null) request.paymentType = paymentType;
         if (bankGatewayId && bankGatewayId !== "all") {
           request.bankGatewayId = bankGatewayId;
+        }
+        if (savedGroupId && savedGroupId !== "all") {
+          request.accountGroupId = savedGroupId;
         }
         if (nationalCode) request.nationalCode = nationalCode;
         if (destinationIban) request.destinationIban = destinationIban;
@@ -193,6 +201,11 @@ export default function TransactionReportsPage() {
     setExportError("");
 
     try {
+      // خواندن accountGroupId از localStorage
+      const savedGroupId = typeof window !== "undefined"
+        ? localStorage.getItem("selected-account-group")
+        : null;
+
       const request: TransactionsRequest = {
         pageNumber: 1,
         pageSize: totalRecords || 10000,
@@ -205,6 +218,9 @@ export default function TransactionReportsPage() {
       if (paymentType !== null) request.paymentType = paymentType;
       if (bankGatewayId && bankGatewayId !== "all") {
         request.bankGatewayId = bankGatewayId;
+      }
+      if (savedGroupId && savedGroupId !== "all") {
+        request.accountGroupId = savedGroupId;
       }
       if (nationalCode) request.nationalCode = nationalCode;
       if (destinationIban) request.destinationIban = destinationIban;

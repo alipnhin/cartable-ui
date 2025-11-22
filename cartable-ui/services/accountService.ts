@@ -117,10 +117,20 @@ export const getAccountsSelectData = async (
  * Get list of all accounts
  */
 export const getAccountsList = async (
-  accessToken: string
+  accessToken: string,
+  accountGroupId?: string
 ): Promise<AccountListItem[]> => {
+  // ساخت query parameters
+  let url = "/v1-Cartable/ManageAccount/GetList";
+
+  // اگر accountGroupId وجود داشت و "all" نبود، به query string اضافه کن
+  if (accountGroupId && accountGroupId !== "all") {
+    const queryParams = new URLSearchParams({ accountGroupId });
+    url = `${url}?${queryParams.toString()}`;
+  }
+
   const response = await apiClient.get<AccountListItem[]>(
-    "/v1-Cartable/ManageAccount/GetList",
+    url,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,

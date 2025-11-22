@@ -86,6 +86,7 @@ export interface TransactionsRequest {
   accountNumber?: string;
   orderId?: string;
   bankGatewayId?: string;
+  accountGroupId?: string;
   paymentType?: number;
   status?: number;
   fromDate?: string;
