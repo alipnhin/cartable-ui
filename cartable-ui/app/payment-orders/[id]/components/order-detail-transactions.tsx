@@ -8,6 +8,11 @@ import {
   ReasonCodeApiEnum,
   TransactionFilterParams,
 } from "@/types/api";
+import {
+  TransactionStatus,
+  PaymentMethodEnum,
+  TransactionReasonEnum,
+} from "@/types/transaction";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -80,6 +85,34 @@ interface OrderDetailTransactionsProps {
 
 type SortField = "amount" | "destinationAccountOwner" | "nationalCode";
 
+// Mapper functions: UI Enum -> API Enum
+const mapTransactionStatusToApi = (status: TransactionStatus): TransactionStatusApiEnum | undefined => {
+  const mapping: Record<string, TransactionStatusApiEnum> = {
+    [TransactionStatus.WaitForExecution]: TransactionStatusApiEnum.WaitForExecution,
+    [TransactionStatus.WaitForBank]: TransactionStatusApiEnum.WaitForBank,
+    [TransactionStatus.BankSucceeded]: TransactionStatusApiEnum.BankSucceeded,
+    [TransactionStatus.BankRejected]: TransactionStatusApiEnum.BankFailed,
+    [TransactionStatus.Canceled]: TransactionStatusApiEnum.Canceled,
+  };
+  return mapping[status];
+};
+
+const mapPaymentMethodToApi = (method: PaymentMethodEnum): PaymentTypeApiEnum | undefined => {
+  const mapping: Record<string, PaymentTypeApiEnum> = {
+    [PaymentMethodEnum.Paya]: PaymentTypeApiEnum.Paya,
+    [PaymentMethodEnum.Satna]: PaymentTypeApiEnum.Satna,
+  };
+  return mapping[method];
+};
+
+const mapTransactionReasonToApi = (reason: TransactionReasonEnum): ReasonCodeApiEnum | undefined => {
+  const mapping: Record<string, ReasonCodeApiEnum> = {
+    [TransactionReasonEnum.InvestmentAndBourse]: ReasonCodeApiEnum.InvestmentAndBourse,
+    [TransactionReasonEnum.SalaryDeposit]: ReasonCodeApiEnum.SalaryAndWages,
+  };
+  return mapping[reason];
+};
+
 export function OrderDetailTransactions({
   transactions,
   isLoading,
@@ -96,7 +129,30 @@ export function OrderDetailTransactions({
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
 
-  // Helper functions with i18n
+  // Helper functions with i18n - updated to use UI enums
+  const getPaymentMethodLabel = (method: PaymentMethodEnum) => {
+    switch (method) {
+      case PaymentMethodEnum.Unknown:
+        return t("transactions.paymentTypes.unknown");
+      case PaymentMethodEnum.Internal:
+        return t("transactions.paymentTypes.internal");
+      case PaymentMethodEnum.Paya:
+        return t("transactions.paymentTypes.paya");
+      case PaymentMethodEnum.Satna:
+        return t("transactions.paymentTypes.satna");
+      case PaymentMethodEnum.Card:
+        return t("transactions.paymentTypes.card");
+      default:
+        return method;
+    }
+  };
+
+  const getTransactionReasonLabel = (reason: TransactionReasonEnum) => {
+    const reasonKey = reason.charAt(0).toLowerCase() + reason.slice(1);
+    return t(`transactions.reasonCodes.${reasonKey}`) || reason;
+  };
+
+  // Compatibility helpers for API enum display
   const getPaymentTypeLabel = (type: PaymentTypeApiEnum) => {
     switch (type) {
       case PaymentTypeApiEnum.Paya:
@@ -129,11 +185,11 @@ export function OrderDetailTransactions({
     }
   };
 
-  // Local filter state
+  // Local filter state - using UI enums
   const [searchValue, setSearchValue] = useState("");
-  const [statusFilter, setStatusFilter] = useState<TransactionStatusApiEnum | "all">("all");
-  const [paymentTypeFilter, setPaymentTypeFilter] = useState<PaymentTypeApiEnum | "all">("all");
-  const [reasonCodeFilter, setReasonCodeFilter] = useState<ReasonCodeApiEnum | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<TransactionStatus | "all">("all");
+  const [paymentTypeFilter, setPaymentTypeFilter] = useState<PaymentMethodEnum | "all">("all");
+  const [reasonCodeFilter, setReasonCodeFilter] = useState<TransactionReasonEnum | "all">("all");
   const [sortField, setSortField] = useState<SortField | "">("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
@@ -161,9 +217,22 @@ export function OrderDetailTransactions({
     const filters: Partial<TransactionFilterParams> = { ...extraFilters };
 
     if (searchValue) filters.serchValue = searchValue;
-    if (statusFilter && statusFilter !== "all") filters.status = statusFilter;
-    if (paymentTypeFilter && paymentTypeFilter !== "all") filters.paymentType = paymentTypeFilter;
-    if (reasonCodeFilter && reasonCodeFilter !== "all") filters.reasonCode = reasonCodeFilter;
+
+    // Map UI enums to API enums
+    if (statusFilter && statusFilter !== "all") {
+      const apiStatus = mapTransactionStatusToApi(statusFilter as TransactionStatus);
+      if (apiStatus) filters.status = apiStatus;
+    }
+
+    if (paymentTypeFilter && paymentTypeFilter !== "all") {
+      const apiPaymentType = mapPaymentMethodToApi(paymentTypeFilter as PaymentMethodEnum);
+      if (apiPaymentType) filters.paymentType = apiPaymentType;
+    }
+
+    if (reasonCodeFilter && reasonCodeFilter !== "all") {
+      const apiReasonCode = mapTransactionReasonToApi(reasonCodeFilter as TransactionReasonEnum);
+      if (apiReasonCode) filters.reasonCode = apiReasonCode;
+    }
 
     onFilterChange(filters);
   };
@@ -292,23 +361,32 @@ export function OrderDetailTransactions({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">{t("transactions.allStatuses")}</SelectItem>
-                            <SelectItem value={TransactionStatusApiEnum.BankSucceeded}>
-                              {t("transactions.statusLabels.bankSucceeded")}
+                            <SelectItem value={TransactionStatus.Registered}>
+                              {t("transactions.statusLabels.registered")}
                             </SelectItem>
-                            <SelectItem value={TransactionStatusApiEnum.BankFailed}>
-                              {t("transactions.statusLabels.bankFailed")}
-                            </SelectItem>
-                            <SelectItem value={TransactionStatusApiEnum.WaitForBank}>
-                              {t("transactions.statusLabels.waitForBank")}
-                            </SelectItem>
-                            <SelectItem value={TransactionStatusApiEnum.WaitForExecution}>
+                            <SelectItem value={TransactionStatus.WaitForExecution}>
                               {t("transactions.statusLabels.waitForExecution")}
                             </SelectItem>
-                            <SelectItem value={TransactionStatusApiEnum.Draft}>
-                              {t("transactions.statusLabels.draft")}
+                            <SelectItem value={TransactionStatus.WaitForBank}>
+                              {t("transactions.statusLabels.waitForBank")}
                             </SelectItem>
-                            <SelectItem value={TransactionStatusApiEnum.Canceled}>
+                            <SelectItem value={TransactionStatus.BankSucceeded}>
+                              {t("transactions.statusLabels.bankSucceeded")}
+                            </SelectItem>
+                            <SelectItem value={TransactionStatus.BankRejected}>
+                              {t("transactions.statusLabels.bankRejected")}
+                            </SelectItem>
+                            <SelectItem value={TransactionStatus.TransactionRollback}>
+                              {t("transactions.statusLabels.transactionRollback")}
+                            </SelectItem>
+                            <SelectItem value={TransactionStatus.Failed}>
+                              {t("transactions.statusLabels.failed")}
+                            </SelectItem>
+                            <SelectItem value={TransactionStatus.Canceled}>
                               {t("transactions.statusLabels.canceled")}
+                            </SelectItem>
+                            <SelectItem value={TransactionStatus.Expired}>
+                              {t("transactions.statusLabels.expired")}
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -323,12 +401,14 @@ export function OrderDetailTransactions({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">{t("transactions.allTypes")}</SelectItem>
-                            <SelectItem value={PaymentTypeApiEnum.Paya}>{t("transactions.paymentTypes.paya")}</SelectItem>
-                          <SelectItem value={PaymentTypeApiEnum.Satna}>{t("transactions.paymentTypes.satna")}</SelectItem>
-                          <SelectItem value={PaymentTypeApiEnum.Rtgs}>{t("transactions.paymentTypes.rtgs")}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                            <SelectItem value={PaymentMethodEnum.Unknown}>{t("transactions.paymentTypes.unknown")}</SelectItem>
+                            <SelectItem value={PaymentMethodEnum.Internal}>{t("transactions.paymentTypes.internal")}</SelectItem>
+                            <SelectItem value={PaymentMethodEnum.Paya}>{t("transactions.paymentTypes.paya")}</SelectItem>
+                            <SelectItem value={PaymentMethodEnum.Satna}>{t("transactions.paymentTypes.satna")}</SelectItem>
+                            <SelectItem value={PaymentMethodEnum.Card}>{t("transactions.paymentTypes.card")}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
                     {/* Reason Code Filter */}
                     <div className="space-y-2">
@@ -339,23 +419,65 @@ export function OrderDetailTransactions({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">{t("transactions.allReasonCodes")}</SelectItem>
-                          <SelectItem value={ReasonCodeApiEnum.InvestmentAndBourse}>
+                          <SelectItem value={TransactionReasonEnum.Unknown}>
+                            {t("transactions.reasonCodes.unknown")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.SalaryDeposit}>
+                            {t("transactions.reasonCodes.salaryDeposit")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.ServicesInsurance}>
+                            {t("transactions.reasonCodes.servicesInsurance")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.Therapeutic}>
+                            {t("transactions.reasonCodes.therapeutic")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.InvestmentAndBourse}>
                             {t("transactions.reasonCodes.investmentAndBourse")}
                           </SelectItem>
-                          <SelectItem value={ReasonCodeApiEnum.ImportGoods}>
-                            {t("transactions.reasonCodes.importGoods")}
+                          <SelectItem value={TransactionReasonEnum.LegalCurrencyActivities}>
+                            {t("transactions.reasonCodes.legalCurrencyActivities")}
                           </SelectItem>
-                          <SelectItem value={ReasonCodeApiEnum.SalaryAndWages}>
-                            {t("transactions.reasonCodes.salaryAndWages")}
+                          <SelectItem value={TransactionReasonEnum.DebtPayment}>
+                            {t("transactions.reasonCodes.debtPayment")}
                           </SelectItem>
-                          <SelectItem value={ReasonCodeApiEnum.TaxAndDuties}>
-                            {t("transactions.reasonCodes.taxAndDuties")}
+                          <SelectItem value={TransactionReasonEnum.Retirement}>
+                            {t("transactions.reasonCodes.retirement")}
                           </SelectItem>
-                          <SelectItem value={ReasonCodeApiEnum.LoanRepayment}>
-                            {t("transactions.reasonCodes.loanRepayment")}
+                          <SelectItem value={TransactionReasonEnum.MovableProperties}>
+                            {t("transactions.reasonCodes.movableProperties")}
                           </SelectItem>
-                          <SelectItem value={ReasonCodeApiEnum.OtherPayments}>
-                            {t("transactions.reasonCodes.otherPayments")}
+                          <SelectItem value={TransactionReasonEnum.ImmovableProperties}>
+                            {t("transactions.reasonCodes.immovableProperties")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.CashManagement}>
+                            {t("transactions.reasonCodes.cashManagement")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.CustomsDuties}>
+                            {t("transactions.reasonCodes.customsDuties")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.TaxSettle}>
+                            {t("transactions.reasonCodes.taxSettle")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.OtherGovernmentServices}>
+                            {t("transactions.reasonCodes.otherGovernmentServices")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.FacilitiesAndCommitments}>
+                            {t("transactions.reasonCodes.facilitiesAndCommitments")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.BondReturn}>
+                            {t("transactions.reasonCodes.bondReturn")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.GeneralAndDailyCosts}>
+                            {t("transactions.reasonCodes.generalAndDailyCosts")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.Charity}>
+                            {t("transactions.reasonCodes.charity")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.StuffsPurchase}>
+                            {t("transactions.reasonCodes.stuffsPurchase")}
+                          </SelectItem>
+                          <SelectItem value={TransactionReasonEnum.ServicesPurchase}>
+                            {t("transactions.reasonCodes.servicesPurchase")}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -396,63 +518,122 @@ export function OrderDetailTransactions({
 
               {/* Status Filter */}
               <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as any); applyFilters(); }}>
-                <SelectTrigger className="w-[160px] h-9">
+                <SelectTrigger className="w-[180px] h-9">
                   <SelectValue placeholder={t("transactions.allStatuses")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("transactions.allStatuses")}</SelectItem>
-                  <SelectItem value={TransactionStatusApiEnum.BankSucceeded}>
-                    {t("transactions.statusLabels.bankSucceeded")}
+                  <SelectItem value={TransactionStatus.Registered}>
+                    {t("transactions.statusLabels.registered")}
                   </SelectItem>
-                  <SelectItem value={TransactionStatusApiEnum.BankFailed}>
-                    {t("transactions.statusLabels.bankFailed")}
-                  </SelectItem>
-                  <SelectItem value={TransactionStatusApiEnum.WaitForBank}>
-                    {t("transactions.statusLabels.waitForBank")}
-                  </SelectItem>
-                  <SelectItem value={TransactionStatusApiEnum.WaitForExecution}>
+                  <SelectItem value={TransactionStatus.WaitForExecution}>
                     {t("transactions.statusLabels.waitForExecution")}
                   </SelectItem>
-                  <SelectItem value={TransactionStatusApiEnum.Canceled}>
+                  <SelectItem value={TransactionStatus.WaitForBank}>
+                    {t("transactions.statusLabels.waitForBank")}
+                  </SelectItem>
+                  <SelectItem value={TransactionStatus.BankSucceeded}>
+                    {t("transactions.statusLabels.bankSucceeded")}
+                  </SelectItem>
+                  <SelectItem value={TransactionStatus.BankRejected}>
+                    {t("transactions.statusLabels.bankRejected")}
+                  </SelectItem>
+                  <SelectItem value={TransactionStatus.TransactionRollback}>
+                    {t("transactions.statusLabels.transactionRollback")}
+                  </SelectItem>
+                  <SelectItem value={TransactionStatus.Failed}>
+                    {t("transactions.statusLabels.failed")}
+                  </SelectItem>
+                  <SelectItem value={TransactionStatus.Canceled}>
                     {t("transactions.statusLabels.canceled")}
+                  </SelectItem>
+                  <SelectItem value={TransactionStatus.Expired}>
+                    {t("transactions.statusLabels.expired")}
                   </SelectItem>
                 </SelectContent>
               </Select>
 
               {/* Payment Type Filter */}
               <Select value={paymentTypeFilter} onValueChange={(v) => { setPaymentTypeFilter(v as any); applyFilters(); }}>
-                <SelectTrigger className="w-[140px] h-9">
+                <SelectTrigger className="w-[160px] h-9">
                   <SelectValue placeholder={t("transactions.allTypes")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("transactions.allTypes")}</SelectItem>
-                  <SelectItem value={PaymentTypeApiEnum.Paya}>{t("transactions.paymentTypes.paya")}</SelectItem>
-                  <SelectItem value={PaymentTypeApiEnum.Satna}>{t("transactions.paymentTypes.satna")}</SelectItem>
-                  <SelectItem value={PaymentTypeApiEnum.Rtgs}>{t("transactions.paymentTypes.rtgs")}</SelectItem>
+                  <SelectItem value={PaymentMethodEnum.Unknown}>{t("transactions.paymentTypes.unknown")}</SelectItem>
+                  <SelectItem value={PaymentMethodEnum.Internal}>{t("transactions.paymentTypes.internal")}</SelectItem>
+                  <SelectItem value={PaymentMethodEnum.Paya}>{t("transactions.paymentTypes.paya")}</SelectItem>
+                  <SelectItem value={PaymentMethodEnum.Satna}>{t("transactions.paymentTypes.satna")}</SelectItem>
+                  <SelectItem value={PaymentMethodEnum.Card}>{t("transactions.paymentTypes.card")}</SelectItem>
                 </SelectContent>
               </Select>
 
               {/* Reason Code Filter */}
               <Select value={reasonCodeFilter} onValueChange={(v) => { setReasonCodeFilter(v as any); applyFilters(); }}>
-                <SelectTrigger className="w-[180px] h-9">
+                <SelectTrigger className="w-[200px] h-9">
                   <SelectValue placeholder={t("transactions.allReasonCodes")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("transactions.allReasonCodes")}</SelectItem>
-                  <SelectItem value={ReasonCodeApiEnum.InvestmentAndBourse}>
+                  <SelectItem value={TransactionReasonEnum.Unknown}>
+                    {t("transactions.reasonCodes.unknown")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.SalaryDeposit}>
+                    {t("transactions.reasonCodes.salaryDeposit")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.ServicesInsurance}>
+                    {t("transactions.reasonCodes.servicesInsurance")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.Therapeutic}>
+                    {t("transactions.reasonCodes.therapeutic")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.InvestmentAndBourse}>
                     {t("transactions.reasonCodes.investmentAndBourse")}
                   </SelectItem>
-                  <SelectItem value={ReasonCodeApiEnum.SalaryAndWages}>
-                    {t("transactions.reasonCodes.salaryAndWages")}
+                  <SelectItem value={TransactionReasonEnum.LegalCurrencyActivities}>
+                    {t("transactions.reasonCodes.legalCurrencyActivities")}
                   </SelectItem>
-                  <SelectItem value={ReasonCodeApiEnum.TaxAndDuties}>
-                    {t("transactions.reasonCodes.taxAndDuties")}
+                  <SelectItem value={TransactionReasonEnum.DebtPayment}>
+                    {t("transactions.reasonCodes.debtPayment")}
                   </SelectItem>
-                  <SelectItem value={ReasonCodeApiEnum.LoanRepayment}>
-                    {t("transactions.reasonCodes.loanRepayment")}
+                  <SelectItem value={TransactionReasonEnum.Retirement}>
+                    {t("transactions.reasonCodes.retirement")}
                   </SelectItem>
-                  <SelectItem value={ReasonCodeApiEnum.OtherPayments}>
-                    {t("transactions.reasonCodes.otherPayments")}
+                  <SelectItem value={TransactionReasonEnum.MovableProperties}>
+                    {t("transactions.reasonCodes.movableProperties")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.ImmovableProperties}>
+                    {t("transactions.reasonCodes.immovableProperties")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.CashManagement}>
+                    {t("transactions.reasonCodes.cashManagement")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.CustomsDuties}>
+                    {t("transactions.reasonCodes.customsDuties")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.TaxSettle}>
+                    {t("transactions.reasonCodes.taxSettle")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.OtherGovernmentServices}>
+                    {t("transactions.reasonCodes.otherGovernmentServices")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.FacilitiesAndCommitments}>
+                    {t("transactions.reasonCodes.facilitiesAndCommitments")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.BondReturn}>
+                    {t("transactions.reasonCodes.bondReturn")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.GeneralAndDailyCosts}>
+                    {t("transactions.reasonCodes.generalAndDailyCosts")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.Charity}>
+                    {t("transactions.reasonCodes.charity")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.StuffsPurchase}>
+                    {t("transactions.reasonCodes.stuffsPurchase")}
+                  </SelectItem>
+                  <SelectItem value={TransactionReasonEnum.ServicesPurchase}>
+                    {t("transactions.reasonCodes.servicesPurchase")}
                   </SelectItem>
                 </SelectContent>
               </Select>

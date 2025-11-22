@@ -73,11 +73,17 @@ export default function ManagerCartablePage() {
 
       setIsLoading(true);
       try {
+        // خواندن accountGroupId از localStorage
+        const savedGroupId = typeof window !== "undefined"
+          ? localStorage.getItem("selected-account-group")
+          : null;
+
         const response = await getManagerCartable(
           {
             pageNumber,
             pageSize,
             orderBy: "createdDateTime",
+            accountGroupId: savedGroupId || undefined,
           },
           session.accessToken
         );
@@ -109,11 +115,17 @@ export default function ManagerCartablePage() {
 
     setIsLoading(true);
     try {
+      // خواندن accountGroupId از localStorage
+      const savedGroupId = typeof window !== "undefined"
+        ? localStorage.getItem("selected-account-group")
+        : null;
+
       const response = await getManagerCartable(
         {
           pageNumber,
           pageSize,
           orderBy: "createdDateTime",
+          accountGroupId: savedGroupId || undefined,
         },
         session.accessToken
       );

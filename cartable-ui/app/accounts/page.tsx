@@ -57,7 +57,15 @@ export default function AccountsPage() {
 
       setIsLoading(true);
       try {
-        const data = await getAccountsList(session.accessToken);
+        // خواندن accountGroupId از localStorage
+        const savedGroupId = typeof window !== "undefined"
+          ? localStorage.getItem("selected-account-group")
+          : null;
+
+        const data = await getAccountsList(
+          session.accessToken,
+          savedGroupId || undefined
+        );
         setAccounts(data);
       } catch (error) {
         console.error("Error fetching accounts:", error);

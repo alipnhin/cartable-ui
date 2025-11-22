@@ -89,11 +89,21 @@ export default function PaymentOrdersPage() {
 
       setIsLoading(true);
       try {
+        // خواندن accountGroupId از localStorage
+        const savedGroupId = typeof window !== "undefined"
+          ? localStorage.getItem("selected-account-group")
+          : null;
+
         // ساخت پارامترهای فیلتر برای API
         const apiFilters: any = {
           pageNumber,
           pageSize,
         };
+
+        // اضافه کردن accountGroupId
+        if (savedGroupId && savedGroupId !== "all") {
+          apiFilters.accountGroupId = savedGroupId;
+        }
 
         // اضافه کردن sorting
         if (sorting.length > 0) {
