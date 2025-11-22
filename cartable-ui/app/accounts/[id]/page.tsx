@@ -9,7 +9,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { AppLayout } from "@/components/layout";
+import { FixHeader } from "@/components/layout/Fix-Header";
 import {
   ArrowLeft,
   Users,
@@ -170,7 +170,9 @@ export default function AccountDetailPage() {
   // Loading state
   if (isLoading) {
     return (
-      <AppLayout>
+      <>
+        <FixHeader returnUrl="/accounts" />
+        <div className="container mx-auto p-4 md:p-6 space-y-6 mt-14">
         <div className="flex items-center justify-between mb-6">
           <Skeleton className="h-9 w-24" />
           <Skeleton className="h-9 w-28" />
@@ -238,43 +240,38 @@ export default function AccountDetailPage() {
             </CardContent>
           </Card>
         </div>
-      </AppLayout>
+        </div>
+      </>
     );
   }
 
   // Error state
   if (error || !account) {
     return (
-      <AppLayout>
-        <div className="flex flex-col items-center justify-center min-h-[400px]">
-          <h2 className="text-2xl font-bold mb-2">
-            {t("common.messages.notFound")}
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            {error || "حساب مورد نظر یافت نشد"}
-          </p>
-          <Button onClick={() => router.push("/accounts")}>
-            بازگشت به لیست حساب‌ها
-          </Button>
+      <>
+        <FixHeader returnUrl="/accounts" />
+        <div className="container mx-auto p-4 md:p-6 mt-14">
+          <div className="flex flex-col items-center justify-center min-h-[400px]">
+            <h2 className="text-2xl font-bold mb-2">
+              {t("common.messages.notFound")}
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              {error || "حساب مورد نظر یافت نشد"}
+            </p>
+            <Button onClick={() => router.push("/accounts")}>
+              بازگشت به لیست حساب‌ها
+            </Button>
+          </div>
         </div>
-      </AppLayout>
+      </>
     );
   }
 
   return (
-    <AppLayout>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <>
+      <FixHeader returnUrl="/accounts">
         <Button
           variant="ghost"
-          onClick={() => router.back()}
-          className="-ms-2"
-        >
-          <ArrowLeft className="me-2 h-4 w-4" />
-          بازگشت
-        </Button>
-        <Button
-          variant="outline"
           size="sm"
           onClick={fetchAccountDetail}
           disabled={isUpdating}
@@ -283,10 +280,10 @@ export default function AccountDetailPage() {
           <RefreshCw
             className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`}
           />
-          به‌روزرسانی
+          {t("common.refresh")}
         </Button>
-      </div>
-
+      </FixHeader>
+      <div className="container mx-auto p-4 md:p-6 space-y-6 mt-14">
       <div className="space-y-6">
         {/* بخش اطلاعات حساب */}
         <AccountInfo account={account} />
@@ -364,6 +361,7 @@ export default function AccountDetailPage() {
           </CardContent>
         </Card>
       </div>
-    </AppLayout>
+      </div>
+    </>
   );
 }

@@ -123,7 +123,11 @@
     "emeraldFinance": "Emerald Finance",
     "emeraldFinanceDesc": "Ideal for financial systems",
     "indigoPro": "Indigo Professional",
-    "indigoProDesc": "Modern and corporate theme"
+    "indigoProDesc": "Modern and corporate theme",
+    "redElegant": "Elegant Red",
+    "redElegantDesc": "Beautiful and attractive red theme",
+    "rosePassion": "Passionate Rose",
+    "rosePassionDesc": "Warm and pleasant rose theme"
   },
   "paymentCartable": {
     "pageTitle": "Payment Orders",
@@ -750,5 +754,36 @@
       "amount": "Amount:",
       "successRate": "Success Rate:"
     }
+  },
+  "pwa": {
+    "installApp": "Install Cartable App",
+    "description": "For faster access and a better experience, install the app",
+    "installDescription": "For faster access and a better experience, install the app",
+    "install": "Install",
+    "later": "Later",
+    "close": "Close",
+    "iosSubtitle": "on iPhone/iPad",
+    "iosIntro": "To install this app as an application, follow these steps:",
+    "iosStep1Title": "Tap the Share button",
+    "iosStep1Tap": "Tap the",
+    "iosStep1At": "icon at the bottom of the page",
+    "iosStep2Title": "Select \"Add to Home Screen\"",
+    "iosStep2Select": "In the opened menu, select the",
+    "iosStep3Title": "Tap \"Add\"",
+    "iosStep3Desc": "On the opened page, tap the Add button to add the app to your home screen",
+    "iosNoteTitle": "Note:",
+    "iosNoteDesc": "After installation, you can launch the app like other apps from your phone's home screen.",
+    "installOnIOS": "Install Cartable App",
+    "installOnIOSSubtitle": "on iPhone/iPad",
+    "installInstructions": "To install this app as an application, follow these steps:",
+    "step1": "Tap the Share button",
+    "step1Description": "Tap the icon at the bottom of the page",
+    "step2": "Select \"Add to Home Screen\"",
+    "step2Description": "In the opened menu, select the",
+    "step3": "Tap \"Add\"",
+    "step3Description": "On the opened page, tap the Add button to add the app to your home screen",
+    "installNote": "After installation, you can launch the app like other apps from your phone's home screen.",
+    "understood": "Got it",
+    "alreadyInstalled": "App is already installed"
   }
 }

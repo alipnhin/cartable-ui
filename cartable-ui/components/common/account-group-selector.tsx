@@ -73,6 +73,15 @@ export function AccountGroupSwitcher({
   const [loading, setLoading] = useState(true);
   const [activeGroup, setActiveGroup] = useState<AccountGroup | null>(null);
 
+  // خواندن گروه ذخیره شده از localStorage
+  useEffect(() => {
+    const savedGroupId = localStorage.getItem("selected-account-group");
+    if (savedGroupId && !value) {
+      // اگر گروه ذخیره شده وجود دارد و value مشخص نشده، از آن استفاده کن
+      return;
+    }
+  }, []);
+
   // واکشی گروه‌های حساب از API
   useEffect(() => {
     const fetchAccountGroups = async () => {
@@ -86,16 +95,31 @@ export function AccountGroupSwitcher({
         const groups = await getAccountGroups(session.accessToken);
         setAccountGroups(groups);
 
-        // اگر value مشخص شده، آن گروه را انتخاب کن
-        // در غیر این صورت، گروه "all" را انتخاب کن
-        const selectedGroup = value
-          ? groups.find((g) => g.id === value)
-          : groups.find((g) => g.id === "all");
+        // اولویت 1: value که از props آمده
+        // اولویت 2: گروه ذخیره شده در localStorage
+        // اولویت 3: گروه "all"
+        // اولویت 4: اولین گروه موجود
+        const savedGroupId = localStorage.getItem("selected-account-group");
+        let selectedGroup: AccountGroup | undefined;
+
+        if (value) {
+          selectedGroup = groups.find((g) => g.id === value);
+        } else if (savedGroupId) {
+          selectedGroup = groups.find((g) => g.id === savedGroupId);
+        }
+
+        if (!selectedGroup) {
+          selectedGroup = groups.find((g) => g.id === "all") || groups[0];
+        }
 
         if (selectedGroup) {
           setActiveGroup(selectedGroup);
-        } else if (groups.length > 0) {
-          setActiveGroup(groups[0]);
+          // ذخیره در localStorage
+          localStorage.setItem("selected-account-group", selectedGroup.id);
+          // اطلاع‌رسانی به والد اگر onChange وجود دارد
+          if (onChange && !value) {
+            onChange(selectedGroup.id);
+          }
         }
       } catch (error) {
         logger.error("Error fetching account groups:", error instanceof Error ? error : undefined);
@@ -109,6 +133,8 @@ export function AccountGroupSwitcher({
 
   const handleChange = (group: AccountGroup) => {
     setActiveGroup(group);
+    // ذخیره در localStorage
+    localStorage.setItem("selected-account-group", group.id);
     onChange?.(group.id);
   };
 
@@ -124,9 +150,9 @@ export function AccountGroupSwitcher({
         )}
       >
         <Building2 className="h-4 w-4 shrink-0 animate-pulse" />
-        {!compact && (
-          <span className="text-xs">{t("common.loading") || "در حال بارگذاری..."}</span>
-        )}
+        <span className={cn(compact ? "text-xs" : "text-xs")}>
+          {t("common.loading") || "در حال بارگذاری..."}
+        </span>
       </Button>
     );
   }

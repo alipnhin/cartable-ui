@@ -138,14 +138,15 @@ export default function DashboardPage() {
         }}
       />
 
-      {/* Loading overlay for filter changes */}
-      {loading && (
-        <div className="fixed inset-0 bg-background/50 z-50 flex items-center justify-center">
-          <div className="bg-card p-4 rounded-lg shadow-lg border">
-            <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+      {/* Loading overlay for filter changes - positioned relative to content */}
+      <div className="relative">
+        {loading && (
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center transition-opacity duration-200">
+            <div className="bg-card p-4 rounded-lg shadow-lg border">
+              <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Stats Cards Row */}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4 mb-5">
@@ -232,6 +233,7 @@ export default function DashboardPage() {
           delay={0.9}
         />
         <ComparisonMetrics data={dashboardData} delay={1.0} />
+      </div>
       </div>
     </AppLayout>
   );

@@ -60,6 +60,20 @@ export const COLOR_THEMES: ColorTheme[] = [
     previewColorSecondary: '#818CF8',
     descriptionKey: 'themes.indigoProDesc',
   },
+  {
+    id: 'theme-red-elegant',
+    nameKey: 'themes.redElegant',
+    previewColor: '#DC2626',
+    previewColorSecondary: '#F87171',
+    descriptionKey: 'themes.redElegantDesc',
+  },
+  {
+    id: 'theme-rose-passion',
+    nameKey: 'themes.rosePassion',
+    previewColor: '#E11D48',
+    previewColorSecondary: '#FB7185',
+    descriptionKey: 'themes.rosePassionDesc',
+  },
 ];
 
 /** تم پیش‌فرض */
