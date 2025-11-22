@@ -13,8 +13,9 @@ import { getBankCodeFromIban, getBankName } from "@/lib/bank-logos";
 import { TransactionStatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
-import { Copy, Check, Clock } from "lucide-react";
+import { Copy, Check, Clock, CheckCircle, XCircle, Send, FileEdit, Ban, AlertCircle } from "lucide-react";
 import { useState } from "react";
+import { TransactionStatusApiEnum } from "@/types/api";
 
 interface TransactionDetailDialogProps {
   transaction: WithdrawalTransaction | null;
@@ -37,6 +38,26 @@ const formatDateTime = (dateString: string, locale: string): string => {
 
   return dateFormatter.format(date);
 };
+
+// Helper to get status icon for timeline
+function getTransactionStatusIcon(status: TransactionStatusApiEnum) {
+  switch (status) {
+    case TransactionStatusApiEnum.Draft:
+      return <FileEdit className="h-5 w-5 text-gray-600" />;
+    case TransactionStatusApiEnum.WaitForExecution:
+      return <Clock className="h-5 w-5 text-blue-600" />;
+    case TransactionStatusApiEnum.WaitForBank:
+      return <Send className="h-5 w-5 text-purple-600" />;
+    case TransactionStatusApiEnum.BankSucceeded:
+      return <CheckCircle className="h-5 w-5 text-green-600" />;
+    case TransactionStatusApiEnum.BankFailed:
+      return <XCircle className="h-5 w-5 text-red-600" />;
+    case TransactionStatusApiEnum.Canceled:
+      return <Ban className="h-5 w-5 text-muted-foreground" />;
+    default:
+      return <Clock className="h-5 w-5 text-gray-600" />;
+  }
+}
 
 // Copy to clipboard component
 function CopyButton({ text }: { text: string }) {
@@ -220,30 +241,55 @@ export function TransactionDetailDialog({
 
           <TabsContent value="history">
             {transaction.changeHistory && transaction.changeHistory.length > 0 ? (
-              <div className="space-y-3">
-                {transaction.changeHistory.map((entry, index) => (
-                  <div
-                    key={entry.id || index}
-                    className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center justify-between gap-4">
-                          <span className="text-sm font-medium text-foreground">
-                            {entry.description}
-                          </span>
-                          <TransactionStatusBadge status={entry.status as any} size="sm" />
+              <div className="relative">
+                {/* Timeline List */}
+                <div className="space-y-4">
+                  {[...transaction.changeHistory]
+                    .sort((a, b) => new Date(b.createdDateTime).getTime() - new Date(a.createdDateTime).getTime())
+                    .map((entry, index, arr) => (
+                      <div className="flex items-start relative" key={entry.id || index}>
+                        {/* Vertical connecting line */}
+                        {index < arr.length - 1 && (
+                          <div className="w-9 start-0 top-9 absolute bottom-0 rtl:-translate-x-1/2 translate-x-1/2 border-s border-s-input"></div>
+                        )}
+
+                        {/* Status Icon */}
+                        <div className="flex items-center justify-center bg-accent/60 shrink-0 rounded-full border border-input size-9 text-secondary-foreground z-10">
+                          {getTransactionStatusIcon(entry.status)}
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {formatDateTime(entry.createdDateTime, locale)}
+
+                        {/* Timeline Content */}
+                        <div className="ps-2.5 mb-7 text-base grow">
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-2 mb-3 flex-wrap">
+                              <TransactionStatusBadge status={entry.status as any} size="default" />
+                            </div>
+                            <div className="text-sm mb-2 font-medium">
+                              {entry.description || "بدون توضیحات"}
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                              <span>
+                                {new Date(entry.createdDateTime).toLocaleDateString(
+                                  locale === "fa" ? "fa-IR" : "en-US",
+                                  {
+                                    year: "numeric",
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                  }
+                                )}
+                              </span>
+                              <span>
+                                {new Date(entry.createdDateTime).toLocaleTimeString(locale === "fa" ? "fa-IR" : "en-US", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    ))}
+                </div>
               </div>
             ) : (
               <div className="text-center py-12">

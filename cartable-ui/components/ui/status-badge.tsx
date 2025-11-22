@@ -191,7 +191,7 @@ export function getTransactionStatusBadge(status: TransactionStatus): {
       icon: Clock,
     },
     [TransactionStatus.BankSucceeded]: {
-      variant: "success", // سبز تیره - موفق
+      variant: "success",
       icon: CheckCircle2,
     },
     [TransactionStatus.WaitForExecution]: {
@@ -203,11 +203,11 @@ export function getTransactionStatusBadge(status: TransactionStatus): {
       icon: CheckCircle2,
     },
     [TransactionStatus.Failed]: {
-      variant: "successLight", // سبز روشن - انجام شده با خطا
+      variant: "danger",
       icon: XCircle,
     },
     [TransactionStatus.BankRejected]: {
-      variant: "successLight", // سبز روشن - انجام شده با خطا
+      variant: "danger",
       icon: Ban,
     },
     [TransactionStatus.Expired]: {

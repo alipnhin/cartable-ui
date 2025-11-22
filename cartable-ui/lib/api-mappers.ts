@@ -29,6 +29,8 @@ function mapPaymentStatus(status: PaymentStatusEnum | string): OrderStatus {
     case "submitted_to_bank":
       return OrderStatus.SubmittedToBank;
     case "succeeded":
+    case "banksucceeded":
+    case "bank_succeeded":
       return OrderStatus.Succeeded;
     case "partiallysucceeded":
     case "partially_succeeded":
@@ -43,6 +45,7 @@ function mapPaymentStatus(status: PaymentStatusEnum | string): OrderStatus {
     case "expired":
       return OrderStatus.Expired;
     default:
+      console.warn(`Unknown payment status: ${status}, defaulting to Draft`);
       return OrderStatus.Draft;
   }
 }
