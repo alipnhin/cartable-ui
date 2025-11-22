@@ -20,9 +20,11 @@ import {
   getFilteredMenuItems,
   getUserRolesFromSession,
   isRouteActive,
+  applyBadgesToMenuItems,
 } from "@/config/navigation";
 import { AccountGroupSwitcher } from "@/components/common/account-group-selector";
 import useTranslation from "@/hooks/useTranslation";
+import { useMenuCounts } from "@/hooks/useMenuCounts";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -42,11 +44,16 @@ export function Sidebar({
   const { t } = useTranslation();
   const { data: session } = useSession();
 
-  // Filter menu items based on user roles
+  // دریافت تعداد واقعی از API
+  const { counts } = useMenuCounts();
+
+  // Filter menu items based on user roles and apply real badges
   const menuItems = useMemo(() => {
     const userRoles = getUserRolesFromSession(session);
-    return getFilteredMenuItems(userRoles, !!session);
-  }, [session]);
+    const filteredItems = getFilteredMenuItems(userRoles, !!session);
+    // اعمال badge های واقعی
+    return applyBadgesToMenuItems(filteredItems, counts);
+  }, [session, counts]);
 
   return (
     <aside
