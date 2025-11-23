@@ -85,17 +85,53 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
-    // Extract origin from API_BASE_URL for CSP (remove path)
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "*";
-    let apiOrigin = apiBaseUrl;
-    try {
-      if (apiBaseUrl !== "*") {
-        const url = new URL(apiBaseUrl);
-        apiOrigin = url.origin; // e.g., https://localhost:8000
+    /**
+     * Content Security Policy (CSP) Configuration
+     *
+     * فقط origin های مشخص شده در environment variables مجاز هستند.
+     * این تنظیمات امنیت برنامه را در مقابل XSS و injection attacks افزایش می‌دهد.
+     *
+     * Allowed Origins:
+     * - 'self': همان دامنه برنامه
+     * - AUTH_ISSUER: Identity Server (احراز هویت)
+     * - NEXT_PUBLIC_API_BASE_URL: Backend API
+     * - localhost:* (فقط در development)
+     */
+    const allowedOrigins: string[] = ["'self'"];
+
+    // Add Identity Server origin
+    if (process.env.AUTH_ISSUER) {
+      try {
+        const authUrl = new URL(process.env.AUTH_ISSUER);
+        allowedOrigins.push(authUrl.origin);
+      } catch (e) {
+        console.warn("Invalid AUTH_ISSUER URL:", process.env.AUTH_ISSUER);
       }
-    } catch (e) {
-      // If URL parsing fails, use the original value
-      apiOrigin = apiBaseUrl;
+    }
+
+    // Add API origin (extract from NEXT_PUBLIC_API_BASE_URL)
+    if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+      try {
+        const apiUrl = new URL(process.env.NEXT_PUBLIC_API_BASE_URL);
+        const apiOrigin = apiUrl.origin;
+        // Only add if not already in list
+        if (!allowedOrigins.includes(apiOrigin)) {
+          allowedOrigins.push(apiOrigin);
+        }
+      } catch (e) {
+        console.warn("Invalid NEXT_PUBLIC_API_BASE_URL:", process.env.NEXT_PUBLIC_API_BASE_URL);
+      }
+    }
+
+    // In development, be more lenient with localhost
+    if (process.env.NODE_ENV === "development") {
+      allowedOrigins.push("http://localhost:*");
+      allowedOrigins.push("https://localhost:*");
+    }
+
+    // Log allowed origins for debugging (only in development)
+    if (process.env.NODE_ENV === "development") {
+      console.log("[CSP] Allowed origins for connect-src:", allowedOrigins);
     }
 
     return [
@@ -122,7 +158,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data:",
-              "connect-src 'self' " + (process.env.AUTH_ISSUER || "*") + " " + apiOrigin,
+              `connect-src ${allowedOrigins.join(" ")}`,
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
