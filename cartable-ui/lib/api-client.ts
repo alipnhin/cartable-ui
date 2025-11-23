@@ -3,12 +3,13 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 // Base URL برای API - از environment variable استفاده می‌شود
 // در صورت عدم وجود، از مقدار پیش‌فرض استفاده می‌شود
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://si-lab-tadbirpay.etadbir.com/api";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://localhost:8000/api";
 
 // Timeout برای درخواست‌های API
-const API_TIMEOUT =
-  parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || "30000", 10);
+const API_TIMEOUT = parseInt(
+  process.env.NEXT_PUBLIC_API_TIMEOUT || "30000",
+  10
+);
 
 // متغیر برای جلوگیری از چندین درخواست refresh همزمان
 let isRefreshing = false;
@@ -98,7 +99,9 @@ apiClient.interceptors.response.use(
           originalRequest._retry = true;
           isRefreshing = true;
 
-          console.error("Unauthorized: Token is invalid or expired - attempting refresh...");
+          console.error(
+            "Unauthorized: Token is invalid or expired - attempting refresh..."
+          );
 
           // dispatch event برای refresh توکن
           window.dispatchEvent(new CustomEvent("auth:unauthorized"));
@@ -108,7 +111,10 @@ apiClient.interceptors.response.use(
             const handleRefreshed = () => {
               isRefreshing = false;
               onRefreshed();
-              window.removeEventListener("auth:token-refreshed", handleRefreshed);
+              window.removeEventListener(
+                "auth:token-refreshed",
+                handleRefreshed
+              );
               // بعد از refresh موفق، کاربر باید درخواست را دوباره انجام دهد
               // چون توکن جدید از session گرفته می‌شود
               reject(error);
@@ -117,7 +123,10 @@ apiClient.interceptors.response.use(
             const handleFailed = () => {
               isRefreshing = false;
               refreshSubscribers = [];
-              window.removeEventListener("auth:token-refreshed", handleRefreshed);
+              window.removeEventListener(
+                "auth:token-refreshed",
+                handleRefreshed
+              );
               reject(error);
             };
 
