@@ -125,14 +125,14 @@ export function getPaymentStatusBadge(status: OrderStatus): {
     [OrderStatus.PartiallySucceeded]: {
       variant: "warning",
       label_fa: "انجام شده با خطا",
-      label_en: "Partially Succeeded",
+      label_en: "Done with Error",
       icon: AlertTriangle,
     },
-    [OrderStatus.Rejected]: {
+    [OrderStatus.OwnerRejected]: {
       variant: "danger",
-      label_fa: "رد شده",
-      label_en: "Rejected",
-      icon: XCircle,
+      label_fa: "عدم تائید",
+      label_en: "Owner Rejected",
+      icon: UserRoundX,
     },
     [OrderStatus.BankRejected]: {
       variant: "danger",
@@ -151,12 +151,6 @@ export function getPaymentStatusBadge(status: OrderStatus): {
       label_fa: "منقضی شده",
       label_en: "Expired",
       icon: AlarmClockOff,
-    },
-    [OrderStatus.OwnerRejected]: {
-      variant: "danger",
-      label_fa: "عدم تائید",
-      label_en: "Owner Rejected",
-      icon: UserRoundX,
     },
   };
 

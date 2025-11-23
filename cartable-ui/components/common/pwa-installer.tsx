@@ -67,8 +67,8 @@ export function PWAInstaller() {
   });
 
   useEffect(() => {
-    // Register service worker
-    if ("serviceWorker" in navigator) {
+    // Register service worker only in production or when PWA is enabled
+    if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
       navigator.serviceWorker
         .register("/sw.js")
         .then(() => {
@@ -77,6 +77,14 @@ export function PWAInstaller() {
         .catch((error) => {
           logger.error("Service Worker registration failed:", error instanceof Error ? error : undefined);
         });
+    } else if ("serviceWorker" in navigator && process.env.NODE_ENV === "development") {
+      // In development, unregister any existing service workers to prevent caching issues
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+          registration.unregister();
+          logger.info("Unregistered service worker in development mode");
+        }
+      });
     }
 
     // Get device info

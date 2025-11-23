@@ -38,18 +38,31 @@ export interface PaymentOrder {
   paymentType?: number; // نوع پرداخت (0: داخلی، 1: پایا، 2: ساتنا)
 }
 
+/**
+ * Enum وضعیت دستور پرداخت - مطابق با PaymentStatusEnum
+ * مقادیر عددی باید دقیقاً مطابق با بک‌اند باشند
+ */
 export enum OrderStatus {
-  Draft = "Draft", // پیش‌نویس
-  WaitingForOwnersApproval = "WaitingForOwnersApproval", // در انتظار تأیید صاحبان امضا
-  OwnersApproved = "OwnersApproved", // تأیید شده توسط صاحبان امضا
-  OwnerRejected = "OwnerRejected",
-  SubmittedToBank = "SubmittedToBank", // ارسال شده به بانک
-  Succeeded = "BankSucceeded", // انجام شده
-  PartiallySucceeded = "DoneWithError", // انجام شده با خطا
-  Rejected = "rejected", // عدم تأیید
-  BankRejected = "BankRejected", // رد شده توسط بانک
-  Canceled = "Canceled", // لغو شده
-  Expired = "Expired", // منقضی شده
+  /** در انتظار تأیید صاحبان امضا */
+  WaitingForOwnersApproval = 0,
+  /** تأیید شده توسط صاحبان امضا */
+  OwnersApproved = 1,
+  /** ارسال شده به بانک */
+  SubmittedToBank = 2,
+  /** انجام شده (موفق) */
+  Succeeded = 3,
+  /** عدم تأیید */
+  OwnerRejected = 4,
+  /** رد شده توسط بانک */
+  BankRejected = 5,
+  /** پیش‌نویس */
+  Draft = 6,
+  /** انجام شده با خطا */
+  PartiallySucceeded = 7,
+  /** لغو شده */
+  Canceled = 8,
+  /** منقضی شده */
+  Expired = 9,
 }
 
 export interface PaymentOrderDetail extends PaymentOrder {
@@ -75,13 +88,6 @@ export interface OrderStatusInfo {
 }
 
 export const ORDER_STATUSES: OrderStatusInfo[] = [
-  {
-    status: OrderStatus.Draft,
-    label_fa: "پیش‌نویس",
-    label_en: "Draft",
-    color: "gray",
-    description_fa: "دستور در حال تکمیل است",
-  },
   {
     status: OrderStatus.WaitingForOwnersApproval,
     label_fa: "در انتظار تأیید",
@@ -111,16 +117,9 @@ export const ORDER_STATUSES: OrderStatusInfo[] = [
     description_fa: "تمام تراکنش‌ها با موفقیت انجام شد",
   },
   {
-    status: OrderStatus.PartiallySucceeded,
-    label_fa: "انجام شده با خطا",
-    label_en: "Partially Succeeded",
-    color: "orange",
-    description_fa: "برخی تراکنش‌ها با خطا مواجه شدند",
-  },
-  {
-    status: OrderStatus.Rejected,
+    status: OrderStatus.OwnerRejected,
     label_fa: "عدم تأیید",
-    label_en: "Rejected",
+    label_en: "Owner Rejected",
     color: "red",
     description_fa: "رد شده توسط تأییدکنندگان",
   },
@@ -130,6 +129,20 @@ export const ORDER_STATUSES: OrderStatusInfo[] = [
     label_en: "Bank Rejected",
     color: "red",
     description_fa: "رد شده توسط سیستم بانک",
+  },
+  {
+    status: OrderStatus.Draft,
+    label_fa: "پیش‌نویس",
+    label_en: "Draft",
+    color: "gray",
+    description_fa: "دستور در حال تکمیل است",
+  },
+  {
+    status: OrderStatus.PartiallySucceeded,
+    label_fa: "انجام شده با خطا",
+    label_en: "Done with Error",
+    color: "orange",
+    description_fa: "برخی تراکنش‌ها با خطا مواجه شدند",
   },
   {
     status: OrderStatus.Canceled,

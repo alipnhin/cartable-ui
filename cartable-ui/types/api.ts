@@ -51,20 +51,30 @@ export interface CartableFilterParams extends PaginationParams {
 }
 
 /**
- * Enum وضعیت پرداخت
+ * Enum وضعیت پرداخت - مطابق با بک‌اند
+ * مقادیر عددی باید دقیقاً مطابق با بک‌اند باشند
  */
 export enum PaymentStatusEnum {
-  Draft = "Draft",
-  WaitingForOwnersApproval = "WaitingForOwnersApproval",
-  OwnersApproved = "OwnersApproved",
-  OwnerRejected = "OwnerRejected",
-  SubmittedToBank = "SubmittedToBank",
-  Succeeded = "Succeeded",
-  PartiallySucceeded = "PartiallySucceeded",
-  Rejected = "Rejected",
-  BankRejected = "BankRejected",
-  Canceled = "Canceled",
-  Expired = "Expired",
+  /** در انتظار تائید امضاداران */
+  WaitingForOwnersApproval = 0,
+  /** تائید شده توسط امضاداران */
+  OwnersApproved = 1,
+  /** ارسال شده به بانک جهت پردازش */
+  SubmittedToBank = 2,
+  /** تراکنش با موفقیت انجام شده */
+  BankSucceeded = 3,
+  /** عدم تائید توسط امضا داران */
+  OwnerRejected = 4,
+  /** رد شده توسط بانک */
+  BankRejected = 5,
+  /** پیش نویس */
+  Draft = 6,
+  /** انجام شده با خطا */
+  DoneWithError = 7,
+  /** لغو شده */
+  Canceled = 8,
+  /** منقضی شده */
+  Expired = 9,
 }
 
 /**
