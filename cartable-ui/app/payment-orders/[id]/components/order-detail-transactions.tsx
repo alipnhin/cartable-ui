@@ -86,19 +86,9 @@ interface OrderDetailTransactionsProps {
 type SortField = "amount" | "destinationAccountOwner" | "nationalCode";
 
 // Mapper functions: UI Enum -> API Enum
+// چون هر دو enum مقادیر عددی یکسان دارند، مستقیماً cast می‌کنیم
 const mapTransactionStatusToApi = (status: TransactionStatus): TransactionStatusApiEnum | undefined => {
-  const mapping: Record<string, TransactionStatusApiEnum> = {
-    [TransactionStatus.Registered]: TransactionStatusApiEnum.Draft,
-    [TransactionStatus.WaitForExecution]: TransactionStatusApiEnum.WaitForExecution,
-    [TransactionStatus.WaitForBank]: TransactionStatusApiEnum.WaitForBank,
-    [TransactionStatus.BankSucceeded]: TransactionStatusApiEnum.BankSucceeded,
-    [TransactionStatus.BankRejected]: TransactionStatusApiEnum.BankFailed,
-    [TransactionStatus.TransactionRollback]: TransactionStatusApiEnum.BankFailed,
-    [TransactionStatus.Failed]: TransactionStatusApiEnum.BankFailed,
-    [TransactionStatus.Canceled]: TransactionStatusApiEnum.Canceled,
-    [TransactionStatus.Expired]: TransactionStatusApiEnum.Canceled,
-  };
-  return mapping[status];
+  return status as unknown as TransactionStatusApiEnum;
 };
 
 const mapPaymentMethodToApi = (method: PaymentMethodEnum): PaymentTypeApiEnum | undefined => {
@@ -173,6 +163,31 @@ export function OrderDetailTransactions({
   const getTransactionReasonLabel = (reason: TransactionReasonEnum) => {
     const reasonKey = reason.charAt(0).toLowerCase() + reason.slice(1);
     return t(`transactions.reasonCodes.${reasonKey}`) || reason;
+  };
+
+  const getTransactionStatusLabel = (status: TransactionStatus) => {
+    switch (status) {
+      case TransactionStatus.Registered:
+        return t("transactions.statusLabels.registered");
+      case TransactionStatus.WaitForExecution:
+        return t("transactions.statusLabels.waitForExecution");
+      case TransactionStatus.WaitForBank:
+        return t("transactions.statusLabels.waitForBank");
+      case TransactionStatus.BankSucceeded:
+        return t("transactions.statusLabels.bankSucceeded");
+      case TransactionStatus.BankRejected:
+        return t("transactions.statusLabels.bankRejected");
+      case TransactionStatus.TransactionRollback:
+        return t("transactions.statusLabels.transactionRollback");
+      case TransactionStatus.Failed:
+        return t("transactions.statusLabels.failed");
+      case TransactionStatus.Canceled:
+        return t("transactions.statusLabels.canceled");
+      case TransactionStatus.Expired:
+        return t("transactions.statusLabels.expired");
+      default:
+        return String(status);
+    }
   };
 
   // Compatibility helpers for API enum display
@@ -378,37 +393,40 @@ export function OrderDetailTransactions({
                       {/* Status Filter */}
                       <div className="space-y-2">
                         <Label>{t("transactions.transactionStatus")}</Label>
-                        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+                        <Select
+                          value={statusFilter !== "all" ? String(statusFilter) : "all"}
+                          onValueChange={(v) => setStatusFilter(v === "all" ? "all" : Number(v) as TransactionStatus)}
+                        >
                           <SelectTrigger className="h-10">
                             <SelectValue placeholder={t("transactions.allStatuses")} />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">{t("transactions.allStatuses")}</SelectItem>
-                            <SelectItem value={TransactionStatus.Registered}>
+                            <SelectItem value={String(TransactionStatus.Registered)}>
                               {t("transactions.statusLabels.registered")}
                             </SelectItem>
-                            <SelectItem value={TransactionStatus.WaitForExecution}>
+                            <SelectItem value={String(TransactionStatus.WaitForExecution)}>
                               {t("transactions.statusLabels.waitForExecution")}
                             </SelectItem>
-                            <SelectItem value={TransactionStatus.WaitForBank}>
+                            <SelectItem value={String(TransactionStatus.WaitForBank)}>
                               {t("transactions.statusLabels.waitForBank")}
                             </SelectItem>
-                            <SelectItem value={TransactionStatus.BankSucceeded}>
+                            <SelectItem value={String(TransactionStatus.BankSucceeded)}>
                               {t("transactions.statusLabels.bankSucceeded")}
                             </SelectItem>
-                            <SelectItem value={TransactionStatus.BankRejected}>
+                            <SelectItem value={String(TransactionStatus.BankRejected)}>
                               {t("transactions.statusLabels.bankRejected")}
                             </SelectItem>
-                            <SelectItem value={TransactionStatus.TransactionRollback}>
+                            <SelectItem value={String(TransactionStatus.TransactionRollback)}>
                               {t("transactions.statusLabels.transactionRollback")}
                             </SelectItem>
-                            <SelectItem value={TransactionStatus.Failed}>
+                            <SelectItem value={String(TransactionStatus.Failed)}>
                               {t("transactions.statusLabels.failed")}
                             </SelectItem>
-                            <SelectItem value={TransactionStatus.Canceled}>
+                            <SelectItem value={String(TransactionStatus.Canceled)}>
                               {t("transactions.statusLabels.canceled")}
                             </SelectItem>
-                            <SelectItem value={TransactionStatus.Expired}>
+                            <SelectItem value={String(TransactionStatus.Expired)}>
                               {t("transactions.statusLabels.expired")}
                             </SelectItem>
                           </SelectContent>
@@ -540,37 +558,40 @@ export function OrderDetailTransactions({
               </div>
 
               {/* Status Filter */}
-              <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as any); applyFilters(); }}>
+              <Select
+                value={statusFilter !== "all" ? String(statusFilter) : "all"}
+                onValueChange={(v) => { setStatusFilter(v === "all" ? "all" : Number(v) as TransactionStatus); applyFilters(); }}
+              >
                 <SelectTrigger className="w-[180px] h-9">
                   <SelectValue placeholder={t("transactions.allStatuses")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("transactions.allStatuses")}</SelectItem>
-                  <SelectItem value={TransactionStatus.Registered}>
+                  <SelectItem value={String(TransactionStatus.Registered)}>
                     {t("transactions.statusLabels.registered")}
                   </SelectItem>
-                  <SelectItem value={TransactionStatus.WaitForExecution}>
+                  <SelectItem value={String(TransactionStatus.WaitForExecution)}>
                     {t("transactions.statusLabels.waitForExecution")}
                   </SelectItem>
-                  <SelectItem value={TransactionStatus.WaitForBank}>
+                  <SelectItem value={String(TransactionStatus.WaitForBank)}>
                     {t("transactions.statusLabels.waitForBank")}
                   </SelectItem>
-                  <SelectItem value={TransactionStatus.BankSucceeded}>
+                  <SelectItem value={String(TransactionStatus.BankSucceeded)}>
                     {t("transactions.statusLabels.bankSucceeded")}
                   </SelectItem>
-                  <SelectItem value={TransactionStatus.BankRejected}>
+                  <SelectItem value={String(TransactionStatus.BankRejected)}>
                     {t("transactions.statusLabels.bankRejected")}
                   </SelectItem>
-                  <SelectItem value={TransactionStatus.TransactionRollback}>
+                  <SelectItem value={String(TransactionStatus.TransactionRollback)}>
                     {t("transactions.statusLabels.transactionRollback")}
                   </SelectItem>
-                  <SelectItem value={TransactionStatus.Failed}>
+                  <SelectItem value={String(TransactionStatus.Failed)}>
                     {t("transactions.statusLabels.failed")}
                   </SelectItem>
-                  <SelectItem value={TransactionStatus.Canceled}>
+                  <SelectItem value={String(TransactionStatus.Canceled)}>
                     {t("transactions.statusLabels.canceled")}
                   </SelectItem>
-                  <SelectItem value={TransactionStatus.Expired}>
+                  <SelectItem value={String(TransactionStatus.Expired)}>
                     {t("transactions.statusLabels.expired")}
                   </SelectItem>
                 </SelectContent>
@@ -701,7 +722,7 @@ export function OrderDetailTransactions({
               )}
               {statusFilter && statusFilter !== "all" && (
                 <Badge variant="secondary" className="gap-1.5">
-                  {t(`transactions.statusLabels.${statusFilter.charAt(0).toLowerCase() + statusFilter.slice(1)}`)}
+                  {getTransactionStatusLabel(statusFilter)}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => {

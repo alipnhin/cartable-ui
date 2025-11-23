@@ -75,6 +75,8 @@ export enum PaymentStatusEnum {
   Canceled = 8,
   /** منقضی شده */
   Expired = 9,
+  /** در انتظار تایید مدیر کارتابل */
+  WaitForManagerApproval = 10,
 }
 
 /**
@@ -202,16 +204,28 @@ export enum ReasonCodeApiEnum {
 }
 
 /**
- * Enum وضعیت تراکنش - مقادیر API (PascalCase)
- * برای mapping به TransactionStatus موجود
+ * Enum وضعیت تراکنش - مطابق با بک‌اند (PaymentItemStatusEnum)
+ * مقادیر عددی باید دقیقاً مطابق با بک‌اند باشند
  */
 export enum TransactionStatusApiEnum {
-  Draft = "Draft",
-  WaitForExecution = "WaitForExecution",
-  WaitForBank = "WaitForBank",
-  BankSucceeded = "BankSucceeded",
-  BankFailed = "BankFailed",
-  Canceled = "Canceled",
+  /** ثبت شده */
+  Registered = 0,
+  /** در صف پردازش */
+  WaitForExecution = 1,
+  /** ارسال شده به بانک */
+  WaitForBank = 2,
+  /** تراکنش انجام شده */
+  BankSucceeded = 3,
+  /** رد شده توسط بانک */
+  BankRejected = 4,
+  /** برگشت مبلغ به حساب مبدا */
+  TransactionRollback = 5,
+  /** خطا در ارسال به بانک */
+  Failed = 6,
+  /** لغو شده */
+  Canceled = 7,
+  /** منقضی شده */
+  Expired = 8,
 }
 
 /**

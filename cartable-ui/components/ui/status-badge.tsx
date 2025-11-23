@@ -222,22 +222,23 @@ export function getTransactionStatusBadge(status: TransactionStatus): {
   );
 }
 
-export function getPaymentTypeBadge(type: number | undefined): {
+export function getPaymentTypeBadge(type: number | undefined | null): {
   variant: BadgeVariant;
   label_fa: string;
   label_en: string;
 } {
-  if (type === undefined) {
+  if (type === undefined || type === null) {
     return { variant: "muted", label_fa: "نامشخص", label_en: "Unknown" };
   }
 
   const typeMap: Record<
     number,
-    { variant: BadgeVariant; label_fa: string; label_en: string }
+    { variant: BadgeVariant; label_fa: string; label_en: "Internal" | "Paya" | "Satna" | "Card" }
   > = {
     0: { variant: "default", label_fa: "داخلی", label_en: "Internal" },
     1: { variant: "success", label_fa: "پایا", label_en: "Paya" },
     2: { variant: "info", label_fa: "ساتنا", label_en: "Satna" },
+    3: { variant: "warning", label_fa: "کارت به کارت", label_en: "Card" },
   };
 
   return (
@@ -246,6 +247,30 @@ export function getPaymentTypeBadge(type: number | undefined): {
       label_fa: "نامشخص",
       label_en: "Unknown",
     }
+  );
+}
+
+// Wrapper Component for PaymentType
+interface PaymentTypeBadgeProps {
+  type: number | undefined | null;
+  size?: "sm" | "default";
+  className?: string;
+}
+
+export function PaymentTypeBadge({
+  type,
+  size = "default",
+  className,
+}: PaymentTypeBadgeProps) {
+  const typeInfo = getPaymentTypeBadge(type);
+
+  return (
+    <StatusBadge
+      variant={typeInfo.variant}
+      className={className}
+    >
+      {typeInfo.label_fa}
+    </StatusBadge>
   );
 }
 

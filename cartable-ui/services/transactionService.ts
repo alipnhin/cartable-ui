@@ -95,17 +95,18 @@ export interface TransactionsRequest {
   transferToDate?: string;
 }
 
-// Status mapping
+// Status mapping - مطابق با PaymentItemStatusEnum بک‌اند
 export const TransactionStatusMap: Record<
   number,
   { label: string; class: string }
 > = {
-  1: { label: "ثبت شده", class: "secondary" },
-  2: { label: "در انتظار اجرا", class: "info" },
+  0: { label: "ثبت شده", class: "secondary" },
+  1: { label: "در صف پردازش", class: "info" },
+  2: { label: "ارسال شده به بانک", class: "warning" },
   3: { label: "تراکنش انجام شده", class: "success" },
   4: { label: "رد شده توسط بانک", class: "danger" },
-  5: { label: "در انتظار بانک", class: "warning" },
-  6: { label: "بازگشت داده شده", class: "secondary" },
+  5: { label: "برگشت مبلغ به حساب مبدا", class: "secondary" },
+  6: { label: "خطا در ارسال به بانک", class: "danger" },
   7: { label: "لغو شده", class: "warning" },
   8: { label: "منقضی شده", class: "secondary" },
 };

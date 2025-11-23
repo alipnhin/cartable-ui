@@ -5,8 +5,11 @@ import {
   formatAmount,
   formatDateToPersian,
   TransactionStatusInfo,
-  PaymentTypeInfo
+  PaymentTypeInfo,
+  TransactionStatusMap,
+  PaymentTypeMap,
 } from "@/services/transactionService";
+import { PaymentTypeBadge } from "@/components/ui/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -311,15 +314,13 @@ export function TransactionTable({
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
+                <TableHead>شماره درخواست</TableHead>
                 <TableHead>
                   <SortableHeader field="destinationAccountOwner">
-                    {t("transactions.ownerName")}
+                    نام ذینفع
                   </SortableHeader>
                 </TableHead>
-                <TableHead>کد ملی</TableHead>
-                <TableHead>{t("transactions.iban")}</TableHead>
-                <TableHead>شماره حساب</TableHead>
-                <TableHead>کد مشتری</TableHead>
+                <TableHead>حساب مقصد</TableHead>
                 <TableHead>بانک</TableHead>
                 <TableHead>
                   <SortableHeader field="amount">
@@ -346,11 +347,9 @@ export function TransactionTable({
                 [...Array(pageSize > 10 ? 10 : pageSize)].map((_, index) => (
                   <TableRow key={index}>
                     <TableCell><Skeleton className="h-4 w-6" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-40" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-40" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-16" /></TableCell>
@@ -361,7 +360,7 @@ export function TransactionTable({
                 ))
               ) : transactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={12} className="text-center py-16">
+                  <TableCell colSpan={10} className="text-center py-16">
                     <div className="flex flex-col items-center gap-3">
                       <SearchX className="h-12 w-12 text-muted-foreground/50" />
                       <div className="space-y-1">
@@ -379,30 +378,25 @@ export function TransactionTable({
                     <TableCell className="font-medium">
                       {startIndex + index + 1}
                     </TableCell>
-                    <TableCell className="font-medium max-w-[180px] truncate">
-                      {tx.destinationAccountOwner}
-                    </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {tx.nationalCode || "-"}
+                      {tx.orderId}
                     </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {tx.destinationIban}
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm">{tx.destinationAccountOwner}</span>
+                        <span className="text-xs text-muted-foreground font-mono">{tx.nationalCode || "-"}</span>
+                      </div>
                     </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {tx.accountNumber}
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      {tx.accountCode || "-"}
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-mono text-xs">{tx.destinationIban}</span>
+                        <span className="font-mono text-xs text-muted-foreground">{tx.accountNumber}</span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-sm">{tx.bankName}</TableCell>
                     <TableCell className="font-medium">{formatAmount(tx.amount)}</TableCell>
                     <TableCell>
-                      <Badge
-                        variant={getPaymentTypeVariant(tx.paymentType)}
-                        className="text-xs"
-                      >
-                        {getPaymentTypeLabel(tx.paymentType)}
-                      </Badge>
+                      <PaymentTypeBadge type={Number(tx.paymentType)} className="text-xs" />
                     </TableCell>
                     <TableCell className="text-sm">
                       {formatDateToPersian(tx.createdDateTime)}

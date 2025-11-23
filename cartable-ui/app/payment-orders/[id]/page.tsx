@@ -58,6 +58,7 @@ import {
   TransactionFilterParams,
   PaymentStatusEnum,
   OperationTypeEnum,
+  TransactionStatusApiEnum,
 } from "@/types/api";
 import { OtpDialog } from "@/components/common/otp-dialog";
 
@@ -660,7 +661,7 @@ export default function PaymentOrderDetailPage() {
   // محاسبه تعداد تراکنش‌های در صف بانک
   const waitForBankCount = statistics
     ? statistics.statusStatistics.breakdown.find(
-        (s) => s.status === "WaitForBank"
+        (s) => s.status === TransactionStatusApiEnum.WaitForBank
       )?.count || 0
     : 0;
 

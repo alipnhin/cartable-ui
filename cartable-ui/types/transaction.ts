@@ -26,16 +26,29 @@ export interface Transaction {
   UpdatedDateTime?: string;
 }
 
+/**
+ * Enum وضعیت تراکنش - مطابق با TransactionStatusApiEnum
+ * مقادیر عددی باید دقیقاً مطابق با بک‌اند باشند
+ */
 export enum TransactionStatus {
-  Registered = "registered",
-  WaitForExecution = "waitForExecution",
-  WaitForBank = "waitForBank",
-  BankSucceeded = "bankSucceeded",
-  BankRejected = "bankRejected",
-  TransactionRollback = "transactionRollback",
-  Failed = "failed",
-  Canceled = "canceled",
-  Expired = "expired",
+  /** ثبت شده */
+  Registered = 0,
+  /** در صف پردازش */
+  WaitForExecution = 1,
+  /** ارسال شده به بانک */
+  WaitForBank = 2,
+  /** تراکنش انجام شده */
+  BankSucceeded = 3,
+  /** رد شده توسط بانک */
+  BankRejected = 4,
+  /** برگشت مبلغ به حساب مبدا */
+  TransactionRollback = 5,
+  /** خطا در ارسال به بانک */
+  Failed = 6,
+  /** لغو شده */
+  Canceled = 7,
+  /** منقضی شده */
+  Expired = 8,
 }
 export enum PaymentMethodEnum {
   /** نامشخص */

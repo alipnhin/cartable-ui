@@ -1,6 +1,6 @@
 "use client";
 
-import { WithdrawalStatistics } from "@/types/api";
+import { WithdrawalStatistics, TransactionStatusApiEnum } from "@/types/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
@@ -37,12 +37,12 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
   } = statistics;
 
   // محاسبه تعداد تراکنش‌ها بر اساس وضعیت
-  const succeededCount = statusStatistics.breakdown.find(s => s.status === "BankSucceeded")?.count || 0;
+  const succeededCount = statusStatistics.breakdown.find(s => s.status === TransactionStatusApiEnum.BankSucceeded)?.count || 0;
   const failedCount = statusStatistics.breakdown.filter(s =>
-    s.status === "BankFailed" || s.status === "Canceled"
+    s.status === TransactionStatusApiEnum.BankRejected || s.status === TransactionStatusApiEnum.Failed || s.status === TransactionStatusApiEnum.Canceled
   ).reduce((sum, s) => sum + s.count, 0);
   const pendingCount = statusStatistics.breakdown.filter(s =>
-    s.status === "WaitForExecution" || s.status === "WaitForBank" || s.status === "Draft"
+    s.status === TransactionStatusApiEnum.WaitForExecution || s.status === TransactionStatusApiEnum.WaitForBank || s.status === TransactionStatusApiEnum.Registered
   ).reduce((sum, s) => sum + s.count, 0);
 
   return (

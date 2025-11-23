@@ -29,11 +29,11 @@ interface TransactionsFilterProps {
 }
 
 const statusOptions = [
-  { value: "BankSucceeded", label: "تراکنش انجام شده" },
-  { value: "BankRejected", label: "رد شده توسط بانک" },
-  { value: "Failed", label: "ناموفق" },
-  { value: "WaitForBank", label: "در صف پردازش بانک" },
-  { value: "Registered", label: "ثبت شده" },
+  { value: TransactionStatus.BankSucceeded, label: "تراکنش انجام شده" },
+  { value: TransactionStatus.BankRejected, label: "رد شده توسط بانک" },
+  { value: TransactionStatus.Failed, label: "ناموفق" },
+  { value: TransactionStatus.WaitForBank, label: "در صف پردازش بانک" },
+  { value: TransactionStatus.Registered, label: "ثبت شده" },
 ];
 
 const paymentTypeOptions = [
@@ -172,16 +172,12 @@ export function TransactionsFilter({
                 <Badge
                   key={option.value}
                   variant={
-                    localFilters.status.includes(
-                      option.value as TransactionStatus
-                    )
+                    localFilters.status.includes(option.value)
                       ? "primary"
                       : "outline"
                   }
                   className="cursor-pointer"
-                  onClick={() =>
-                    toggleStatus(option.value as TransactionStatus)
-                  }
+                  onClick={() => toggleStatus(option.value)}
                 >
                   {option.label}
                 </Badge>
