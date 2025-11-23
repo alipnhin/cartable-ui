@@ -42,7 +42,7 @@ const formatDateTime = (dateString: string, locale: string): string => {
 // Helper to get status icon for timeline
 function getTransactionStatusIcon(status: TransactionStatusApiEnum) {
   switch (status) {
-    case TransactionStatusApiEnum.Draft:
+    case TransactionStatusApiEnum.Registered:
       return <FileEdit className="h-5 w-5 text-gray-600" />;
     case TransactionStatusApiEnum.WaitForExecution:
       return <Clock className="h-5 w-5 text-blue-600" />;
@@ -50,9 +50,13 @@ function getTransactionStatusIcon(status: TransactionStatusApiEnum) {
       return <Send className="h-5 w-5 text-purple-600" />;
     case TransactionStatusApiEnum.BankSucceeded:
       return <CheckCircle className="h-5 w-5 text-green-600" />;
-    case TransactionStatusApiEnum.BankFailed:
+    case TransactionStatusApiEnum.BankRejected:
+    case TransactionStatusApiEnum.Failed:
       return <XCircle className="h-5 w-5 text-red-600" />;
+    case TransactionStatusApiEnum.TransactionRollback:
+      return <AlertCircle className="h-5 w-5 text-warning" />;
     case TransactionStatusApiEnum.Canceled:
+    case TransactionStatusApiEnum.Expired:
       return <Ban className="h-5 w-5 text-muted-foreground" />;
     default:
       return <Clock className="h-5 w-5 text-gray-600" />;
