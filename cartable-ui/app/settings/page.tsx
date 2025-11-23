@@ -11,7 +11,6 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import useTranslation from "@/hooks/useTranslation";
 import { useToast } from "@/hooks/use-toast";
-import { CURRENT_USER } from "@/mocks/mockUsers";
 import { User, Bell, Lock, Globe, Palette } from "lucide-react";
 
 export default function SettingsPage() {
@@ -19,9 +18,9 @@ export default function SettingsPage() {
   const { toast } = useToast();
 
   const [profile, setProfile] = useState({
-    fullName: CURRENT_USER.fullName,
-    email: CURRENT_USER.email,
-    phone: "09123456789",
+    fullName: "",
+    email: "",
+    phone: "",
   });
 
   const [notifications, setNotifications] = useState({
@@ -107,10 +106,9 @@ export default function SettingsPage() {
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
                   <AvatarFallback className="text-2xl">
-                    {CURRENT_USER.fullName
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
+                    {profile.fullName
+                      ? profile.fullName.split(" ").map((n) => n[0]).join("")
+                      : "U"}
                   </AvatarFallback>
                 </Avatar>
                 <Button variant="outline">{t("settings.changeAvatar")}</Button>
@@ -159,7 +157,7 @@ export default function SettingsPage() {
                 <div>
                   <Label>{t("settings.role")}</Label>
                   <Input
-                    value={CURRENT_USER.role}
+                    value=""
                     disabled
                     className="mt-2 bg-muted"
                   />

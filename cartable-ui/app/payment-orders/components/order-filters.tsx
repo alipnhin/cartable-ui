@@ -75,7 +75,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
       label: t("paymentCartable.statusLabels.succeeded"),
     },
     {
-      value: OrderStatus.Rejected,
+      value: OrderStatus.OwnerRejected,
       label: t("paymentCartable.statusLabels.rejected"),
     },
     {
@@ -189,11 +189,11 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
         <div className="space-y-2">
           <Label className="text-sm">{t("filters.status")}</Label>
           <Select
-            value={localFilters.status || "all"}
+            value={localFilters.status !== "" ? String(localFilters.status) : "all"}
             onValueChange={(value) =>
               setLocalFilters((prev) => ({
                 ...prev,
-                status: value === "all" ? "" : (value as OrderStatus),
+                status: value === "all" ? "" : (Number(value) as OrderStatus),
               }))
             }
           >
@@ -203,7 +203,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
             <SelectContent>
               <SelectItem value="all">{t("filters.allStatuses")}</SelectItem>
               {statusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <SelectItem key={option.value} value={String(option.value)}>
                   {option.label}
                 </SelectItem>
               ))}
@@ -305,11 +305,11 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
           <div className="space-y-2">
             <Label className="text-sm">{t("filters.status")}</Label>
             <Select
-              value={localFilters.status || "all"}
+              value={localFilters.status !== "" ? String(localFilters.status) : "all"}
               onValueChange={(value) =>
                 setLocalFilters((prev) => ({
                   ...prev,
-                  status: value === "all" ? "" : (value as OrderStatus),
+                  status: value === "all" ? "" : (Number(value) as OrderStatus),
                 }))
               }
             >
@@ -319,7 +319,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
               <SelectContent>
                 <SelectItem value="all">{t("filters.allStatuses")}</SelectItem>
                 {statusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem key={option.value} value={String(option.value)}>
                     {option.label}
                   </SelectItem>
                 ))}

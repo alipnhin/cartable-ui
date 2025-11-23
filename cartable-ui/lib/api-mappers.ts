@@ -8,46 +8,10 @@ import { PaymentOrder, OrderStatus } from "@/types/order";
 
 /**
  * تبدیل PaymentStatusEnum (از API) به OrderStatus (داخلی)
+ * چون هر دو enum مقادیر عددی یکسان دارند، مستقیماً cast می‌کنیم
  */
-function mapPaymentStatus(status: PaymentStatusEnum | string): OrderStatus {
-  // تبدیل به lowercase برای مقایسه case-insensitive
-  const statusStr = String(status).toLowerCase();
-
-  switch (statusStr) {
-    case "draft":
-      return OrderStatus.Draft;
-    case "waitingforownersapproval":
-    case "waiting_for_owners_approval":
-      return OrderStatus.WaitingForOwnersApproval;
-    case "ownersapproved":
-    case "owners_approved":
-      return OrderStatus.OwnersApproved;
-    case "ownerrejected":
-    case "owner_rejected":
-      return OrderStatus.OwnerRejected;
-    case "submittedtobank":
-    case "submitted_to_bank":
-      return OrderStatus.SubmittedToBank;
-    case "succeeded":
-    case "banksucceeded":
-    case "bank_succeeded":
-      return OrderStatus.Succeeded;
-    case "partiallysucceeded":
-    case "partially_succeeded":
-      return OrderStatus.PartiallySucceeded;
-    case "rejected":
-      return OrderStatus.Rejected;
-    case "bankrejected":
-    case "bank_rejected":
-      return OrderStatus.BankRejected;
-    case "canceled":
-      return OrderStatus.Canceled;
-    case "expired":
-      return OrderStatus.Expired;
-    default:
-      console.warn(`Unknown payment status: ${status}, defaulting to Draft`);
-      return OrderStatus.Draft;
-  }
+function mapPaymentStatus(status: PaymentStatusEnum): OrderStatus {
+  return status as unknown as OrderStatus;
 }
 
 /**

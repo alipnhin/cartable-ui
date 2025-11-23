@@ -99,7 +99,7 @@ export function FilterSheet({
       label: t("paymentCartable.statusLabels.succeeded"),
     },
     {
-      value: OrderStatus.Rejected,
+      value: OrderStatus.OwnerRejected,
       label: t("paymentCartable.statusLabels.rejected"),
     },
     {
@@ -293,7 +293,7 @@ export function FilterSheet({
                     {statusOptions.map((option) => (
                       <CommandItem
                         key={option.value}
-                        value={option.value}
+                        value={String(option.value)}
                         onSelect={() => handleStatusSelect(option.value)}
                       >
                         <Check

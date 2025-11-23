@@ -37,11 +37,10 @@ export function OrderDetailHistory({ changeHistory }: OrderDetailHistoryProps) {
         return <XCircle className="h-5 w-5 text-red-600" />;
       case PaymentStatusEnum.SubmittedToBank:
         return <Send className="h-5 w-5 text-purple-600" />;
-      case PaymentStatusEnum.Succeeded:
+      case PaymentStatusEnum.BankSucceeded:
         return <CheckCircle className="h-5 w-5 text-success" />;
-      case PaymentStatusEnum.PartiallySucceeded:
+      case PaymentStatusEnum.DoneWithError:
         return <AlertCircle className="h-5 w-5 text-warning" />;
-      case PaymentStatusEnum.Rejected:
       case PaymentStatusEnum.BankRejected:
         return <XCircle className="h-5 w-5 text-destructive" />;
       case PaymentStatusEnum.Canceled:
