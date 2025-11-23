@@ -1,6 +1,7 @@
 "use client";
 import { ReactNode, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { I18N_LANGUAGES, Language } from "@/i18n/config";
 import { FileText, Globe, LogOut, Moon, Palette, User } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -23,11 +24,12 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useColorTheme } from "@/providers/color-theme-provider";
 
 export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const { t } = useTranslation();
+  const router = useRouter();
   const { changeLanguage, language } = useLanguage();
   const { theme, setTheme } = useTheme();
   const isMobile = useIsMobile();
@@ -50,8 +52,8 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
     setTheme(checked ? "dark" : "light");
   };
 
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: "/" });
+  const handleLogout = () => {
+    router.push("/auth/logout");
   };
 
   // Mobile Drawer Version

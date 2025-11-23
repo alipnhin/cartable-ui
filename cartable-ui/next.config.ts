@@ -85,6 +85,19 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
+    // Extract origin from API_BASE_URL for CSP (remove path)
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "*";
+    let apiOrigin = apiBaseUrl;
+    try {
+      if (apiBaseUrl !== "*") {
+        const url = new URL(apiBaseUrl);
+        apiOrigin = url.origin; // e.g., https://localhost:8000
+      }
+    } catch (e) {
+      // If URL parsing fails, use the original value
+      apiOrigin = apiBaseUrl;
+    }
+
     return [
       {
         source: "/(.*)",
@@ -109,7 +122,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data:",
-              "connect-src 'self' " + (process.env.AUTH_ISSUER || "*") + " " + (process.env.NEXT_PUBLIC_API_BASE_URL || "*"),
+              "connect-src 'self' " + (process.env.AUTH_ISSUER || "*") + " " + apiOrigin,
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

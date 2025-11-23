@@ -104,12 +104,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token) {
         session.accessToken = token.accessToken as string;
         session.user.id = token.sub as string;
+        session.idToken = token.idToken as string;
         // اگر refresh token خطا داشت، error را به session اضافه کن
         if (token.error) {
           session.error = token.error as string;
         }
       }
       return session;
+    },
+  },
+  events: {
+    async signOut(message) {
+      // Logout from Identity Server
+      // Check if message contains token (JWT strategy)
+      if ("token" in message && message.token?.idToken) {
+        const params = new URLSearchParams({
+          id_token_hint: message.token.idToken as string,
+          post_logout_redirect_uri: process.env.NEXTAUTH_URL || "http://localhost:3000",
+        });
+
+        try {
+          await fetch(`${process.env.AUTH_ISSUER}/connect/endsession?${params.toString()}`, {
+            method: "GET",
+          });
+        } catch (error) {
+          console.error("Error logging out from Identity Server:", error);
+        }
+      }
     },
   },
   pages: {

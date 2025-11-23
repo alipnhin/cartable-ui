@@ -8,6 +8,8 @@ declare module "next-auth" {
   interface Session {
     /** Access token from OIDC provider */
     accessToken?: string;
+    /** ID token from OIDC provider (used for logout) */
+    idToken?: string;
     /** Error message if token refresh failed */
     error?: string;
     /** User information */
