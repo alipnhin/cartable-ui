@@ -84,93 +84,81 @@ export function getPaymentStatusBadge(status: PaymentStatusEnum): {
   translationKey: string;
   icon: React.ElementType;
 } {
-  // تبدیل status به عدد برای اطمینان از تطابق صحیح
-  const statusNumber = Number(status);
-
-  // نگاشت مستقیم با استفاده از مقادیر عددی
-  const statusMap: Record<
-    number,
-    {
-      variant: BadgeVariant;
-      translationKey: string;
-      icon: React.ElementType;
-    }
-  > = {
-    [0]: {
-      // WaitingForOwnersApproval
-      variant: "warning",
-      translationKey: "paymentCartable.statusLabels.waitingForApproval",
-      icon: Clock,
-    },
-    [1]: {
-      // OwnersApproved
-      variant: "success",
-      translationKey: "paymentCartable.statusLabels.approved",
-      icon: UserRoundCheck,
-    },
-    [2]: {
-      // SubmittedToBank
-      variant: "info",
-      translationKey: "paymentCartable.statusLabels.submittedToBank",
-      icon: Banknote,
-    },
-    [3]: {
-      // BankSucceeded
-      variant: "success",
-      translationKey: "paymentCartable.statusLabels.succeeded",
-      icon: CheckCircle2,
-    },
-    [4]: {
-      // OwnerRejected
-      variant: "danger",
-      translationKey: "paymentCartable.statusLabels.rejected",
-      icon: UserRoundX,
-    },
-    [5]: {
-      // BankRejected
-      variant: "danger",
-      translationKey: "paymentCartable.statusLabels.bankRejected",
-      icon: BanknoteX,
-    },
-    [6]: {
-      // Draft
-      variant: "muted",
-      translationKey: "paymentCartable.statusLabels.draft",
-      icon: FileText,
-    },
-    [7]: {
-      // DoneWithError
-      variant: "warning",
-      translationKey: "paymentCartable.statusLabels.doneWithError",
-      icon: AlertTriangle,
-    },
-    [8]: {
-      // Canceled
-      variant: "muted",
-      translationKey: "paymentCartable.statusLabels.canceled",
-      icon: Ban,
-    },
-    [9]: {
-      // Expired
-      variant: "muted",
-      translationKey: "paymentCartable.statusLabels.expired",
-      icon: AlarmClockOff,
-    },
-    [10]: {
-      // WaitForManagerApproval
-      variant: "info",
-      translationKey: "paymentCartable.statusLabels.waitForManagerApproval",
-      icon: ClipboardCheck,
-    },
-  };
-
-  return (
-    statusMap[statusNumber] || {
-      variant: "default",
-      translationKey: "common.status",
-      icon: HelpCircle,
-    }
-  );
+  // استفاده از switch برای type-safety بهتر
+  switch (status) {
+    case PaymentStatusEnum.WaitingForOwnersApproval:
+      return {
+        variant: "warning",
+        translationKey: "paymentCartable.statusLabels.waitingForApproval",
+        icon: Clock,
+      };
+    case PaymentStatusEnum.OwnersApproved:
+      return {
+        variant: "success",
+        translationKey: "paymentCartable.statusLabels.approved",
+        icon: UserRoundCheck,
+      };
+    case PaymentStatusEnum.SubmittedToBank:
+      return {
+        variant: "info",
+        translationKey: "paymentCartable.statusLabels.submittedToBank",
+        icon: Banknote,
+      };
+    case PaymentStatusEnum.BankSucceeded:
+      return {
+        variant: "success",
+        translationKey: "paymentCartable.statusLabels.succeeded",
+        icon: CheckCircle2,
+      };
+    case PaymentStatusEnum.OwnerRejected:
+      return {
+        variant: "danger",
+        translationKey: "paymentCartable.statusLabels.rejected",
+        icon: UserRoundX,
+      };
+    case PaymentStatusEnum.BankRejected:
+      return {
+        variant: "danger",
+        translationKey: "paymentCartable.statusLabels.bankRejected",
+        icon: BanknoteX,
+      };
+    case PaymentStatusEnum.Draft:
+      return {
+        variant: "muted",
+        translationKey: "paymentCartable.statusLabels.draft",
+        icon: FileText,
+      };
+    case PaymentStatusEnum.DoneWithError:
+      return {
+        variant: "warning",
+        translationKey: "paymentCartable.statusLabels.doneWithError",
+        icon: AlertTriangle,
+      };
+    case PaymentStatusEnum.Canceled:
+      return {
+        variant: "muted",
+        translationKey: "paymentCartable.statusLabels.canceled",
+        icon: Ban,
+      };
+    case PaymentStatusEnum.Expired:
+      return {
+        variant: "muted",
+        translationKey: "paymentCartable.statusLabels.expired",
+        icon: AlarmClockOff,
+      };
+    case PaymentStatusEnum.WaitForManagerApproval:
+      return {
+        variant: "info",
+        translationKey: "paymentCartable.statusLabels.waitForManagerApproval",
+        icon: ClipboardCheck,
+      };
+    default:
+      return {
+        variant: "default",
+        translationKey: "common.status",
+        icon: HelpCircle,
+      };
+  }
 }
 
 // Helper function to get badge variant from TransactionStatus enum
