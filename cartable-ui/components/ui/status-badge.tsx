@@ -233,28 +233,26 @@ export function getTransactionStatusBadge(status: TransactionStatus): {
 
 export function getPaymentTypeBadge(type: number | undefined | null): {
   variant: BadgeVariant;
-  label_fa: string;
-  label_en: string;
+  translationKey: string;
 } {
   if (type === undefined || type === null) {
-    return { variant: "muted", label_fa: "نامشخص", label_en: "Unknown" };
+    return {
+      variant: "muted",
+      translationKey: "transactions.paymentTypes.unknown"
+    };
   }
 
-  const typeMap: Record<
-    number,
-    { variant: BadgeVariant; label_fa: string; label_en: "Internal" | "Paya" | "Satna" | "Card" }
-  > = {
-    0: { variant: "default", label_fa: "داخلی", label_en: "Internal" },
-    1: { variant: "success", label_fa: "پایا", label_en: "Paya" },
-    2: { variant: "info", label_fa: "ساتنا", label_en: "Satna" },
-    3: { variant: "warning", label_fa: "کارت به کارت", label_en: "Card" },
+  const typeMap: Record<number, { variant: BadgeVariant; translationKey: string }> = {
+    0: { variant: "default", translationKey: "transactions.paymentTypes.internal" },
+    1: { variant: "success", translationKey: "transactions.paymentTypes.paya" },
+    2: { variant: "info", translationKey: "transactions.paymentTypes.satna" },
+    3: { variant: "warning", translationKey: "transactions.paymentTypes.card" },
   };
 
   return (
     typeMap[type] || {
       variant: "muted",
-      label_fa: "نامشخص",
-      label_en: "Unknown",
+      translationKey: "transactions.paymentTypes.unknown",
     }
   );
 }
@@ -271,6 +269,7 @@ export function PaymentTypeBadge({
   size = "default",
   className,
 }: PaymentTypeBadgeProps) {
+  const { t } = useTranslation();
   const typeInfo = getPaymentTypeBadge(type);
 
   return (
@@ -278,7 +277,7 @@ export function PaymentTypeBadge({
       variant={typeInfo.variant}
       className={className}
     >
-      {typeInfo.label_fa}
+      {t(typeInfo.translationKey)}
     </StatusBadge>
   );
 }
