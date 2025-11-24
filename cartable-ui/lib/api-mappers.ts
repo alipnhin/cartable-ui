@@ -13,6 +13,14 @@ import { PaymentOrder } from "@/types/order";
 export function mapPaymentListDtoToPaymentOrder(
   dto: PaymentListDto
 ): PaymentOrder {
+  // Debug: log status value and type
+  console.log('Payment Order Mapping:', {
+    orderId: dto.orderId,
+    status: dto.status,
+    statusType: typeof dto.status,
+    statusNumber: Number(dto.status)
+  });
+
   return {
     id: dto.id,
     orderId: dto.orderId,
