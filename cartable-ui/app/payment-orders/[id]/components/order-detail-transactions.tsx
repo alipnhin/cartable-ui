@@ -9,8 +9,6 @@ import {
   TransactionFilterParams,
 } from "@/types/api";
 import {
-  TransactionStatus,
-  PaymentMethodEnum,
   TransactionReasonEnum,
 } from "@/types/transaction";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -85,47 +83,6 @@ interface OrderDetailTransactionsProps {
 
 type SortField = "amount" | "destinationAccountOwner" | "nationalCode";
 
-// Mapper functions: UI Enum -> API Enum
-// چون هر دو enum مقادیر عددی یکسان دارند، مستقیماً cast می‌کنیم
-const mapTransactionStatusToApi = (status: TransactionStatus): TransactionStatusApiEnum | undefined => {
-  return status as unknown as TransactionStatusApiEnum;
-};
-
-const mapPaymentMethodToApi = (method: PaymentMethodEnum): PaymentTypeApiEnum | undefined => {
-  const mapping: Record<string, PaymentTypeApiEnum> = {
-    [PaymentMethodEnum.Paya]: PaymentTypeApiEnum.Paya,
-    [PaymentMethodEnum.Satna]: PaymentTypeApiEnum.Satna,
-    // Unknown, Internal, Card در API وجود ندارند
-  };
-  return mapping[method];
-};
-
-const mapTransactionReasonToApi = (reason: TransactionReasonEnum): ReasonCodeApiEnum | undefined => {
-  const mapping: Record<string, ReasonCodeApiEnum> = {
-    [TransactionReasonEnum.InvestmentAndBourse]: ReasonCodeApiEnum.InvestmentAndBourse,
-    [TransactionReasonEnum.StuffsPurchase]: ReasonCodeApiEnum.ImportGoods,
-    [TransactionReasonEnum.SalaryDeposit]: ReasonCodeApiEnum.SalaryAndWages,
-    [TransactionReasonEnum.CustomsDuties]: ReasonCodeApiEnum.TaxAndDuties,
-    [TransactionReasonEnum.TaxSettle]: ReasonCodeApiEnum.TaxAndDuties,
-    [TransactionReasonEnum.DebtPayment]: ReasonCodeApiEnum.LoanRepayment,
-    [TransactionReasonEnum.FacilitiesAndCommitments]: ReasonCodeApiEnum.LoanRepayment,
-    [TransactionReasonEnum.GeneralAndDailyCosts]: ReasonCodeApiEnum.OtherPayments,
-    [TransactionReasonEnum.ServicesPurchase]: ReasonCodeApiEnum.OtherPayments,
-    [TransactionReasonEnum.ServicesInsurance]: ReasonCodeApiEnum.OtherPayments,
-    [TransactionReasonEnum.Therapeutic]: ReasonCodeApiEnum.OtherPayments,
-    [TransactionReasonEnum.LegalCurrencyActivities]: ReasonCodeApiEnum.OtherPayments,
-    [TransactionReasonEnum.Retirement]: ReasonCodeApiEnum.OtherPayments,
-    [TransactionReasonEnum.MovableProperties]: ReasonCodeApiEnum.OtherPayments,
-    [TransactionReasonEnum.ImmovableProperties]: ReasonCodeApiEnum.OtherPayments,
-    [TransactionReasonEnum.CashManagement]: ReasonCodeApiEnum.OtherPayments,
-    [TransactionReasonEnum.OtherGovernmentServices]: ReasonCodeApiEnum.OtherPayments,
-    [TransactionReasonEnum.BondReturn]: ReasonCodeApiEnum.OtherPayments,
-    [TransactionReasonEnum.Charity]: ReasonCodeApiEnum.OtherPayments,
-    // Unknown در API وجود ندارد
-  };
-  return mapping[reason];
-};
-
 export function OrderDetailTransactions({
   transactions,
   isLoading,
@@ -142,21 +99,19 @@ export function OrderDetailTransactions({
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
 
-  // Helper functions with i18n - updated to use UI enums
-  const getPaymentMethodLabel = (method: PaymentMethodEnum) => {
+  // Helper function to get payment type label
+  const getPaymentMethodLabel = (method: PaymentTypeApiEnum | undefined | null) => {
+    if (!method) return t("transactions.paymentTypes.unknown");
+
     switch (method) {
-      case PaymentMethodEnum.Unknown:
-        return t("transactions.paymentTypes.unknown");
-      case PaymentMethodEnum.Internal:
-        return t("transactions.paymentTypes.internal");
-      case PaymentMethodEnum.Paya:
+      case PaymentTypeApiEnum.Paya:
         return t("transactions.paymentTypes.paya");
-      case PaymentMethodEnum.Satna:
+      case PaymentTypeApiEnum.Satna:
         return t("transactions.paymentTypes.satna");
-      case PaymentMethodEnum.Card:
-        return t("transactions.paymentTypes.card");
+      case PaymentTypeApiEnum.Rtgs:
+        return t("transactions.paymentTypes.rtgs");
       default:
-        return method;
+        return t("transactions.paymentTypes.unknown");
     }
   };
 
@@ -165,25 +120,25 @@ export function OrderDetailTransactions({
     return t(`transactions.reasonCodes.${reasonKey}`) || reason;
   };
 
-  const getTransactionStatusLabel = (status: TransactionStatus) => {
+  const getTransactionStatusLabel = (status: TransactionStatusApiEnum) => {
     switch (status) {
-      case TransactionStatus.Registered:
+      case TransactionStatusApiEnum.Registered:
         return t("transactions.statusLabels.registered");
-      case TransactionStatus.WaitForExecution:
+      case TransactionStatusApiEnum.WaitForExecution:
         return t("transactions.statusLabels.waitForExecution");
-      case TransactionStatus.WaitForBank:
+      case TransactionStatusApiEnum.WaitForBank:
         return t("transactions.statusLabels.waitForBank");
-      case TransactionStatus.BankSucceeded:
+      case TransactionStatusApiEnum.BankSucceeded:
         return t("transactions.statusLabels.bankSucceeded");
-      case TransactionStatus.BankRejected:
+      case TransactionStatusApiEnum.BankRejected:
         return t("transactions.statusLabels.bankRejected");
-      case TransactionStatus.TransactionRollback:
+      case TransactionStatusApiEnum.TransactionRollback:
         return t("transactions.statusLabels.transactionRollback");
-      case TransactionStatus.Failed:
+      case TransactionStatusApiEnum.Failed:
         return t("transactions.statusLabels.failed");
-      case TransactionStatus.Canceled:
+      case TransactionStatusApiEnum.Canceled:
         return t("transactions.statusLabels.canceled");
-      case TransactionStatus.Expired:
+      case TransactionStatusApiEnum.Expired:
         return t("transactions.statusLabels.expired");
       default:
         return String(status);
@@ -223,10 +178,10 @@ export function OrderDetailTransactions({
     }
   };
 
-  // Local filter state - using UI enums
+  // Local filter state - using API enums
   const [searchValue, setSearchValue] = useState("");
-  const [statusFilter, setStatusFilter] = useState<TransactionStatus | "all">("all");
-  const [paymentTypeFilter, setPaymentTypeFilter] = useState<PaymentMethodEnum | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<TransactionStatusApiEnum | "all">("all");
+  const [paymentTypeFilter, setPaymentTypeFilter] = useState<PaymentTypeApiEnum | "all">("all");
   const [reasonCodeFilter, setReasonCodeFilter] = useState<TransactionReasonEnum | "all">("all");
   const [sortField, setSortField] = useState<SortField | "">("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -256,20 +211,17 @@ export function OrderDetailTransactions({
 
     if (searchValue) filters.serchValue = searchValue;
 
-    // Map UI enums to API enums
+    // استفاده مستقیم از enum های API
     if (statusFilter && statusFilter !== "all") {
-      const apiStatus = mapTransactionStatusToApi(statusFilter as TransactionStatus);
-      if (apiStatus) filters.status = apiStatus;
+      filters.status = statusFilter as TransactionStatusApiEnum;
     }
 
     if (paymentTypeFilter && paymentTypeFilter !== "all") {
-      const apiPaymentType = mapPaymentMethodToApi(paymentTypeFilter as PaymentMethodEnum);
-      if (apiPaymentType) filters.paymentType = apiPaymentType;
+      filters.paymentType = paymentTypeFilter as PaymentTypeApiEnum;
     }
 
     if (reasonCodeFilter && reasonCodeFilter !== "all") {
-      const apiReasonCode = mapTransactionReasonToApi(reasonCodeFilter as TransactionReasonEnum);
-      if (apiReasonCode) filters.reasonCode = apiReasonCode;
+      filters.reasonCode = reasonCodeFilter as unknown as ReasonCodeApiEnum;
     }
 
     onFilterChange(filters);
@@ -395,38 +347,38 @@ export function OrderDetailTransactions({
                         <Label>{t("transactions.transactionStatus")}</Label>
                         <Select
                           value={statusFilter !== "all" ? String(statusFilter) : "all"}
-                          onValueChange={(v) => setStatusFilter(v === "all" ? "all" : Number(v) as TransactionStatus)}
+                          onValueChange={(v) => setStatusFilter(v === "all" ? "all" : Number(v) as TransactionStatusApiEnum)}
                         >
                           <SelectTrigger className="h-10">
                             <SelectValue placeholder={t("transactions.allStatuses")} />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">{t("transactions.allStatuses")}</SelectItem>
-                            <SelectItem value={String(TransactionStatus.Registered)}>
+                            <SelectItem value={String(TransactionStatusApiEnum.Registered)}>
                               {t("transactions.statusLabels.registered")}
                             </SelectItem>
-                            <SelectItem value={String(TransactionStatus.WaitForExecution)}>
+                            <SelectItem value={String(TransactionStatusApiEnum.WaitForExecution)}>
                               {t("transactions.statusLabels.waitForExecution")}
                             </SelectItem>
-                            <SelectItem value={String(TransactionStatus.WaitForBank)}>
+                            <SelectItem value={String(TransactionStatusApiEnum.WaitForBank)}>
                               {t("transactions.statusLabels.waitForBank")}
                             </SelectItem>
-                            <SelectItem value={String(TransactionStatus.BankSucceeded)}>
+                            <SelectItem value={String(TransactionStatusApiEnum.BankSucceeded)}>
                               {t("transactions.statusLabels.bankSucceeded")}
                             </SelectItem>
-                            <SelectItem value={String(TransactionStatus.BankRejected)}>
+                            <SelectItem value={String(TransactionStatusApiEnum.BankRejected)}>
                               {t("transactions.statusLabels.bankRejected")}
                             </SelectItem>
-                            <SelectItem value={String(TransactionStatus.TransactionRollback)}>
+                            <SelectItem value={String(TransactionStatusApiEnum.TransactionRollback)}>
                               {t("transactions.statusLabels.transactionRollback")}
                             </SelectItem>
-                            <SelectItem value={String(TransactionStatus.Failed)}>
+                            <SelectItem value={String(TransactionStatusApiEnum.Failed)}>
                               {t("transactions.statusLabels.failed")}
                             </SelectItem>
-                            <SelectItem value={String(TransactionStatus.Canceled)}>
+                            <SelectItem value={String(TransactionStatusApiEnum.Canceled)}>
                               {t("transactions.statusLabels.canceled")}
                             </SelectItem>
-                            <SelectItem value={String(TransactionStatus.Expired)}>
+                            <SelectItem value={String(TransactionStatusApiEnum.Expired)}>
                               {t("transactions.statusLabels.expired")}
                             </SelectItem>
                           </SelectContent>
@@ -442,11 +394,9 @@ export function OrderDetailTransactions({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">{t("transactions.allTypes")}</SelectItem>
-                            <SelectItem value={PaymentMethodEnum.Unknown}>{t("transactions.paymentTypes.unknown")}</SelectItem>
-                            <SelectItem value={PaymentMethodEnum.Internal}>{t("transactions.paymentTypes.internal")}</SelectItem>
-                            <SelectItem value={PaymentMethodEnum.Paya}>{t("transactions.paymentTypes.paya")}</SelectItem>
-                            <SelectItem value={PaymentMethodEnum.Satna}>{t("transactions.paymentTypes.satna")}</SelectItem>
-                            <SelectItem value={PaymentMethodEnum.Card}>{t("transactions.paymentTypes.card")}</SelectItem>
+                            <SelectItem value={PaymentTypeApiEnum.Paya}>{t("transactions.paymentTypes.paya")}</SelectItem>
+                            <SelectItem value={PaymentTypeApiEnum.Satna}>{t("transactions.paymentTypes.satna")}</SelectItem>
+                            <SelectItem value={PaymentTypeApiEnum.Rtgs}>{t("transactions.paymentTypes.rtgs")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -560,38 +510,38 @@ export function OrderDetailTransactions({
               {/* Status Filter */}
               <Select
                 value={statusFilter !== "all" ? String(statusFilter) : "all"}
-                onValueChange={(v) => { setStatusFilter(v === "all" ? "all" : Number(v) as TransactionStatus); applyFilters(); }}
+                onValueChange={(v) => { setStatusFilter(v === "all" ? "all" : Number(v) as TransactionStatusApiEnum); applyFilters(); }}
               >
                 <SelectTrigger className="w-[180px] h-9">
                   <SelectValue placeholder={t("transactions.allStatuses")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("transactions.allStatuses")}</SelectItem>
-                  <SelectItem value={String(TransactionStatus.Registered)}>
+                  <SelectItem value={String(TransactionStatusApiEnum.Registered)}>
                     {t("transactions.statusLabels.registered")}
                   </SelectItem>
-                  <SelectItem value={String(TransactionStatus.WaitForExecution)}>
+                  <SelectItem value={String(TransactionStatusApiEnum.WaitForExecution)}>
                     {t("transactions.statusLabels.waitForExecution")}
                   </SelectItem>
-                  <SelectItem value={String(TransactionStatus.WaitForBank)}>
+                  <SelectItem value={String(TransactionStatusApiEnum.WaitForBank)}>
                     {t("transactions.statusLabels.waitForBank")}
                   </SelectItem>
-                  <SelectItem value={String(TransactionStatus.BankSucceeded)}>
+                  <SelectItem value={String(TransactionStatusApiEnum.BankSucceeded)}>
                     {t("transactions.statusLabels.bankSucceeded")}
                   </SelectItem>
-                  <SelectItem value={String(TransactionStatus.BankRejected)}>
+                  <SelectItem value={String(TransactionStatusApiEnum.BankRejected)}>
                     {t("transactions.statusLabels.bankRejected")}
                   </SelectItem>
-                  <SelectItem value={String(TransactionStatus.TransactionRollback)}>
+                  <SelectItem value={String(TransactionStatusApiEnum.TransactionRollback)}>
                     {t("transactions.statusLabels.transactionRollback")}
                   </SelectItem>
-                  <SelectItem value={String(TransactionStatus.Failed)}>
+                  <SelectItem value={String(TransactionStatusApiEnum.Failed)}>
                     {t("transactions.statusLabels.failed")}
                   </SelectItem>
-                  <SelectItem value={String(TransactionStatus.Canceled)}>
+                  <SelectItem value={String(TransactionStatusApiEnum.Canceled)}>
                     {t("transactions.statusLabels.canceled")}
                   </SelectItem>
-                  <SelectItem value={String(TransactionStatus.Expired)}>
+                  <SelectItem value={String(TransactionStatusApiEnum.Expired)}>
                     {t("transactions.statusLabels.expired")}
                   </SelectItem>
                 </SelectContent>
@@ -604,11 +554,9 @@ export function OrderDetailTransactions({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("transactions.allTypes")}</SelectItem>
-                  <SelectItem value={PaymentMethodEnum.Unknown}>{t("transactions.paymentTypes.unknown")}</SelectItem>
-                  <SelectItem value={PaymentMethodEnum.Internal}>{t("transactions.paymentTypes.internal")}</SelectItem>
-                  <SelectItem value={PaymentMethodEnum.Paya}>{t("transactions.paymentTypes.paya")}</SelectItem>
-                  <SelectItem value={PaymentMethodEnum.Satna}>{t("transactions.paymentTypes.satna")}</SelectItem>
-                  <SelectItem value={PaymentMethodEnum.Card}>{t("transactions.paymentTypes.card")}</SelectItem>
+                  <SelectItem value={PaymentTypeApiEnum.Paya}>{t("transactions.paymentTypes.paya")}</SelectItem>
+                  <SelectItem value={PaymentTypeApiEnum.Satna}>{t("transactions.paymentTypes.satna")}</SelectItem>
+                  <SelectItem value={PaymentTypeApiEnum.Rtgs}>{t("transactions.paymentTypes.rtgs")}</SelectItem>
                 </SelectContent>
               </Select>
 

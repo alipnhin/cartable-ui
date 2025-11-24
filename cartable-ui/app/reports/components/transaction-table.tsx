@@ -4,12 +4,9 @@ import {
   TransactionItem,
   formatAmount,
   formatDateToPersian,
-  TransactionStatusInfo,
-  PaymentTypeInfo,
-  TransactionStatusMap,
-  PaymentTypeMap,
 } from "@/services/transactionService";
-import { PaymentTypeBadge } from "@/components/ui/status-badge";
+import { PaymentTypeBadge, TransactionStatusBadge } from "@/components/ui/status-badge";
+import { TransactionStatusApiEnum, PaymentTypeApiEnum } from "@/types/api";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -122,50 +119,29 @@ export function TransactionTable({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Get badge variant based on status
-  const getStatusVariant = (status: string) => {
-    const statusInfo = TransactionStatusInfo[status];
-    if (!statusInfo) return "secondary";
-    switch (statusInfo.class) {
-      case "success":
-        return "success";
-      case "danger":
-        return "destructive";
-      case "warning":
-        return "warning";
-      case "info":
-        return "info";
-      default:
-        return "secondary";
-    }
+  // Helper functions برای نمایش status و payment type
+  const getStatusDisplay = (status: string) => {
+    const statusMap: Record<string, { variant: string; label: string }> = {
+      "BankSucceeded": { variant: "success", label: "موفق" },
+      "Registered": { variant: "secondary", label: "ثبت شده" },
+      "WaitForExecution": { variant: "info", label: "در انتظار اجرا" },
+      "WaitForBank": { variant: "warning", label: "در انتظار بانک" },
+      "Failed": { variant: "destructive", label: "ناموفق" },
+      "BankFailed": { variant: "destructive", label: "رد شده توسط بانک" },
+      "Canceled": { variant: "secondary", label: "لغو شده" },
+      "Rejected": { variant: "destructive", label: "رد شده" },
+    };
+    return statusMap[status] || { variant: "secondary", label: status };
   };
 
-  // Get badge variant based on payment type
-  const getPaymentTypeVariant = (paymentType: string) => {
-    const typeInfo = PaymentTypeInfo[paymentType];
-    if (!typeInfo) return "secondary";
-    switch (typeInfo.class) {
-      case "success":
-        return "success";
-      case "primary":
-        return "primary";
-      case "info":
-        return "info";
-      case "warning":
-        return "warning";
-      default:
-        return "secondary";
-    }
-  };
-
-  // Get status label
-  const getStatusLabel = (status: string) => {
-    return TransactionStatusInfo[status]?.label || status;
-  };
-
-  // Get payment type label
-  const getPaymentTypeLabel = (paymentType: string) => {
-    return PaymentTypeInfo[paymentType]?.label || paymentType;
+  const getPaymentTypeDisplay = (paymentType: string) => {
+    const typeMap: Record<string, { variant: string; label: string }> = {
+      "Paya": { variant: "info", label: "پایا" },
+      "Satna": { variant: "warning", label: "ساتنا" },
+      "Internal": { variant: "success", label: "درون بانکی" },
+      "Rtgs": { variant: "warning", label: "آنی (RTGS)" },
+    };
+    return typeMap[paymentType] || { variant: "secondary", label: paymentType };
   };
 
   if (isMobile) {
@@ -225,8 +201,8 @@ export function TransactionTable({
                     <span className="font-medium text-sm">
                       {tx.destinationAccountOwner}
                     </span>
-                    <Badge variant={getStatusVariant(tx.status)} className="text-xs">
-                      {getStatusLabel(tx.status)}
+                    <Badge variant={getStatusDisplay(tx.status).variant as any} className="text-xs">
+                      {getStatusDisplay(tx.status).label}
                     </Badge>
                   </div>
                   <div className="text-sm space-y-1">
@@ -247,10 +223,10 @@ export function TransactionTable({
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">نوع پرداخت:</span>
                       <Badge
-                        variant={getPaymentTypeVariant(tx.paymentType)}
+                        variant={getPaymentTypeDisplay(tx.paymentType).variant as any}
                         className="text-xs"
                       >
-                        {getPaymentTypeLabel(tx.paymentType)}
+                        {getPaymentTypeDisplay(tx.paymentType).label}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
@@ -396,7 +372,9 @@ export function TransactionTable({
                     <TableCell className="text-sm">{tx.bankName}</TableCell>
                     <TableCell className="font-medium">{formatAmount(tx.amount)}</TableCell>
                     <TableCell>
-                      <PaymentTypeBadge type={Number(tx.paymentType)} className="text-xs" />
+                      <Badge variant={getPaymentTypeDisplay(tx.paymentType).variant as any} className="text-xs">
+                        {getPaymentTypeDisplay(tx.paymentType).label}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-sm">
                       {formatDateToPersian(tx.createdDateTime)}
@@ -406,10 +384,10 @@ export function TransactionTable({
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={getStatusVariant(tx.status)}
+                        variant={getStatusDisplay(tx.status).variant as any}
                         className="text-xs"
                       >
-                        {getStatusLabel(tx.status)}
+                        {getStatusDisplay(tx.status).label}
                       </Badge>
                     </TableCell>
                   </TableRow>

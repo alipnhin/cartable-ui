@@ -37,31 +37,7 @@ export const formatDateToPersian = (dateString: string | null): string => {
   }).format(date);
 };
 
-// Status mapping
-export const TransactionStatusInfo: Record<string, { label: string; class: string }> = {
-  // موفق
-  BankSucceeded: { label: "موفق", class: "success" },
-  // در انتظار پردازش
-  Registered: { label: "ثبت شده", class: "info" },
-  WaitForExecution: { label: "در انتظار اجرا", class: "warning" },
-  WaitForBank: { label: "در انتظار بانک", class: "warning" },
-  // ناموفق
-  Failed: { label: "ناموفق", class: "danger" },
-  BankFailed: { label: "رد شده توسط بانک", class: "danger" },
-  Canceled: { label: "لغو شده", class: "secondary" },
-  Rejected: { label: "رد شده", class: "danger" },
-};
-
-// Status categories for stats
-export const SuccessStatuses = ["BankSucceeded"];
-export const PendingStatuses = ["Registered", "WaitForExecution", "WaitForBank"];
-
-// Payment type mapping
-export const PaymentTypeInfo: Record<string, { label: string; class: string }> = {
-  Paya: { label: "پایا", class: "info" },
-  Satna: { label: "ساتنا", class: "warning" },
-  Internal: { label: "درون بانکی", class: "success" },
-};
+// این mapping ها حذف شدند و از badge function ها در components/ui/status-badge.tsx استفاده می‌شود
 
 export interface TransactionsResponse {
   items: TransactionItem[];
@@ -87,7 +63,7 @@ export interface TransactionsRequest {
   orderId?: string;
   bankGatewayId?: string;
   accountGroupId?: string;
-  paymentType?: number;
+  paymentType?: string; // PaymentMethodEnum values
   status?: number;
   fromDate?: string;
   toDate?: string;
@@ -95,30 +71,6 @@ export interface TransactionsRequest {
   transferToDate?: string;
 }
 
-// Status mapping - مطابق با PaymentItemStatusEnum بک‌اند
-export const TransactionStatusMap: Record<
-  number,
-  { label: string; class: string }
-> = {
-  0: { label: "ثبت شده", class: "secondary" },
-  1: { label: "در صف پردازش", class: "info" },
-  2: { label: "ارسال شده به بانک", class: "warning" },
-  3: { label: "تراکنش انجام شده", class: "success" },
-  4: { label: "رد شده توسط بانک", class: "danger" },
-  5: { label: "برگشت مبلغ به حساب مبدا", class: "secondary" },
-  6: { label: "خطا در ارسال به بانک", class: "danger" },
-  7: { label: "لغو شده", class: "warning" },
-  8: { label: "منقضی شده", class: "secondary" },
-};
-
-// Payment type mapping
-export const PaymentTypeMap: Record<number, { label: string; class: string }> =
-  {
-    0: { label: "داخلی", class: "success" },
-    1: { label: "پایا", class: "info" },
-    2: { label: "ساتنا", class: "primary" },
-    3: { label: "کارت به کارت", class: "warning" },
-  };
 
 /**
  * Get paginated list of transactions

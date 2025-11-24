@@ -31,11 +31,8 @@ import { PersianDatePicker } from "@/components/ui/persian-datepicker";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import AccountSelector from "@/components/common/AccountSelector";
-import {
-  TransactionStatusMap,
-  PaymentTypeMap,
-  getDefaultDateRange,
-} from "@/services/transactionService";
+import { getDefaultDateRange } from "@/services/transactionService";
+import { TransactionStatusApiEnum, PaymentTypeApiEnum } from "@/types/api";
 import {
   Filter,
   X,
@@ -48,6 +45,39 @@ interface TransactionFiltersProps {
   filters: TransactionFiltersType;
   onFiltersChange: (filters: TransactionFiltersType) => void;
 }
+
+// Transaction Status Options
+const transactionStatusOptions = [
+  { value: TransactionStatusApiEnum.Registered, label: "ثبت شده" },
+  { value: TransactionStatusApiEnum.WaitForExecution, label: "در صف پردازش" },
+  { value: TransactionStatusApiEnum.WaitForBank, label: "ارسال شده به بانک" },
+  { value: TransactionStatusApiEnum.BankSucceeded, label: "تراکنش انجام شده" },
+  { value: TransactionStatusApiEnum.BankRejected, label: "رد شده توسط بانک" },
+  { value: TransactionStatusApiEnum.TransactionRollback, label: "برگشت مبلغ به حساب مبدا" },
+  { value: TransactionStatusApiEnum.Failed, label: "خطا در ارسال به بانک" },
+  { value: TransactionStatusApiEnum.Canceled, label: "لغو شده" },
+  { value: TransactionStatusApiEnum.Expired, label: "منقضی شده" },
+];
+
+// Payment Type Options
+const paymentTypeOptions = [
+  { value: PaymentTypeApiEnum.Paya, label: "پایا" },
+  { value: PaymentTypeApiEnum.Satna, label: "ساتنا" },
+  { value: PaymentTypeApiEnum.Rtgs, label: "آنی (RTGS)" },
+];
+
+// Helper functions to get labels
+const getTransactionStatusLabel = (status: number | null): string => {
+  if (status === null) return "نامشخص";
+  const option = transactionStatusOptions.find(opt => opt.value === status);
+  return option?.label || "نامشخص";
+};
+
+const getPaymentTypeLabel = (paymentType: string | null): string => {
+  if (paymentType === null) return "نامشخص";
+  const option = paymentTypeOptions.find(opt => opt.value === paymentType);
+  return option?.label || "نامشخص";
+};
 
 export function TransactionFilters({
   filters,
@@ -120,9 +150,9 @@ export function TransactionFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">همه وضعیت‌ها</SelectItem>
-            {Object.entries(TransactionStatusMap).map(([key, { label }]) => (
-              <SelectItem key={key} value={key}>
-                {label}
+            {transactionStatusOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value.toString()}>
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -133,11 +163,11 @@ export function TransactionFilters({
       <div className="space-y-2">
         <Label className="text-sm">نوع پرداخت</Label>
         <Select
-          value={localFilters.paymentType?.toString() || "all"}
+          value={localFilters.paymentType || "all"}
           onValueChange={(value) =>
             setLocalFilters({
               ...localFilters,
-              paymentType: value === "all" ? null : Number(value),
+              paymentType: value === "all" ? null : value,
             })
           }
         >
@@ -146,9 +176,9 @@ export function TransactionFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">همه انواع</SelectItem>
-            {Object.entries(PaymentTypeMap).map(([key, { label }]) => (
-              <SelectItem key={key} value={key}>
-                {label}
+            {paymentTypeOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -436,7 +466,7 @@ export function TransactionFilters({
                 variant="secondary"
                 className="gap-1"
               >
-                {TransactionStatusMap[filters.status]?.label || "نامشخص"}
+                {getTransactionStatusLabel(filters.status)}
                 <button
                   onClick={() => onFiltersChange({ ...filters, status: null })}
                   className="hover:bg-muted rounded-full p-0.5"
@@ -450,7 +480,7 @@ export function TransactionFilters({
                 variant="secondary"
                 className="gap-1"
               >
-                {PaymentTypeMap[filters.paymentType]?.label || "نامشخص"}
+                {getPaymentTypeLabel(filters.paymentType)}
                 <button
                   onClick={() => onFiltersChange({ ...filters, paymentType: null })}
                   className="hover:bg-muted rounded-full p-0.5"

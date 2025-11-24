@@ -4,6 +4,14 @@
  */
 
 import { ChangeHistoryEntry } from "./common";
+import {
+  TransactionStatusApiEnum,
+  PaymentTypeApiEnum,
+} from "./api";
+
+// Re-export API enums for backward compatibility
+export { TransactionStatusApiEnum as TransactionStatus };
+export { PaymentTypeApiEnum as PaymentMethodEnum };
 
 export interface Transaction {
   id: string;
@@ -18,53 +26,12 @@ export interface Transaction {
   ownerName: string;
   description?: string;
   trackingId?: string; // کد پیگیری بانک
-  status: TransactionStatus;
+  status: TransactionStatusApiEnum;
   providerMessage?: string;
   createdDateTime: string;
   reasonCode?: TransactionReasonEnum;
-  paymentType?: PaymentMethodEnum;
+  paymentType?: PaymentTypeApiEnum;
   UpdatedDateTime?: string;
-}
-
-/**
- * Enum وضعیت تراکنش - مطابق با TransactionStatusApiEnum
- * مقادیر عددی باید دقیقاً مطابق با بک‌اند باشند
- */
-export enum TransactionStatus {
-  /** ثبت شده */
-  Registered = 0,
-  /** در صف پردازش */
-  WaitForExecution = 1,
-  /** ارسال شده به بانک */
-  WaitForBank = 2,
-  /** تراکنش انجام شده */
-  BankSucceeded = 3,
-  /** رد شده توسط بانک */
-  BankRejected = 4,
-  /** برگشت مبلغ به حساب مبدا */
-  TransactionRollback = 5,
-  /** خطا در ارسال به بانک */
-  Failed = 6,
-  /** لغو شده */
-  Canceled = 7,
-  /** منقضی شده */
-  Expired = 8,
-}
-export enum PaymentMethodEnum {
-  /** نامشخص */
-  Unknown = "unknown",
-
-  /** داخلی */
-  Internal = "internal",
-
-  /** پایا */
-  Paya = "paya",
-
-  /** ساتنا */
-  Satna = "satna",
-
-  /** کارت به کارت */
-  Card = "card",
 }
 
 export enum TransactionReasonEnum {
@@ -144,42 +111,42 @@ export interface BankResponse {
 
 // Transaction Status Info for UI
 export interface TransactionStatusInfo {
-  status: TransactionStatus;
+  status: TransactionStatusApiEnum;
   color: string;
   icon?: string;
 }
 
 export const TRANSACTION_STATUSES: TransactionStatusInfo[] = [
   {
-    status: TransactionStatus.Registered,
+    status: TransactionStatusApiEnum.Registered,
     color: "gray",
   },
   {
-    status: TransactionStatus.Expired,
+    status: TransactionStatusApiEnum.Expired,
     color: "yellow",
   },
   {
-    status: TransactionStatus.WaitForExecution,
+    status: TransactionStatusApiEnum.WaitForExecution,
     color: "blue",
   },
   {
-    status: TransactionStatus.WaitForBank,
+    status: TransactionStatusApiEnum.WaitForBank,
     color: "purple",
   },
   {
-    status: TransactionStatus.BankSucceeded,
+    status: TransactionStatusApiEnum.BankSucceeded,
     color: "green",
   },
   {
-    status: TransactionStatus.BankRejected,
+    status: TransactionStatusApiEnum.BankRejected,
     color: "red",
   },
   {
-    status: TransactionStatus.TransactionRollback,
+    status: TransactionStatusApiEnum.TransactionRollback,
     color: "dark",
   },
   {
-    status: TransactionStatus.Canceled,
+    status: TransactionStatusApiEnum.Canceled,
     color: "gray",
   },
 ];
