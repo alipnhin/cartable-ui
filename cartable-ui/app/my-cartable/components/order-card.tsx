@@ -58,7 +58,7 @@ export function OrderCard({
   const isMobile = useIsMobile();
   const [actionsOpen, setActionsOpen] = useState(false);
   const statusBadge = getPaymentStatusBadge(order.status);
-  const { variant, icon: Icon, label_fa, label_en } = statusBadge;
+  const { variant, icon: Icon, translationKey } = statusBadge;
 
   const handleCardClick = () => {
     if (onSelect) {

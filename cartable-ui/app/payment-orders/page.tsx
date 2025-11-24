@@ -199,8 +199,8 @@ export default function PaymentOrdersPage() {
     ).length;
     const succeeded = orders.filter(
       (o) =>
-        o.status === OrderStatus.PartiallySucceeded ||
-        o.status === OrderStatus.Succeeded
+        o.status === OrderStatus.DoneWithError ||
+        o.status === OrderStatus.BankSucceeded
     ).length;
     const totalAmount = orders.reduce(
       (sum, order) => sum + order.totalAmount,

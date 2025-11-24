@@ -48,7 +48,7 @@ interface OrderCardProps {
 export function OrderCard({ order, onView }: OrderCardProps) {
   const { t, locale } = useTranslation();
   const statusBadge = getPaymentStatusBadge(order.status);
-  const { variant, icon: Icon, label_fa, label_en } = statusBadge;
+  const { variant, icon: Icon, translationKey } = statusBadge;
 
   const bankCode = getBankCodeFromSheba(order.accountSheba);
   const dateTime = formatDateTime(order.createdDateTime || order.createdDate || "", locale);
@@ -73,7 +73,7 @@ export function OrderCard({ order, onView }: OrderCardProps) {
             </div>
           </div>
           <StatusBadge variant={variant} icon={<Icon />}>
-            {locale === "fa" ? label_fa : label_en}
+            {t(translationKey)}
           </StatusBadge>
         </div>
 
