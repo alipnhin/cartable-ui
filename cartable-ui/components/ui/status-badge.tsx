@@ -7,7 +7,8 @@
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { OrderStatus, TransactionStatus } from "@/types";
+import { TransactionStatus } from "@/types";
+import { PaymentStatusEnum } from "@/types/api";
 import { useTranslation } from "react-i18next";
 import {
   FileText,
@@ -23,6 +24,7 @@ import {
   AlarmClockOff,
   UserRoundCheck,
   UserRoundX,
+  ClipboardCheck,
 } from "lucide-react";
 
 export type BadgeVariant =
@@ -76,89 +78,81 @@ export function StatusBadge({
   );
 }
 
-// Helper function to get badge variant from OrderStatus enum
-export function getPaymentStatusBadge(status: OrderStatus): {
+// Helper function to get badge variant from PaymentStatusEnum
+export function getPaymentStatusBadge(status: PaymentStatusEnum): {
   variant: BadgeVariant;
-  label_fa: string;
-  label_en: string;
+  translationKey: string;
   icon: React.ElementType;
 } {
   const statusMap: Record<
-    OrderStatus,
+    PaymentStatusEnum,
     {
       variant: BadgeVariant;
-      label_fa: string;
-      label_en: string;
+      translationKey: string;
       icon: React.ElementType;
     }
   > = {
-    [OrderStatus.Draft]: {
+    [PaymentStatusEnum.Draft]: {
       variant: "muted",
-      label_fa: "پیش‌نویس",
-      label_en: "Draft",
+      translationKey: "paymentCartable.statusLabels.draft",
       icon: FileText,
     },
-    [OrderStatus.WaitingForOwnersApproval]: {
+    [PaymentStatusEnum.WaitingForOwnersApproval]: {
       variant: "warning",
-      label_fa: "در انتظار تأیید",
-      label_en: "Waiting For Approval",
+      translationKey: "paymentCartable.statusLabels.waitingForApproval",
       icon: Clock,
     },
-    [OrderStatus.OwnersApproved]: {
+    [PaymentStatusEnum.OwnersApproved]: {
       variant: "success",
-      label_fa: "تأیید شده",
-      label_en: "Approved",
+      translationKey: "paymentCartable.statusLabels.approved",
       icon: UserRoundCheck,
     },
-    [OrderStatus.SubmittedToBank]: {
+    [PaymentStatusEnum.SubmittedToBank]: {
       variant: "info",
-      label_fa: "ارسال شده به بانک",
-      label_en: "Submitted To Bank",
+      translationKey: "paymentCartable.statusLabels.submittedToBank",
       icon: Banknote,
     },
-    [OrderStatus.Succeeded]: {
+    [PaymentStatusEnum.BankSucceeded]: {
       variant: "success",
-      label_fa: "انجام شده",
-      label_en: "Succeeded",
+      translationKey: "paymentCartable.statusLabels.succeeded",
       icon: CheckCircle2,
     },
-    [OrderStatus.PartiallySucceeded]: {
+    [PaymentStatusEnum.DoneWithError]: {
       variant: "warning",
-      label_fa: "انجام شده با خطا",
-      label_en: "Done with Error",
+      translationKey: "paymentCartable.statusLabels.doneWithError",
       icon: AlertTriangle,
     },
-    [OrderStatus.OwnerRejected]: {
+    [PaymentStatusEnum.OwnerRejected]: {
       variant: "danger",
-      label_fa: "عدم تائید",
-      label_en: "Owner Rejected",
+      translationKey: "paymentCartable.statusLabels.rejected",
       icon: UserRoundX,
     },
-    [OrderStatus.BankRejected]: {
+    [PaymentStatusEnum.BankRejected]: {
       variant: "danger",
-      label_fa: "رد شده توسط بانک",
-      label_en: "Bank Rejected",
+      translationKey: "paymentCartable.statusLabels.bankRejected",
       icon: BanknoteX,
     },
-    [OrderStatus.Canceled]: {
+    [PaymentStatusEnum.Canceled]: {
       variant: "muted",
-      label_fa: "لغو شده",
-      label_en: "Canceled",
+      translationKey: "paymentCartable.statusLabels.canceled",
       icon: Ban,
     },
-    [OrderStatus.Expired]: {
+    [PaymentStatusEnum.Expired]: {
       variant: "muted",
-      label_fa: "منقضی شده",
-      label_en: "Expired",
+      translationKey: "paymentCartable.statusLabels.expired",
       icon: AlarmClockOff,
+    },
+    [PaymentStatusEnum.WaitForManagerApproval]: {
+      variant: "info",
+      translationKey: "paymentCartable.statusLabels.waitForManagerApproval",
+      icon: ClipboardCheck,
     },
   };
 
   return (
     statusMap[status] || {
       variant: "default",
-      label_fa: "نامشخص",
-      label_en: "Unknown",
+      translationKey: "common.status",
       icon: HelpCircle,
     }
   );
@@ -301,18 +295,19 @@ export function TransactionStatusBadge({
   );
 }
 
-// Wrapper Component for OrderStatus
-interface OrderStatusBadgeProps {
-  status: OrderStatus;
+// Wrapper Component for PaymentStatus
+interface PaymentStatusBadgeProps {
+  status: PaymentStatusEnum;
   size?: "sm" | "default";
   className?: string;
 }
 
-export function OrderStatusBadge({
+export function PaymentStatusBadge({
   status,
   size = "default",
   className,
-}: OrderStatusBadgeProps) {
+}: PaymentStatusBadgeProps) {
+  const { t } = useTranslation();
   const statusInfo = getPaymentStatusBadge(status);
   const Icon = statusInfo.icon;
 
@@ -322,7 +317,10 @@ export function OrderStatusBadge({
       icon={<Icon className={size === "sm" ? "h-3 w-3" : "h-4 w-4"} />}
       className={className}
     >
-      {statusInfo.label_fa}
+      {t(statusInfo.translationKey)}
     </StatusBadge>
   );
 }
+
+// Backward compatibility alias
+export const OrderStatusBadge = PaymentStatusBadge;

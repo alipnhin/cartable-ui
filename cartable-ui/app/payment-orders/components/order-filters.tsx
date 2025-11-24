@@ -71,7 +71,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
       label: t("paymentCartable.statusLabels.submittedToBank"),
     },
     {
-      value: OrderStatus.Succeeded,
+      value: OrderStatus.BankSucceeded,
       label: t("paymentCartable.statusLabels.succeeded"),
     },
     {
@@ -87,7 +87,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
       label: t("paymentCartable.statusLabels.draft"),
     },
     {
-      value: OrderStatus.PartiallySucceeded,
+      value: OrderStatus.DoneWithError,
       label: t("paymentCartable.statusLabels.doneWithError"),
     },
     {
@@ -97,6 +97,10 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
     {
       value: OrderStatus.Expired,
       label: t("paymentCartable.statusLabels.expired"),
+    },
+    {
+      value: OrderStatus.WaitForManagerApproval,
+      label: t("paymentCartable.statusLabels.waitForManagerApproval"),
     },
   ];
 

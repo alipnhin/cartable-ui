@@ -155,7 +155,8 @@
       "draft": "مسودة",
       "doneWithError": "مكتمل مع خطأ",
       "canceled": "ملغى",
-      "expired": "منتهي الصلاحية"
+      "expired": "منتهي الصلاحية",
+      "waitForManagerApproval": "في انتظار موافقة مدير السلة"
     }
   },
   "paymentOrders": {

@@ -7,6 +7,7 @@ import { Account } from "./account";
 import { ChangeHistoryEntry } from "./common";
 import { OrderApprover } from "./signer";
 import { Transaction } from "./transaction";
+import { PaymentStatusEnum } from "./api";
 
 export interface PaymentOrder {
   id: string;
@@ -19,7 +20,7 @@ export interface PaymentOrder {
   numberOfTransactions: number;
   totalAmount: number;
   currency: string;
-  status: OrderStatus;
+  status: PaymentStatusEnum;
   statusDescription?: string;
   createdBy: string;
   createdByName: string;
@@ -39,31 +40,10 @@ export interface PaymentOrder {
 }
 
 /**
- * Enum وضعیت دستور پرداخت - مطابق با PaymentStatusEnum
- * مقادیر عددی باید دقیقاً مطابق با بک‌اند باشند
+ * Re-export PaymentStatusEnum as OrderStatus for backward compatibility
+ * استفاده مستقیم از PaymentStatusEnum که تمام مقادیر را از بک‌اند دارد
  */
-export enum OrderStatus {
-  /** در انتظار تأیید صاحبان امضا */
-  WaitingForOwnersApproval = 0,
-  /** تأیید شده توسط صاحبان امضا */
-  OwnersApproved = 1,
-  /** ارسال شده به بانک */
-  SubmittedToBank = 2,
-  /** انجام شده (موفق) */
-  Succeeded = 3,
-  /** عدم تأیید */
-  OwnerRejected = 4,
-  /** رد شده توسط بانک */
-  BankRejected = 5,
-  /** پیش‌نویس */
-  Draft = 6,
-  /** انجام شده با خطا */
-  PartiallySucceeded = 7,
-  /** لغو شده */
-  Canceled = 8,
-  /** منقضی شده */
-  Expired = 9,
-}
+export { PaymentStatusEnum as OrderStatus } from "./api";
 
 export interface PaymentOrderDetail extends PaymentOrder {
   account: Account;
@@ -77,93 +57,16 @@ export interface PaymentOrderDetail extends PaymentOrder {
   canInquiry: boolean; // آیا می‌توان استعلام زد؟
 }
 
-// Order Status Info for UI
-export interface OrderStatusInfo {
-  status: OrderStatus;
-  label_fa: string;
-  label_en: string;
-  color: string;
-  icon?: string;
-  description_fa?: string;
-}
-
-export const ORDER_STATUSES: OrderStatusInfo[] = [
-  {
-    status: OrderStatus.WaitingForOwnersApproval,
-    label_fa: "در انتظار تأیید",
-    label_en: "Waiting for Approval",
-    color: "yellow",
-    description_fa: "در انتظار تأیید صاحبان امضا",
-  },
-  {
-    status: OrderStatus.OwnersApproved,
-    label_fa: "تأیید شده",
-    label_en: "Approved",
-    color: "blue",
-    description_fa: "تأیید شده توسط صاحبان امضا",
-  },
-  {
-    status: OrderStatus.SubmittedToBank,
-    label_fa: "ارسال شده به بانک",
-    label_en: "Submitted to Bank",
-    color: "purple",
-    description_fa: "ارسال شده به سیستم بانک",
-  },
-  {
-    status: OrderStatus.Succeeded,
-    label_fa: "انجام شده",
-    label_en: "Succeeded",
-    color: "green",
-    description_fa: "تمام تراکنش‌ها با موفقیت انجام شد",
-  },
-  {
-    status: OrderStatus.OwnerRejected,
-    label_fa: "عدم تأیید",
-    label_en: "Owner Rejected",
-    color: "red",
-    description_fa: "رد شده توسط تأییدکنندگان",
-  },
-  {
-    status: OrderStatus.BankRejected,
-    label_fa: "رد شده توسط بانک",
-    label_en: "Bank Rejected",
-    color: "red",
-    description_fa: "رد شده توسط سیستم بانک",
-  },
-  {
-    status: OrderStatus.Draft,
-    label_fa: "پیش‌نویس",
-    label_en: "Draft",
-    color: "gray",
-    description_fa: "دستور در حال تکمیل است",
-  },
-  {
-    status: OrderStatus.PartiallySucceeded,
-    label_fa: "انجام شده با خطا",
-    label_en: "Done with Error",
-    color: "orange",
-    description_fa: "برخی تراکنش‌ها با خطا مواجه شدند",
-  },
-  {
-    status: OrderStatus.Canceled,
-    label_fa: "لغو شده",
-    label_en: "Canceled",
-    color: "gray",
-    description_fa: "لغو شده توسط کاربر",
-  },
-  {
-    status: OrderStatus.Expired,
-    label_fa: "منقضی شده",
-    label_en: "Expired",
-    color: "gray",
-    description_fa: "زمان دستور به پایان رسیده",
-  },
-];
+/**
+ * REMOVED: OrderStatusInfo and ORDER_STATUSES
+ * این آرایه حذف شده است. از تابع getPaymentStatusBadge در status-badge.tsx
+ * و سیستم ترجمه i18n برای نمایش برچسب‌ها استفاده کنید.
+ */
 
 // Filter
 export interface OrderFilterParams {
   accountGroups?: string[];
-  statuses?: OrderStatus[];
+  statuses?: PaymentStatusEnum[];
   fromDate?: string;
   toDate?: string;
   minAmount?: number;
