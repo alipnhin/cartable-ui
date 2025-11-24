@@ -162,7 +162,8 @@
       "draft": "Draft",
       "doneWithError": "Completed with Error",
       "canceled": "Canceled",
-      "expired": "Expired"
+      "expired": "Expired",
+      "waitForManagerApproval": "Waiting for Manager Approval"
     }
   },
   "paymentOrders": {

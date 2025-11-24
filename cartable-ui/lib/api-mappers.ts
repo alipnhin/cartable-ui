@@ -3,19 +3,12 @@
  * توابع تبدیل داده‌های API به تایپ‌های داخلی برنامه
  */
 
-import { PaymentListDto, PaymentStatusEnum } from "@/types/api";
-import { PaymentOrder, OrderStatus } from "@/types/order";
-
-/**
- * تبدیل PaymentStatusEnum (از API) به OrderStatus (داخلی)
- * چون هر دو enum مقادیر عددی یکسان دارند، مستقیماً cast می‌کنیم
- */
-function mapPaymentStatus(status: PaymentStatusEnum): OrderStatus {
-  return status as unknown as OrderStatus;
-}
+import { PaymentListDto } from "@/types/api";
+import { PaymentOrder } from "@/types/order";
 
 /**
  * تبدیل PaymentListDto (از API) به PaymentOrder (برای UI)
+ * دیگر نیازی به تبدیل status نیست چون هر دو از PaymentStatusEnum استفاده می‌کنند
  */
 export function mapPaymentListDtoToPaymentOrder(
   dto: PaymentListDto
@@ -31,7 +24,7 @@ export function mapPaymentListDtoToPaymentOrder(
     numberOfTransactions: parseInt(dto.numberOfTransactions) || 0,
     totalAmount: parseFloat(dto.totalAmount) || 0,
     currency: "IRR",
-    status: mapPaymentStatus(dto.status),
+    status: dto.status, // استفاده مستقیم بدون تبدیل
     createdBy: "",
     createdByName: "",
     createdAt: dto.createdDateTime,

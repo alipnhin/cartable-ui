@@ -165,7 +165,8 @@
       "draft": "پیش‌نویس",
       "doneWithError": "انجام شده با خطا",
       "canceled": "لغو شده",
-      "expired": "منقضی شده"
+      "expired": "منقضی شده",
+      "waitForManagerApproval": "در انتظار تایید مدیر کارتابل"
     }
   },
   "paymentOrders": {

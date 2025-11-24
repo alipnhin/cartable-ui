@@ -3,7 +3,7 @@
  * انواع مشترک و پایه‌ای که در سراسر برنامه استفاده می‌شوند
  */
 
-import { OrderStatus } from "./order";
+import { PaymentStatusEnum } from "./api";
 import { TransactionStatus } from "./transaction";
 
 // Pagination
@@ -107,7 +107,7 @@ export interface ChangeHistoryEntry {
   createdDateTime: string;
   title: string;
   userName: string;
-  Status: OrderStatus; 
+  Status: PaymentStatusEnum;
 }
 
 export type ChangeAction =
