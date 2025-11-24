@@ -166,57 +166,28 @@ export function getTransactionStatusBadge(status: TransactionStatus): {
   variant: BadgeVariant;
   icon: React.ElementType;
 } {
-  const statusMap: Record<
-    TransactionStatus,
-    {
-      variant: BadgeVariant;
-      icon: React.ElementType;
-    }
-  > = {
-    [TransactionStatus.Registered]: {
-      variant: "muted",
-      icon: FileText,
-    },
-    [TransactionStatus.Canceled]: {
-      variant: "warning",
-      icon: Clock,
-    },
-    [TransactionStatus.BankSucceeded]: {
-      variant: "success",
-      icon: CheckCircle2,
-    },
-    [TransactionStatus.WaitForExecution]: {
-      variant: "info",
-      icon: Banknote,
-    },
-    [TransactionStatus.WaitForBank]: {
-      variant: "default",
-      icon: CheckCircle2,
-    },
-    [TransactionStatus.Failed]: {
-      variant: "danger",
-      icon: XCircle,
-    },
-    [TransactionStatus.BankRejected]: {
-      variant: "danger",
-      icon: Ban,
-    },
-    [TransactionStatus.Expired]: {
-      variant: "muted",
-      icon: XCircle,
-    },
-    [TransactionStatus.TransactionRollback]: {
-      variant: "muted",
-      icon: "symbol",
-    },
-  };
-
-  return (
-    statusMap[status] || {
-      variant: "default",
-      icon: HelpCircle,
-    }
-  );
+  switch (status) {
+    case TransactionStatus.Registered:
+      return { variant: "muted", icon: FileText };
+    case TransactionStatus.WaitForExecution:
+      return { variant: "info", icon: Banknote };
+    case TransactionStatus.WaitForBank:
+      return { variant: "default", icon: CheckCircle2 };
+    case TransactionStatus.BankSucceeded:
+      return { variant: "success", icon: CheckCircle2 };
+    case TransactionStatus.BankRejected:
+      return { variant: "danger", icon: Ban };
+    case TransactionStatus.TransactionRollback:
+      return { variant: "muted", icon: Hourglass };
+    case TransactionStatus.Failed:
+      return { variant: "danger", icon: XCircle };
+    case TransactionStatus.Canceled:
+      return { variant: "warning", icon: Clock };
+    case TransactionStatus.Expired:
+      return { variant: "muted", icon: XCircle };
+    default:
+      return { variant: "default", icon: HelpCircle };
+  }
 }
 
 export function getPaymentTypeBadge(type: number | undefined | null): {
@@ -230,19 +201,33 @@ export function getPaymentTypeBadge(type: number | undefined | null): {
     };
   }
 
-  const typeMap: Record<number, { variant: BadgeVariant; translationKey: string }> = {
-    0: { variant: "default", translationKey: "transactions.paymentTypes.internal" },
-    1: { variant: "success", translationKey: "transactions.paymentTypes.paya" },
-    2: { variant: "info", translationKey: "transactions.paymentTypes.satna" },
-    3: { variant: "warning", translationKey: "transactions.paymentTypes.card" },
-  };
-
-  return (
-    typeMap[type] || {
-      variant: "muted",
-      translationKey: "transactions.paymentTypes.unknown",
-    }
-  );
+  switch (type) {
+    case 0:
+      return {
+        variant: "default",
+        translationKey: "transactions.paymentTypes.internal"
+      };
+    case 1:
+      return {
+        variant: "success",
+        translationKey: "transactions.paymentTypes.paya"
+      };
+    case 2:
+      return {
+        variant: "info",
+        translationKey: "transactions.paymentTypes.satna"
+      };
+    case 3:
+      return {
+        variant: "warning",
+        translationKey: "transactions.paymentTypes.card"
+      };
+    default:
+      return {
+        variant: "muted",
+        translationKey: "transactions.paymentTypes.unknown"
+      };
+  }
 }
 
 // Wrapper Component for PaymentType
