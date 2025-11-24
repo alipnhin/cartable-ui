@@ -1,6 +1,6 @@
 "use client";
 
-import { TransactionItem, SuccessStatuses, PendingStatuses } from "@/services/transactionService";
+import { TransactionItem } from "@/services/transactionService";
 import { Card, CardContent } from "@/components/ui/card";
 import useTranslation from "@/hooks/useTranslation";
 import {
@@ -22,11 +22,11 @@ export function TransactionStats({ transactions = [] }: TransactionStatsProps) {
   // در انتظار: Registered, WaitForExecution, WaitForBank
   // ناموفق: سایر وضعیت‌ها
   const succeededCount = transactions.filter((tx) =>
-    SuccessStatuses.includes(tx.status)
+    tx.status === "BankSucceeded"
   ).length;
 
   const pendingCount = transactions.filter((tx) =>
-    PendingStatuses.includes(tx.status)
+    ["Registered", "WaitForExecution", "WaitForBank"].includes(tx.status)
   ).length;
 
   const stats = {
@@ -36,7 +36,7 @@ export function TransactionStats({ transactions = [] }: TransactionStatsProps) {
     failed: transactions.length - succeededCount - pendingCount,
     totalAmount: transactions.reduce((sum, tx) => sum + tx.amount, 0),
     successAmount: transactions
-      .filter((tx) => SuccessStatuses.includes(tx.status))
+      .filter((tx) => tx.status === "BankSucceeded")
       .reduce((sum, tx) => sum + tx.amount, 0),
   };
 

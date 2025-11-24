@@ -22,7 +22,7 @@ import { toast } from "sonner";
 export interface TransactionFiltersType {
   search: string;
   status: number | null;
-  paymentType: number | null;
+  paymentType: string | null;
   fromDate: string;
   toDate: string;
   bankGatewayId: string;
@@ -51,7 +51,7 @@ export default function TransactionReportsPage() {
 
   // Individual filter states (like payment-orders page)
   const [status, setStatus] = useState<number | null>(null);
-  const [paymentType, setPaymentType] = useState<number | null>(null);
+  const [paymentType, setPaymentType] = useState<string | null>(null);
   const [fromDate, setFromDate] = useState(defaultDates.fromDate);
   const [toDate, setToDate] = useState(defaultDates.toDate);
   const [bankGatewayId, setBankGatewayId] = useState("");

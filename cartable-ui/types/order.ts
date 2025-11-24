@@ -36,7 +36,6 @@ export interface PaymentOrder {
   totalTransactions?: number; // alias for numberOfTransactions
   createdDate?: string; // alias for createdAt
   createdDateTime?: string; // alias for createdAt
-  paymentType?: number; // نوع پرداخت (0: داخلی، 1: پایا، 2: ساتنا)
 }
 
 /**
