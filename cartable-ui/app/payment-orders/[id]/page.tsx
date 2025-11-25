@@ -61,6 +61,7 @@ import {
   PaymentItemStatusEnum,
 } from "@/types/api";
 import { OtpDialog } from "@/components/common/otp-dialog";
+import { InquiryLoadingDialog } from "./components/inquiry-loading-dialog";
 
 export default function PaymentOrderDetailPage() {
   const params = useParams();
@@ -79,6 +80,10 @@ export default function PaymentOrderDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Inquiry loading states
+  const [isInquiringOrder, setIsInquiringOrder] = useState(false);
+  const [inquiringTransactionId, setInquiringTransactionId] = useState<string | null>(null);
 
   // Transaction pagination and filters
   const [transactionPage, setTransactionPage] = useState(1);
@@ -180,6 +185,8 @@ export default function PaymentOrderDetailPage() {
   const handleInquiryOrder = async () => {
     if (!session?.accessToken || !orderId) return;
 
+    setIsInquiringOrder(true);
+
     try {
       await inquiryOrderById(orderId, session.accessToken);
 
@@ -189,8 +196,9 @@ export default function PaymentOrderDetailPage() {
         variant: "success",
       });
 
-      // ریلود کامل صفحه
-      await reloadPage();
+      // رفرش بدون فلیکر - فقط داده‌ها را به‌روزرسانی می‌کنیم
+      await fetchOrderData();
+      await fetchTransactions();
     } catch (err: any) {
       console.error("Error inquiring order:", err);
 
@@ -206,6 +214,8 @@ export default function PaymentOrderDetailPage() {
         description: errorMessage,
         variant: "error",
       });
+    } finally {
+      setIsInquiringOrder(false);
     }
   };
 
@@ -266,6 +276,8 @@ export default function PaymentOrderDetailPage() {
   const handleInquiryTransaction = async (transactionId: string) => {
     if (!session?.accessToken) return;
 
+    setInquiringTransactionId(transactionId);
+
     try {
       await inquiryTransactionById(transactionId, session.accessToken);
 
@@ -284,6 +296,8 @@ export default function PaymentOrderDetailPage() {
         description: t("paymentOrders.inquiryTransactionError"),
         variant: "error",
       });
+    } finally {
+      setInquiringTransactionId(null);
     }
   };
 
@@ -800,6 +814,7 @@ export default function PaymentOrderDetailPage() {
               onFilterChange={fetchTransactions}
               onInquiryTransaction={handleInquiryTransaction}
               onExport={handleExportExcel}
+              inquiringTransactionId={inquiringTransactionId}
             />
           </TabsContent>
 
@@ -864,6 +879,15 @@ export default function PaymentOrderDetailPage() {
           totalRecords={totalTransactions}
           onCancel={handleCancelExport}
           errorMessage={exportError}
+        />
+
+        {/* دایالوگ لودینگ استعلام دستور پرداخت */}
+        <InquiryLoadingDialog open={isInquiringOrder} type="order" />
+
+        {/* دایالوگ لودینگ استعلام تراکنش */}
+        <InquiryLoadingDialog
+          open={inquiringTransactionId !== null}
+          type="transaction"
         />
       </div>
     </>

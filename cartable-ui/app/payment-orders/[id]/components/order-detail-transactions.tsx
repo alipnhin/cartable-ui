@@ -79,6 +79,7 @@ interface OrderDetailTransactionsProps {
   ) => void | Promise<void>;
   onInquiryTransaction: (transactionId: string) => void | Promise<void>;
   onExport?: () => void | Promise<void>;
+  inquiringTransactionId?: string | null;
 }
 
 type SortField = "amount" | "destinationAccountOwner" | "nationalCode";
@@ -95,6 +96,7 @@ export function OrderDetailTransactions({
   onFilterChange,
   onInquiryTransaction,
   onExport,
+  inquiringTransactionId,
 }: OrderDetailTransactionsProps) {
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
@@ -584,12 +586,11 @@ export function OrderDetailTransactions({
               {/* Status Filter */}
               <Select
                 value={statusFilter !== "all" ? String(statusFilter) : "all"}
-                onValueChange={(v) => {
+                onValueChange={(v) =>
                   setStatusFilter(
                     v === "all" ? "all" : (v as PaymentItemStatusEnum)
-                  );
-                  applyFilters();
-                }}
+                  )
+                }
               >
                 <SelectTrigger className="w-[180px] h-9">
                   <SelectValue placeholder={t("transactions.allStatuses")} />
@@ -639,10 +640,7 @@ export function OrderDetailTransactions({
               {/* Payment Type Filter */}
               <Select
                 value={paymentTypeFilter}
-                onValueChange={(v) => {
-                  setPaymentTypeFilter(v as any);
-                  applyFilters();
-                }}
+                onValueChange={(v) => setPaymentTypeFilter(v as any)}
               >
                 <SelectTrigger className="w-[160px] h-9">
                   <SelectValue placeholder={t("transactions.allTypes")} />
@@ -666,10 +664,7 @@ export function OrderDetailTransactions({
               {/* Reason Code Filter */}
               <Select
                 value={reasonCodeFilter}
-                onValueChange={(v) => {
-                  setReasonCodeFilter(v as any);
-                  applyFilters();
-                }}
+                onValueChange={(v) => setReasonCodeFilter(v as any)}
               >
                 <SelectTrigger className="w-[200px] h-9">
                   <SelectValue placeholder={t("transactions.allReasonCodes")} />
@@ -852,9 +847,10 @@ export function OrderDetailTransactions({
                         PaymentItemStatusEnum.WaitForBank ||
                       transaction.status ===
                         PaymentItemStatusEnum.WaitForExecution;
+                    const isInquiring = inquiringTransactionId === transaction.id;
 
                     return (
-                      <Card key={transaction.id} className="overflow-hidden">
+                      <Card key={transaction.id} className={`overflow-hidden ${isInquiring ? "opacity-60 pointer-events-none" : ""}`}>
                         {/* هدر با مبلغ برجسته */}
                         <div className="bg-muted/50 p-4 border-b">
                           <div className="flex items-center justify-between mb-3">
@@ -925,19 +921,9 @@ export function OrderDetailTransactions({
                             </span>
                           </div>
 
-                          {/* کد علت */}
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">
-                              {t("transactions.reasonLabel")}
-                            </span>
-                            <span className="text-sm text-foreground truncate max-w-[50%] text-left">
-                              {getReasonCodeLabel(transaction.reasonCode)}
-                            </span>
-                          </div>
-
                           {/* کد رهگیری */}
                           {transaction.trackingId && (
-                            <div className="flex items-center justify-between pt-2 border-t">
+                            <div className="flex items-center justify-between">
                               <span className="text-sm text-muted-foreground">
                                 {t("transactions.trackingIdLabel")}
                               </span>
@@ -963,9 +949,10 @@ export function OrderDetailTransactions({
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleInquiry(transaction)}
+                                disabled={isInquiring}
                                 className="gap-2 h-9"
                               >
-                                <RefreshCw className="h-4 w-4" />
+                                <RefreshCw className={`h-4 w-4 ${isInquiring ? "animate-spin" : ""}`} />
                                 {t("transactions.inquiry")}
                               </Button>
                             )}
@@ -1039,7 +1026,7 @@ export function OrderDetailTransactions({
                           {t("transactions.paymentTypeColumn")}
                         </TableHead>
                         <TableHead>
-                          {t("transactions.reasonCodeColumn")}
+                          {t("transactions.trackingIdLabel")}
                         </TableHead>
                         <TableHead>{t("transactions.statusColumn")}</TableHead>
                         <TableHead className="text-left">
@@ -1057,11 +1044,12 @@ export function OrderDetailTransactions({
                             PaymentItemStatusEnum.WaitForBank ||
                           transaction.status ===
                             PaymentItemStatusEnum.WaitForExecution;
+                        const isInquiring = inquiringTransactionId === transaction.id;
 
                         return (
                           <TableRow
                             key={transaction.id}
-                            className="hover:bg-muted/30 transition-colors"
+                            className={`hover:bg-muted/30 transition-colors ${isInquiring ? "opacity-60" : ""}`}
                           >
                             <TableCell className="text-muted-foreground text-sm">
                               {startIndex + index + 1}
@@ -1098,8 +1086,8 @@ export function OrderDetailTransactions({
                             <TableCell>
                               {getPaymentMethodLabel(transaction.paymentType)}
                             </TableCell>
-                            <TableCell className="text-sm">
-                              {getReasonCodeLabel(transaction.reasonCode)}
+                            <TableCell className="text-sm font-mono">
+                              {transaction.trackingId || "-"}
                             </TableCell>
                             <TableCell>
                               <TransactionStatusBadge
@@ -1123,9 +1111,10 @@ export function OrderDetailTransactions({
                                     variant="outline"
                                     size="sm"
                                     onClick={() => handleInquiry(transaction)}
+                                    disabled={isInquiring}
                                     className="h-8 gap-1.5 text-xs"
                                   >
-                                    <RefreshCw className="h-3.5 w-3.5" />
+                                    <RefreshCw className={`h-3.5 w-3.5 ${isInquiring ? "animate-spin" : ""}`} />
                                     {t("transactions.inquiry")}
                                   </Button>
                                 )}
