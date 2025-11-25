@@ -5,13 +5,14 @@
 
 import { ChangeHistoryEntry } from "./common";
 import {
-  TransactionStatusApiEnum,
-  PaymentTypeApiEnum,
+  PaymentItemStatusEnum,
+  PaymentMethodEnum,
+  TransactionReasonEnum,
 } from "./api";
 
 // Re-export API enums for backward compatibility
-export { TransactionStatusApiEnum as TransactionStatus };
-export { PaymentTypeApiEnum as PaymentMethodEnum };
+export { PaymentItemStatusEnum as TransactionStatus };
+export { PaymentMethodEnum as PaymentMethodEnum };
 
 export interface Transaction {
   id: string;
@@ -26,74 +27,12 @@ export interface Transaction {
   ownerName: string;
   description?: string;
   trackingId?: string; // کد پیگیری بانک
-  status: TransactionStatusApiEnum;
+  status: PaymentItemStatusEnum;
   providerMessage?: string;
   createdDateTime: string;
   reasonCode?: TransactionReasonEnum;
-  paymentType?: PaymentTypeApiEnum;
+  paymentType?: PaymentMethodEnum;
   UpdatedDateTime?: string;
-}
-
-export enum TransactionReasonEnum {
-  /** نامشخص */
-  Unknown = "unknown",
-
-  /** واريز حقوق */
-  SalaryDeposit = "salaryDeposit",
-
-  /** امور بیمه خدمات */
-  ServicesInsurance = "servicesInsurance",
-
-  /** امور درمانی */
-  Therapeutic = "therapeutic",
-
-  /** امور سرمايه‌گذارى و بورس */
-  InvestmentAndBourse = "investmentAndBourse",
-
-  /** امور ارزى در چارچوب ضوابط و مقررات */
-  LegalCurrencyActivities = "legalCurrencyActivities",
-
-  /** پرداخت قرض و تاديه ديون (قرض‌الحسنه، بدهى و غیره) */
-  DebtPayment = "debtPayment",
-
-  /** امور بازنشستگی */
-  Retirement = "retirement",
-
-  /** اموال منقول */
-  MovableProperties = "movableProperties",
-
-  /** اموال غیر منقول */
-  ImmovableProperties = "immovableProperties",
-
-  /** مدیریت نقدینگی */
-  CashManagement = "cashManagement",
-
-  /** عوارض گمرکى */
-  CustomsDuties = "customsDuties",
-
-  /** تسویه مالیاتی */
-  TaxSettle = "taxSettle",
-
-  /** سایر خدمات دولتی */
-  OtherGovernmentServices = "otherGovernmentServices",
-
-  /** تسهیلات و تعهدات */
-  FacilitiesAndCommitments = "facilitiesAndCommitments",
-
-  /** بازگردانی وثیقه */
-  BondReturn = "bondReturn",
-
-  /** هزينه عمومى و امور روزمره */
-  GeneralAndDailyCosts = "generalAndDailyCosts",
-
-  /** امور خیریه */
-  Charity = "charity",
-
-  /** خرید کالا */
-  StuffsPurchase = "stuffsPurchase",
-
-  /** خرید خدمات */
-  ServicesPurchase = "servicesPurchase",
 }
 
 export interface TransactionDetail extends Transaction {
@@ -111,42 +50,42 @@ export interface BankResponse {
 
 // Transaction Status Info for UI
 export interface TransactionStatusInfo {
-  status: TransactionStatusApiEnum;
+  status: PaymentItemStatusEnum;
   color: string;
   icon?: string;
 }
 
 export const TRANSACTION_STATUSES: TransactionStatusInfo[] = [
   {
-    status: TransactionStatusApiEnum.Registered,
+    status: PaymentItemStatusEnum.Registered,
     color: "gray",
   },
   {
-    status: TransactionStatusApiEnum.Expired,
+    status: PaymentItemStatusEnum.Expired,
     color: "yellow",
   },
   {
-    status: TransactionStatusApiEnum.WaitForExecution,
+    status: PaymentItemStatusEnum.WaitForExecution,
     color: "blue",
   },
   {
-    status: TransactionStatusApiEnum.WaitForBank,
+    status: PaymentItemStatusEnum.WaitForBank,
     color: "purple",
   },
   {
-    status: TransactionStatusApiEnum.BankSucceeded,
+    status: PaymentItemStatusEnum.BankSucceeded,
     color: "green",
   },
   {
-    status: TransactionStatusApiEnum.BankRejected,
+    status: PaymentItemStatusEnum.BankRejected,
     color: "red",
   },
   {
-    status: TransactionStatusApiEnum.TransactionRollback,
+    status: PaymentItemStatusEnum.TransactionRollback,
     color: "dark",
   },
   {
-    status: TransactionStatusApiEnum.Canceled,
+    status: PaymentItemStatusEnum.Canceled,
     color: "gray",
   },
 ];

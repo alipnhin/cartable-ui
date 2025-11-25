@@ -193,11 +193,13 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
         <div className="space-y-2">
           <Label className="text-sm">{t("filters.status")}</Label>
           <Select
-            value={localFilters.status !== "" ? String(localFilters.status) : "all"}
+            value={
+              localFilters.status !== "" ? String(localFilters.status) : "all"
+            }
             onValueChange={(value) =>
               setLocalFilters((prev) => ({
                 ...prev,
-                status: value === "all" ? "" : (Number(value) as OrderStatus),
+                status: value === "all" ? "" : (value as OrderStatus),
               }))
             }
           >
@@ -309,11 +311,13 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
           <div className="space-y-2">
             <Label className="text-sm">{t("filters.status")}</Label>
             <Select
-              value={localFilters.status !== "" ? String(localFilters.status) : "all"}
+              value={
+                localFilters.status !== "" ? String(localFilters.status) : "all"
+              }
               onValueChange={(value) =>
                 setLocalFilters((prev) => ({
                   ...prev,
-                  status: value === "all" ? "" : (Number(value) as OrderStatus),
+                  status: value === "all" ? "" : (value as OrderStatus),
                 }))
               }
             >

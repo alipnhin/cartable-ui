@@ -13,9 +13,19 @@ import { getBankCodeFromIban, getBankName } from "@/lib/bank-logos";
 import { TransactionStatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
-import { Copy, Check, Clock, CheckCircle, XCircle, Send, FileEdit, Ban, AlertCircle } from "lucide-react";
+import {
+  Copy,
+  Check,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Send,
+  FileEdit,
+  Ban,
+  AlertCircle,
+} from "lucide-react";
 import { useState } from "react";
-import { TransactionStatusApiEnum } from "@/types/api";
+import { PaymentItemStatusEnum } from "@/types/api";
 
 interface TransactionDetailDialogProps {
   transaction: WithdrawalTransaction | null;
@@ -28,35 +38,38 @@ const formatDateTime = (dateString: string, locale: string): string => {
   if (!dateString) return "-";
 
   const date = new Date(dateString);
-  const dateFormatter = new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const dateFormatter = new Intl.DateTimeFormat(
+    locale === "fa" ? "fa-IR" : "en-US",
+    {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  );
 
   return dateFormatter.format(date);
 };
 
 // Helper to get status icon for timeline
-function getTransactionStatusIcon(status: TransactionStatusApiEnum) {
+function getTransactionStatusIcon(status: PaymentItemStatusEnum) {
   switch (status) {
-    case TransactionStatusApiEnum.Registered:
+    case PaymentItemStatusEnum.Registered:
       return <FileEdit className="h-5 w-5 text-gray-600" />;
-    case TransactionStatusApiEnum.WaitForExecution:
+    case PaymentItemStatusEnum.WaitForExecution:
       return <Clock className="h-5 w-5 text-blue-600" />;
-    case TransactionStatusApiEnum.WaitForBank:
+    case PaymentItemStatusEnum.WaitForBank:
       return <Send className="h-5 w-5 text-purple-600" />;
-    case TransactionStatusApiEnum.BankSucceeded:
+    case PaymentItemStatusEnum.BankSucceeded:
       return <CheckCircle className="h-5 w-5 text-green-600" />;
-    case TransactionStatusApiEnum.BankRejected:
-    case TransactionStatusApiEnum.Failed:
+    case PaymentItemStatusEnum.BankRejected:
+    case PaymentItemStatusEnum.Failed:
       return <XCircle className="h-5 w-5 text-red-600" />;
-    case TransactionStatusApiEnum.TransactionRollback:
+    case PaymentItemStatusEnum.TransactionRollback:
       return <AlertCircle className="h-5 w-5 text-warning" />;
-    case TransactionStatusApiEnum.Canceled:
-    case TransactionStatusApiEnum.Expired:
+    case PaymentItemStatusEnum.Canceled:
+    case PaymentItemStatusEnum.Expired:
       return <Ban className="h-5 w-5 text-muted-foreground" />;
     default:
       return <Clock className="h-5 w-5 text-gray-600" />;
@@ -108,7 +121,11 @@ function InfoRow({
     <div className="flex justify-between items-start py-2.5 border-b border-border/50 last:border-0">
       <span className="text-sm text-muted-foreground shrink-0">{label}</span>
       <div className="flex items-center gap-1.5">
-        <span className={`text-sm font-medium text-foreground text-left ${mono ? "font-mono" : ""}`}>
+        <span
+          className={`text-sm font-medium text-foreground text-left ${
+            mono ? "font-mono" : ""
+          }`}
+        >
           {value}
         </span>
         {copyable && typeof value === "string" && <CopyButton text={value} />}
@@ -132,8 +149,13 @@ export function TransactionDetailDialog({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto w-full">
         <DialogHeader className="pb-4 border-b">
           <div className="flex items-center justify-between gap-4 pe-8">
-            <DialogTitle className="text-lg font-semibold">جزئیات تراکنش</DialogTitle>
-            <TransactionStatusBadge status={transaction.status as any} size="sm" />
+            <DialogTitle className="text-lg font-semibold">
+              جزئیات تراکنش
+            </DialogTitle>
+            <TransactionStatusBadge
+              status={transaction.status as any}
+              size="sm"
+            />
           </div>
         </DialogHeader>
 
@@ -151,7 +173,9 @@ export function TransactionDetailDialog({
                   <BankLogo bankCode={bankCode} size="xl" />
                 </div>
               )}
-              <div className="text-sm text-muted-foreground mb-1">مبلغ تراکنش</div>
+              <div className="text-sm text-muted-foreground mb-1">
+                مبلغ تراکنش
+              </div>
               <div className="text-3xl font-bold text-foreground">
                 {formatCurrency(parseFloat(transaction.amount) || 0, locale)}
               </div>
@@ -186,12 +210,7 @@ export function TransactionDetailDialog({
                     copyable
                   />
 
-                  {bankName && (
-                    <InfoRow
-                      label="بانک مقصد"
-                      value={bankName}
-                    />
-                  )}
+                  {bankName && <InfoRow label="بانک مقصد" value={bankName} />}
                 </div>
               </div>
 
@@ -235,7 +254,9 @@ export function TransactionDetailDialog({
             {/* Error Message */}
             {transaction.providerMessage && (
               <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-                <div className="text-sm font-medium text-destructive mb-1">علت رد</div>
+                <div className="text-sm font-medium text-destructive mb-1">
+                  علت رد
+                </div>
                 <div className="text-sm text-destructive">
                   {transaction.providerMessage}
                 </div>
@@ -244,14 +265,22 @@ export function TransactionDetailDialog({
           </TabsContent>
 
           <TabsContent value="history">
-            {transaction.changeHistory && transaction.changeHistory.length > 0 ? (
+            {transaction.changeHistory &&
+            transaction.changeHistory.length > 0 ? (
               <div className="relative">
                 {/* Timeline List */}
                 <div className="space-y-4">
                   {[...transaction.changeHistory]
-                    .sort((a, b) => new Date(b.createdDateTime).getTime() - new Date(a.createdDateTime).getTime())
+                    .sort(
+                      (a, b) =>
+                        new Date(b.createdDateTime).getTime() -
+                        new Date(a.createdDateTime).getTime()
+                    )
                     .map((entry, index, arr) => (
-                      <div className="flex items-start relative" key={entry.id || index}>
+                      <div
+                        className="flex items-start relative"
+                        key={entry.id || index}
+                      >
                         {/* Vertical connecting line */}
                         {index < arr.length - 1 && (
                           <div className="w-9 start-0 top-9 absolute bottom-0 rtl:-translate-x-1/2 translate-x-1/2 border-s border-s-input"></div>
@@ -266,14 +295,19 @@ export function TransactionDetailDialog({
                         <div className="ps-2.5 mb-7 text-base grow">
                           <div className="flex flex-col">
                             <div className="flex items-center gap-2 mb-3 flex-wrap">
-                              <TransactionStatusBadge status={entry.status as any} size="default" />
+                              <TransactionStatusBadge
+                                status={entry.status as any}
+                                size="default"
+                              />
                             </div>
                             <div className="text-sm mb-2 font-medium">
                               {entry.description || "بدون توضیحات"}
                             </div>
                             <div className="flex items-center gap-4 text-xs text-muted-foreground">
                               <span>
-                                {new Date(entry.createdDateTime).toLocaleDateString(
+                                {new Date(
+                                  entry.createdDateTime
+                                ).toLocaleDateString(
                                   locale === "fa" ? "fa-IR" : "en-US",
                                   {
                                     year: "numeric",
@@ -283,10 +317,15 @@ export function TransactionDetailDialog({
                                 )}
                               </span>
                               <span>
-                                {new Date(entry.createdDateTime).toLocaleTimeString(locale === "fa" ? "fa-IR" : "en-US", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                                {new Date(
+                                  entry.createdDateTime
+                                ).toLocaleTimeString(
+                                  locale === "fa" ? "fa-IR" : "en-US",
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
                               </span>
                             </div>
                           </div>
@@ -298,7 +337,9 @@ export function TransactionDetailDialog({
             ) : (
               <div className="text-center py-12">
                 <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-sm text-muted-foreground">تاریخچه تغییراتی وجود ندارد</p>
+                <p className="text-sm text-muted-foreground">
+                  تاریخچه تغییراتی وجود ندارد
+                </p>
               </div>
             )}
           </TabsContent>

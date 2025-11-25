@@ -56,39 +56,37 @@ export interface CartableFilterParams extends PaginationParams {
  */
 export enum PaymentStatusEnum {
   /** در انتظار تائید امضاداران */
-  WaitingForOwnersApproval = 0,
-  /** تائید شده توسط امضاداران */
-  OwnersApproved = 1,
-  /** ارسال شده به بانک جهت پردازش */
-  SubmittedToBank = 2,
-  /** تراکنش با موفقیت انجام شده */
-  BankSucceeded = 3,
-  /** عدم تائید توسط امضا داران */
-  OwnerRejected = 4,
-  /** رد شده توسط بانک */
-  BankRejected = 5,
-  /** پیش نویس */
-  Draft = 6,
-  /** انجام شده با خطا */
-  DoneWithError = 7,
-  /** لغو شده */
-  Canceled = 8,
-  /** منقضی شده */
-  Expired = 9,
-  /** در انتظار تایید مدیر کارتابل */
-  WaitForManagerApproval = 10,
-}
+  WaitingForOwnersApproval = "WaitingForOwnersApproval",
 
-/**
- * Enum کد بانک
- */
-export enum BankEnum {
-  Mellat = 0,
-  Saderat = 1,
-  Tejarat = 2,
-  Melli = 3,
-  Sepah = 4,
-  // سایر بانک‌ها را در صورت نیاز اضافه کنید
+  /** تائید شده توسط امضاداران */
+  OwnersApproved = "OwnersApproved",
+
+  /** ارسال شده به بانک جهت پردازش */
+  SubmittedToBank = "SubmittedToBank",
+
+  /** تراکنش با موفقیت انجام شده */
+  BankSucceeded = "BankSucceeded",
+
+  /** عدم تائید توسط امضا داران */
+  OwnerRejected = "OwnerRejected",
+
+  /** رد شده توسط بانک */
+  BankRejected = "BankRejected",
+
+  /** پیش نویس - در انتظار تائید از سوی برنامه صادر کننده تراکنش */
+  Draft = "Draft",
+
+  /** انجام شده با خطا - بخشی از تراکنش‌ها انجام نشده */
+  DoneWithError = "DoneWithError",
+
+  /** لغو درخواست پرداخت توسط مشتری */
+  Canceled = "Canceled",
+
+  /** منقضی شده پس از عدم تائید و ارسال به بانک */
+  Expired = "Expired",
+
+  /** در انتظار تایید مدیر کارتابل */
+  WaitForManagerApproval = "WaitForManagerApproval",
 }
 
 /**
@@ -98,7 +96,7 @@ export interface PaymentListDto {
   id: string;
   orderId: string;
   /** کد بانک مبدا */
-  providerCode: BankEnum;
+  providerCode: string;
   /** کد پیگیری ارائه شده از سوی بانک */
   trackingId: string;
   /** عنوان تراکنش */
@@ -194,48 +192,103 @@ export interface BatchApproveRequest {
  * Enum کد علت پرداخت - مقادیر API (PascalCase)
  * برای mapping به TransactionReasonEnum موجود
  */
-export enum ReasonCodeApiEnum {
-  InvestmentAndBourse = "InvestmentAndBourse",
-  ImportGoods = "ImportGoods",
-  SalaryAndWages = "SalaryAndWages",
-  TaxAndDuties = "TaxAndDuties",
-  LoanRepayment = "LoanRepayment",
-  OtherPayments = "OtherPayments",
+export enum TransactionReasonEnum {
+  /** نامشخص */
+  Unknown = "unknown",
+
+  /** واريز حقوق */
+  SalaryDeposit = "salaryDeposit",
+
+  /** امور بیمه خدمات */
+  ServicesInsurance = "servicesInsurance",
+
+  /** امور درمانی */
+  Therapeutic = "therapeutic",
+
+  /** امور سرمايه‌گذارى و بورس */
+  InvestmentAndBourse = "investmentAndBourse",
+
+  /** امور ارزى در چارچوب ضوابط و مقررات */
+  LegalCurrencyActivities = "legalCurrencyActivities",
+
+  /** پرداخت قرض و تاديه ديون (قرض‌الحسنه، بدهى و غیره) */
+  DebtPayment = "debtPayment",
+
+  /** امور بازنشستگی */
+  Retirement = "retirement",
+
+  /** اموال منقول */
+  MovableProperties = "movableProperties",
+
+  /** اموال غیر منقول */
+  ImmovableProperties = "immovableProperties",
+
+  /** مدیریت نقدینگی */
+  CashManagement = "cashManagement",
+
+  /** عوارض گمرکى */
+  CustomsDuties = "customsDuties",
+
+  /** تسویه مالیاتی */
+  TaxSettle = "taxSettle",
+
+  /** سایر خدمات دولتی */
+  OtherGovernmentServices = "otherGovernmentServices",
+
+  /** تسهیلات و تعهدات */
+  FacilitiesAndCommitments = "facilitiesAndCommitments",
+
+  /** بازگردانی وثیقه */
+  BondReturn = "bondReturn",
+
+  /** هزينه عمومى و امور روزمره */
+  GeneralAndDailyCosts = "generalAndDailyCosts",
+
+  /** امور خیریه */
+  Charity = "charity",
+
+  /** خرید کالا */
+  StuffsPurchase = "stuffsPurchase",
+
+  /** خرید خدمات */
+  ServicesPurchase = "servicesPurchase",
 }
 
 /**
  * Enum وضعیت تراکنش - مطابق با بک‌اند (PaymentItemStatusEnum)
  * مقادیر عددی باید دقیقاً مطابق با بک‌اند باشند
  */
-export enum TransactionStatusApiEnum {
-  /** ثبت شده */
-  Registered = 0,
-  /** در صف پردازش */
-  WaitForExecution = 1,
-  /** ارسال شده به بانک */
-  WaitForBank = 2,
-  /** تراکنش انجام شده */
-  BankSucceeded = 3,
-  /** رد شده توسط بانک */
-  BankRejected = 4,
-  /** برگشت مبلغ به حساب مبدا */
-  TransactionRollback = 5,
-  /** خطا در ارسال به بانک */
-  Failed = 6,
-  /** لغو شده */
-  Canceled = 7,
-  /** منقضی شده */
-  Expired = 8,
+export enum PaymentItemStatusEnum {
+  Registered = "Registered",
+  WaitForExecution = "WaitForExecution",
+  WaitForBank = "WaitForBank",
+  BankSucceeded = "BankSucceeded",
+  BankRejected = "BankRejected",
+  TransactionRollback = "TransactionRollback",
+  Failed = "Failed",
+  Canceled = "Canceled",
+  Expired = "Expired",
 }
 
 /**
  * Enum نوع پرداخت - مقادیر API (PascalCase)
  * برای mapping به PaymentMethodEnum موجود
  */
-export enum PaymentTypeApiEnum {
+export enum PaymentMethodEnum {
+  /** نامشخص */
+  Unknown = "Unknown",
+
+  /** داخلی */
+  Internal = "Internal",
+
+  /** پایا */
   Paya = "Paya",
+
+  /** ساتنا */
   Satna = "Satna",
-  Rtgs = "Rtgs",
+
+  /** کارت به کارت */
+  Card = "Card",
 }
 
 /**
@@ -303,7 +356,7 @@ export interface WithdrawalOrderDetails {
  * آمار وضعیت
  */
 export interface StatusBreakdown {
-  status: TransactionStatusApiEnum;
+  status: PaymentItemStatusEnum;
   statusName: string;
   count: number;
   percentage: number;
@@ -314,7 +367,7 @@ export interface StatusBreakdown {
  * آمار نوع پرداخت
  */
 export interface PaymentTypeBreakdown {
-  paymentType: PaymentTypeApiEnum;
+  paymentType: PaymentMethodEnum;
   typeName: string;
   count: number;
   percentage: number;
@@ -327,7 +380,7 @@ export interface PaymentTypeBreakdown {
  * آمار کد علت
  */
 export interface ReasonCodeBreakdown {
-  reasonCode: ReasonCodeApiEnum;
+  reasonCode: TransactionReasonEnum;
   reasonName: string;
   count: number;
   percentage: number;
@@ -361,12 +414,12 @@ export interface WithdrawalStatistics {
   };
   paymentTypeStatistics: {
     breakdown: PaymentTypeBreakdown[];
-    mostUsedType: PaymentTypeApiEnum;
+    mostUsedType: PaymentMethodEnum;
     mostUsedTypePercentage: number;
   };
   reasonCodeStatistics: {
     breakdown: ReasonCodeBreakdown[];
-    mostUsedReason: ReasonCodeApiEnum;
+    mostUsedReason: TransactionReasonEnum;
     mostUsedReasonPercentage: number;
   };
   financialStatistics: {
@@ -395,7 +448,7 @@ export interface TransactionChangeHistory {
   id: string;
   withdrawalTransactionId: string;
   description: string;
-  status: TransactionStatusApiEnum;
+  status: PaymentItemStatusEnum;
   createdDateTime: string;
 }
 
@@ -416,10 +469,10 @@ export interface WithdrawalTransaction {
   providerMessage: string;
   amount: string;
   paymentNumber: string;
-  reasonCode: ReasonCodeApiEnum;
+  reasonCode: TransactionReasonEnum;
   rowNumber: number;
-  status: TransactionStatusApiEnum;
-  paymentType: PaymentTypeApiEnum;
+  status: PaymentItemStatusEnum;
+  paymentType: PaymentMethodEnum;
   transferDateTime: string;
   createdDateTime: string;
   updatedDateTime: string;
@@ -443,11 +496,11 @@ export interface TransactionFilterParams extends PaginationParams {
   /** جستجو در تمام فیلدها */
   serchValue?: string;
   /** کد علت پرداخت */
-  reasonCode?: ReasonCodeApiEnum;
+  reasonCode?: TransactionReasonEnum;
   /** وضعیت تراکنش */
-  status?: TransactionStatusApiEnum;
+  status?: PaymentItemStatusEnum;
   /** نوع پرداخت */
-  paymentType?: PaymentTypeApiEnum;
+  paymentType?: PaymentMethodEnum;
 }
 
 /**

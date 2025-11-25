@@ -13,12 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Filter, X } from "lucide-react";
-import { TransactionStatusApiEnum, PaymentTypeApiEnum } from "@/types/api";
+import { PaymentItemStatusEnum, PaymentMethodEnum } from "@/types/api";
 
 interface TransactionsFilterProps {
   filters: {
-    status: TransactionStatusApiEnum[];
-    paymentType: PaymentTypeApiEnum[];
+    status: PaymentItemStatusEnum[];
+    paymentType: PaymentMethodEnum[];
     search: string;
     beneficiaryName: string;
     iban: string;
@@ -29,17 +29,17 @@ interface TransactionsFilterProps {
 }
 
 const statusOptions = [
-  { value: TransactionStatusApiEnum.BankSucceeded, label: "تراکنش انجام شده" },
-  { value: TransactionStatusApiEnum.BankRejected, label: "رد شده توسط بانک" },
-  { value: TransactionStatusApiEnum.Failed, label: "ناموفق" },
-  { value: TransactionStatusApiEnum.WaitForBank, label: "در صف پردازش بانک" },
-  { value: TransactionStatusApiEnum.Registered, label: "ثبت شده" },
+  { value: PaymentItemStatusEnum.BankSucceeded, label: "تراکنش انجام شده" },
+  { value: PaymentItemStatusEnum.BankRejected, label: "رد شده توسط بانک" },
+  { value: PaymentItemStatusEnum.Failed, label: "ناموفق" },
+  { value: PaymentItemStatusEnum.WaitForBank, label: "در صف پردازش بانک" },
+  { value: PaymentItemStatusEnum.Registered, label: "ثبت شده" },
 ];
 
 const paymentTypeOptions = [
-  { value: PaymentTypeApiEnum.Paya, label: "پایا" },
-  { value: PaymentTypeApiEnum.Satna, label: "ساتنا" },
-  { value: PaymentTypeApiEnum.Rtgs, label: "آنی (RTGS)" },
+  { value: PaymentMethodEnum.Paya, label: "پایا" },
+  { value: PaymentMethodEnum.Satna, label: "ساتنا" },
+  { value: PaymentMethodEnum.Internal, label: "داخلی" },
 ];
 
 export function TransactionsFilter({
@@ -77,7 +77,7 @@ export function TransactionsFilter({
     onReset();
   };
 
-  const toggleStatus = (status: TransactionStatusApiEnum) => {
+  const toggleStatus = (status: PaymentItemStatusEnum) => {
     setLocalFilters((prev) => ({
       ...prev,
       status: prev.status.includes(status)
@@ -86,7 +86,7 @@ export function TransactionsFilter({
     }));
   };
 
-  const togglePaymentType = (type: PaymentTypeApiEnum) => {
+  const togglePaymentType = (type: PaymentMethodEnum) => {
     setLocalFilters((prev) => ({
       ...prev,
       paymentType: prev.paymentType.includes(type)

@@ -64,13 +64,12 @@ export interface TransactionsRequest {
   bankGatewayId?: string;
   accountGroupId?: string;
   paymentType?: string; // PaymentMethodEnum values
-  status?: number;
+  status?: string;
   fromDate?: string;
   toDate?: string;
   transferFromDate?: string;
   transferToDate?: string;
 }
-
 
 /**
  * Get paginated list of transactions

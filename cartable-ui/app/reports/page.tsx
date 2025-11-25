@@ -6,7 +6,10 @@ import { Card } from "@/components/ui/card";
 import { TransactionFilters } from "./components/transaction-filters";
 import { TransactionTable } from "./components/transaction-table";
 import { TransactionStats } from "./components/transaction-stats";
-import { ExportProgressDialog, ExportStatus } from "./components/export-progress-dialog";
+import {
+  ExportProgressDialog,
+  ExportStatus,
+} from "./components/export-progress-dialog";
 import useTranslation from "@/hooks/useTranslation";
 import { AppLayout, PageHeader } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,7 +24,7 @@ import { toast } from "sonner";
 
 export interface TransactionFiltersType {
   search: string;
-  status: number | null;
+  status: string | null;
   paymentType: string | null;
   fromDate: string;
   toDate: string;
@@ -50,7 +53,7 @@ export default function TransactionReportsPage() {
   }, []);
 
   // Individual filter states (like payment-orders page)
-  const [status, setStatus] = useState<number | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [paymentType, setPaymentType] = useState<string | null>(null);
   const [fromDate, setFromDate] = useState(defaultDates.fromDate);
   const [toDate, setToDate] = useState(defaultDates.toDate);
@@ -116,9 +119,10 @@ export default function TransactionReportsPage() {
       setLoading(true);
       try {
         // خواندن accountGroupId از localStorage
-        const savedGroupId = typeof window !== "undefined"
-          ? localStorage.getItem("selected-account-group")
-          : null;
+        const savedGroupId =
+          typeof window !== "undefined"
+            ? localStorage.getItem("selected-account-group")
+            : null;
 
         const request: TransactionsRequest = {
           pageNumber: currentPage,
@@ -148,7 +152,10 @@ export default function TransactionReportsPage() {
           request.orderBy = `${sortField} ${sortDirection}`;
         }
 
-        const response = await getTransactionsList(request, session.accessToken);
+        const response = await getTransactionsList(
+          request,
+          session.accessToken
+        );
         setTransactions(response.items);
         setTotalRecords(response.totalItemCount);
       } catch (error) {
@@ -202,9 +209,10 @@ export default function TransactionReportsPage() {
 
     try {
       // خواندن accountGroupId از localStorage
-      const savedGroupId = typeof window !== "undefined"
-        ? localStorage.getItem("selected-account-group")
-        : null;
+      const savedGroupId =
+        typeof window !== "undefined"
+          ? localStorage.getItem("selected-account-group")
+          : null;
 
       const request: TransactionsRequest = {
         pageNumber: 1,
@@ -230,8 +238,13 @@ export default function TransactionReportsPage() {
       if (transferToDate) request.transferToDate = transferToDate;
 
       setExportStatus("downloading");
-      const blob = await exportTransactionsToExcel(request, session.accessToken);
-      const filename = `transactions-${new Date().toISOString().split("T")[0]}.xlsx`;
+      const blob = await exportTransactionsToExcel(
+        request,
+        session.accessToken
+      );
+      const filename = `transactions-${
+        new Date().toISOString().split("T")[0]
+      }.xlsx`;
       downloadBlobAsFile(blob, filename);
       setExportStatus("success");
     } catch (error) {
@@ -332,7 +345,10 @@ export default function TransactionReportsPage() {
         <TransactionStats transactions={transactions} />
 
         {/* فیلترها */}
-        <TransactionFilters filters={filters} onFiltersChange={handleFiltersChange} />
+        <TransactionFilters
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+        />
 
         {/* جدول */}
         <TransactionTable

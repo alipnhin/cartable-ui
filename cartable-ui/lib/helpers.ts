@@ -175,3 +175,10 @@ export function formatCurrency(
 
   return isPersian ? `${formatted} ${unit}` : `${unit} ${formatted}`;
 }
+
+export function lowerFirst(value?: string | null): string {
+  if (!value) return ""; // null/undefined/"" => ""
+  const chars = Array.from(value); // درست کار می‌کند با یونیکد و surrogate pairs
+  chars[0] = chars[0].toLowerCase();
+  return chars.join("");
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { WithdrawalStatistics, TransactionStatusApiEnum } from "@/types/api";
+import { WithdrawalStatistics, PaymentItemStatusEnum } from "@/types/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
@@ -22,7 +22,9 @@ interface OrderDetailStatisticsProps {
   statistics: WithdrawalStatistics;
 }
 
-export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps) {
+export function OrderDetailStatistics({
+  statistics,
+}: OrderDetailStatisticsProps) {
   const { t, locale } = useTranslation();
 
   const {
@@ -37,13 +39,26 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
   } = statistics;
 
   // محاسبه تعداد تراکنش‌ها بر اساس وضعیت
-  const succeededCount = statusStatistics.breakdown.find(s => s.status === TransactionStatusApiEnum.BankSucceeded)?.count || 0;
-  const failedCount = statusStatistics.breakdown.filter(s =>
-    s.status === TransactionStatusApiEnum.BankRejected || s.status === TransactionStatusApiEnum.Failed || s.status === TransactionStatusApiEnum.Canceled
-  ).reduce((sum, s) => sum + s.count, 0);
-  const pendingCount = statusStatistics.breakdown.filter(s =>
-    s.status === TransactionStatusApiEnum.WaitForExecution || s.status === TransactionStatusApiEnum.WaitForBank || s.status === TransactionStatusApiEnum.Registered
-  ).reduce((sum, s) => sum + s.count, 0);
+  const succeededCount =
+    statusStatistics.breakdown.find(
+      (s) => s.status === PaymentItemStatusEnum.BankSucceeded
+    )?.count || 0;
+  const failedCount = statusStatistics.breakdown
+    .filter(
+      (s) =>
+        s.status === PaymentItemStatusEnum.BankRejected ||
+        s.status === PaymentItemStatusEnum.Failed ||
+        s.status === PaymentItemStatusEnum.Canceled
+    )
+    .reduce((sum, s) => sum + s.count, 0);
+  const pendingCount = statusStatistics.breakdown
+    .filter(
+      (s) =>
+        s.status === PaymentItemStatusEnum.WaitForExecution ||
+        s.status === PaymentItemStatusEnum.WaitForBank ||
+        s.status === PaymentItemStatusEnum.Registered
+    )
+    .reduce((sum, s) => sum + s.count, 0);
 
   return (
     <div className="space-y-6">
@@ -97,7 +112,9 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                     <span className="text-sm">{t("statistics.succeeded")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{succeededCount}</span>
+                    <span className="text-sm font-medium">
+                      {succeededCount}
+                    </span>
                     <span className="text-xs text-muted-foreground">
                       ({overallSuccessRate.toFixed(1)}%)
                     </span>
@@ -127,7 +144,13 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{pendingCount}</span>
                     <span className="text-xs text-muted-foreground">
-                      ({(100 - overallSuccessRate - statusStatistics.failureRate).toFixed(1)}%)
+                      (
+                      {(
+                        100 -
+                        overallSuccessRate -
+                        statusStatistics.failureRate
+                      ).toFixed(1)}
+                      %)
                     </span>
                   </div>
                 </div>
@@ -154,7 +177,9 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium">{t("statistics.succeeded")}</span>
+                  <span className="text-sm font-medium">
+                    {t("statistics.succeeded")}
+                  </span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold">{succeededCount}</span>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success font-medium">
@@ -163,7 +188,8 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                   </div>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {formatCurrency(financialStatistics.successfulAmount, locale)} {t("statistics.rial")}
+                  {formatCurrency(financialStatistics.successfulAmount, locale)}{" "}
+                  {t("statistics.rial")}
                 </div>
               </div>
             </div>
@@ -175,7 +201,9 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium">{t("statistics.failed")}</span>
+                  <span className="text-sm font-medium">
+                    {t("statistics.failed")}
+                  </span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold">{failedCount}</span>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-medium">
@@ -184,7 +212,8 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                   </div>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {formatCurrency(financialStatistics.failedAmount, locale)} {t("statistics.rial")}
+                  {formatCurrency(financialStatistics.failedAmount, locale)}{" "}
+                  {t("statistics.rial")}
                 </div>
               </div>
             </div>
@@ -196,16 +225,24 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium">{t("statistics.pending")}</span>
+                  <span className="text-sm font-medium">
+                    {t("statistics.pending")}
+                  </span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold">{pendingCount}</span>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-warning/10 text-warning font-medium">
-                      {(100 - overallSuccessRate - statusStatistics.failureRate).toFixed(1)}%
+                      {(
+                        100 -
+                        overallSuccessRate -
+                        statusStatistics.failureRate
+                      ).toFixed(1)}
+                      %
                     </span>
                   </div>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {formatCurrency(financialStatistics.pendingAmount, locale)} {t("statistics.rial")}
+                  {formatCurrency(financialStatistics.pendingAmount, locale)}{" "}
+                  {t("statistics.rial")}
                 </div>
               </div>
             </div>
@@ -221,7 +258,8 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {reasonCodeStatistics.breakdown[0]?.reasonName || reasonCodeStatistics.mostUsedReason}
+                  {reasonCodeStatistics.breakdown[0]?.reasonName ||
+                    reasonCodeStatistics.mostUsedReason}
                 </p>
               </div>
             )}
@@ -244,7 +282,9 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
               <div className="text-3xl font-bold text-foreground">
                 {formatCurrency(financialStatistics.totalAmount, locale)}
               </div>
-              <div className="text-sm text-muted-foreground">{t("statistics.rial")}</div>
+              <div className="text-sm text-muted-foreground">
+                {t("statistics.rial")}
+              </div>
             </div>
 
             {/* جزئیات مبالغ */}
@@ -319,36 +359,52 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
               <div key={type.paymentType} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className={`w-6 h-6 rounded-lg ${
-                      type.paymentType === "Paya" ? "bg-blue-500/10" :
-                      type.paymentType === "Satna" ? "bg-purple-500/10" :
-                      "bg-green-500/10"
-                    } flex items-center justify-center`}>
-                      <Activity className={`h-4 w-4 ${
-                        type.paymentType === "Paya" ? "text-blue-500" :
-                        type.paymentType === "Satna" ? "text-purple-500" :
-                        "text-green-500"
-                      }`} />
+                    <div
+                      className={`w-6 h-6 rounded-lg ${
+                        type.paymentType === "Paya"
+                          ? "bg-blue-500/10"
+                          : type.paymentType === "Satna"
+                          ? "bg-purple-500/10"
+                          : "bg-green-500/10"
+                      } flex items-center justify-center`}
+                    >
+                      <Activity
+                        className={`h-4 w-4 ${
+                          type.paymentType === "Paya"
+                            ? "text-blue-500"
+                            : type.paymentType === "Satna"
+                            ? "text-purple-500"
+                            : "text-green-500"
+                        }`}
+                      />
                     </div>
-                    <span className="text-sm font-medium">
-                      {type.typeName}
-                    </span>
+                    <span className="text-sm font-medium">{type.typeName}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{type.count}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      type.paymentType === "Paya" ? "bg-blue-500/10 text-blue-500" :
-                      type.paymentType === "Satna" ? "bg-purple-500/10 text-purple-500" :
-                      "bg-green-500/10 text-green-500"
-                    }`}>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${
+                        type.paymentType === "Paya"
+                          ? "bg-blue-500/10 text-blue-500"
+                          : type.paymentType === "Satna"
+                          ? "bg-purple-500/10 text-purple-500"
+                          : "bg-green-500/10 text-green-500"
+                      }`}
+                    >
                       {type.percentage.toFixed(1)}%
                     </span>
                   </div>
                 </div>
                 <Progress value={type.percentage} className="h-2" />
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{t("orderDetail.statistics.amount")} {formatCurrency(type.amount, locale)} {t("statistics.rial")}</span>
-                  <span>{t("orderDetail.statistics.successRate")} {type.successRate.toFixed(1)}%</span>
+                  <span>
+                    {t("orderDetail.statistics.amount")}{" "}
+                    {formatCurrency(type.amount, locale)} {t("statistics.rial")}
+                  </span>
+                  <span>
+                    {t("orderDetail.statistics.successRate")}{" "}
+                    {type.successRate.toFixed(1)}%
+                  </span>
                 </div>
               </div>
             ))}
@@ -434,7 +490,8 @@ export function OrderDetailStatistics({ statistics }: OrderDetailStatisticsProps
                       {t("statistics.averageProcessingTime")}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {timeStatistics.averageProcessingTimeMinutes} {t("statistics.minutes")}
+                      {timeStatistics.averageProcessingTimeMinutes}{" "}
+                      {t("statistics.minutes")}
                     </div>
                   </div>
                   <Timer className="h-8 w-8 text-primary" />

@@ -32,13 +32,8 @@ import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import AccountSelector from "@/components/common/AccountSelector";
 import { getDefaultDateRange } from "@/services/transactionService";
-import { TransactionStatusApiEnum, PaymentTypeApiEnum } from "@/types/api";
-import {
-  Filter,
-  X,
-  ChevronDown,
-  Search,
-} from "lucide-react";
+import { PaymentMethodEnum, PaymentItemStatusEnum } from "@/types/api";
+import { Filter, X, ChevronDown, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface TransactionFiltersProps {
@@ -48,34 +43,37 @@ interface TransactionFiltersProps {
 
 // Transaction Status Options
 const transactionStatusOptions = [
-  { value: TransactionStatusApiEnum.Registered, label: "ثبت شده" },
-  { value: TransactionStatusApiEnum.WaitForExecution, label: "در صف پردازش" },
-  { value: TransactionStatusApiEnum.WaitForBank, label: "ارسال شده به بانک" },
-  { value: TransactionStatusApiEnum.BankSucceeded, label: "تراکنش انجام شده" },
-  { value: TransactionStatusApiEnum.BankRejected, label: "رد شده توسط بانک" },
-  { value: TransactionStatusApiEnum.TransactionRollback, label: "برگشت مبلغ به حساب مبدا" },
-  { value: TransactionStatusApiEnum.Failed, label: "خطا در ارسال به بانک" },
-  { value: TransactionStatusApiEnum.Canceled, label: "لغو شده" },
-  { value: TransactionStatusApiEnum.Expired, label: "منقضی شده" },
+  { value: PaymentItemStatusEnum.Registered, label: "ثبت شده" },
+  { value: PaymentItemStatusEnum.WaitForExecution, label: "در صف پردازش" },
+  { value: PaymentItemStatusEnum.WaitForBank, label: "ارسال شده به بانک" },
+  { value: PaymentItemStatusEnum.BankSucceeded, label: "تراکنش انجام شده" },
+  { value: PaymentItemStatusEnum.BankRejected, label: "رد شده توسط بانک" },
+  {
+    value: PaymentItemStatusEnum.TransactionRollback,
+    label: "برگشت مبلغ به حساب مبدا",
+  },
+  { value: PaymentItemStatusEnum.Failed, label: "خطا در ارسال به بانک" },
+  { value: PaymentItemStatusEnum.Canceled, label: "لغو شده" },
+  { value: PaymentItemStatusEnum.Expired, label: "منقضی شده" },
 ];
 
 // Payment Type Options
 const paymentTypeOptions = [
-  { value: PaymentTypeApiEnum.Paya, label: "پایا" },
-  { value: PaymentTypeApiEnum.Satna, label: "ساتنا" },
-  { value: PaymentTypeApiEnum.Rtgs, label: "آنی (RTGS)" },
+  { value: PaymentMethodEnum.Paya, label: "پایا" },
+  { value: PaymentMethodEnum.Satna, label: "ساتنا" },
+  { value: PaymentMethodEnum.Internal, label: "آنی (RTGS)" },
 ];
 
 // Helper functions to get labels
-const getTransactionStatusLabel = (status: number | null): string => {
+const getTransactionStatusLabel = (status: string | null): string => {
   if (status === null) return "نامشخص";
-  const option = transactionStatusOptions.find(opt => opt.value === status);
+  const option = transactionStatusOptions.find((opt) => opt.value === status);
   return option?.label || "نامشخص";
 };
 
 const getPaymentTypeLabel = (paymentType: string | null): string => {
   if (paymentType === null) return "نامشخص";
-  const option = paymentTypeOptions.find(opt => opt.value === paymentType);
+  const option = paymentTypeOptions.find((opt) => opt.value === paymentType);
   return option?.label || "نامشخص";
 };
 
@@ -141,7 +139,7 @@ export function TransactionFilters({
           onValueChange={(value) =>
             setLocalFilters({
               ...localFilters,
-              status: value === "all" ? null : Number(value),
+              status: value === "all" ? null : value,
             })
           }
         >
@@ -351,10 +349,7 @@ export function TransactionFilters({
                   پاک کردن
                 </Button>
                 <DrawerClose asChild>
-                  <Button
-                    onClick={handleApplyFilters}
-                    className="flex-1 gap-2"
-                  >
+                  <Button onClick={handleApplyFilters} className="flex-1 gap-2">
                     <Search className="h-4 w-4" />
                     اعمال فیلتر
                   </Button>
@@ -462,10 +457,7 @@ export function TransactionFilters({
         {advancedFiltersCount > 0 && !isAdvancedOpen && (
           <div className="flex flex-wrap gap-2 pt-2 border-t">
             {filters.status !== null && (
-              <Badge
-                variant="secondary"
-                className="gap-1"
-              >
+              <Badge variant="secondary" className="gap-1">
                 {getTransactionStatusLabel(filters.status)}
                 <button
                   onClick={() => onFiltersChange({ ...filters, status: null })}
@@ -476,13 +468,12 @@ export function TransactionFilters({
               </Badge>
             )}
             {filters.paymentType !== null && (
-              <Badge
-                variant="secondary"
-                className="gap-1"
-              >
+              <Badge variant="secondary" className="gap-1">
                 {getPaymentTypeLabel(filters.paymentType)}
                 <button
-                  onClick={() => onFiltersChange({ ...filters, paymentType: null })}
+                  onClick={() =>
+                    onFiltersChange({ ...filters, paymentType: null })
+                  }
                   className="hover:bg-muted rounded-full p-0.5"
                 >
                   <X className="h-3 w-3" />
@@ -493,7 +484,9 @@ export function TransactionFilters({
               <Badge variant="secondary" className="gap-1">
                 کد ملی: {filters.nationalCode}
                 <button
-                  onClick={() => onFiltersChange({ ...filters, nationalCode: "" })}
+                  onClick={() =>
+                    onFiltersChange({ ...filters, nationalCode: "" })
+                  }
                   className="hover:bg-muted rounded-full p-0.5"
                 >
                   <X className="h-3 w-3" />

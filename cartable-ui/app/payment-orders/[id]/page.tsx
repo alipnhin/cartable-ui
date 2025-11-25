@@ -46,11 +46,11 @@ import {
   exportOrderTransactionsToExcel,
   downloadBlobAsFile,
 } from "@/services/paymentOrdersService";
-import { ExportProgressDialog, ExportStatus } from "@/app/reports/components/export-progress-dialog";
 import {
-  sendOperationOtp,
-  approvePayment,
-} from "@/services/cartableService";
+  ExportProgressDialog,
+  ExportStatus,
+} from "@/app/reports/components/export-progress-dialog";
+import { sendOperationOtp, approvePayment } from "@/services/cartableService";
 import {
   WithdrawalOrderDetails,
   WithdrawalStatistics,
@@ -58,7 +58,7 @@ import {
   TransactionFilterParams,
   PaymentStatusEnum,
   OperationTypeEnum,
-  TransactionStatusApiEnum,
+  PaymentItemStatusEnum,
 } from "@/types/api";
 import { OtpDialog } from "@/components/common/otp-dialog";
 
@@ -70,8 +70,11 @@ export default function PaymentOrderDetailPage() {
   const orderId = params.id as string;
 
   // State for order details
-  const [orderDetails, setOrderDetails] = useState<WithdrawalOrderDetails | null>(null);
-  const [statistics, setStatistics] = useState<WithdrawalStatistics | null>(null);
+  const [orderDetails, setOrderDetails] =
+    useState<WithdrawalOrderDetails | null>(null);
+  const [statistics, setStatistics] = useState<WithdrawalStatistics | null>(
+    null
+  );
   const [transactions, setTransactions] = useState<WithdrawalTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
@@ -136,7 +139,9 @@ export default function PaymentOrderDetailPage() {
   /**
    * واکشی لیست تراکنش‌ها
    */
-  const fetchTransactions = async (filters?: Partial<TransactionFilterParams>) => {
+  const fetchTransactions = async (
+    filters?: Partial<TransactionFilterParams>
+  ) => {
     if (!session?.accessToken || !orderId) return;
 
     setIsLoadingTransactions(true);
@@ -149,7 +154,10 @@ export default function PaymentOrderDetailPage() {
         ...filters,
       };
 
-      const response = await getWithdrawalTransactions(params, session.accessToken);
+      const response = await getWithdrawalTransactions(
+        params,
+        session.accessToken
+      );
 
       setTransactions(response.items);
       setTotalTransactionPages(response.totalPageCount);
@@ -187,10 +195,11 @@ export default function PaymentOrderDetailPage() {
       console.error("Error inquiring order:", err);
 
       // نمایش پیام خطای دقیق‌تر از API
-      const errorMessage = err?.response?.data?.message ||
-                          err?.response?.data?.error ||
-                          err?.message ||
-                          t("paymentOrders.inquiryOrderError");
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        t("paymentOrders.inquiryOrderError");
 
       toast({
         title: t("common.error"),
@@ -466,8 +475,13 @@ export default function PaymentOrderDetailPage() {
 
     try {
       setExportStatus("downloading");
-      const blob = await exportOrderTransactionsToExcel(orderId, session.accessToken);
-      const filename = `transactions-${orderDetails?.orderId || orderId}-${new Date().toISOString().split("T")[0]}.xlsx`;
+      const blob = await exportOrderTransactionsToExcel(
+        orderId,
+        session.accessToken
+      );
+      const filename = `transactions-${orderDetails?.orderId || orderId}-${
+        new Date().toISOString().split("T")[0]
+      }.xlsx`;
       downloadBlobAsFile(blob, filename);
       setExportStatus("success");
     } catch (error) {
@@ -523,7 +537,10 @@ export default function PaymentOrderDetailPage() {
             {/* Stats Cards Skeleton */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg">
+                <div
+                  key={i}
+                  className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg"
+                >
                   <Skeleton className="w-10 h-10 rounded-lg" />
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-5 w-20" />
@@ -538,7 +555,10 @@ export default function PaymentOrderDetailPage() {
               {[1, 2].map((col) => (
                 <div key={col} className="flex flex-col gap-4">
                   {[1, 2, 3].map((row) => (
-                    <div key={row} className="flex justify-between items-center">
+                    <div
+                      key={row}
+                      className="flex justify-between items-center"
+                    >
                       <Skeleton className="h-4 w-24" />
                       <Skeleton className="h-4 w-32" />
                     </div>
@@ -655,13 +675,15 @@ export default function PaymentOrderDetailPage() {
   };
 
   const canInquiry = orderDetails.status === PaymentStatusEnum.SubmittedToBank;
-  const canApproveReject = orderDetails.status === PaymentStatusEnum.WaitingForOwnersApproval;
-  const canSendToBank = orderDetails.status === PaymentStatusEnum.OwnersApproved;
+  const canApproveReject =
+    orderDetails.status === PaymentStatusEnum.WaitingForOwnersApproval;
+  const canSendToBank =
+    orderDetails.status === PaymentStatusEnum.OwnersApproved;
 
   // محاسبه تعداد تراکنش‌های در صف بانک
   const waitForBankCount = statistics
     ? statistics.statusStatistics.breakdown.find(
-        (s) => s.status === TransactionStatusApiEnum.WaitForBank
+        (s) => s.status === PaymentItemStatusEnum.WaitForBank
       )?.count || 0
     : 0;
 
@@ -711,14 +733,22 @@ export default function PaymentOrderDetailPage() {
             >
               <TabsTrigger value="statistics">
                 <BarChart3 />{" "}
-                <span className="hidden sm:inline">{t("paymentOrders.statisticsTab")}</span>
-                <span className="sm:hidden">{t("paymentOrders.statisticsShort")}</span>
+                <span className="hidden sm:inline">
+                  {t("paymentOrders.statisticsTab")}
+                </span>
+                <span className="sm:hidden">
+                  {t("paymentOrders.statisticsShort")}
+                </span>
               </TabsTrigger>
 
               <TabsTrigger value="transactions">
                 <FileText className="" />
-                <span className="hidden sm:inline">{t("paymentOrders.transactionsTab")}</span>
-                <span className="sm:hidden">{t("paymentOrders.transactionsShort")}</span>
+                <span className="hidden sm:inline">
+                  {t("paymentOrders.transactionsTab")}
+                </span>
+                <span className="sm:hidden">
+                  {t("paymentOrders.transactionsShort")}
+                </span>
                 <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
                   {totalTransactions}
                 </span>
@@ -726,8 +756,12 @@ export default function PaymentOrderDetailPage() {
 
               <TabsTrigger value="approvers">
                 <Users />
-                <span className="hidden sm:inline">{t("paymentOrders.approversTab")}</span>
-                <span className="sm:hidden">{t("paymentOrders.approversShort")}</span>
+                <span className="hidden sm:inline">
+                  {t("paymentOrders.approversTab")}
+                </span>
+                <span className="sm:hidden">
+                  {t("paymentOrders.approversShort")}
+                </span>
                 <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
                   {orderDetails.approvers.length}
                 </span>
@@ -735,8 +769,12 @@ export default function PaymentOrderDetailPage() {
 
               <TabsTrigger value="history">
                 <History />
-                <span className="hidden sm:inline">{t("paymentOrders.historyTab")}</span>
-                <span className="sm:hidden">{t("paymentOrders.historyShort")}</span>
+                <span className="hidden sm:inline">
+                  {t("paymentOrders.historyTab")}
+                </span>
+                <span className="sm:hidden">
+                  {t("paymentOrders.historyShort")}
+                </span>
                 <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
                   {orderDetails.changeHistory.length}
                 </span>
@@ -775,7 +813,10 @@ export default function PaymentOrderDetailPage() {
         </Tabs>
 
         {/* دایالوگ تایید ارسال به بانک */}
-        <AlertDialog open={showSendToBankDialog} onOpenChange={setShowSendToBankDialog}>
+        <AlertDialog
+          open={showSendToBankDialog}
+          onOpenChange={setShowSendToBankDialog}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>تایید ارسال به بانک</AlertDialogTitle>
@@ -783,7 +824,8 @@ export default function PaymentOrderDetailPage() {
                 آیا از ارسال این دستور پرداخت به بانک اطمینان دارید؟
                 <br />
                 <br />
-                پس از ارسال، دستور پرداخت به سیستم بانک ارسال خواهد شد و قابل ویرایش نخواهد بود.
+                پس از ارسال، دستور پرداخت به سیستم بانک ارسال خواهد شد و قابل
+                ویرایش نخواهد بود.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -798,9 +840,7 @@ export default function PaymentOrderDetailPage() {
         {/* دایالوگ OTP برای تایید/رد */}
         <OtpDialog
           open={otpDialog.open}
-          onOpenChange={(open) =>
-            setOtpDialog((prev) => ({ ...prev, open }))
-          }
+          onOpenChange={(open) => setOtpDialog((prev) => ({ ...prev, open }))}
           title={
             otpDialog.type === "approve"
               ? "تایید دستور پرداخت"

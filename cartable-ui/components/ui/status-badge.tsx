@@ -7,7 +7,12 @@
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { PaymentStatusEnum, TransactionStatusApiEnum, PaymentTypeApiEnum } from "@/types/api";
+import {
+  PaymentStatusEnum,
+  PaymentItemStatusEnum,
+  TransactionReasonEnum,
+  PaymentMethodEnum,
+} from "@/types/api";
 import { useTranslation } from "react-i18next";
 import {
   FileText,
@@ -33,6 +38,7 @@ export type BadgeVariant =
   | "warning"
   | "danger"
   | "info"
+  | "accent"
   | "muted";
 
 interface StatusBadgeProps {
@@ -53,6 +59,8 @@ const variantStyles: Record<BadgeVariant, string> = {
   danger:
     "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20 hover:bg-red-500/20",
   info: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 hover:bg-blue-500/20",
+  accent:
+    "bg-accent-500/10 text-accent-700 dark:text-accent-400 border-accent-500/20 hover:bg-accent-500/20",
   muted: "bg-muted text-muted-foreground border-muted-foreground/20",
 };
 
@@ -93,7 +101,7 @@ export function getPaymentStatusBadge(status: PaymentStatusEnum): {
       };
     case PaymentStatusEnum.OwnersApproved:
       return {
-        variant: "success",
+        variant: "successLight",
         translationKey: "paymentCartable.statusLabels.approved",
         icon: UserRoundCheck,
       };
@@ -129,7 +137,7 @@ export function getPaymentStatusBadge(status: PaymentStatusEnum): {
       };
     case PaymentStatusEnum.DoneWithError:
       return {
-        variant: "warning",
+        variant: "successLight",
         translationKey: "paymentCartable.statusLabels.doneWithError",
         icon: AlertTriangle,
       };
@@ -161,73 +169,115 @@ export function getPaymentStatusBadge(status: PaymentStatusEnum): {
 }
 
 // Helper function to get badge variant from TransactionStatus enum
-export function getTransactionStatusBadge(status: TransactionStatusApiEnum): {
+export function getTransactionStatusBadge(status: PaymentItemStatusEnum): {
   variant: BadgeVariant;
   translationKey: string;
   icon: React.ElementType;
 } {
   switch (status) {
-    case TransactionStatusApiEnum.Registered:
-      return { variant: "muted", translationKey: "transactionStatus.registered", icon: FileText };
-    case TransactionStatusApiEnum.WaitForExecution:
-      return { variant: "info", translationKey: "transactionStatus.waitForExecution", icon: Banknote };
-    case TransactionStatusApiEnum.WaitForBank:
-      return { variant: "default", translationKey: "transactionStatus.waitForBank", icon: CheckCircle2 };
-    case TransactionStatusApiEnum.BankSucceeded:
-      return { variant: "success", translationKey: "transactionStatus.bankSucceeded", icon: CheckCircle2 };
-    case TransactionStatusApiEnum.BankRejected:
-      return { variant: "danger", translationKey: "transactionStatus.bankRejected", icon: Ban };
-    case TransactionStatusApiEnum.TransactionRollback:
-      return { variant: "muted", translationKey: "transactionStatus.transactionRollback", icon: Hourglass };
-    case TransactionStatusApiEnum.Failed:
-      return { variant: "danger", translationKey: "transactionStatus.failed", icon: XCircle };
-    case TransactionStatusApiEnum.Canceled:
-      return { variant: "warning", translationKey: "transactionStatus.canceled", icon: Clock };
-    case TransactionStatusApiEnum.Expired:
-      return { variant: "muted", translationKey: "transactionStatus.expired", icon: XCircle };
+    case PaymentItemStatusEnum.Registered:
+      return {
+        variant: "muted",
+        translationKey: "transactionStatus.registered",
+        icon: FileText,
+      };
+    case PaymentItemStatusEnum.WaitForExecution:
+      return {
+        variant: "info",
+        translationKey: "transactionStatus.waitForExecution",
+        icon: Banknote,
+      };
+    case PaymentItemStatusEnum.WaitForBank:
+      return {
+        variant: "info",
+        translationKey: "transactionStatus.waitForBank",
+        icon: CheckCircle2,
+      };
+    case PaymentItemStatusEnum.BankSucceeded:
+      return {
+        variant: "success",
+        translationKey: "transactionStatus.bankSucceeded",
+        icon: CheckCircle2,
+      };
+    case PaymentItemStatusEnum.BankRejected:
+      return {
+        variant: "danger",
+        translationKey: "transactionStatus.bankRejected",
+        icon: Ban,
+      };
+    case PaymentItemStatusEnum.TransactionRollback:
+      return {
+        variant: "muted",
+        translationKey: "transactionStatus.transactionRollback",
+        icon: Hourglass,
+      };
+    case PaymentItemStatusEnum.Failed:
+      return {
+        variant: "danger",
+        translationKey: "transactionStatus.failed",
+        icon: XCircle,
+      };
+    case PaymentItemStatusEnum.Canceled:
+      return {
+        variant: "warning",
+        translationKey: "transactionStatus.canceled",
+        icon: Clock,
+      };
+    case PaymentItemStatusEnum.Expired:
+      return {
+        variant: "muted",
+        translationKey: "transactionStatus.expired",
+        icon: XCircle,
+      };
     default:
-      return { variant: "default", translationKey: "common.status", icon: HelpCircle };
+      return {
+        variant: "default",
+        translationKey: "common.status",
+        icon: HelpCircle,
+      };
   }
 }
 
-export function getPaymentTypeBadge(type: PaymentTypeApiEnum | undefined | null): {
+export function getPaymentTypeBadge(
+  type: PaymentMethodEnum | undefined | null
+): {
   variant: BadgeVariant;
   translationKey: string;
 } {
   if (type === undefined || type === null) {
     return {
       variant: "muted",
-      translationKey: "transactions.paymentTypes.unknown"
+      translationKey: "transactions.paymentTypes.unknown",
     };
   }
 
   switch (type) {
-    case PaymentTypeApiEnum.Paya:
+    case PaymentMethodEnum.Paya:
       return {
         variant: "success",
-        translationKey: "transactions.paymentTypes.paya"
+        translationKey: "transactions.paymentTypes.paya",
       };
-    case PaymentTypeApiEnum.Satna:
+    case PaymentMethodEnum.Satna:
       return {
         variant: "info",
-        translationKey: "transactions.paymentTypes.satna"
+        translationKey: "transactions.paymentTypes.satna",
       };
-    case PaymentTypeApiEnum.Rtgs:
+    case PaymentMethodEnum.Internal:
       return {
         variant: "warning",
-        translationKey: "transactions.paymentTypes.rtgs"
+        translationKey: "transactions.paymentTypes.rtgs",
       };
     default:
       return {
         variant: "muted",
-        translationKey: "transactions.paymentTypes.unknown"
+        translationKey: "transactions.paymentTypes.unknown",
       };
   }
 }
 
 // Wrapper Component for PaymentType
 interface PaymentTypeBadgeProps {
-  type: PaymentTypeApiEnum | undefined | null;
+  type: PaymentMethodEnum | undefined | null;
   size?: "sm" | "default";
   className?: string;
 }
@@ -241,10 +291,7 @@ export function PaymentTypeBadge({
   const typeInfo = getPaymentTypeBadge(type);
 
   return (
-    <StatusBadge
-      variant={typeInfo.variant}
-      className={className}
-    >
+    <StatusBadge variant={typeInfo.variant} className={className}>
       {t(typeInfo.translationKey)}
     </StatusBadge>
   );
@@ -252,7 +299,7 @@ export function PaymentTypeBadge({
 
 // Wrapper Component for TransactionStatus
 interface TransactionStatusBadgeProps {
-  status: TransactionStatusApiEnum;
+  status: PaymentItemStatusEnum;
   size?: "sm" | "default";
   className?: string;
 }
