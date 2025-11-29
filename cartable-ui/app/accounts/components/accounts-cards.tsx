@@ -69,16 +69,28 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
           {/* Body */}
           <div className="space-y-2.5">
             {/* شماره حساب */}
-            <div className="flex items-center justify-between py-2 border-b">
+            <div className="flex items-center justify-between py-2">
               <span className="text-sm text-muted-foreground flex items-center gap-2">
                 <Hash className="h-3.5 w-3.5" />
                 {t("accounts.accountNumber")}
               </span>
               <span className="text-sm font-mono">{account.accountNumber}</span>
             </div>
-
+            <svg className="h-1 w-full max-md:hidden">
+              <line
+                x1="1.2"
+                y1="1.2"
+                x2="100%"
+                y2="1.2"
+                className="stroke-border-primary"
+                stroke="#eee"
+                stroke-width="2.4"
+                stroke-dasharray="0,6"
+                stroke-linecap="round"
+              ></line>
+            </svg>
             {/* شبا */}
-            <div className="flex items-center justify-between py-2 border-b">
+            <div className="flex items-center justify-between py-2">
               <span className="text-sm text-muted-foreground flex items-center gap-2">
                 <CreditCard className="h-3.5 w-3.5" />
                 {t("accounts.iban")}
@@ -87,7 +99,19 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
                 {formatIBAN(account.shebaNumber)}
               </span>
             </div>
-
+            <svg className="h-1 w-full max-md:hidden">
+              <line
+                x1="1.2"
+                y1="1.2"
+                x2="100%"
+                y2="1.2"
+                className="stroke-border-primary"
+                stroke="#eee"
+                stroke-width="2.4"
+                stroke-dasharray="0,6"
+                stroke-linecap="round"
+              ></line>
+            </svg>
             {/* کارتابل */}
             <div className="flex items-center justify-between py-2">
               <span className="text-sm text-muted-foreground flex items-center gap-2">
@@ -104,12 +128,9 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
           </div>
 
           {/* Footer Actions */}
-          <div
-            className="mt-4 pt-4 border-t"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="mt-4" onClick={(e) => e.stopPropagation()}>
             <Button
-              size="sm"
+              size="md"
               variant="outline"
               className="w-full"
               onClick={() => router.push(`/accounts/${account.id}`)}

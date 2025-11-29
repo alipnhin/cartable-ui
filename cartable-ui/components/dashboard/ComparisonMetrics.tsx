@@ -22,9 +22,24 @@ export default function ComparisonMetrics({
       title: t("dashboard.charts.comparisonMetrics.successRate"),
       value: `${data.successPercent.toFixed(1)}%`,
       description: t("dashboard.charts.comparisonMetrics.fromTotal"),
-      trend: data.successPercent >= 70 ? "up" : data.successPercent >= 50 ? "neutral" : "down",
-      color: data.successPercent >= 70 ? "text-success" : data.successPercent >= 50 ? "text-warning" : "text-destructive",
-      bgColor: data.successPercent >= 70 ? "bg-success/10" : data.successPercent >= 50 ? "bg-warning/10" : "bg-destructive/10",
+      trend:
+        data.successPercent >= 70
+          ? "up"
+          : data.successPercent >= 50
+          ? "neutral"
+          : "down",
+      color:
+        data.successPercent >= 70
+          ? "text-success"
+          : data.successPercent >= 50
+          ? "text-warning"
+          : "text-destructive",
+      bgColor:
+        data.successPercent >= 70
+          ? "bg-success/10"
+          : data.successPercent >= 50
+          ? "bg-warning/10"
+          : "bg-destructive/10",
     },
     {
       title: t("dashboard.charts.comparisonMetrics.avgAmount"),
@@ -88,16 +103,17 @@ export default function ComparisonMetrics({
       <div className="p-5">
         <div className="grid grid-cols-2 gap-3">
           {metrics.map((metric, index) => (
-            <div
-              key={index}
-              className="p-3 rounded-lg border bg-card"
-            >
+            <div key={index} className="p-3 rounded-lg border bg-card">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-muted-foreground">
                   {metric.title}
                 </span>
-                <div className={`w-5 h-5 rounded-md ${metric.bgColor} flex items-center justify-center`}>
-                  <span className={metric.color}>{getTrendIcon(metric.trend)}</span>
+                <div
+                  className={`w-5 h-5 rounded-md ${metric.bgColor} flex items-center justify-center`}
+                >
+                  <span className={metric.color}>
+                    {getTrendIcon(metric.trend)}
+                  </span>
                 </div>
               </div>
               <div className={`text-xl font-bold mb-0.5 ${metric.color}`}>
@@ -118,7 +134,8 @@ export default function ComparisonMetrics({
                 {t("dashboard.charts.comparisonMetrics.systemStatus")}
               </h4>
               <p className="text-xs text-muted-foreground">
-                {formatNumber(data.totalTransactions)} {t("dashboard.transaction")}
+                {formatNumber(data.totalTransactions)}{" "}
+                {t("dashboard.transaction")}
               </p>
             </div>
             <div

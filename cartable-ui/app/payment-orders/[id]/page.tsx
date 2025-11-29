@@ -83,7 +83,9 @@ export default function PaymentOrderDetailPage() {
 
   // Inquiry loading states
   const [isInquiringOrder, setIsInquiringOrder] = useState(false);
-  const [inquiringTransactionId, setInquiringTransactionId] = useState<string | null>(null);
+  const [inquiringTransactionId, setInquiringTransactionId] = useState<
+    string | null
+  >(null);
 
   // Transaction pagination and filters
   const [transactionPage, setTransactionPage] = useState(1);
@@ -710,13 +712,8 @@ export default function PaymentOrderDetailPage() {
   return (
     <>
       <FixHeader returnUrl="/payment-orders">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={reloadPage}
-          className="gap-2"
-        >
-          <RefreshCw className="h-4 w-4" />
+        <Button variant="outline" onClick={reloadPage} className="gap-2">
+          <RefreshCw />
           {t("common.refresh")}
         </Button>
       </FixHeader>

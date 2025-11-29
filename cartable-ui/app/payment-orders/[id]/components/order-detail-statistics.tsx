@@ -17,7 +17,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 interface OrderDetailStatisticsProps {
   statistics: WithdrawalStatistics;
 }
@@ -59,102 +59,123 @@ export function OrderDetailStatistics({
         s.status === PaymentItemStatusEnum.Registered
     )
     .reduce((sum, s) => sum + s.count, 0);
+  const colors = {
+    success: "#10b981",
+    failed: "#ef4444",
+    pending: "#f59e0b",
+  };
 
+  const data = [
+    {
+      name: t("statistics.succeeded"),
+      value: succeededCount,
+      color: colors.success,
+      percent: overallSuccessRate.toFixed(1),
+    },
+    {
+      name: t("statistics.failed"),
+      value: failedCount,
+      color: colors.failed,
+      percent: statusStatistics.failureRate.toFixed(1),
+    },
+    {
+      name: t("statistics.pending"),
+      value: pendingCount,
+      color: colors.pending,
+      percent: (
+        100 -
+        overallSuccessRate -
+        statusStatistics.failureRate
+      ).toFixed(1),
+    },
+  ];
   return (
     <div className="space-y-6">
       {/* ردیف اول: نمودار و جزئیات */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* نمودار Donut */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-base flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center justify-between">
               <span>{t("orderDetail.statistics.transactionStatuses")}</span>
-              <span className="text-sm font-normal text-success">
-                {t("statistics.successRate")}: {overallSuccessRate.toFixed(1)}%
+              <span className="font-semibold">
+                {overallSuccessRate.toFixed(1)}%
               </span>
             </CardTitle>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
               {t("orderDetail.statistics.transactionStatusDistribution")}
             </p>
           </CardHeader>
-          <CardContent>
-            {/* نمودار ساده با CSS */}
-            <div className="relative w-full aspect-square max-w-[200px] mx-auto mb-6">
-              <div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background: `conic-gradient(
-                    #10B981 0% ${overallSuccessRate}%,
-                    #EF4444 ${overallSuccessRate}% ${
-                    overallSuccessRate + statusStatistics.failureRate
-                  }%,
-                    #F59E0B ${
-                      overallSuccessRate + statusStatistics.failureRate
-                    }% 100%
-                  )`,
-                }}
-              >
-                <div className="absolute inset-[25%] bg-white dark:bg-card rounded-full flex flex-col items-center justify-center shadow-lg">
-                  <div className="text-2xl font-bold">{totalTransactions}</div>
-                  <div className="text-xs text-muted-foreground truncate max-w-[80%] text-center">
+
+          <CardContent className="pt-4">
+            <div className="relative w-full h-48 mb-4">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={data}
+                    dataKey="value"
+                    startAngle={90}
+                    endAngle={-270}
+                    innerRadius="60%"
+                    outerRadius="85%"
+                    stroke="none"
+                    animationBegin={200}
+                    animationDuration={900}
+                    isAnimationActive
+                  >
+                    {data.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} />
+                    ))}
+                  </Pie>
+
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 10,
+                      border: "none",
+                      backdropFilter: "blur(8px)",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                    }}
+                    formatter={(value, _, props) => [
+                      `${value} (${props.payload.percent}%)`,
+                      props.payload.name,
+                    ]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+
+              {/* متن وسط دونات */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="text-center select-none">
+                  <div className="text-lg font-bold">{totalTransactions}</div>
+                  <div className="text-[10px] text-neutral-600 dark:text-neutral-400">
                     {t("dashboard.transaction")}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* لیست وضعیت‌ها */}
-            <div className="space-y-3">
-              {succeededCount > 0 && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-success"></div>
-                    <span className="text-sm">{t("statistics.succeeded")}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">
-                      {succeededCount}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      ({overallSuccessRate.toFixed(1)}%)
-                    </span>
-                  </div>
-                </div>
-              )}
-              {failedCount > 0 && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-destructive"></div>
-                    <span className="text-sm">{t("statistics.failed")}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{failedCount}</span>
-                    <span className="text-xs text-muted-foreground">
-                      ({statusStatistics.failureRate.toFixed(1)}%)
+            {/* Legend مدرن */}
+            <div className="divide-y divide-neutral-200/50 dark:divide-neutral-800/50">
+              {data
+                .filter((x) => x.value > 0)
+                .map((row, index) => (
+                  <div
+                    className="flex items-center justify-between py-2 text-sm"
+                    key={index}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ background: row.color }}
+                      />
+                      <span>{row.name}</span>
+                    </div>
+                    <span className="text-xs text-neutral-600 dark:text-neutral-300">
+                      {row.value} ({row.percent}%)
                     </span>
                   </div>
-                </div>
-              )}
-              {pendingCount > 0 && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-warning"></div>
-                    <span className="text-sm">{t("statistics.pending")}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{pendingCount}</span>
-                    <span className="text-xs text-muted-foreground">
-                      (
-                      {(
-                        100 -
-                        overallSuccessRate -
-                        statusStatistics.failureRate
-                      ).toFixed(1)}
-                      %)
-                    </span>
-                  </div>
-                </div>
-              )}
+                ))}
             </div>
           </CardContent>
         </Card>

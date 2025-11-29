@@ -101,7 +101,7 @@ export function OtpDialog({
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
             <p className="text-sm text-muted-foreground">
-              {t("otp.requesting")}
+              {t("otp.resending")}
             </p>
           </div>
         </DialogContent>
@@ -294,7 +294,7 @@ function OtpForm({ onConfirm, onResend, onClose }: OtpFormProps) {
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={otp.length < 5 || isLoading}
+          disabled={otp.length < 6 || isLoading}
           className="flex-1"
         >
           {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
@@ -416,7 +416,7 @@ function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
           onChange={(e) => handleChange(index, e.target.value)}
           onKeyDown={(e) => handleKeyDown(index, e)}
           onPaste={handlePaste}
-          className="w-12 h-12 text-center text-lg font-semibold"
+          className="w-14 h-14 text-center text-lg font-semibold"
           autoComplete="off"
           autoFocus={index === 0}
         />

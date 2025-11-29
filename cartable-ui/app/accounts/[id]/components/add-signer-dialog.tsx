@@ -16,7 +16,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, InputWrapper } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -84,7 +84,9 @@ export function AddSignerDialog({
   // جستجو در کاربران
   const filteredUsers = availableUsers.filter(
     (user) =>
-      `${user.firstName} ${user.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
+      `${user.firstName} ${user.lastName}`
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
       user.email?.toLowerCase().includes(search.toLowerCase()) ||
       user.userName?.toLowerCase().includes(search.toLowerCase())
   );
@@ -158,11 +160,8 @@ export function AddSignerDialog({
         <div className="flex-1 overflow-hidden space-y-4">
           {/* جستجو */}
           <div className="space-y-2">
-            <Label htmlFor="search">
-              {t("common.search") || "جستجو"}
-            </Label>
-            <div className="relative">
-              <Search className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+            <InputWrapper>
+              <Search />
               <Input
                 id="search"
                 placeholder={
@@ -173,7 +172,7 @@ export function AddSignerDialog({
                 onChange={(e) => setSearch(e.target.value)}
                 className="pe-10"
               />
-            </div>
+            </InputWrapper>
           </div>
 
           {/* لیست کاربران */}

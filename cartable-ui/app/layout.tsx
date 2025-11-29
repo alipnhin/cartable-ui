@@ -71,8 +71,17 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
 
         {/* Theme Color */}
-        <meta name="theme-color" content="#27ae60" />
-        <meta name="msapplication-TileColor" content="#27ae60" />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: light)"
+          content="#ffffff"
+        />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: dark)"
+          content="#0f2937"
+        />
+        <meta name="msapplication-TileColor" content="#FFFFFF" />
 
         {/* Apple Touch Icons */}
         <link
@@ -90,11 +99,11 @@ export default function RootLayout({
         {/* Apple PWA Meta Tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="کارتابل" />
+        <meta name="apple-mobile-web-app-title" content="تدبیر پی" />
 
         {/* Mobile Web App */}
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="کارتابل" />
+        <meta name="application-name" content="تدبیر پی" />
 
         {/* Favicons */}
         <link
@@ -126,16 +135,16 @@ export default function RootLayout({
             <UnauthorizedHandler />
             <ThemeProvider>
               <ColorThemeProvider>
-              <I18nProvider>
-                <TooltipsProvider>
-                  <DirectionProvider dir="rtl">
-                    <NavigationProgressProvider>
-                      {children}
-                    </NavigationProgressProvider>
-                    <Toaster />
-                  </DirectionProvider>
-                </TooltipsProvider>
-              </I18nProvider>
+                <I18nProvider>
+                  <TooltipsProvider>
+                    <DirectionProvider dir="rtl">
+                      <NavigationProgressProvider>
+                        {children}
+                      </NavigationProgressProvider>
+                      <Toaster />
+                    </DirectionProvider>
+                  </TooltipsProvider>
+                </I18nProvider>
               </ColorThemeProvider>
             </ThemeProvider>
           </SessionProvider>

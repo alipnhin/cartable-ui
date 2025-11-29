@@ -38,10 +38,9 @@ export function FixHeader({ returnUrl, children }: HeaderProps) {
           />
         </div>
 
-        <div className="flex-1 min-w-0 flex items-center gap-2">
-          {children}
-        </div>
-        <Button variant="outline" onClick={() => router.push(`${returnUrl}`)}>
+        <div className="flex-1 min-w-0 flex items-center gap-2"></div>
+        {children}
+        <Button variant="mono" onClick={() => router.push(`${returnUrl}`)}>
           {isRTL ? <ArrowRight /> : <ArrowLeft />}
           {t("common.back")}
         </Button>

@@ -26,7 +26,14 @@ import { AccountInfo } from "./components/account-info";
 import { SignerCard } from "./components/signer-card";
 import { MinimumSignaturesForm } from "./components/minimum-signatures-form";
 import { AddSignerDialog } from "./components/add-signer-dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardHeading,
+  CardTitle,
+  CardToolbar,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   getAccountDetail,
@@ -165,7 +172,8 @@ export default function AccountDetailPage() {
 
   // تعداد امضاداران فعال
   const activeSignersCount =
-    account?.users?.filter((u) => u.status === 1 || u.status === "Enable").length ?? 0;
+    account?.users?.filter((u) => u.status === 1 || u.status === "Enable")
+      .length ?? 0;
 
   // Loading state
   if (isLoading) {
@@ -173,73 +181,73 @@ export default function AccountDetailPage() {
       <>
         <FixHeader returnUrl="/accounts" />
         <div className="container mx-auto p-4 md:p-6 space-y-6 mt-14">
-        <div className="flex items-center justify-between mb-6">
-          <Skeleton className="h-9 w-24" />
-          <Skeleton className="h-9 w-28" />
-        </div>
-        <div className="space-y-6">
-          {/* Account Info Skeleton */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4 mb-6">
-                <Skeleton className="h-16 w-16 rounded-xl" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-6 w-32" />
-                  <Skeleton className="h-4 w-48" />
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="space-y-2">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-5 w-32" />
+          <div className="flex items-center justify-between mb-6">
+            <Skeleton className="h-9 w-24" />
+            <Skeleton className="h-9 w-28" />
+          </div>
+          <div className="space-y-6">
+            {/* Account Info Skeleton */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4 mb-6">
+                  <Skeleton className="h-16 w-16 rounded-xl" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-4 w-48" />
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Signers Skeleton */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-6 w-32" />
-                <Skeleton className="h-9 w-32" />
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Stats skeleton */}
-              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-4 w-16" />
-                  <Skeleton className="h-4 w-16" />
                 </div>
-                <Skeleton className="h-5 w-28 rounded-full" />
-              </div>
-
-              {/* Min signatures skeleton */}
-              <Skeleton className="h-20 w-full rounded-lg" />
-
-              {/* Signer cards skeleton */}
-              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="flex flex-col">
-                    <CardContent className="p-4 flex flex-col items-center pt-6">
-                      <Skeleton className="h-14 w-14 rounded-full mb-3" />
-                      <Skeleton className="h-4 w-24 mb-1" />
-                      <Skeleton className="h-5 w-20 rounded-full mb-2" />
-                      <Skeleton className="h-3 w-16 mb-2" />
-                      <Skeleton className="h-3 w-20" />
-                    </CardContent>
-                    <div className="flex items-center px-4 min-h-12 border-t justify-center">
-                      <Skeleton className="h-7 w-20" />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-5 w-32" />
                     </div>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Signers Skeleton */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-9 w-32" />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Stats skeleton */}
+                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                  <Skeleton className="h-5 w-28 rounded-full" />
+                </div>
+
+                {/* Min signatures skeleton */}
+                <Skeleton className="h-20 w-full rounded-lg" />
+
+                {/* Signer cards skeleton */}
+                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Card key={i} className="flex flex-col">
+                      <CardContent className="p-4 flex flex-col items-center pt-6">
+                        <Skeleton className="h-14 w-14 rounded-full mb-3" />
+                        <Skeleton className="h-4 w-24 mb-1" />
+                        <Skeleton className="h-5 w-20 rounded-full mb-2" />
+                        <Skeleton className="h-3 w-16 mb-2" />
+                        <Skeleton className="h-3 w-20" />
+                      </CardContent>
+                      <div className="flex items-center px-4 min-h-12 border-t justify-center">
+                        <Skeleton className="h-7 w-20" />
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </>
     );
@@ -271,96 +279,101 @@ export default function AccountDetailPage() {
     <>
       <FixHeader returnUrl="/accounts">
         <Button
-          variant="ghost"
-          size="sm"
+          variant="outline"
           onClick={fetchAccountDetail}
           disabled={isUpdating}
           className="gap-2"
         >
-          <RefreshCw
-            className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`}
-          />
+          <RefreshCw className={`${isUpdating ? "animate-spin" : ""}`} />
           {t("common.refresh")}
         </Button>
       </FixHeader>
       <div className="container mx-auto p-4 md:p-6 space-y-6 mt-14">
-      <div className="space-y-6">
-        {/* بخش اطلاعات حساب */}
-        <AccountInfo account={account} />
+        <div className="space-y-6">
+          {/* بخش اطلاعات حساب */}
+          <AccountInfo account={account} />
 
-        {/* بخش امضاداران */}
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                امضاداران حساب
-              </CardTitle>
-              <AddSignerDialog
-                accountId={accountId}
-                existingSignerIds={account.users?.map((u) => u.userId) ?? []}
-                onAdd={handleAddSigner}
+          {/* بخش امضاداران */}
+          <Card>
+            <CardHeader className="py-4">
+              <CardHeading>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  امضاداران حساب
+                </CardTitle>
+              </CardHeading>
+              <CardToolbar>
+                <AddSignerDialog
+                  accountId={accountId}
+                  existingSignerIds={account.users?.map((u) => u.userId) ?? []}
+                  onAdd={handleAddSigner}
+                />
+              </CardToolbar>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              {/* فرم حداقل امضا با آمار */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-muted/30 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm text-muted-foreground">کل:</span>
+                    <span className="font-bold">
+                      {account.users?.length ?? 0}
+                    </span>
+                  </div>
+                  <div className="h-4 w-px bg-border" />
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm text-muted-foreground">فعال:</span>
+                    <span className="font-bold text-success">
+                      {activeSignersCount}
+                    </span>
+                  </div>
+                </div>
+                {activeSignersCount < account.minimumSignature ? (
+                  <Badge variant="destructive" className="gap-1">
+                    <XCircle className="h-3 w-3" />
+                    امضاداران فعال کافی نیست
+                  </Badge>
+                ) : (
+                  <Badge className="gap-1 bg-success hover:bg-success/90">
+                    <CheckCircle2 className="h-3 w-3" />
+                    تعداد کافی است
+                  </Badge>
+                )}
+              </div>
+
+              {/* فرم حداقل امضا */}
+              <MinimumSignaturesForm
+                currentValue={account.minimumSignature}
+                maxValue={account.users?.length ?? 0}
+                onSave={handleSaveMinSignatures}
+                isLoading={isUpdating}
               />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* فرم حداقل امضا با آمار */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-muted/30 rounded-lg">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm text-muted-foreground">کل:</span>
-                  <span className="font-bold">{account.users?.length ?? 0}</span>
+
+              {/* لیست امضاداران */}
+              {account.users && account.users.length > 0 ? (
+                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  {account.users.map((signer) => (
+                    <SignerCard
+                      key={signer.id}
+                      signer={signer}
+                      onRequestStatusChange={handleRequestStatusChange}
+                      isUpdating={isUpdating}
+                    />
+                  ))}
                 </div>
-                <div className="h-4 w-px bg-border" />
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm text-muted-foreground">فعال:</span>
-                  <span className="font-bold text-success">{activeSignersCount}</span>
-                </div>
-              </div>
-              {activeSignersCount < account.minimumSignature ? (
-                <Badge variant="destructive" className="gap-1">
-                  <XCircle className="h-3 w-3" />
-                  امضاداران فعال کافی نیست
-                </Badge>
               ) : (
-                <Badge className="gap-1 bg-success hover:bg-success/90">
-                  <CheckCircle2 className="h-3 w-3" />
-                  تعداد کافی است
-                </Badge>
+                <div className="text-center py-8 bg-muted/30 rounded-lg border-2 border-dashed">
+                  <Users className="h-8 w-8 mx-auto mb-3 text-muted-foreground opacity-50" />
+                  <p className="text-muted-foreground text-sm">
+                    امضاداری تعریف نشده است. از دکمه «افزودن امضادار» استفاده
+                    کنید.
+                  </p>
+                </div>
               )}
-            </div>
-
-            {/* فرم حداقل امضا */}
-            <MinimumSignaturesForm
-              currentValue={account.minimumSignature}
-              maxValue={account.users?.length ?? 0}
-              onSave={handleSaveMinSignatures}
-              isLoading={isUpdating}
-            />
-
-            {/* لیست امضاداران */}
-            {account.users && account.users.length > 0 ? (
-              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {account.users.map((signer) => (
-                  <SignerCard
-                    key={signer.id}
-                    signer={signer}
-                    onRequestStatusChange={handleRequestStatusChange}
-                    isUpdating={isUpdating}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 bg-muted/30 rounded-lg border-2 border-dashed">
-                <Users className="h-8 w-8 mx-auto mb-3 text-muted-foreground opacity-50" />
-                <p className="text-muted-foreground text-sm">
-                  امضاداری تعریف نشده است. از دکمه «افزودن امضادار» استفاده کنید.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </>
   );

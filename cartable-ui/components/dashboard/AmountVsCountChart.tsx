@@ -1,7 +1,14 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Timer, CheckCircle, XCircle, ArrowLeftRight, BarChart3 } from "lucide-react";
+import {
+  Timer,
+  CheckCircle,
+  XCircle,
+  ArrowLeftRight,
+  BarChart3,
+  UserX,
+} from "lucide-react";
 import type { TransactionStatusSummary } from "@/types/dashboard";
 import { formatNumber } from "@/lib/utils";
 import useTranslation from "@/hooks/useTranslation";
@@ -11,28 +18,31 @@ interface AmountVsCountChartProps {
   delay?: number;
 }
 
-const statusConfig: Record<number, {
-  icon: typeof Timer;
-  iconBg: string;
-  iconColor: string;
-}> = {
-  1: {
+const statusConfig: Record<
+  string,
+  {
+    icon: typeof Timer;
+    iconBg: string;
+    iconColor: string;
+  }
+> = {
+  WaitForExecution: {
     icon: Timer,
     iconBg: "bg-warning/10",
     iconColor: "text-warning",
   },
-  3: {
+  BankSucceeded: {
     icon: CheckCircle,
     iconBg: "bg-success/10",
     iconColor: "text-success",
   },
-  4: {
+  BankRejected: {
     icon: XCircle,
     iconBg: "bg-destructive/10",
     iconColor: "text-destructive",
   },
-  5: {
-    icon: ArrowLeftRight,
+  Canceled: {
+    icon: UserX,
     iconBg: "bg-primary/10",
     iconColor: "text-primary",
   },
