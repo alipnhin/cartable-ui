@@ -2,7 +2,11 @@
 
 import { WithdrawalStatistics, PaymentItemStatusEnum } from "@/types/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency, formatDate } from "@/lib/helpers";
+import {
+  formatCurrency,
+  formatCurrencyNoneUnit,
+  formatDate,
+} from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
 import {
   ArrowUpCircle,
@@ -209,7 +213,10 @@ export function OrderDetailStatistics({
                   </div>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {formatCurrency(financialStatistics.successfulAmount, locale)}{" "}
+                  {formatCurrencyNoneUnit(
+                    financialStatistics.successfulAmount,
+                    locale
+                  )}{" "}
                   {t("statistics.rial")}
                 </div>
               </div>
@@ -233,7 +240,10 @@ export function OrderDetailStatistics({
                   </div>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {formatCurrency(financialStatistics.failedAmount, locale)}{" "}
+                  {formatCurrencyNoneUnit(
+                    financialStatistics.failedAmount,
+                    locale
+                  )}{" "}
                   {t("statistics.rial")}
                 </div>
               </div>
@@ -262,7 +272,10 @@ export function OrderDetailStatistics({
                   </div>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {formatCurrency(financialStatistics.pendingAmount, locale)}{" "}
+                  {formatCurrencyNoneUnit(
+                    financialStatistics.pendingAmount,
+                    locale
+                  )}{" "}
                   {t("statistics.rial")}
                 </div>
               </div>
@@ -301,7 +314,10 @@ export function OrderDetailStatistics({
                 {t("orderDetail.statistics.totalTransactionAmount")}
               </div>
               <div className="text-3xl font-bold text-foreground">
-                {formatCurrency(financialStatistics.totalAmount, locale)}
+                {formatCurrencyNoneUnit(
+                  financialStatistics.totalAmount,
+                  locale
+                )}
               </div>
               <div className="text-sm text-muted-foreground">
                 {t("statistics.rial")}
@@ -420,7 +436,8 @@ export function OrderDetailStatistics({
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>
                     {t("orderDetail.statistics.amount")}{" "}
-                    {formatCurrency(type.amount, locale)} {t("statistics.rial")}
+                    {formatCurrencyNoneUnit(type.amount, locale)}{" "}
+                    {t("statistics.rial")}
                   </span>
                   <span>
                     {t("orderDetail.statistics.successRate")}{" "}

@@ -32,7 +32,7 @@ export function mapPaymentListDtoToPaymentOrder(
     description: dto.description,
     // فیلدهای اضافی برای UI
     orderNumber: dto.orderId,
-    accountTitle: dto.bankName,
+    accountTitle: dto.gatewayTitle,
     totalTransactions: parseInt(dto.numberOfTransactions) || 0,
     createdDate: dto.createdDateTime,
     createdDateTime: dto.createdDateTime,

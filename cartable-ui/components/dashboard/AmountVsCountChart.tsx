@@ -12,6 +12,7 @@ import {
 import type { TransactionStatusSummary } from "@/types/dashboard";
 import { formatNumber } from "@/lib/utils";
 import useTranslation from "@/hooks/useTranslation";
+import { lowerFirst } from "@/lib/helpers";
 
 interface AmountVsCountChartProps {
   data: TransactionStatusSummary[];
@@ -99,7 +100,9 @@ export default function AmountVsCountChart({
                       <Icon className={`w-4 h-4 ${config.iconColor}`} />
                     </div>
                     <span className="text-sm font-medium text-foreground">
-                      {item.statusTitle}
+                      {t(
+                        `transactions.statusLabels.${lowerFirst(item.status)}`
+                      )}
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -118,7 +121,7 @@ export default function AmountVsCountChart({
                       <div className="text-lg font-bold text-foreground">
                         {formatNumber(item.totalAmount)}
                         <span className="text-xs font-normal text-muted-foreground ms-1">
-                          ریال
+                          {t("statistics.rial")}
                         </span>
                       </div>
                     </div>

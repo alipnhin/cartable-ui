@@ -203,7 +203,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
               }))
             }
           >
-            <SelectTrigger size="lg" className="h-10">
+            <SelectTrigger size="lg" className="h-12">
               <SelectValue placeholder={t("filters.allStatuses")} />
             </SelectTrigger>
             <SelectContent>
@@ -306,7 +306,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
     <Card className="mb-4">
       <CardContent className="p-4 space-y-4">
         {/* فیلترهای اصلی - سه ستونه */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           {/* وضعیت */}
           <div className="space-y-2">
             <Label className="text-sm">{t("filters.status")}</Label>

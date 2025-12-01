@@ -5,6 +5,7 @@ import { CreditCard, Banknote, Wallet } from "lucide-react";
 import type { PaymentTypeSummary } from "@/types/dashboard";
 import { formatNumber } from "@/lib/utils";
 import useTranslation from "@/hooks/useTranslation";
+import { lowerFirst } from "@/lib/helpers";
 
 interface PaymentTypeChartProps {
   data: PaymentTypeSummary[];
@@ -49,7 +50,8 @@ export default function PaymentTypeChart({
             const iconConfig =
               paymentTypeIcons[index % paymentTypeIcons.length];
             const Icon = iconConfig.icon;
-            const percent = total > 0 ? Math.round((item.count / total) * 100) : 0;
+            const percent =
+              total > 0 ? Math.round((item.count / total) * 100) : 0;
 
             return (
               <div key={index} className="flex items-center gap-4">
@@ -61,7 +63,11 @@ export default function PaymentTypeChart({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-medium text-foreground truncate">
-                      {item.paymentTypeTitle}
+                      {t(
+                        `transactions.paymentTypes.${lowerFirst(
+                          item.paymentType
+                        )}`
+                      )}
                     </span>
                     <span className="text-sm font-bold text-foreground">
                       {formatNumber(item.count)}
@@ -69,7 +75,7 @@ export default function PaymentTypeChart({
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">
-                      {formatNumber(item.totalAmount)} ریال
+                      {formatNumber(item.totalAmount)} {t("statistics.rial")}
                     </span>
                     <span className="text-xs font-semibold text-muted-foreground">
                       {percent}%

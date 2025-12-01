@@ -178,7 +178,7 @@ export function FilterSheet({
           onChange={(e) =>
             setLocalFilters((prev) => ({ ...prev, orderTitle: e.target.value }))
           }
-          className={cn("h-10", isMobile && "h-12 text-base")}
+          className={cn("h-12", isMobile && "h-12 text-base")}
         />
       </div>
 

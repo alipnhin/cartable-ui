@@ -26,30 +26,23 @@ import { AccountGroup } from "@/types/account";
  * const groups = await getAccountGroups(session.accessToken);
  * ```
  */
+const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
 export const getAccountGroups = async (
   accessToken: string
 ): Promise<AccountGroup[]> => {
-  // TODO: فعال‌سازی فراخوانی API بعد از آماده شدن
-  /*
   const response = await apiClient.get<AccountGroup[]>(
-    "/v1-Cartable/AccountGroup/GetList",
+    "/v1-Cartable/ManageAccount/GetAccountGroups",
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     }
   );
-
-  return response.data;
-  */
-
-  // داده‌های موک برای تست
-  // این داده‌ها بعد از آماده شدن API باید حذف شوند
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(MOCK_ACCOUNT_GROUPS);
-    }, 300); // شبیه‌سازی تاخیر شبکه
-  });
+  // Normalize here
+  return response.data.map((g) => ({
+    ...g,
+    id: g.id === EMPTY_GUID ? "all" : g.id,
+  }));
 };
 
 /**
@@ -70,10 +63,8 @@ export const getAccountGroupById = async (
   id: string,
   accessToken: string
 ): Promise<AccountGroup> => {
-  // TODO: فعال‌سازی فراخوانی API بعد از آماده شدن
-  /*
   const response = await apiClient.get<AccountGroup>(
-    `/v1-Cartable/AccountGroup/${id}`,
+    `/v1-Cartable/ManageAccount/GetAccountGroupById/${id}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -82,66 +73,4 @@ export const getAccountGroupById = async (
   );
 
   return response.data;
-  */
-
-  // داده‌های موک
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const group = MOCK_ACCOUNT_GROUPS.find((g) => g.id === id);
-      if (group) {
-        resolve(group);
-      } else {
-        reject(new Error("گروه حساب یافت نشد"));
-      }
-    }, 300);
-  });
 };
-
-/**
- * داده‌های موک برای گروه‌های حساب
- * این داده‌ها بعد از آماده شدن API باید حذف شوند
- *
- * گروه "all" به معنی "همه گروه‌ها" است و وقتی انتخاب شود، AccountGroupId با مقدار null ارسال می‌شود
- */
-export const MOCK_ACCOUNT_GROUPS: AccountGroup[] = [
-  {
-    id: "all",
-    title: "همه گروه‌ها",
-    accountCount: 12,
-    icon: "Layers",
-    description: "تمام حساب‌های بانکی",
-    color: "#6366f1",
-  },
-  {
-    id: "group_operational",
-    title: "حساب‌های عملیاتی",
-    accountCount: 5,
-    icon: "Briefcase",
-    description: "حساب‌های مربوط به عملیات روزانه",
-    color: "#10b981",
-  },
-  {
-    id: "group_investment",
-    title: "حساب‌های سرمایه‌گذاری",
-    accountCount: 3,
-    icon: "TrendingUp",
-    description: "حساب‌های اختصاصی سرمایه‌گذاری",
-    color: "#8b5cf6",
-  },
-  {
-    id: "group_foreign",
-    title: "حساب‌های ارزی",
-    accountCount: 2,
-    icon: "DollarSign",
-    description: "حساب‌های ارز خارجی",
-    color: "#f59e0b",
-  },
-  {
-    id: "group_savings",
-    title: "حساب‌های پس‌انداز",
-    accountCount: 2,
-    icon: "PiggyBank",
-    description: "حساب‌های پس‌انداز بلندمدت",
-    color: "#06b6d4",
-  },
-];

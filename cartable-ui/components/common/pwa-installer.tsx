@@ -22,8 +22,10 @@ import {
   RiMoreLine,
   RiShareLine,
   RiHomeLine,
+  RiAddBoxLine,
 } from "@remixicon/react";
 
+import { Plus, Share, SquarePlus } from "lucide-react";
 // Type برای BeforeInstallPromptEvent
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -37,7 +39,9 @@ const getDeviceInfo = () => {
   const isAndroid = /android/.test(userAgent);
   const isSafari = /safari/.test(userAgent) && !/chrome/.test(userAgent);
   const isChrome = /chrome/.test(userAgent);
-  const isInStandaloneMode = window.matchMedia("(display-mode: standalone)").matches;
+  const isInStandaloneMode = window.matchMedia(
+    "(display-mode: standalone)"
+  ).matches;
   // @ts-ignore
   const isInPWA = window.navigator.standalone === true || isInStandaloneMode;
 
@@ -75,9 +79,15 @@ export function PWAInstaller() {
           logger.info("Service Worker registered");
         })
         .catch((error) => {
-          logger.error("Service Worker registration failed:", error instanceof Error ? error : undefined);
+          logger.error(
+            "Service Worker registration failed:",
+            error instanceof Error ? error : undefined
+          );
         });
-    } else if ("serviceWorker" in navigator && process.env.NODE_ENV === "development") {
+    } else if (
+      "serviceWorker" in navigator &&
+      process.env.NODE_ENV === "development"
+    ) {
       // In development, unregister any existing service workers to prevent caching issues
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         for (const registration of registrations) {
@@ -102,7 +112,8 @@ export function PWAInstaller() {
     if (dismissed) {
       const dismissedDate = new Date(dismissed);
       const daysSinceDismissed =
-        (new Date().getTime() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
+        (new Date().getTime() - dismissedDate.getTime()) /
+        (1000 * 60 * 60 * 24);
       // نشان دادن دوباره بعد از 7 روز
       if (daysSinceDismissed < 7) {
         return;
@@ -165,7 +176,10 @@ export function PWAInstaller() {
 
       setDeferredPrompt(null);
     } catch (error) {
-      logger.error("Error during installation:", error instanceof Error ? error : undefined);
+      logger.error(
+        "Error during installation:",
+        error instanceof Error ? error : undefined
+      );
     }
   };
 
@@ -245,7 +259,9 @@ export function PWAInstaller() {
                 <h3 className="text-lg font-bold text-card-foreground">
                   {t("pwa.installApp")}
                 </h3>
-                <p className="text-sm text-muted-foreground">{t("pwa.iosSubtitle")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("pwa.iosSubtitle")}
+                </p>
               </div>
             </div>
             <button
@@ -258,14 +274,12 @@ export function PWAInstaller() {
           </div>
 
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              {t("pwa.iosIntro")}
-            </p>
+            <p className="text-sm text-muted-foreground">{t("pwa.iosIntro")}</p>
 
             <div className="space-y-3">
               {/* Step 1 */}
               <div className="flex gap-3 rounded-lg bg-accent/50 p-3">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
                   ۱
                 </div>
                 <div className="flex-1">
@@ -273,22 +287,18 @@ export function PWAInstaller() {
                     {t("pwa.iosStep1Title")}
                   </p>
                   <div className="mt-2 flex items-center gap-2 text-muted-foreground">
-                    <span className="text-xs">
-                      {t("pwa.iosStep1Tap")}
-                    </span>
+                    <span className="text-xs">{t("pwa.iosStep1Tap")}</span>
                     <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500">
-                      <RiShareLine className="h-4 w-4 text-white" />
+                      <Share className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-xs">
-                      {t("pwa.iosStep1At")}
-                    </span>
+                    <span className="text-xs">{t("pwa.iosStep1At")}</span>
                   </div>
                 </div>
               </div>
 
               {/* Step 2 */}
               <div className="flex gap-3 rounded-lg bg-accent/50 p-3">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
                   ۲
                 </div>
                 <div className="flex-1">
@@ -296,11 +306,9 @@ export function PWAInstaller() {
                     {t("pwa.iosStep2Title")}
                   </p>
                   <div className="mt-2 flex items-center gap-2 text-muted-foreground">
-                    <span className="text-xs">
-                      {t("pwa.iosStep2Select")}
-                    </span>
+                    <span className="text-xs">{t("pwa.iosStep2Select")}</span>
                     <div className="flex items-center gap-1 rounded bg-gray-200 px-2 py-1 dark:bg-gray-700">
-                      <RiHomeLine className="h-3 w-3" />
+                      <RiAddBoxLine className="h-3 w-3" />
                       <span className="text-xs">Add to Home Screen</span>
                     </div>
                   </div>
@@ -309,7 +317,7 @@ export function PWAInstaller() {
 
               {/* Step 3 */}
               <div className="flex gap-3 rounded-lg bg-accent/50 p-3">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
                   ۳
                 </div>
                 <div className="flex-1">
@@ -325,9 +333,10 @@ export function PWAInstaller() {
 
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950">
               <div className="flex gap-2">
-                <RiAppleLine className="h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                <RiAppleLine className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
                 <p className="text-xs text-blue-800 dark:text-blue-200">
-                  <strong>{t("pwa.iosNoteTitle")}</strong> {t("pwa.iosNoteDesc")}
+                  <strong>{t("pwa.iosNoteTitle")}</strong>{" "}
+                  {t("pwa.iosNoteDesc")}
                 </p>
               </div>
             </div>

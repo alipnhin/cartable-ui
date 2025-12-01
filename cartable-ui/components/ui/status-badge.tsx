@@ -254,7 +254,7 @@ export function getPaymentTypeBadge(
   switch (type) {
     case PaymentMethodEnum.Paya:
       return {
-        variant: "success",
+        variant: "warning",
         translationKey: "transactions.paymentTypes.paya",
       };
     case PaymentMethodEnum.Satna:
@@ -264,7 +264,7 @@ export function getPaymentTypeBadge(
       };
     case PaymentMethodEnum.Internal:
       return {
-        variant: "warning",
+        variant: "success",
         translationKey: "transactions.paymentTypes.rtgs",
       };
     default:

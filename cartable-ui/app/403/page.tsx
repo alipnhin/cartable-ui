@@ -37,7 +37,7 @@ export default function ForbiddenPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-accent/5 to-background p-4">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-background via-accent/5 to-background p-4">
       <div className="w-full max-w-2xl">
         {/* Icon و عنوان */}
         <div className="text-center">
@@ -64,18 +64,16 @@ export default function ForbiddenPage() {
               <span className="mt-0.5 text-destructive">•</span>
               <span>
                 برای دسترسی به این صفحه، باید یکی از نقش‌های{" "}
-                <strong className="text-foreground">امضادار (cartable-approver)</strong>{" "}
-                یا{" "}
-                <strong className="text-foreground">
-                  مدیر (cartable-manager)
-                </strong>{" "}
-                را داشته باشید
+                <strong className="text-foreground">امضادار</strong> یا{" "}
+                <strong className="text-foreground">مدیر کارتابل</strong> را
+                داشته باشید
               </span>
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5 text-destructive">•</span>
               <span>
-                احتمالاً با حساب کاربری دیگری وارد شده‌اید که دسترسی لازم را ندارد
+                احتمالاً با حساب کاربری دیگری وارد شده‌اید که دسترسی لازم را
+                ندارد
               </span>
             </li>
             <li className="flex items-start gap-2">
@@ -133,7 +131,7 @@ export default function ForbiddenPage() {
           <p className="text-sm text-muted-foreground">
             در صورت نیاز به کمک، با{" "}
             <a
-              href="mailto:support@example.com"
+              href="mailto:support@etadbir.com"
               className="font-medium text-primary hover:underline"
             >
               پشتیبانی

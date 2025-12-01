@@ -11,6 +11,7 @@ import {
 import type { TransactionStatusSummary } from "@/types/dashboard";
 import { formatNumber } from "@/lib/utils";
 import useTranslation from "@/hooks/useTranslation";
+import { lowerFirst } from "@/lib/helpers";
 
 interface TransactionStatusChartProps {
   data: TransactionStatusSummary[];
@@ -98,7 +99,9 @@ export default function TransactionStatusChart({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-sm font-medium text-foreground truncate">
-                      {item.statusTitle}
+                      {t(
+                        `transactions.statusLabels.${lowerFirst(item.status)}`
+                      )}
                     </span>
                     <span className="text-sm font-bold text-foreground">
                       {formatNumber(item.transactionCount)}

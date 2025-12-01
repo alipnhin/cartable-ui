@@ -1,6 +1,6 @@
 // Dashboard transaction progress types
 export interface TransactionStatusSummary {
-  status: number;
+  status: string;
   statusTitle: string;
   transactionCount: number;
   totalAmount: number;
@@ -8,7 +8,7 @@ export interface TransactionStatusSummary {
 }
 
 export interface PaymentTypeSummary {
-  paymentType: number;
+  paymentType: string;
   paymentTypeTitle: string;
   count: number;
   totalAmount: number;

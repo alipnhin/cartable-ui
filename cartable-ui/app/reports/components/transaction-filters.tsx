@@ -130,7 +130,7 @@ export function TransactionFilters({
 
   // Advanced filters content (shared between desktop accordion and mobile drawer)
   const advancedFiltersContent = (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {/* وضعیت */}
       <div className="space-y-2">
         <Label className="text-sm">{t("filters.status")}</Label>
@@ -367,7 +367,7 @@ export function TransactionFilters({
     <Card>
       <CardContent className="p-4 space-y-4">
         {/* فیلترهای اصلی - سه ستونه */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           {/* انتخاب حساب */}
           <div className="space-y-2">
             <Label className="text-sm">انتخاب حساب</Label>

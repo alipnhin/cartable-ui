@@ -123,31 +123,6 @@ export function TransactionTable({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Helper functions برای نمایش status و payment type
-  const getStatusDisplay = (status: string) => {
-    const statusMap: Record<string, { variant: string; label: string }> = {
-      BankSucceeded: { variant: "success", label: "موفق" },
-      Registered: { variant: "secondary", label: "ثبت شده" },
-      WaitForExecution: { variant: "info", label: "در انتظار اجرا" },
-      WaitForBank: { variant: "warning", label: "در انتظار بانک" },
-      Failed: { variant: "destructive", label: "ناموفق" },
-      BankFailed: { variant: "destructive", label: "رد شده توسط بانک" },
-      Canceled: { variant: "secondary", label: "لغو شده" },
-      Rejected: { variant: "destructive", label: "رد شده" },
-    };
-    return statusMap[status] || { variant: "secondary", label: status };
-  };
-
-  const getPaymentTypeDisplay = (paymentType: string) => {
-    const typeMap: Record<string, { variant: string; label: string }> = {
-      Paya: { variant: "info", label: "پایا" },
-      Satna: { variant: "warning", label: "ساتنا" },
-      Internal: { variant: "success", label: "درون بانکی" },
-      Rtgs: { variant: "warning", label: "آنی (RTGS)" },
-    };
-    return typeMap[paymentType] || { variant: "secondary", label: paymentType };
-  };
-
   if (isMobile) {
     // نمایش کارتی در موبایل
     return (
@@ -159,7 +134,7 @@ export function TransactionTable({
                 ? `${t("common.showing")} ${startIndex + 1}-${endIndex} ${t(
                     "common.of"
                   )} ${totalRecords}`
-                : t("common.noData")}
+                : t("common.pagination.noData")}
             </p>
             <Button
               variant="outline"
@@ -209,12 +184,10 @@ export function TransactionTable({
                     <span className="font-medium text-sm">
                       {tx.destinationAccountOwner}
                     </span>
-                    <Badge
-                      variant={getStatusDisplay(tx.status).variant as any}
-                      className="text-xs"
-                    >
-                      {getStatusDisplay(tx.status).label}
-                    </Badge>
+                    <TransactionStatusBadge
+                      status={tx.status as any}
+                      size="sm"
+                    />
                   </div>
                   <div className="text-sm space-y-1">
                     <div className="flex justify-between">
@@ -234,15 +207,13 @@ export function TransactionTable({
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">نوع پرداخت:</span>
-                      <Badge
-                        variant={
-                          getPaymentTypeDisplay(tx.paymentType).variant as any
-                        }
-                        className="text-xs"
-                      >
-                        {getPaymentTypeDisplay(tx.paymentType).label}
-                      </Badge>
+                      <span className="text-muted-foreground">
+                        {t("transactions.paymentTypeColumn")}:
+                      </span>
+                      <PaymentTypeBadge
+                        type={tx.paymentType as any}
+                        size="sm"
+                      />
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
@@ -309,12 +280,12 @@ export function TransactionTable({
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="font-bold bg-muted/40 ">
               <TableHead className="w-12">#</TableHead>
               <TableHead>شماره درخواست</TableHead>
               <TableHead>
                 <SortableHeader field="destinationAccountOwner">
-                  نام ذینفع
+                  {t("transactions.beneficiaryName")}
                 </SortableHeader>
               </TableHead>
               <TableHead>حساب مقصد</TableHead>
@@ -324,7 +295,7 @@ export function TransactionTable({
                   {t("transactions.amount")}
                 </SortableHeader>
               </TableHead>
-              <TableHead>نوع پرداخت</TableHead>
+              <TableHead> {t("transactions.clearFilters")}</TableHead>
               <TableHead>
                 <SortableHeader field="createdDateTime">
                   تاریخ ثبت
@@ -425,14 +396,7 @@ export function TransactionTable({
                     {formatAmount(tx.amount)}
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        getPaymentTypeDisplay(tx.paymentType).variant as any
-                      }
-                      className="text-xs"
-                    >
-                      {getPaymentTypeDisplay(tx.paymentType).label}
-                    </Badge>
+                    <PaymentTypeBadge type={tx.paymentType as any} size="sm" />
                   </TableCell>
                   <TableCell className="text-sm">
                     {formatDateToPersian(tx.createdDateTime)}
@@ -441,12 +405,10 @@ export function TransactionTable({
                     {formatDateToPersian(tx.transferDateTime)}
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={getStatusDisplay(tx.status).variant as any}
-                      className="text-xs"
-                    >
-                      {getStatusDisplay(tx.status).label}
-                    </Badge>
+                    <TransactionStatusBadge
+                      status={tx.status as any}
+                      size="sm"
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -472,7 +434,7 @@ export function TransactionTable({
               </span>
             </>
           ) : (
-            t("common.noData")
+            t("common.pagination.noData")
           )}
         </div>
         <div className="flex items-center gap-6 lg:gap-8">

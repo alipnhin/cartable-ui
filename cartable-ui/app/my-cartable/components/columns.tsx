@@ -77,7 +77,7 @@ export const createColumns = (
       cell: ({ row }) => {
         const bankCode = getBankCodeFromIban(row.original.accountSheba);
         return (
-          <div className="flex items-center grow gap-2.5">
+          <div className="flex items-center grow gap-2.5 min-w-[260px]">
             {row.original.accountSheba && (
               <BankLogo bankCode={bankCode} size="md" />
             )}
@@ -145,38 +145,20 @@ export const createColumns = (
         );
       },
       cell: ({ row }) => (
-        <div className=" font-semibold">
-          {formatCurrency(row.original.totalAmount, locale)}
+        <div className="flex flex-col gap-1">
+          <span className="font-bold text-secondary-foreground leading-3">
+            {formatCurrency(row.original.totalAmount, locale)}
+          </span>
+          <span className="text-sm font-bold text-mono hover:text-primary-active mb-px">
+            {row.original.totalTransactions ||
+              row.original.numberOfTransactions}
+            <span className="ms-2 font-normal text-sm text-muted-foreground">
+              {t("paymentOrders.transactionsShort")}
+            </span>
+          </span>
         </div>
       ),
       size: 150,
-    },
-    {
-      accessorKey: "totalTransactions",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-8 px-2 hover:bg-transparent font-semibold"
-          >
-            {t("orders.totalTransactions")}
-            {column.getIsSorted() === "desc" ? (
-              <ArrowDown />
-            ) : column.getIsSorted() === "asc" ? (
-              <ArrowUp />
-            ) : (
-              <ChevronsUpDown />
-            )}
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="text-center font-medium">
-          {row.original.totalTransactions || row.original.numberOfTransactions}
-        </div>
-      ),
-      size: 100,
     },
     {
       accessorKey: "status",

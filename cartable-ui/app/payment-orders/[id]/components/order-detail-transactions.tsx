@@ -642,7 +642,7 @@ export function OrderDetailTransactions({
                 value={paymentTypeFilter}
                 onValueChange={(v) => setPaymentTypeFilter(v as any)}
               >
-                <SelectTrigger className="w-[160px] h-9">
+                <SelectTrigger className="w-40 h-9">
                   <SelectValue placeholder={t("transactions.allTypes")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -847,10 +847,16 @@ export function OrderDetailTransactions({
                         PaymentItemStatusEnum.WaitForBank ||
                       transaction.status ===
                         PaymentItemStatusEnum.WaitForExecution;
-                    const isInquiring = inquiringTransactionId === transaction.id;
+                    const isInquiring =
+                      inquiringTransactionId === transaction.id;
 
                     return (
-                      <Card key={transaction.id} className={`overflow-hidden ${isInquiring ? "opacity-60 pointer-events-none" : ""}`}>
+                      <Card
+                        key={transaction.id}
+                        className={`overflow-hidden ${
+                          isInquiring ? "opacity-60 pointer-events-none" : ""
+                        }`}
+                      >
                         {/* هدر با مبلغ برجسته */}
                         <div className="bg-muted/50 p-4 border-b">
                           <div className="flex items-center justify-between mb-3">
@@ -952,7 +958,11 @@ export function OrderDetailTransactions({
                                 disabled={isInquiring}
                                 className="gap-2 h-9"
                               >
-                                <RefreshCw className={`h-4 w-4 ${isInquiring ? "animate-spin" : ""}`} />
+                                <RefreshCw
+                                  className={`h-4 w-4 ${
+                                    isInquiring ? "animate-spin" : ""
+                                  }`}
+                                />
                                 {t("transactions.inquiry")}
                               </Button>
                             )}
@@ -1044,12 +1054,15 @@ export function OrderDetailTransactions({
                             PaymentItemStatusEnum.WaitForBank ||
                           transaction.status ===
                             PaymentItemStatusEnum.WaitForExecution;
-                        const isInquiring = inquiringTransactionId === transaction.id;
+                        const isInquiring =
+                          inquiringTransactionId === transaction.id;
 
                         return (
                           <TableRow
                             key={transaction.id}
-                            className={`hover:bg-muted/30 transition-colors ${isInquiring ? "opacity-60" : ""}`}
+                            className={`hover:bg-muted/30 transition-colors ${
+                              isInquiring ? "opacity-60" : ""
+                            }`}
                           >
                             <TableCell className="text-muted-foreground text-sm">
                               {startIndex + index + 1}
@@ -1114,7 +1127,11 @@ export function OrderDetailTransactions({
                                     disabled={isInquiring}
                                     className="h-8 gap-1.5 text-xs"
                                   >
-                                    <RefreshCw className={`h-3.5 w-3.5 ${isInquiring ? "animate-spin" : ""}`} />
+                                    <RefreshCw
+                                      className={`h-3.5 w-3.5 ${
+                                        isInquiring ? "animate-spin" : ""
+                                      }`}
+                                    />
                                     {t("transactions.inquiry")}
                                   </Button>
                                 )}

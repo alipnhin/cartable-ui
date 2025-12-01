@@ -342,7 +342,7 @@ export default function TransactionReportsPage() {
         />
 
         {/* آمارهای کلی */}
-        <TransactionStats transactions={transactions} />
+        {/* <TransactionStats transactions={transactions} /> */}
 
         {/* فیلترها */}
         <TransactionFilters

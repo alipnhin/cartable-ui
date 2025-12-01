@@ -279,7 +279,7 @@ export default function AccountDetailPage() {
     <>
       <FixHeader returnUrl="/accounts">
         <Button
-          variant="outline"
+          variant="dashed"
           onClick={fetchAccountDetail}
           disabled={isUpdating}
           className="gap-2"

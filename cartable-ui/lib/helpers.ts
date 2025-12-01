@@ -176,6 +176,23 @@ export function formatCurrency(
   return isPersian ? `${formatted} ${unit}` : `${unit} ${formatted}`;
 }
 
+export function formatCurrencyNoneUnit(
+  amount: number,
+  locale: string = "fa-IR",
+  asToman: boolean = false
+): string {
+  if (isNaN(amount)) return "";
+
+  const isPersian = locale.startsWith("fa");
+  const displayAmount = isPersian && asToman ? amount / 10 : amount;
+
+  const formatted = new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 0,
+  }).format(displayAmount);
+
+  return isPersian ? `${formatted}` : `${formatted}`;
+}
+
 export function lowerFirst(value?: string | null): string {
   if (!value) return ""; // null/undefined/"" => ""
   const chars = Array.from(value); // درست کار می‌کند با یونیکد و surrogate pairs

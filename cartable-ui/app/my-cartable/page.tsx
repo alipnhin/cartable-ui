@@ -7,13 +7,20 @@ import { OrderCard, OrderCardSkeleton } from "./components/order-card";
 import { DataTable } from "./components/data-table";
 import { createColumns } from "./components/columns";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Download, X, ClipboardCheck } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Download,
+  X,
+  ClipboardCheck,
+} from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { OtpDialog } from "@/components/common/otp-dialog";
 import { cn } from "@/lib/utils";
 import { IStatisticsItems, Statistics } from "./components/statistics";
+import { useAccountGroupStore } from "@/store/account-group-store";
 import {
   getApproverCartable,
   sendOperationOtp,
@@ -31,7 +38,7 @@ export default function MyCartablePage() {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const { data: session } = useSession();
-
+  const groupId = useAccountGroupStore((s) => s.groupId);
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [selectedRowIds, setSelectedRowIds] = useState<Record<string, boolean>>(
     {}
@@ -81,9 +88,10 @@ export default function MyCartablePage() {
       setIsLoading(true);
       try {
         // خواندن accountGroupId از localStorage
-        const savedGroupId = typeof window !== "undefined"
-          ? localStorage.getItem("selected-account-group")
-          : null;
+        const savedGroupId =
+          typeof window !== "undefined"
+            ? localStorage.getItem("selected-account-group")
+            : null;
 
         const response = await getApproverCartable(
           {
@@ -113,7 +121,7 @@ export default function MyCartablePage() {
     };
 
     fetchOrders();
-  }, [session?.accessToken, pageNumber, pageSize]);
+  }, [session?.accessToken, pageNumber, pageSize, groupId]);
 
   /**
    * بارگذاری مجدد داده‌ها
@@ -126,9 +134,10 @@ export default function MyCartablePage() {
     setIsLoading(true);
     try {
       // خواندن accountGroupId از localStorage
-      const savedGroupId = typeof window !== "undefined"
-        ? localStorage.getItem("selected-account-group")
-        : null;
+      const savedGroupId =
+        typeof window !== "undefined"
+          ? localStorage.getItem("selected-account-group")
+          : null;
 
       const response = await getApproverCartable(
         {

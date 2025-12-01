@@ -43,7 +43,7 @@ export function Header({
             )}
             onClick={onMenuToggle}
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-6 w-6" />
             <span className="sr-only">Toggle Menu</span>
           </Button>
         )}

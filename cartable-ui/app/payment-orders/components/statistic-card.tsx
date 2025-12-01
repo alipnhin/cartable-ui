@@ -1,8 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/helpers";
-import { cn } from "@/lib/utils";
+import { cn, formatNumber } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
-
+import useTranslation from "@/hooks/useTranslation";
 export interface StatisticCardProps {
   icon: LucideIcon;
   accentColor?: "primary" | "success" | "warning" | "info" | "destructive";
@@ -43,7 +43,7 @@ export default function StatisticCard({ cards }: StatisticCardsProps) {
       border: "oklch(0.58 0.18 20 / 0.2)",
     },
   };
-
+  const { t } = useTranslation();
   return (
     <div className="grow grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
       {cards.map((card, i) => {
@@ -64,7 +64,7 @@ export default function StatisticCard({ cards }: StatisticCardsProps) {
               <div className="space-y-0.5">
                 <div className="text-2xl font-bold text-foreground leading-none">
                   {card.currency && typeof card.value === "number"
-                    ? formatCurrency(card.value)
+                    ? `${formatNumber(card.value)} ${t("statistics.rial")}`
                     : card.value}
                 </div>
                 <div className="text-sm text-muted-foreground">

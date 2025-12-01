@@ -17,6 +17,7 @@ import { getAccountsList, AccountListItem } from "@/services/accountService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useAccountGroupStore } from "@/store/account-group-store";
 import {
   Select,
   SelectContent,
@@ -42,7 +43,7 @@ export default function AccountsPage() {
   const [searchText, setSearchText] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"list" | "card">("list");
-
+  const groupId = useAccountGroupStore((s) => s.groupId);
   // Set default view mode based on device
   useEffect(() => {
     if (isMobile) {
@@ -58,9 +59,10 @@ export default function AccountsPage() {
       setIsLoading(true);
       try {
         // خواندن accountGroupId از localStorage
-        const savedGroupId = typeof window !== "undefined"
-          ? localStorage.getItem("selected-account-group")
-          : null;
+        const savedGroupId =
+          typeof window !== "undefined"
+            ? localStorage.getItem("selected-account-group")
+            : null;
 
         const data = await getAccountsList(
           session.accessToken,
@@ -81,7 +83,7 @@ export default function AccountsPage() {
 
     fetchAccounts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.accessToken]);
+  }, [session?.accessToken, groupId]);
 
   // فیلتر کردن حساب‌ها
   const filteredAccounts = useMemo(() => {
@@ -184,8 +186,12 @@ export default function AccountsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("common.all") || "همه"}</SelectItem>
-              <SelectItem value="active">{t("common.active") || "فعال"}</SelectItem>
-              <SelectItem value="inactive">{t("common.inactive") || "غیرفعال"}</SelectItem>
+              <SelectItem value="active">
+                {t("common.active") || "فعال"}
+              </SelectItem>
+              <SelectItem value="inactive">
+                {t("common.inactive") || "غیرفعال"}
+              </SelectItem>
             </SelectContent>
           </Select>
 
@@ -225,8 +231,9 @@ export default function AccountsPage() {
       {/* تعداد نتایج */}
       {!isLoading && (
         <div className="mt-4 text-sm text-muted-foreground text-center">
-          {t("common.showing") || "نمایش"} {filteredAccounts.length} {t("common.of") || "از"}{" "}
-          {accounts.length} {t("accounts.accounts") || "حساب"}
+          {t("common.showing") || "نمایش"} {filteredAccounts.length}{" "}
+          {t("common.of") || "از"} {accounts.length}{" "}
+          {t("accounts.accounts") || "حساب"}
         </div>
       )}
     </AppLayout>

@@ -9,7 +9,7 @@
  */
 
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
@@ -21,28 +21,59 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
-  Building2,
-  ChevronsUpDown,
+  Crown,
+  Folder,
+  Folders,
+  Tags,
+  Gem,
   Layers,
   Briefcase,
-  TrendingUp,
-  DollarSign,
-  PiggyBank,
+  Wallet,
+  Handshake,
+  Coins,
+  Bookmark,
+  Banknote,
+  Award,
+  Star,
+  Bolt,
+  Archive,
+  Inbox,
+  Landmark,
+  Album,
+  File,
   LucideIcon,
+  Building2,
+  ChevronsUpDown,
+  Icon,
 } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { cn } from "@/lib/utils";
 import { AccountGroup } from "@/types/account";
 import { getAccountGroups } from "@/services/accountGroupService";
 import logger from "@/lib/logger";
-
+import { useAccountGroupStore } from "@/store/account-group-store";
 // نقشه آیکون‌ها - برای تبدیل نام آیکون به کامپوننت
 const ICON_MAP: Record<string, LucideIcon> = {
+  Crown,
+  Folder,
+  Folders,
+  Tags,
+  Gem,
   Layers,
   Briefcase,
-  TrendingUp,
-  DollarSign,
-  PiggyBank,
+  Wallet,
+  Handshake,
+  Coins,
+  Bookmark,
+  Banknote,
+  Award,
+  Star,
+  Bolt,
+  Archive,
+  Inbox,
+  Landmark,
+  Album,
+  File,
   Building2,
 };
 
@@ -72,7 +103,9 @@ export function AccountGroupSwitcher({
   const [accountGroups, setAccountGroups] = useState<AccountGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeGroup, setActiveGroup] = useState<AccountGroup | null>(null);
+  const router = useRouter();
 
+  const setGroupId = useAccountGroupStore((s) => s.setGroupId);
   // خواندن گروه ذخیره شده از localStorage
   useEffect(() => {
     const savedGroupId = localStorage.getItem("selected-account-group");
@@ -114,6 +147,7 @@ export function AccountGroupSwitcher({
 
         if (selectedGroup) {
           setActiveGroup(selectedGroup);
+          setGroupId(selectedGroup.id);
           // ذخیره در localStorage
           localStorage.setItem("selected-account-group", selectedGroup.id);
           // اطلاع‌رسانی به والد اگر onChange وجود دارد
@@ -122,7 +156,10 @@ export function AccountGroupSwitcher({
           }
         }
       } catch (error) {
-        logger.error("Error fetching account groups:", error instanceof Error ? error : undefined);
+        logger.error(
+          "Error fetching account groups:",
+          error instanceof Error ? error : undefined
+        );
       } finally {
         setLoading(false);
       }
@@ -135,7 +172,9 @@ export function AccountGroupSwitcher({
     setActiveGroup(group);
     // ذخیره در localStorage
     localStorage.setItem("selected-account-group", group.id);
+    setGroupId(group.id);
     onChange?.(group.id);
+    router.refresh();
   };
 
   // اگر در حال بارگذاری است یا هیچ گروهی وجود ندارد
@@ -145,7 +184,7 @@ export function AccountGroupSwitcher({
         variant="outline"
         disabled
         className={cn(
-          compact ? "h-9 px-3 gap-2 max-w-[160px]" : "w-[200px]",
+          compact ? "h-9 px-3 gap-2 max-w-[200px]" : "w-[250px]",
           className
         )}
       >
@@ -167,7 +206,7 @@ export function AccountGroupSwitcher({
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-9 px-3 gap-2 max-w-[160px]">
+          <Button variant="outline" className="h-9 px-3 gap-2 max-w-[250px]">
             <GroupIcon className="h-4 w-4 shrink-0" />
             <span className="text-xs font-medium truncate">
               {activeGroup.title}
@@ -175,12 +214,14 @@ export function AccountGroupSwitcher({
             <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[200px]" align="end">
+        <DropdownMenuContent className="w-[250px]" align="end">
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             {t("accountGroup.selectGroup") || "انتخاب گروه حساب"}
           </DropdownMenuLabel>
           {accountGroups.map((group) => {
-            const Icon = group.icon ? ICON_MAP[group.icon] || Building2 : Building2;
+            const Icon = group.icon
+              ? ICON_MAP[group.icon] || Building2
+              : Building2;
             return (
               <DropdownMenuItem
                 key={group.id}
@@ -220,8 +261,9 @@ export function AccountGroupSwitcher({
         <Button
           variant="outline"
           role="combobox"
+          size="lg"
           className={cn(
-            "w-[200px] justify-between",
+            "justify-between",
             "data-[state=open]:bg-accent",
             className
           )}
@@ -230,7 +272,9 @@ export function AccountGroupSwitcher({
             <div
               className="flex h-7 w-7 items-center justify-center rounded-md border bg-background shrink-0"
               style={
-                activeGroup.color ? { borderColor: activeGroup.color } : undefined
+                activeGroup.color
+                  ? { borderColor: activeGroup.color }
+                  : undefined
               }
             >
               <GroupIcon
@@ -252,12 +296,15 @@ export function AccountGroupSwitcher({
           <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[200px]" align="start">
+      <DropdownMenuContent className="w-full" align="start">
         <DropdownMenuLabel className="text-xs text-muted-foreground">
           {t("accountGroup.selectGroup") || "انتخاب گروه حساب"}
         </DropdownMenuLabel>
+
         {accountGroups.map((group) => {
-          const Icon = group.icon ? ICON_MAP[group.icon] || Building2 : Building2;
+          const Icon = group.icon
+            ? ICON_MAP[group.icon] || Building2
+            : Building2;
           return (
             <DropdownMenuItem
               key={group.id}

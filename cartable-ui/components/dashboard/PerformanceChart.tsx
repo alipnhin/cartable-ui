@@ -12,6 +12,7 @@ import {
 import type { TransactionStatusSummary } from "@/types/dashboard";
 import { formatNumber } from "@/lib/utils";
 import useTranslation from "@/hooks/useTranslation";
+import { lowerFirst } from "@/lib/helpers";
 
 interface PerformanceChartProps {
   data: TransactionStatusSummary[];
@@ -107,7 +108,9 @@ export default function PerformanceChart({
                         <Icon className={`w-3.5 h-3.5 ${config.iconColor}`} />
                       </div>
                       <span className="text-sm font-medium text-foreground">
-                        {item.statusTitle}
+                        {t(
+                          `transactions.statusLabels.${lowerFirst(item.status)}`
+                        )}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">

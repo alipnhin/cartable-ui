@@ -712,7 +712,7 @@ export default function PaymentOrderDetailPage() {
   return (
     <>
       <FixHeader returnUrl="/payment-orders">
-        <Button variant="outline" onClick={reloadPage} className="gap-2">
+        <Button variant="dashed" onClick={reloadPage} className="gap-2">
           <RefreshCw />
           {t("common.refresh")}
         </Button>
@@ -736,10 +736,10 @@ export default function PaymentOrderDetailPage() {
         {/* تب‌های جزئیات */}
         <Tabs defaultValue="statistics" className="w-full space-y-6">
           {/* Tab Navigation */}
-          <div className="rounded-lg border bg-card p-4">
+          <div className="rounded-lg border bg-card py-3 px-2">
             <TabsList
-              className="w-full justify-center bg-transparent h-auto gap-3 flex-wrap"
-              size="lg"
+              className="w-full justify-center bg-transparent h-auto gap-2 flex-wrap"
+              size="md"
               variant="button"
             >
               <TabsTrigger value="statistics">

@@ -31,27 +31,19 @@ export const getApproverCartable = async (
     accountGroupId,
   } = params;
 
-  // ساخت query parameters
-  const queryParams = new URLSearchParams({
-    pageNumber: pageNumber.toString(),
-    pageSize: pageSize.toString(),
-    orderBy,
-  });
-
-  // اگر bankGatewayId وجود داشت، اضافه کن
-  if (bankGatewayId) {
-    queryParams.append("bankGatewayId", bankGatewayId);
-  }
-
-  // اگر accountGroupId وجود داشت و "all" نبود، اضافه کن
-  // اگر "all" باشد یا undefined، null ارسال می‌شود
+  const requestBody: any = {
+    pageNumber,
+    pageSize,
+  };
+  if (orderBy) requestBody.orderBy = orderBy;
+  if (bankGatewayId) requestBody.bankGatewayId = bankGatewayId;
   if (accountGroupId && accountGroupId !== "all") {
-    queryParams.append("accountGroupId", accountGroupId);
+    requestBody.accountGroupId = accountGroupId;
   }
 
   const response = await apiClient.post<PaymentListResponse>(
-    `/v1-Cartable/Approver/ApproverCartable?${queryParams.toString()}`,
-    {},
+    `/v1-Cartable/Approver/ApproverCartable`,
+    requestBody,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,

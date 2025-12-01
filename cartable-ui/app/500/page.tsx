@@ -31,7 +31,7 @@ export default function ServerErrorPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-destructive/5 to-background p-4">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-background via-destructive/5 to-background p-4">
       <div className="w-full max-w-2xl">
         {/* Icon و عنوان */}
         <div className="text-center">
@@ -40,11 +40,10 @@ export default function ServerErrorPage() {
           </div>
 
           <h1 className="mb-2 text-6xl font-black text-foreground">500</h1>
-          <h2 className="mb-4 text-2xl font-bold text-foreground">
-            خطای سرور
-          </h2>
+          <h2 className="mb-4 text-2xl font-bold text-foreground">خطای سرور</h2>
           <p className="mb-8 text-lg text-muted-foreground">
-            متأسفانه مشکلی در سرور رخ داده است. لطفاً چند لحظه دیگر دوباره تلاش کنید
+            متأسفانه مشکلی در سرور رخ داده است. لطفاً چند لحظه دیگر دوباره تلاش
+            کنید
           </p>
         </div>
 
@@ -56,15 +55,11 @@ export default function ServerErrorPage() {
           <ul className="space-y-3 text-sm text-muted-foreground">
             <li className="flex items-start gap-2">
               <span className="mt-0.5 text-destructive">•</span>
-              <span>
-                یک خطای غیرمنتظره در سمت سرور رخ داده است
-              </span>
+              <span>یک خطای غیرمنتظره در سمت سرور رخ داده است</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5 text-destructive">•</span>
-              <span>
-                تیم فنی ما به صورت خودکار از این خطا مطلع شده‌اند
-              </span>
+              <span>تیم فنی ما به صورت خودکار از این خطا مطلع شده‌اند</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5 text-destructive">•</span>
@@ -125,7 +120,7 @@ export default function ServerErrorPage() {
           <p className="text-center text-sm text-muted-foreground">
             اگر مشکل همچنان ادامه دارد، لطفاً با{" "}
             <a
-              href="mailto:support@example.com"
+              href="mailto:support@etadbir.com"
               className="font-medium text-primary hover:underline"
             >
               پشتیبانی فنی

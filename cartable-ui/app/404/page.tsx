@@ -35,7 +35,7 @@ export default function NotFoundPage() {
   ];
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-primary/5 to-background p-4">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-background via-primary/5 to-background p-4">
       <div className="w-full max-w-2xl">
         {/* Animation و آیکون */}
         <div className="text-center">
@@ -116,7 +116,7 @@ export default function NotFoundPage() {
           <p className="text-sm text-muted-foreground">
             اگر فکر می‌کنید این یک خطاست،{" "}
             <a
-              href="mailto:support@example.com"
+              href="mailto:support@etadbir.com"
               className="font-medium text-primary hover:underline"
             >
               به ما اطلاع دهید

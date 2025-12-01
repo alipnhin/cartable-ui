@@ -1,7 +1,7 @@
 import { LucideIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { formatNumber } from "@/lib/utils";
-
+import useTranslation from "@/hooks/useTranslation";
 interface StatCardProps {
   title: string;
   value: number;
@@ -35,7 +35,7 @@ export default function StatCard({
 }: StatCardProps) {
   const formattedAmount = formatNumber(amount);
   const formattedValue = formatNumber(value);
-
+  const { t, locale } = useTranslation();
   return (
     <Card
       className="hover:shadow-lg transition-all duration-300 animate-fade-in border-2 hover:border-primary/20"
@@ -44,7 +44,9 @@ export default function StatCard({
       <div className="p-5">
         {/* Header with icon and badge */}
         <div className="flex items-start justify-between mb-4">
-          <div className={`w-11 h-11 rounded-xl ${iconBgColor} flex items-center justify-center`}>
+          <div
+            className={`w-11 h-11 rounded-xl ${iconBgColor} flex items-center justify-center`}
+          >
             <Icon className={`w-5 h-5 ${iconColor}`} />
           </div>
           {badge && (
@@ -77,7 +79,9 @@ export default function StatCard({
           <span className="text-sm font-semibold text-foreground">
             {formattedAmount}
           </span>
-          <span className="text-xs text-muted-foreground ms-1">ریال</span>
+          <span className="text-xs text-muted-foreground ms-1">
+            {t("statistics.rial")}
+          </span>
         </div>
       </div>
     </Card>

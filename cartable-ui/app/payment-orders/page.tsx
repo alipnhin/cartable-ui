@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import StatisticCard, { StatisticCardProps } from "./components/statistic-card";
 import { searchPaymentOrders } from "@/services/paymentOrdersService";
 import { mapPaymentListDtosToPaymentOrders } from "@/lib/api-mappers";
+import { useAccountGroupStore } from "@/store/account-group-store";
 
 export default function PaymentOrdersPage() {
   const { t, locale } = useTranslation();
@@ -39,7 +40,7 @@ export default function PaymentOrdersPage() {
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-
+  const groupId = useAccountGroupStore((s) => s.groupId);
   /**
    * State برای sorting سمت سرور
    */
@@ -90,9 +91,10 @@ export default function PaymentOrdersPage() {
       setIsLoading(true);
       try {
         // خواندن accountGroupId از localStorage
-        const savedGroupId = typeof window !== "undefined"
-          ? localStorage.getItem("selected-account-group")
-          : null;
+        const savedGroupId =
+          typeof window !== "undefined"
+            ? localStorage.getItem("selected-account-group")
+            : null;
 
         // ساخت پارامترهای فیلتر برای API
         const apiFilters: any = {
@@ -181,6 +183,7 @@ export default function PaymentOrdersPage() {
     statusFilter, // statusFilter حالا string است نه array
     dateFrom,
     dateTo,
+    groupId,
     // sorting نباید مستقیماً در dependency باشد چون array است
     JSON.stringify(sorting),
     // toast و t را حذف کردیم چون باعث re-render می‌شوند
