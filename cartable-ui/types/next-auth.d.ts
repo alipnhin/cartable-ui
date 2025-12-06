@@ -15,6 +15,22 @@ declare module "next-auth" {
     /** User information */
     user: {
       id: string;
+      /** نام کوچک */
+      given_name?: string;
+      /** نام خانوادگی */
+      family_name?: string;
+      /** نام کاربری */
+      preferred_username?: string;
+      /** شماره تماس */
+      phone_number?: string;
+      /** وضعیت تایید شماره تماس */
+      phone_number_verified?: boolean;
+      /** نقش‌های کاربر */
+      role?: string | string[];
+      /** ایمیل تایید شده */
+      email_verified?: boolean;
+      /** کد ملی */
+      NationalCode?: string;
     } & DefaultSession["user"];
   }
 
@@ -24,6 +40,22 @@ declare module "next-auth" {
    */
   interface User {
     id: string;
+    /** نام کوچک */
+    given_name?: string;
+    /** نام خانوادگی */
+    family_name?: string;
+    /** نام کاربری */
+    preferred_username?: string;
+    /** شماره تماس */
+    phone_number?: string;
+    /** وضعیت تایید شماره تماس */
+    phone_number_verified?: boolean;
+    /** نقش‌های کاربر */
+    role?: string | string[];
+    /** ایمیل تایید شده */
+    email_verified?: boolean;
+    /** کد ملی */
+    NationalCode?: string;
   }
 }
 

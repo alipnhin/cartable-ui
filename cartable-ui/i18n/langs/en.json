@@ -57,12 +57,15 @@
     },
     "labels": {
       "name": "Name",
+      "fullName": "Full Name",
       "email": "Email",
       "password": "Password",
       "username": "Username",
       "phone": "Phone",
-      "address": "Address"
+      "address": "Address",
+      "nationalCode": "National Code"
     },
+    "notAvailable": "Not Available",
     "selectAll": "Select All",
     "select": "Select",
     "actions": "Actions",
@@ -109,6 +112,7 @@
     "logout": "Logout",
     "changeLanguage": "Change Language",
     "changeTheme": "Change Theme",
+    "appearance": "Appearance",
     "darkMode": "Dark Mode",
     "lightMode": "Light Mode"
   },
@@ -801,5 +805,27 @@
     "installNote": "After installation, you can launch the app like other apps from your phone's home screen.",
     "understood": "Got it",
     "alreadyInstalled": "App is already installed"
+  },
+  "profile": {
+    "editProfile": "Edit Profile",
+    "memberSince": "Member Since",
+    "personalInformation": "Personal Information",
+    "personalInformationDescription": "Your personal information from the authentication system",
+    "accountSecurity": "Account Security",
+    "accountSecurityDescription": "Account security management is currently not available",
+    "accountSecurityNotAvailable": "This section is currently disabled",
+    "changePassword": "Change Password",
+    "changePasswordDescription": "Change your account password",
+    "changePasswordNotAvailable": "Password changes are managed through Identity Server",
+    "editProfileNotAvailable": "Profile editing is managed through Identity Server",
+    "twoFactorAuthentication": "Two-Factor Authentication",
+    "twoFactorAuthenticationDescription": "Add extra security with two-factor authentication",
+    "disabled": "Disabled",
+    "enabled": "Enabled",
+    "updateSuccess": "Information updated successfully",
+    "updateError": "Error updating information",
+    "phoneVerified": "Phone Verified",
+    "emailVerified": "Email Verified",
+    "allRoles": "All Roles"
   }
 }

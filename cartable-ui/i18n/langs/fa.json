@@ -60,12 +60,15 @@
     },
     "labels": {
       "name": "نام",
+      "fullName": "نام و نام خانوادگی",
       "email": "ایمیل",
       "password": "رمز عبور",
       "username": "نام کاربری",
       "phone": "تلفن",
-      "address": "آدرس"
+      "address": "آدرس",
+      "nationalCode": "کد ملی"
     },
+    "notAvailable": "در دسترس نیست",
     "selectAll": "انتخاب همه",
     "select": "انتخاب",
     "actions": "عملیات",
@@ -113,6 +116,7 @@
     "logout": "خروج",
     "changeLanguage": "تغییر زبان",
     "changeTheme": "تغییر تم",
+    "appearance": "ظاهر",
     "darkMode": "حالت تاریک",
     "lightMode": "حالت روشن"
   },
@@ -876,5 +880,27 @@
     "admin": "ادمین",
     "unauthorized": "کاربر غیرمجاز",
     "noRole": "بدون نقش"
+  },
+  "profile": {
+    "editProfile": "ویرایش پروفایل",
+    "memberSince": "عضویت از",
+    "personalInformation": "اطلاعات شخصی",
+    "personalInformationDescription": "اطلاعات شخصی شما از سیستم احراز هویت",
+    "accountSecurity": "امنیت حساب",
+    "accountSecurityDescription": "مدیریت امنیت حساب در حال حاضر در دسترس نیست",
+    "accountSecurityNotAvailable": "این بخش در حال حاضر غیرفعال است",
+    "changePassword": "تغییر رمز عبور",
+    "changePasswordDescription": "رمز عبور حساب خود را تغییر دهید",
+    "changePasswordNotAvailable": "تغییر رمز عبور از طریق Identity Server انجام می‌شود",
+    "editProfileNotAvailable": "ویرایش پروفایل از طریق Identity Server انجام می‌شود",
+    "twoFactorAuthentication": "احراز هویت دو مرحله‌ای",
+    "twoFactorAuthenticationDescription": "افزایش امنیت با احراز هویت دو مرحله‌ای",
+    "disabled": "غیرفعال",
+    "enabled": "فعال",
+    "updateSuccess": "اطلاعات با موفقیت بروزرسانی شد",
+    "updateError": "خطا در بروزرسانی اطلاعات",
+    "phoneVerified": "تلفن تایید شده",
+    "emailVerified": "ایمیل تایید شده",
+    "allRoles": "تمام نقش‌ها"
   }
 }

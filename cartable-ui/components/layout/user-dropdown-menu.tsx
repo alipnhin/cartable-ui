@@ -1,9 +1,17 @@
 "use client";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { I18N_LANGUAGES, Language } from "@/i18n/config";
-import { FileText, Globe, LogOut, Moon, Palette, User } from "lucide-react";
+import {
+  FileText,
+  Globe,
+  LogOut,
+  Moon,
+  Sun,
+  Palette,
+  User,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +29,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSession } from "next-auth/react";
@@ -37,41 +44,89 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const { data: session } = useSession();
   const { colorTheme, colorThemeId, setColorTheme, availableThemes } =
     useColorTheme();
+  const [userInfo, setUserInfo] = useState<{
+    fullName: string;
+    email: string;
+    image: string;
+  } | null>(null);
 
-  // اطلاعات کاربر از session
-  const userName = session?.user?.name || "کاربر";
-  const userEmail = session?.user?.email || "";
-  const userImage = session?.user?.image || "/media/avatars/blank.jpg";
+  // دریافت اطلاعات کامل کاربر
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (!session?.accessToken) return;
+
+      try {
+        const response = await fetch("/api/user/profile", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUserInfo({
+            fullName:
+              data.given_name && data.family_name
+                ? `${data.given_name} ${data.family_name}`
+                : data.name || session?.user?.name || "کاربر",
+            email: data.email || session?.user?.email || "",
+            image:
+              data.picture ||
+              session?.user?.image ||
+              "/media/avatars/blank.jpg",
+          });
+        } else {
+          // Fallback به session
+          setUserInfo({
+            fullName: session?.user?.name || "کاربر",
+            email: session?.user?.email || "",
+            image: session?.user?.image || "/media/avatars/blank.jpg",
+          });
+        }
+      } catch (error) {
+        // Fallback به session
+        setUserInfo({
+          fullName: session?.user?.name || "کاربر",
+          email: session?.user?.email || "",
+          image: session?.user?.image || "/media/avatars/blank.jpg",
+        });
+      }
+    };
+
+    if (session) {
+      fetchUserInfo();
+    }
+  }, [session]);
 
   const handleLanguage = (lang: Language) => {
     changeLanguage(lang.code);
     if (isMobile) setOpen(false);
   };
 
-  const handleThemeToggle = (checked: boolean) => {
-    setTheme(checked ? "dark" : "light");
-  };
-
   const handleLogout = () => {
     router.push("/auth/logout");
   };
+
+  const userName = userInfo?.fullName || session?.user?.name || "کاربر";
+  const userEmail = userInfo?.email || session?.user?.email || "";
+  const userImage =
+    userInfo?.image || session?.user?.image || "/media/avatars/blank.jpg";
 
   // Mobile Drawer Version
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[85vh]">
+        <DrawerContent className="max-h-[95vh]">
           <div className="p-6 overflow-y-auto">
             {/* Header */}
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-4 mb-6 p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5">
               <img
-                className="w-14 h-14 rounded-full border-2 border-border"
+                className="w-16 h-16 rounded-2xl border-2 border-primary/20 shadow-lg"
                 src={userImage}
                 alt="User avatar"
               />
               <div className="flex flex-col flex-1">
-                <div className="text-base font-semibold">{userName}</div>
+                <div className="text-lg font-bold">{userName}</div>
                 {userEmail && (
                   <div className="text-sm text-muted-foreground">
                     {userEmail}
@@ -81,76 +136,68 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             </div>
 
             {/* Menu Items */}
-            <div className="space-y-1 mb-4">
+            <div className="space-y-2 mb-6">
               <Link
-                href="#"
-                className="flex items-center gap-3 p-4 rounded-lg hover:bg-muted active:bg-muted/80 transition-colors"
+                href="/profile"
+                className="flex items-center gap-3 p-4 rounded-xl hover:bg-muted/80 active:bg-muted transition-all"
                 onClick={() => setOpen(false)}
               >
-                <User className="h-5 w-5" />
-                <span className="text-base">{t("userMenu.myProfile")}</span>
-              </Link>
-
-              <Link
-                href="#"
-                className="flex items-center gap-3 p-4 rounded-lg hover:bg-muted active:bg-muted/80 transition-colors"
-                onClick={() => setOpen(false)}
-              >
-                <FileText className="h-5 w-5" />
-                <span className="text-base">{t("userMenu.myAccount")}</span>
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+                <span className="text-base font-medium">
+                  {t("userMenu.myProfile")}
+                </span>
               </Link>
             </div>
 
             {/* Language Selection */}
-            <div className="mb-4">
-              <div className="text-sm font-medium text-muted-foreground mb-2 px-4">
+            <div className="mb-6">
+              <div className="text-sm font-semibold text-foreground mb-3 px-2">
                 {t("userMenu.changeLanguage")}
               </div>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {I18N_LANGUAGES.map((item) => (
                   <button
                     key={item.code}
                     onClick={() => handleLanguage(item)}
-                    className={`w-full flex items-center gap-3 p-4 rounded-lg transition-colors ${
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                       language.code === item.code
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-muted active:bg-muted/80"
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "hover:bg-muted/80 active:bg-muted"
                     }`}
                   >
                     <img
                       src={item.flag}
-                      className="w-6 h-6 rounded-full"
+                      className="w-7 h-7 rounded-full shadow-sm"
                       alt={item.name}
                     />
-                    <span className="text-base flex-1 text-start">
+                    <span className="text-base flex-1 text-start font-medium">
                       {item.name}
                     </span>
-                    {language.code === item.code && (
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                    )}
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Theme Selection */}
-            <div className="mb-4">
-              <div className="text-sm font-medium text-muted-foreground mb-2 px-4">
+            <div className="mb-6">
+              <div className="text-sm font-semibold text-foreground mb-3 px-2">
                 {t("userMenu.changeTheme")}
               </div>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {availableThemes.map((themeItem) => (
                   <button
                     key={themeItem.id}
                     onClick={() => setColorTheme(themeItem.id)}
-                    className={`w-full flex items-center gap-3 p-4 rounded-lg transition-colors ${
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                       colorThemeId === themeItem.id
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-muted active:bg-muted/80"
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "hover:bg-muted/80 active:bg-muted"
                     }`}
                   >
                     <div
-                      className="w-6 h-6 rounded-full border border-border"
+                      className="w-7 h-7 rounded-full border-2 border-border shadow-sm"
                       style={{
                         background: `linear-gradient(135deg, ${
                           themeItem.previewColor
@@ -160,34 +207,54 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
                         } 50%)`,
                       }}
                     />
-                    <span className="text-base flex-1 text-start">
+                    <span className="text-base flex-1 text-start font-medium">
                       {t(themeItem.nameKey)}
                     </span>
-                    {colorThemeId === themeItem.id && (
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                    )}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Dark Mode Toggle */}
-            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 mb-4">
-              <div className="flex items-center gap-3">
-                <Moon className="h-5 w-5" />
-                <span className="text-base">{t("userMenu.darkMode")}</span>
+            {/* Dark/Light Mode Toggle */}
+            <div className="mb-6">
+              <div className="text-sm font-semibold text-foreground mb-3 px-2">
+                {t("userMenu.appearance")}
               </div>
-              <Switch
-                checked={theme === "dark"}
-                onCheckedChange={handleThemeToggle}
-              />
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setTheme("light")}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
+                    theme === "light"
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-muted/50 hover:bg-muted"
+                  }`}
+                >
+                  <Sun className="h-6 w-6" />
+                  <span className="text-sm font-medium">
+                    {t("userMenu.lightMode")}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setTheme("dark")}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
+                    theme === "dark"
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-muted/50 hover:bg-muted"
+                  }`}
+                >
+                  <Moon className="h-6 w-6" />
+                  <span className="text-sm font-medium">
+                    {t("userMenu.darkMode")}
+                  </span>
+                </button>
+              </div>
             </div>
 
             {/* Logout Button */}
             <Button
               size="lg"
               variant="primary"
-              className="w-full gap-2"
+              className="w-full gap-2 rounded-xl h-14 text-base font-semibold shadow-lg"
               onClick={handleLogout}
             >
               <LogOut className="h-5 w-5" />
@@ -203,21 +270,21 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   return (
     <DropdownMenu dir={language.direction}>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64" side="bottom" align="end">
+      <DropdownMenuContent className="w-72" side="bottom" align="end">
         {/* Header */}
-        <div className="flex items-center justify-between p-3">
-          <div className="flex items-center gap-2">
-            <img
-              className="w-9 h-9 rounded-full border border-border"
-              src={userImage}
-              alt="User avatar"
-            />
-            <div className="flex flex-col">
-              <div className="text-sm text-mono font-semibold">{userName}</div>
-              {userEmail && (
-                <div className="text-xs text-muted-foreground">{userEmail}</div>
-              )}
-            </div>
+        <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-t-lg">
+          <img
+            className="w-12 h-12 rounded-xl border-2 border-primary/20 shadow-md"
+            src={userImage}
+            alt="User avatar"
+          />
+          <div className="flex flex-col flex-1 min-w-0">
+            <div className="text-sm font-bold truncate">{userName}</div>
+            {userEmail && (
+              <div className="text-xs text-muted-foreground truncate">
+                {userEmail}
+              </div>
+            )}
           </div>
         </div>
 
@@ -225,35 +292,25 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
 
         {/* Menu Items */}
         <DropdownMenuItem asChild>
-          <Link href="#" className="flex items-center gap-2">
-            <User />
+          <Link href="/profile" className="flex items-center gap-2">
+            <User className="w-4 h-4" />
             {t("userMenu.myProfile")}
           </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuItem asChild>
-          <Link href="#" className="flex items-center gap-2">
-            <FileText />
-            {t("userMenu.myAccount")}
-          </Link>
-        </DropdownMenuItem>
-
-        {/* Language Submenu with Radio Group */}
+        {/* Language Submenu */}
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="flex items-center gap-2 **:data-[slot=dropdown-menu-sub-trigger-indicator]:hidden hover:**:data-[slot=badge]:border-input data-[state=open]:**:data-[slot=badge]:border-input">
-            <Globe />
-            <span className="flex items-center justify-between gap-2 grow relative">
+          <DropdownMenuSubTrigger className="flex items-center gap-2">
+            <Globe className="w-4 h-4" />
+            <span className="flex items-center justify-between gap-2 grow">
               {t("userMenu.changeLanguage")}
-              <Badge
-                variant="outline"
-                className="absolute end-0 top-1/2 -translate-y-1/2"
-              >
-                {language.name}
+              <Badge variant="outline" className="gap-1">
                 <img
                   src={language.flag}
                   className="w-3.5 h-3.5 rounded-full"
                   alt={language.name}
                 />
+                {language.name}
               </Badge>
             </span>
           </DropdownMenuSubTrigger>
@@ -285,16 +342,13 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 
-        {/* Theme Submenu with Radio Group */}
+        {/* Theme Submenu */}
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="flex items-center gap-2 **:data-[slot=dropdown-menu-sub-trigger-indicator]:hidden hover:**:data-[slot=badge]:border-input data-[state=open]:**:data-[slot=badge]:border-input">
-            <Palette />
-            <span className="flex items-center justify-between gap-2 grow relative">
+          <DropdownMenuSubTrigger className="flex items-center gap-2">
+            <Palette className="w-4 h-4" />
+            <span className="flex items-center justify-between gap-2 grow">
               {t("userMenu.changeTheme")}
-              <Badge
-                variant="outline"
-                className="absolute end-0 top-1/2 -translate-y-1/2"
-              >
+              <Badge variant="outline">
                 <div
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: colorTheme.previewColor }}
@@ -331,24 +385,40 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 
+        {/* Dark/Light Mode Submenu */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center gap-2">
+            {theme === "dark" ? (
+              <Moon className="w-4 h-4" />
+            ) : (
+              <Sun className="w-4 h-4" />
+            )}
+            <span>{t("userMenu.appearance")}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-40">
+            <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+              <DropdownMenuRadioItem
+                value="light"
+                className="flex items-center gap-2"
+              >
+                <Sun className="w-4 h-4" />
+                {t("userMenu.lightMode")}
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem
+                value="dark"
+                className="flex items-center gap-2"
+              >
+                <Moon className="w-4 h-4" />
+                {t("userMenu.darkMode")}
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+
         <DropdownMenuSeparator />
 
-        {/* Footer */}
-        <DropdownMenuItem
-          className="flex items-center gap-2"
-          onSelect={(event) => event.preventDefault()}
-        >
-          <Moon />
-          <div className="flex items-center gap-2 justify-between grow">
-            {t("userMenu.darkMode")}
-            <Switch
-              size="sm"
-              checked={theme === "dark"}
-              onCheckedChange={handleThemeToggle}
-            />
-          </div>
-        </DropdownMenuItem>
-        <div className="p-2 mt-1">
+        {/* Logout Button */}
+        <div className="p-2">
           <Button
             size="sm"
             variant="primary"
