@@ -7,7 +7,13 @@ import { OrderCard, OrderCardSkeleton } from "./components/order-card";
 import { DataTable } from "./components/data-table";
 import { createColumns } from "./components/columns";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Download, X, ClipboardCheck } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Download,
+  X,
+  ClipboardCheck,
+} from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
@@ -74,9 +80,10 @@ export default function ManagerCartablePage() {
       setIsLoading(true);
       try {
         // خواندن accountGroupId از localStorage
-        const savedGroupId = typeof window !== "undefined"
-          ? localStorage.getItem("selected-account-group")
-          : null;
+        const savedGroupId =
+          typeof window !== "undefined"
+            ? localStorage.getItem("selected-account-group")
+            : null;
 
         const response = await getManagerCartable(
           {
@@ -116,9 +123,10 @@ export default function ManagerCartablePage() {
     setIsLoading(true);
     try {
       // خواندن accountGroupId از localStorage
-      const savedGroupId = typeof window !== "undefined"
-        ? localStorage.getItem("selected-account-group")
-        : null;
+      const savedGroupId =
+        typeof window !== "undefined"
+          ? localStorage.getItem("selected-account-group")
+          : null;
 
       const response = await getManagerCartable(
         {
@@ -411,12 +419,17 @@ export default function ManagerCartablePage() {
         );
       }
 
-      const action = otpDialog.type === "approve" ? t("managerCartable.approved") : t("managerCartable.canceled");
+      const action =
+        otpDialog.type === "approve"
+          ? t("managerCartable.approved")
+          : t("managerCartable.canceled");
       const count = otpDialog.orderIds.length;
 
       toast({
         title: t("toast.success"),
-        description: `${count} ${t("managerCartable.orderSuccessfully")} ${action}`,
+        description: `${count} ${t(
+          "managerCartable.orderSuccessfully"
+        )} ${action}`,
         variant: "success",
       });
 
@@ -547,7 +560,7 @@ export default function ManagerCartablePage() {
       label: `${t("managerCartable.totalTransactions")}`,
     },
     {
-      number: `${new Intl.NumberFormat("fa-IR").format(
+      number: `${new Intl.NumberFormat().format(
         orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0)
       )}`,
       label: `${t("managerCartable.totalAmount")}`,
@@ -634,16 +647,18 @@ export default function ManagerCartablePage() {
                   />
                 ))}
                 {orders.length === 0 && (
-                  <div className="flex flex-col items-center gap-3 py-16">
-                    <ClipboardCheck className="h-12 w-12 text-muted-foreground/50" />
-                    <div className="space-y-1 text-center">
-                      <p className="font-medium text-muted-foreground">
-                        {t("managerCartable.noOrders")}
-                      </p>
-                      <p className="text-sm text-muted-foreground/70">
-                        {t("managerCartable.noOrdersDescription")}
-                      </p>
+                  <div className="flex flex-col items-center py-20 px-4 text-center mt-10">
+                    <div className="p-4 rounded-2xl bg-muted/30">
+                      <ClipboardCheck className="h-10 w-10 text-muted-foreground" />
                     </div>
+
+                    <h3 className="mt-6 text-lg font-semibold text-foreground/80">
+                      {t("managerCartable.noOrders")}
+                    </h3>
+
+                    <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                      {t("managerCartable.noOrdersDescription")}
+                    </p>
                   </div>
                 )}
               </>
@@ -656,7 +671,7 @@ export default function ManagerCartablePage() {
       {isMobile && hasSelection && (
         <div
           className={cn(
-            "fixed bottom-22 left-0 right-0 z-40 p-4",
+            "fixed bottom-24 left-0 right-0 z-40 p-4",
             "bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80",
             "border-t shadow-lg"
           )}
@@ -677,7 +692,7 @@ export default function ManagerCartablePage() {
                 <X className="h-5 w-5" />
               </Button>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-6">
               <Button
                 size="lg"
                 variant="destructive"

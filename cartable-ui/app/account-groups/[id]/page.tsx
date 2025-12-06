@@ -222,7 +222,7 @@ export default function AccountGroupDetailPage() {
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <div
-                className="flex-shrink-0 flex items-center justify-center w-16 h-16 rounded-xl"
+                className="shrink-0 flex items-center justify-center w-16 h-16 rounded-xl"
                 style={{
                   backgroundColor: `${group.color || "#360185"}20`,
                   color: group.color || "#360185",
@@ -241,7 +241,7 @@ export default function AccountGroupDetailPage() {
                     )}
                   </div>
                   <Badge
-                    variant={group.isEnable ? "success" : "secondary"}
+                    variant={group.isEnable ? "success" : "destructive"}
                     appearance="light"
                   >
                     {group.isEnable ? "فعال" : "غیرفعال"}

@@ -827,10 +827,6 @@ main {
     background-color: var(--muted) !important;
 }
 
-.dark .rmdp-day.rmdp-today span {
-    background-color: var(--primary) !important;
-    color: var(--primary-foreground) !important;
-}
 
 .dark .rmdp-day.rmdp-selected span:not(.highlight) {
     background-color: var(--primary) !important;
@@ -882,6 +878,10 @@ main {
     font-size: 18px !important;
 }
 
+.rmdp-mobile .rmdp-action-button {
+    border-radius: var(--radius-lg) !important;
+}
+
 /* Portal overlay for mobile */
 .rmdp-ep-shadow {
     box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25) !important;
@@ -903,7 +903,7 @@ main {
 }
 
 /* Mobile action buttons */
-.dark .rmdp-action-button {
+.rmdp-action-button {
     color: var(--primary) !important;
 }
 
@@ -914,4 +914,41 @@ main {
 
 .rmdp-mobile .rmdp-action-button {
     font-size: 16px !important;
+}
+
+.rmdp-week-day {
+    color: var(--primary) !important;
+}
+
+
+.rmdp-day.rmdp-selected span:not(.highlight) {
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+}
+
+
+.rmdp-day:not(.rmdp-disabled, .rmdp-day-hidden) span:hover {
+    background-color: var(--primary) !important;
+}
+
+.rmdp-day.rmdp-today span {
+    background-color: color-mix(in oklab, var(--primary) 10%, transparent) !important;
+    color: var(--primary) !important;
+}
+
+.rmdp-day.rmdp-today span:hover {
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+}
+
+.rmdp-arrow-container:hover {
+    background-color: var(--primary) !important;
+}
+
+.rmdp-arrow {
+    border-color: var(--primary) !important;
+}
+
+.rmdp-mobile.rmdp-wrapper {
+    border-color: transparent !important;
 }

@@ -27,10 +27,7 @@ export function MobilePagination({
 
   return (
     <div
-      className={cn(
-        "flex items-center justify-between gap-4 py-4",
-        className
-      )}
+      className={cn("flex items-center justify-between gap-4 py-4", className)}
     >
       {/* دکمه قبلی */}
       <Button
@@ -41,7 +38,7 @@ export function MobilePagination({
         className="flex-1"
       >
         <ChevronRight className="h-4 w-4 me-2" />
-        {t("common.pagination.previous")}
+        {t("common.pagination.previousPage")}
       </Button>
 
       {/* نمایش صفحه فعلی */}
@@ -57,7 +54,7 @@ export function MobilePagination({
         disabled={!canGoNext}
         className="flex-1"
       >
-        {t("common.pagination.next")}
+        {t("common.pagination.nextPage")}
         <ChevronLeft className="h-4 w-4 ms-2" />
       </Button>
     </div>

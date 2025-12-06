@@ -20,9 +20,16 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency, lowerFirst } from "@/lib/helpers";
+import {
+  formatCurrency,
+  formatCurrencyNoneUnit,
+  lowerFirst,
+} from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
-import { TransactionStatusBadge } from "@/components/ui/status-badge";
+import {
+  TransactionStatusBadge,
+  PaymentTypeBadge,
+} from "@/components/ui/status-badge";
 import {
   Eye,
   ChevronLeft,
@@ -862,7 +869,7 @@ export function OrderDetailTransactions({
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
                               {bankCode && (
-                                <BankLogo bankCode={bankCode} size="sm" />
+                                <BankLogo bankCode={bankCode} size="md" />
                               )}
                               <span className="text-sm text-muted-foreground">
                                 #{startIndex + index + 1}
@@ -874,8 +881,8 @@ export function OrderDetailTransactions({
                             />
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-foreground">
-                              {formatCurrency(
+                            <div className="text-xl font-bold text-foreground">
+                              {formatCurrencyNoneUnit(
                                 parseFloat(transaction.amount),
                                 locale
                               )}
@@ -923,7 +930,10 @@ export function OrderDetailTransactions({
                               {t("transactions.typeLabel")}
                             </span>
                             <span className="text-sm font-medium text-foreground">
-                              {getPaymentMethodLabel(transaction.paymentType)}
+                              <PaymentTypeBadge
+                                type={transaction.paymentType as any}
+                                size="sm"
+                              />
                             </span>
                           </div>
 
@@ -1097,7 +1107,10 @@ export function OrderDetailTransactions({
                               </span>
                             </TableCell>
                             <TableCell>
-                              {getPaymentMethodLabel(transaction.paymentType)}
+                              <PaymentTypeBadge
+                                type={transaction.paymentType as any}
+                                size="sm"
+                              />
                             </TableCell>
                             <TableCell className="text-sm font-mono">
                               {transaction.trackingId || "-"}

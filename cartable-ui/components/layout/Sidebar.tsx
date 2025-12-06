@@ -12,6 +12,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { useMemo, useState, useTransition } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ import { AccountGroupSwitcher } from "@/components/common/account-group-selector
 import useTranslation from "@/hooks/useTranslation";
 import { useMenuCounts } from "@/hooks/useMenuCounts";
 import { useNavigationProgress } from "@/providers/navigation-progress-provider";
+import { toAbsoluteUrl } from "@/lib/helpers";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -126,7 +128,9 @@ export function Sidebar({
                   </span>
                   {item.badge && item.badge > 0 && (
                     <Badge
-                      variant={isActive || isPendingThis ? "secondary" : "destructive"}
+                      variant={
+                        isActive || isPendingThis ? "secondary" : "destructive"
+                      }
                       className="ms-auto rounded-full h-5 min-w-5 text-xs"
                     >
                       {item.badge > 9 ? "9+" : item.badge}
@@ -158,11 +162,19 @@ export function Sidebar({
 
           {/* App Info */}
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-muted/50 border">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-sm font-bold text-primary-foreground">ک</span>
+            <div className="w-9 h-9 rounded-lg  flex items-center justify-center">
+              <Image
+                src={toAbsoluteUrl("/media/logo.png")}
+                alt="App Logo"
+                width={40}
+                height={40}
+                className="object-contain"
+              />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground truncate">{t("app.title")}</p>
+              <p className="text-sm font-semibold text-foreground truncate">
+                {t("app.title")}
+              </p>
               <p className="text-xs text-muted-foreground">
                 {t("app.version")} 1.0.0
               </p>

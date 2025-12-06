@@ -105,7 +105,7 @@ function MinimalBottomDock({ menuItems }: { menuItems: MenuItem[] }) {
       <div
         className="relative bg-card border-t border-border/50 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.3)]"
         style={{
-          paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
+          paddingBottom: "max(env(safe-area-inset-bottom), 1.75rem)",
           paddingTop: "0.75rem",
         }}
       >
@@ -121,9 +121,9 @@ function MinimalBottomDock({ menuItems }: { menuItems: MenuItem[] }) {
                 onClick={() => handleNavigation(item.route)}
                 disabled={isPending}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-[72px] min-h-[56px] transition-all duration-300 ease-out group",
+                  "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-[72px] min-h-14 transition-all duration-300 ease-out group",
                   "active:scale-90",
-                  "after:content-[''] after:absolute after:inset-[-8px]",
+                  "after:content-[''] after:absolute after:-inset-2",
                   isPending && !isPendingThis && "opacity-40"
                 )}
               >
@@ -210,7 +210,10 @@ function FloatingBottomDock({
   const [isPending, startTransition] = useTransition();
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
-  const centerIndex = useMemo(() => Math.floor(menuItems.length / 2), [menuItems]);
+  const centerIndex = useMemo(
+    () => Math.floor(menuItems.length / 2),
+    [menuItems]
+  );
   const CenterIcon = menuItems[centerIndex]?.icon || Plus;
 
   const handleNavigation = (route: string) => {
@@ -227,7 +230,7 @@ function FloatingBottomDock({
       <div
         className="relative bg-card/95 backdrop-blur-md border-t border-border/50 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.3)]"
         style={{
-          paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
+          paddingBottom: "max(env(safe-area-inset-bottom), 1.75rem)",
           height: "calc(6rem + env(safe-area-inset-bottom))",
         }}
       >
@@ -269,7 +272,7 @@ function FloatingBottomDock({
             "transition-transform duration-200",
             "border-4 border-background",
             "group",
-            "after:content-[''] after:absolute after:inset-[-8px]"
+            "after:content-[''] after:absolute after:-inset-2"
           )}
           style={{
             boxShadow:
@@ -309,7 +312,7 @@ function ClassicBottomDock({ menuItems }: { menuItems: MenuItem[] }) {
       <div
         className="relative bg-card/95 backdrop-blur-md border-t border-border/50 shadow-[0_-2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_-2px_12px_rgba(0,0,0,0.25)]"
         style={{
-          paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
+          paddingBottom: "max(env(safe-area-inset-bottom), 2rem)",
           paddingTop: "0.75rem",
         }}
       >
@@ -325,10 +328,10 @@ function ClassicBottomDock({ menuItems }: { menuItems: MenuItem[] }) {
                 onClick={() => handleNavigation(item.route)}
                 disabled={isPending}
                 className={cn(
-                  "relative flex flex-col items-center gap-2 px-3 py-2.5 rounded-xl min-w-[68px] min-h-[56px] transition-all duration-300",
+                  "relative flex flex-col items-center gap-2 px-3 py-1 rounded-xl min-w-14 min-h-14 transition-all duration-300",
                   "active:scale-95",
                   // افزایش محدوده تاچ
-                  "after:content-[''] after:absolute after:inset-[-8px]",
+                  "after:content-[''] after:absolute after:-inset-2",
                   isActive || isPendingThis
                     ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
                     : "text-muted-foreground hover:bg-muted/50",
@@ -402,7 +405,7 @@ function MinimalV2BottomDock({ menuItems }: { menuItems: MenuItem[] }) {
       <div
         className="relative bg-card/95 backdrop-blur-md border-t border-border/50 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.3)]"
         style={{
-          paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
+          paddingBottom: "max(env(safe-area-inset-bottom), 1.75rem)",
           paddingTop: "0.75rem",
         }}
       >
@@ -418,9 +421,9 @@ function MinimalV2BottomDock({ menuItems }: { menuItems: MenuItem[] }) {
                 onClick={() => handleNavigation(item.route)}
                 disabled={isPending}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-[72px] min-h-[56px] transition-all duration-300 ease-out group",
+                  "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-[72px] min-h-14 transition-all duration-300 ease-out group",
                   "active:scale-90",
-                  "after:content-[''] after:absolute after:inset-[-8px]",
+                  "after:content-[''] after:absolute after:inset-2",
                   isPending && !isPendingThis && "opacity-40"
                 )}
               >

@@ -44,8 +44,8 @@ export function AppSplashLoader() {
               <Image
                 src={toAbsoluteUrl("/media/logo.png")}
                 alt="App Logo"
-                width={40}
-                height={40}
+                width={64}
+                height={64}
                 className="object-contain"
               />
             </div>

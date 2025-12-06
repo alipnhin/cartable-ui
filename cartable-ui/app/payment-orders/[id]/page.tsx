@@ -734,9 +734,9 @@ export default function PaymentOrderDetailPage() {
         />
 
         {/* تب‌های جزئیات */}
-        <Tabs defaultValue="statistics" className="w-full space-y-6">
+        <Tabs defaultValue="statistics" className="w-full space-y-6 ">
           {/* Tab Navigation */}
-          <div className="rounded-lg border bg-card py-3 px-2">
+          <div className="rounded-lg  bg-card py-3 px-2 transition-all duration-200 hover:shadow-lg hover:border-primary/20 border-2">
             <TabsList
               className="w-full justify-center bg-transparent h-auto gap-2 flex-wrap"
               size="md"
@@ -773,9 +773,9 @@ export default function PaymentOrderDetailPage() {
                 <span className="sm:hidden">
                   {t("paymentOrders.approversShort")}
                 </span>
-                <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
+                {/* <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
                   {orderDetails.approvers.length}
-                </span>
+                </span> */}
               </TabsTrigger>
 
               <TabsTrigger value="history">
@@ -786,9 +786,9 @@ export default function PaymentOrderDetailPage() {
                 <span className="sm:hidden">
                   {t("paymentOrders.historyShort")}
                 </span>
-                <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
+                {/* <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
                   {orderDetails.changeHistory.length}
-                </span>
+                </span> */}
               </TabsTrigger>
             </TabsList>
           </div>

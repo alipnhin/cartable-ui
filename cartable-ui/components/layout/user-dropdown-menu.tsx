@@ -41,7 +41,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   // اطلاعات کاربر از session
   const userName = session?.user?.name || "کاربر";
   const userEmail = session?.user?.email || "";
-  const userImage = session?.user?.image || "/media/avatars/blank.png";
+  const userImage = session?.user?.image || "/media/avatars/blank.jpg";
 
   const handleLanguage = (lang: Language) => {
     changeLanguage(lang.code);

@@ -78,7 +78,7 @@ export function GroupCard({
           </div>
           <div className="h-3 w-px bg-border" />
           <Badge
-            variant={group.isEnable ? "success" : "secondary"}
+            variant={group.isEnable ? "success" : "destructive"}
             appearance="light"
           >
             {group.isEnable ? "فعال" : "غیرفعال"}

@@ -3,7 +3,8 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 // Base URL برای API - از environment variable استفاده می‌شود
 // در صورت عدم وجود، از مقدار پیش‌فرض استفاده می‌شود
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://localhost:8000/api";
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "https://si-lab-tadbirpay.etadbir.com/api";
 
 // Timeout برای درخواست‌های API
 const API_TIMEOUT = parseInt(

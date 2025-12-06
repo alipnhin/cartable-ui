@@ -119,7 +119,10 @@ const nextConfig: NextConfig = {
           allowedOrigins.push(apiOrigin);
         }
       } catch (e) {
-        console.warn("Invalid NEXT_PUBLIC_API_BASE_URL:", process.env.NEXT_PUBLIC_API_BASE_URL);
+        console.warn(
+          "Invalid NEXT_PUBLIC_API_BASE_URL:",
+          process.env.NEXT_PUBLIC_API_BASE_URL
+        );
       }
     }
 
@@ -127,6 +130,7 @@ const nextConfig: NextConfig = {
     if (process.env.NODE_ENV === "development") {
       allowedOrigins.push("http://localhost:*");
       allowedOrigins.push("https://localhost:*");
+      allowedOrigins.push("https://si-lab-tadbirpay.etadbir.com:*");
     }
 
     // Log allowed origins for debugging (only in development)

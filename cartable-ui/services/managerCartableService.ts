@@ -45,7 +45,7 @@ export const getManagerCartable = async (
   }
 
   const response = await apiClient.post<PaymentListResponse>(
-    `/v1-Cartable/Approver/ApproverCartable`,
+    `/v1-Cartable/Manager/ManagerCartable`,
     requestBody,
     {
       headers: {
@@ -67,9 +67,8 @@ export const sendManagerOperationOtp = async (
   request: SendOperationOtpRequest,
   accessToken: string
 ): Promise<string> => {
-  // TODO: تغییر URL به endpoint مخصوص مدیر پس از آماده شدن API
   const response = await apiClient.post<string>(
-    `/v1-Cartable/Approver/SendOperationOtp`,
+    `/v1-Cartable/Manager/SendOperationOtp`,
     request,
     {
       headers: {
@@ -91,9 +90,8 @@ export const managerApprovePayment = async (
   request: ApproveRequest,
   accessToken: string
 ): Promise<string> => {
-  // TODO: تغییر URL به endpoint مخصوص مدیر پس از آماده شدن API
   const response = await apiClient.post<string>(
-    `/v1-Cartable/Approver/Approve`,
+    `/v1-Cartable/Manager/Approve`,
     request,
     {
       headers: {
@@ -115,9 +113,8 @@ export const sendManagerBatchOperationOtp = async (
   request: SendBatchOperationOtpRequest,
   accessToken: string
 ): Promise<string> => {
-  // TODO: تغییر URL به endpoint مخصوص مدیر پس از آماده شدن API
   const response = await apiClient.post<string>(
-    `/v1-Cartable/Approver/SendBatchOperationOtp`,
+    `/v1-Cartable/Manager/SendBatchOperationOtp`,
     request,
     {
       headers: {
@@ -139,9 +136,8 @@ export const managerBatchApprovePayments = async (
   request: BatchApproveRequest,
   accessToken: string
 ): Promise<string> => {
-  // TODO: تغییر URL به endpoint مخصوص مدیر پس از آماده شدن API
   const response = await apiClient.post<string>(
-    `/v1-Cartable/Approver/BatchApprove`,
+    `/v1-Cartable/Manager/BatchApprove`,
     request,
     {
       headers: {

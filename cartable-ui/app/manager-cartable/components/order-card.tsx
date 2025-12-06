@@ -4,7 +4,6 @@ import { useState } from "react";
 import { PaymentOrder, OrderStatus } from "@/types/order";
 import {
   OrderStatusBadge,
-  StatusBadge,
   getPaymentStatusBadge,
 } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
@@ -57,8 +56,6 @@ export function OrderCard({
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
   const [actionsOpen, setActionsOpen] = useState(false);
-  const statusBadge = getPaymentStatusBadge(order.status);
-  const { variant, icon: Icon, translationKey } = statusBadge;
 
   const handleCardClick = () => {
     if (onSelect) {
@@ -113,7 +110,7 @@ export function OrderCard({
             <div className="flex items-center gap-1 shrink-0">
               <OrderStatusBadge status={order.status} size="default" />
               {showActions &&
-                order.status === OrderStatus.WaitingForOwnersApproval && (
+                order.status === OrderStatus.WaitForManagerApproval && (
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -182,7 +179,7 @@ export function OrderCard({
               <DrawerTitle className="text-base">{order.title}</DrawerTitle>
             </DrawerHeader>
 
-            <div className="flex gap-2 p-6">
+            <div className="flex gap-2 p-6 mb-8">
               {onReject && (
                 <Button
                   onClick={handleReject}

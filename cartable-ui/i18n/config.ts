@@ -22,13 +22,13 @@ export const I18N_LANGUAGES: Language[] = [
     direction: "ltr",
     flag: "/media/flags/united-states.svg",
   },
-  {
-    code: "ar",
-    name: "Arabic",
-    shortName: "AR",
-    direction: "rtl",
-    flag: "/media/flags/saudi-arabia.svg",
-  },
+  // {
+  //   code: "ar",
+  //   name: "Arabic",
+  //   shortName: "AR",
+  //   direction: "rtl",
+  //   flag: "/media/flags/saudi-arabia.svg",
+  // },
 ];
 export const DEFAULT_LANGUAGE = "fa";
 export const SUPPORTED_LANGUAGES = I18N_LANGUAGES.map((lang) => lang.code);

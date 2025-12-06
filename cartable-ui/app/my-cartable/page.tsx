@@ -636,7 +636,7 @@ export default function MyCartablePage() {
       label: `${t("myCartable.totalTransactions")}`,
     },
     {
-      number: `${new Intl.NumberFormat("fa-IR").format(
+      number: `${new Intl.NumberFormat().format(
         orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0)
       )}`,
       label: `${t("myCartable.totalAmount")}`,
@@ -724,16 +724,18 @@ export default function MyCartablePage() {
                   />
                 ))}
                 {orders.length === 0 && (
-                  <div className="flex flex-col items-center gap-3 py-16">
-                    <ClipboardCheck className="h-12 w-12 text-muted-foreground/50" />
-                    <div className="space-y-1 text-center">
-                      <p className="font-medium text-muted-foreground">
-                        دستوری برای تأیید وجود ندارد
-                      </p>
-                      <p className="text-sm text-muted-foreground/70">
-                        در حال حاضر هیچ دستور پرداختی در انتظار تأیید شما نیست
-                      </p>
+                  <div className="flex flex-col items-center py-20 px-4 text-center mt-10">
+                    <div className="p-4 rounded-2xl bg-muted/30">
+                      <ClipboardCheck className="h-10 w-10 text-muted-foreground" />
                     </div>
+
+                    <h3 className="mt-6 text-lg font-semibold text-foreground/80">
+                      {t("managerCartable.noOrders")}
+                    </h3>
+
+                    <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                      {t("managerCartable.noOrdersDescription")}
+                    </p>
                   </div>
                 )}
               </>
@@ -746,7 +748,7 @@ export default function MyCartablePage() {
       {isMobile && hasSelection && (
         <div
           className={cn(
-            "fixed bottom-22 left-0 right-0 z-40 p-4",
+            "fixed bottom-24 left-0 right-0 z-40 p-4",
             "bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80",
             "border-t shadow-lg"
           )}
@@ -759,7 +761,7 @@ export default function MyCartablePage() {
                 </span>
               </div>
               <Button
-                size="sm"
+                size="md"
                 variant="ghost"
                 onClick={handleCancelSelection}
                 className="shrink-0 h-8 w-8 p-0"
@@ -767,7 +769,7 @@ export default function MyCartablePage() {
                 <X className="h-5 w-5" />
               </Button>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-6">
               <Button
                 size="lg"
                 variant="destructive"

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Filter, Search, Calendar } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import AccountSelector from "@/components/common/AccountSelector";
-import PersianDatePicker from "@/components/common/PersianDatePicker";
+import { PersianDatePicker } from "@/components/ui/persian-datepicker";
 import useTranslation from "@/hooks/useTranslation";
 
 interface DashboardFiltersProps {
@@ -91,7 +91,7 @@ export default function DashboardFilters({
           </div>
 
           {/* From Date */}
-          <div className="flex-1 min-w-[160px] lg:flex-initial lg:w-48">
+          <div className="flex-1 min-w-40 lg:flex-initial lg:w-48">
             <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
               {t("dashboard.filters.fromDate")}
             </Label>
@@ -99,12 +99,11 @@ export default function DashboardFilters({
               value={fromDate}
               onChange={setFromDate}
               placeholder={t("common.selectDate")}
-              locale={locale === "fa" ? "fa" : "en"}
             />
           </div>
 
           {/* To Date */}
-          <div className="flex-1 min-w-[160px] lg:flex-initial lg:w-48">
+          <div className="flex-1 min-w-40 lg:flex-initial lg:w-48">
             <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
               {t("dashboard.filters.toDate")}
             </Label>
@@ -112,7 +111,6 @@ export default function DashboardFilters({
               value={toDate}
               onChange={setToDate}
               placeholder={t("common.selectDate")}
-              locale={locale === "fa" ? "fa" : "en"}
             />
           </div>
 

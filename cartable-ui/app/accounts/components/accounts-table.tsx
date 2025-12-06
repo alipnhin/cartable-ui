@@ -80,9 +80,7 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
                 <TableCell className="w-12">
                   <BankLogo bankCode={account.bankCode} size="sm" />
                 </TableCell>
-                <TableCell className="font-medium">
-                  {account.title}
-                </TableCell>
+                <TableCell className="font-medium">{account.title}</TableCell>
                 <TableCell>{account.bankName}</TableCell>
                 <TableCell className="font-mono text-sm">
                   {account.accountNumber}
@@ -103,7 +101,9 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
                     variant={account.isEnable ? "success" : "secondary"}
                     appearance="light"
                   >
-                    {account.isEnable ? t("common.active") : t("common.inactive")}
+                    {account.isEnable
+                      ? t("common.active")
+                      : t("common.inactive")}
                   </Badge>
                 </TableCell>
                 <TableCell>

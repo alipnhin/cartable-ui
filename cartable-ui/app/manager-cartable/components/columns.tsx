@@ -77,7 +77,7 @@ export const createColumns = (
       cell: ({ row }) => {
         const bankCode = getBankCodeFromIban(row.original.accountSheba);
         return (
-          <div className="flex items-center grow gap-2.5">
+          <div className="flex items-center grow gap-2.5 min-w-60">
             {row.original.accountSheba && (
               <BankLogo bankCode={bankCode} size="md" />
             )}
@@ -208,7 +208,7 @@ export const createColumns = (
         );
       },
       cell: ({ row }) => (
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground min-w-24">
           {formatDateTime(
             row.original.createdDate || row.original.createdAt,
             locale
@@ -241,7 +241,7 @@ export const createColumns = (
           </Button>
 
           {/* دکمه‌های تأیید/رد فقط برای دستورات در انتظار */}
-          {row.original.status === OrderStatus.WaitingForOwnersApproval && (
+          {row.original.status === OrderStatus.WaitForManagerApproval && (
             <>
               {/* دکمه تأیید */}
               <Button

@@ -182,7 +182,7 @@ export function OrderCard({
               <DrawerTitle className="text-base">{order.title}</DrawerTitle>
             </DrawerHeader>
 
-            <div className="flex gap-2 p-6">
+            <div className="flex gap-2 p-6 mb-8">
               {onReject && (
                 <Button
                   onClick={handleReject}

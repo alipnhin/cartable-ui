@@ -63,7 +63,11 @@ export const routePermissions: Record<string, PageAccess> = {
   // داشبورد - نیاز به احراز هویت
   "/dashboard": {
     requiresAuth: true,
-    allowedRoles: [UserRole.CARTABLE_APPROVER, UserRole.CARTABLE_MANAGER, UserRole.ADMIN],
+    allowedRoles: [
+      UserRole.CARTABLE_APPROVER,
+      UserRole.CARTABLE_MANAGER,
+      UserRole.ADMIN,
+    ],
   },
 
   // کارتابل من - فقط برای امضادارها
@@ -72,6 +76,10 @@ export const routePermissions: Record<string, PageAccess> = {
     allowedRoles: [UserRole.CARTABLE_APPROVER, UserRole.ADMIN],
   },
 
+  "/account-groups": {
+    requiresAuth: true,
+    allowedRoles: [UserRole.CARTABLE_MANAGER, UserRole.ADMIN],
+  },
   // کارتابل مدیر - فقط برای مدیران
   "/manager-cartable": {
     requiresAuth: true,
@@ -81,7 +89,11 @@ export const routePermissions: Record<string, PageAccess> = {
   // دستورهای پرداخت - برای همه کاربران احراز شده
   "/payment-orders": {
     requiresAuth: true,
-    allowedRoles: [UserRole.CARTABLE_APPROVER, UserRole.CARTABLE_MANAGER, UserRole.ADMIN],
+    allowedRoles: [
+      UserRole.CARTABLE_APPROVER,
+      UserRole.CARTABLE_MANAGER,
+      UserRole.ADMIN,
+    ],
   },
 
   // حساب‌ها - فقط برای مدیران
@@ -93,13 +105,21 @@ export const routePermissions: Record<string, PageAccess> = {
   // گزارشات - برای همه کاربران احراز شده
   "/reports": {
     requiresAuth: true,
-    allowedRoles: [UserRole.CARTABLE_APPROVER, UserRole.CARTABLE_MANAGER, UserRole.ADMIN],
+    allowedRoles: [
+      UserRole.CARTABLE_APPROVER,
+      UserRole.CARTABLE_MANAGER,
+      UserRole.ADMIN,
+    ],
   },
 
   // تنظیمات - برای همه کاربران احراز شده
   "/settings": {
     requiresAuth: true,
-    allowedRoles: [UserRole.CARTABLE_APPROVER, UserRole.CARTABLE_MANAGER, UserRole.ADMIN],
+    allowedRoles: [
+      UserRole.CARTABLE_APPROVER,
+      UserRole.CARTABLE_MANAGER,
+      UserRole.ADMIN,
+    ],
   },
 };
 
@@ -110,12 +130,24 @@ export const routePermissions: Record<string, PageAccess> = {
  * مشخص می‌کند کدام آیتم‌های منو برای کدام نقش‌ها نمایش داده شوند
  */
 export const navigationPermissions: Record<string, UserRole[]> = {
-  dashboard: [UserRole.CARTABLE_APPROVER, UserRole.CARTABLE_MANAGER, UserRole.ADMIN],
+  dashboard: [
+    UserRole.CARTABLE_APPROVER,
+    UserRole.CARTABLE_MANAGER,
+    UserRole.ADMIN,
+  ],
   myCartable: [UserRole.CARTABLE_APPROVER, UserRole.ADMIN],
   managerCartable: [UserRole.CARTABLE_MANAGER, UserRole.ADMIN],
-  paymentOrders: [UserRole.CARTABLE_APPROVER, UserRole.CARTABLE_MANAGER, UserRole.ADMIN],
+  paymentOrders: [
+    UserRole.CARTABLE_APPROVER,
+    UserRole.CARTABLE_MANAGER,
+    UserRole.ADMIN,
+  ],
   accounts: [UserRole.CARTABLE_MANAGER, UserRole.ADMIN],
-  reports: [UserRole.CARTABLE_APPROVER, UserRole.CARTABLE_MANAGER, UserRole.ADMIN],
+  reports: [
+    UserRole.CARTABLE_APPROVER,
+    UserRole.CARTABLE_MANAGER,
+    UserRole.ADMIN,
+  ],
 };
 
 /**
@@ -156,9 +188,10 @@ export function canAccessRoute(
   isAuthenticated: boolean
 ): boolean {
   // پیدا کردن تنظیمات مسیر
-  const routeConfig = Object.entries(routePermissions).find(([route]) =>
-    pathname.startsWith(route) && route !== "/"
-  )?.[1] || routePermissions["/"];
+  const routeConfig =
+    Object.entries(routePermissions).find(
+      ([route]) => pathname.startsWith(route) && route !== "/"
+    )?.[1] || routePermissions["/"];
 
   // اگر صفحه عمومی است، دسترسی آزاد
   if (routeConfig.isPublic) {
@@ -202,7 +235,9 @@ export function hasMinimumRole(userRoles: string[] | undefined): boolean {
  * @param userRoles - نقش‌های کاربر
  * @returns لیست آیتم‌های منو که کاربر می‌تواند ببیند
  */
-export function getAccessibleMenuItems(userRoles: string[] | undefined): string[] {
+export function getAccessibleMenuItems(
+  userRoles: string[] | undefined
+): string[] {
   if (!userRoles || userRoles.length === 0) {
     return [];
   }

@@ -52,7 +52,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
         <PopoverContent className="w-80 p-3" align="start">
           <div className="space-y-3">
             {/* لیست رنگ‌ها */}
-            <div className="max-h-[300px] overflow-y-auto">
+            <div className="max-h-80 overflow-y-auto">
               <div className="grid grid-cols-4 gap-2">
                 {ALLOWED_COLORS.map((color) => (
                   <button
@@ -60,7 +60,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
                     type="button"
                     onClick={() => handleSelect(color)}
                     className={cn(
-                      "relative h-12 rounded-lg border-2 transition-all hover:border-primary/50 hover:scale-105",
+                      "relative h-12 rounded-lg border-2 transition-all hover:border-primary/50 ",
                       selectedColor === color
                         ? "border-primary"
                         : "border-transparent"

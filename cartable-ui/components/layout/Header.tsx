@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import { Menu, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -97,7 +97,7 @@ export function Header({
                     "group-hover:border-primary/80 group-hover:scale-105",
                     "shadow-sm group-hover:shadow-md"
                   )}
-                  src={toAbsoluteUrl("/media/avatars/blank.png")}
+                  src={toAbsoluteUrl("/media/avatars/blank.jpg")}
                   alt="User Avatar"
                 />
 

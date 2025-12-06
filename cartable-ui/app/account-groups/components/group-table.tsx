@@ -95,7 +95,7 @@ export function GroupTable({
                 </TableCell>
                 <TableCell className="text-center">
                   <Badge
-                    variant={group.isEnable ? "success" : "secondary"}
+                    variant={group.isEnable ? "success" : "destructive"}
                     appearance="light"
                   >
                     {group.isEnable ? "فعال" : "غیرفعال"}

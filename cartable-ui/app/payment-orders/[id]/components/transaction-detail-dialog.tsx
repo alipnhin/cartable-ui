@@ -10,8 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WithdrawalTransaction } from "@/types/api";
 import { BankLogo } from "@/components/common/bank-logo";
 import { getBankCodeFromIban, getBankName } from "@/lib/bank-logos";
-import { TransactionStatusBadge } from "@/components/ui/status-badge";
-import { formatCurrency } from "@/lib/helpers";
+import {
+  PaymentTypeBadge,
+  TransactionStatusBadge,
+} from "@/components/ui/status-badge";
+import { formatCurrency, formatCurrencyNoneUnit } from "@/lib/helpers";
 import useTranslation from "@/hooks/useTranslation";
 import {
   Copy,
@@ -176,9 +179,19 @@ export function TransactionDetailDialog({
               <div className="text-sm text-muted-foreground mb-1">
                 مبلغ تراکنش
               </div>
-              <div className="text-3xl font-bold text-foreground">
-                {formatCurrency(parseFloat(transaction.amount) || 0, locale)}
+              <div className="flex items-center justify-center gap-1 text-3xl font-bold text-foreground mb-32">
+                {formatCurrencyNoneUnit(
+                  parseFloat(transaction.amount) || 0,
+                  locale
+                )}
+                <span className="text-sm text-muted-foreground">
+                  {t("transactions.rial")}
+                </span>
               </div>
+              <PaymentTypeBadge
+                type={transaction.paymentType as any}
+                size="sm"
+              />
             </div>
 
             {/* Two column layout */}
@@ -222,7 +235,7 @@ export function TransactionDetailDialog({
                 <div className="space-y-0">
                   <InfoRow
                     label={t("transactions.orderId")}
-                    value={transaction.id}
+                    value={transaction.orderId}
                     mono
                     copyable
                   />

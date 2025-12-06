@@ -97,28 +97,27 @@ export const ALLOWED_ICONS = [
 
 export type AllowedIcon = (typeof ALLOWED_ICONS)[number];
 
-// رنگ‌های مجاز
 export const ALLOWED_COLORS = [
-  "#360185",
-  "#DE1A58",
-  "#F29AAE",
-  "#3291B6",
-  "#1581BF",
-  "#FF6D1F",
-  "#FF5555",
-  "#A3D78A",
-  "#0046FF",
-  "#84994F",
-  "#F25912",
-  "#D78FEE",
-  "#640D5F",
-  "#78C841",
-  "#E91E63",
-  "#9C27B0",
-  "#2196F3",
-  "#00BCD4",
-  "#4CAF50",
-  "#FFC107",
+  "#FF6B6B",
+  "#E63946",
+  "#F3722C",
+  "#FF9F1C",
+  "#FFBE0B",
+  "#FEE440",
+  "#D9ED92",
+  "#B5E48C",
+  "#99D98C",
+  "#76C893",
+  "#52B69A",
+  "#34A0A4",
+  "#168AAD",
+  "#1A759F",
+  "#1E6091",
+  "#184E77",
+  "#6A4C93",
+  "#8D5BBA",
+  "#B185DB",
+  "#D4BEEE",
 ] as const;
 
 export type AllowedColor = (typeof ALLOWED_COLORS)[number];

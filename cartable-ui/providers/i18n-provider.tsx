@@ -25,14 +25,13 @@ function I18nProvider({ children }: I18nProviderProps) {
     if (!i18n.isInitialized) {
       const resources = {
         en: { translation: enTranslations },
-        ar: { translation: arTranslations },
+        // ar: { translation: arTranslations },
         fa: { translation: faTranslations },
       };
 
       // Get stored language or use default
-      const storedLanguage = typeof window !== 'undefined' 
-        ? localStorage.getItem("language") 
-        : null;
+      const storedLanguage =
+        typeof window !== "undefined" ? localStorage.getItem("language") : null;
       const defaultLng = storedLanguage || "fa";
 
       i18n
@@ -43,8 +42,8 @@ function I18nProvider({ children }: I18nProviderProps) {
           lng: defaultLng, // Set initial language
           fallbackLng: "fa", // Changed to Persian as default
           debug: process.env.NODE_ENV === "development",
-          supportedLngs: ["fa", "en", "ar"], // Explicitly define supported languages
-          
+          supportedLngs: ["fa", "en"], // Explicitly define supported languages
+
           interpolation: {
             escapeValue: false, // React already does escaping
           },
@@ -118,7 +117,7 @@ const useLanguage = () => {
 
   const changeLanguage = (code: string) => {
     // Validate that the language code is supported
-    const isSupported = I18N_LANGUAGES.some(lang => lang.code === code);
+    const isSupported = I18N_LANGUAGES.some((lang) => lang.code === code);
     if (isSupported) {
       i18n.changeLanguage(code);
       localStorage.setItem("language", code);
