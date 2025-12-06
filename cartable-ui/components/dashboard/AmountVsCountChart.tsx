@@ -91,7 +91,7 @@ export default function AmountVsCountChart({
               return (
                 <div
                   key={index}
-                  className="p-4 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors"
+                  className="p-4 rounded-lg border-2 bg-muted/30 hover:bg-muted/50 hover:shadow-lg hover:border-primary/20 transition-all duration-200"
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div

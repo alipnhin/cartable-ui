@@ -30,7 +30,8 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { LayoutGrid, List, Search } from "lucide-react";
+import { Group, LayoutGrid, List, Search, UserPen } from "lucide-react";
+import Link from "next/link";
 
 export default function AccountsPage() {
   const { t } = useTranslation();
@@ -158,6 +159,13 @@ export default function AccountsPage() {
       <PageHeader
         title={t("accounts.pageTitle")}
         description={t("accounts.pageSubtitle")}
+        actions={
+          <Button variant="primary" className="relative">
+            <Group />
+            <Link href="/account-groups"> مدیریت گروه حساب</Link>
+            <span className="border-2 border-background rounded-full size-3 bg-destructive absolute -top-1 -end-1 animate-bounce" />
+          </Button>
+        }
       />
 
       {/* فیلترها و کنترل‌ها */}
@@ -166,13 +174,13 @@ export default function AccountsPage() {
         <div className="w-full sm:w-auto">
           <InputGroup>
             <InputGroupInput
-              className="w-full sm:w-72"
+              className="w-full sm:w-72 h-8.5 "
               placeholder={t("accounts.searchPlaceholder") || "جستجو..."}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
             />
             <InputGroupAddon>
-              <Search className="h-4 w-4" />
+              <Search className=" ms-2" />
             </InputGroupAddon>
           </InputGroup>
         </div>
@@ -181,7 +189,7 @@ export default function AccountsPage() {
         <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
           {/* فیلتر وضعیت */}
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="w-28 h-8.5 text-[0.8125rem]">
+            <SelectTrigger size="lg" className="w-28 text-[0.8125rem]">
               <SelectValue placeholder={t("common.status")} />
             </SelectTrigger>
             <SelectContent>

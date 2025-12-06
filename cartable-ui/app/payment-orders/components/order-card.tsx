@@ -20,19 +20,28 @@ const getBankCodeFromSheba = (sheba: string): string => {
 };
 
 // Helper to format date with time
-const formatDateTime = (dateString: string, locale: string): { date: string; time: string } => {
+const formatDateTime = (
+  dateString: string,
+  locale: string
+): { date: string; time: string } => {
   if (!dateString) return { date: "-", time: "" };
 
   const date = new Date(dateString);
-  const dateFormatter = new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  const timeFormatter = new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const dateFormatter = new Intl.DateTimeFormat(
+    locale === "fa" ? "fa-IR" : "en-US",
+    {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }
+  );
+  const timeFormatter = new Intl.DateTimeFormat(
+    locale === "fa" ? "fa-IR" : "en-US",
+    {
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  );
 
   return {
     date: dateFormatter.format(date),
@@ -51,7 +60,10 @@ export function OrderCard({ order, onView }: OrderCardProps) {
   const { variant, icon: Icon, translationKey } = statusBadge;
 
   const bankCode = getBankCodeFromSheba(order.accountSheba);
-  const dateTime = formatDateTime(order.createdDateTime || order.createdDate || "", locale);
+  const dateTime = formatDateTime(
+    order.createdDateTime || order.createdDate || "",
+    locale
+  );
 
   return (
     <Card
@@ -129,7 +141,7 @@ export function OrderCard({ order, onView }: OrderCardProps) {
 
 export function OrderCardSkeleton() {
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden mb-4">
       <CardContent className="p-4 space-y-4">
         {/* Header with Bank Logo and Status */}
         <div className="flex items-start justify-between gap-3">

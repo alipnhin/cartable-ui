@@ -305,7 +305,7 @@ export default function PaymentOrdersPage() {
           description={t("paymentCartable.pageSubtitle")}
         />
         {/* Filter skeleton */}
-        <Card>
+        <Card className=" mb-4">
           <CardContent className="p-4">
             <div className="grid gap-4 md:grid-cols-3">
               <Skeleton className="h-10 w-full" />
@@ -315,7 +315,7 @@ export default function PaymentOrdersPage() {
           </CardContent>
         </Card>
         {/* Stats skeleton */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4  mb-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i}>
               <CardContent className="p-6">

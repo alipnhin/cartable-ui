@@ -104,7 +104,7 @@ export function DataTable<TData, TValue>({
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border bg-card overflow-hidden">
+      <div className="rounded-lg border-2 bg-card overflow-hidden transition-all duration-200 hover:shadow-lg hover:border-primary/20">
         <div className="p-4 border-b">
           <div className="flex font-bold">
             <LayoutList className="me-2" size={20} />
@@ -141,7 +141,7 @@ export function DataTable<TData, TValue>({
 
   if (data.length === 0) {
     return (
-      <div className="rounded-lg border bg-card">
+      <div className="rounded-lg border-2 bg-card transition-all duration-200 hover:shadow-lg hover:border-primary/20">
         <div className="flex flex-col items-center gap-3 py-16">
           <FileX className="h-12 w-12 text-muted-foreground/50" />
           <div className="space-y-1 text-center">
@@ -159,7 +159,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border bg-card overflow-hidden">
+      <div className="rounded-lg border-2 bg-card overflow-hidden transition-all duration-200 hover:shadow-lg hover:border-primary/20">
         <div className="p-4 border-b">
           <div className="flex font-bold ">
             <LayoutList className="me-2" size={20} />

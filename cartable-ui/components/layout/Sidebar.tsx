@@ -12,7 +12,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useMemo } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,7 @@ import {
 import { AccountGroupSwitcher } from "@/components/common/account-group-selector";
 import useTranslation from "@/hooks/useTranslation";
 import { useMenuCounts } from "@/hooks/useMenuCounts";
+import { useNavigationProgress } from "@/providers/navigation-progress-provider";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -43,6 +44,9 @@ export function Sidebar({
   const router = useRouter();
   const { t } = useTranslation();
   const { data: session } = useSession();
+  const { startProgress } = useNavigationProgress();
+  const [isPending, startTransition] = useTransition();
+  const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
   // دریافت تعداد واقعی از API
   const { counts } = useMenuCounts();
@@ -55,6 +59,15 @@ export function Sidebar({
     return applyBadgesToMenuItems(filteredItems, counts);
   }, [session, counts]);
 
+  const handleNavigation = (route: string) => {
+    if (route === pathname) return;
+    setPendingRoute(route);
+    startProgress();
+    startTransition(() => {
+      router.push(route);
+    });
+  };
+
   return (
     <aside
       className={cn(
@@ -66,31 +79,35 @@ export function Sidebar({
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {menuItems.map((item) => {
           const isActive = isRouteActive(pathname, item.route);
+          const isPendingThis = pendingRoute === item.route;
           const Icon = item.icon;
 
           return (
             <Button
               key={item.title}
               variant="ghost"
+              disabled={isPending}
               className={cn(
                 "group relative w-full justify-start gap-3 transition-all duration-200 h-10",
                 "hover:bg-muted",
                 isCollapsed && "justify-center px-2",
-                isActive && [
+                (isActive || isPendingThis) && [
                   "bg-primary text-primary-foreground font-medium",
                   "hover:bg-primary/90 hover:text-primary-foreground",
-                ]
+                ],
+                isPending && !isPendingThis && "opacity-50"
               )}
-              onClick={() => router.push(item.route)}
+              onClick={() => handleNavigation(item.route)}
               title={isCollapsed ? t(`navigation.${item.title}`) : undefined}
             >
               {/* Icon */}
               <Icon
                 className={cn(
                   "h-5 w-5 shrink-0 transition-all duration-200",
-                  isActive
+                  isActive || isPendingThis
                     ? "text-primary-foreground"
-                    : "text-muted-foreground group-hover:text-foreground"
+                    : "text-muted-foreground group-hover:text-foreground",
+                  isPendingThis && "animate-pulse"
                 )}
               />
 
@@ -100,7 +117,7 @@ export function Sidebar({
                   <span
                     className={cn(
                       "flex-1 text-start transition-colors duration-200 text-sm",
-                      isActive
+                      isActive || isPendingThis
                         ? "text-primary-foreground"
                         : "text-foreground"
                     )}
@@ -109,7 +126,7 @@ export function Sidebar({
                   </span>
                   {item.badge && item.badge > 0 && (
                     <Badge
-                      variant={isActive ? "secondary" : "destructive"}
+                      variant={isActive || isPendingThis ? "secondary" : "destructive"}
                       className="ms-auto rounded-full h-5 min-w-5 text-xs"
                     >
                       {item.badge > 9 ? "9+" : item.badge}

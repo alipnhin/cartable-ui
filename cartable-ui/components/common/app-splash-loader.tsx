@@ -31,7 +31,7 @@ export function AppSplashLoader() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-background"
+          className="fixed inset-0 z-9998 flex flex-col items-center justify-center bg-background"
         >
           {/* Logo */}
           <motion.div
@@ -58,7 +58,7 @@ export function AppSplashLoader() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-2xl font-bold text-foreground mb-2"
           >
-            کارتابل
+            تدبیر پی
           </motion.h1>
 
           {/* Loading Indicator */}

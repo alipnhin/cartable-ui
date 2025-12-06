@@ -74,10 +74,8 @@ export default function DashboardPage() {
     setFilters(newFilters);
   };
 
-  // Show skeleton only on initial load, not on filter changes
-  const isInitialLoad = loading && !dashboardData;
-
-  if (isInitialLoad) {
+  // Show skeleton during loading (both initial and filter changes)
+  if (loading) {
     return (
       <AppLayout>
         <PageHeader
@@ -137,16 +135,6 @@ export default function DashboardPage() {
           toDate: filters.toDate || "",
         }}
       />
-
-      {/* Loading overlay for filter changes - positioned relative to content */}
-      <div className="relative">
-        {loading && (
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center transition-opacity duration-200">
-            <div className="bg-card p-4 rounded-lg shadow-lg border">
-              <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
-            </div>
-          </div>
-        )}
 
       {/* Stats Cards Row */}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4 mb-5">
@@ -233,7 +221,6 @@ export default function DashboardPage() {
           delay={0.9}
         />
         <ComparisonMetrics data={dashboardData} delay={1.0} />
-      </div>
       </div>
     </AppLayout>
   );

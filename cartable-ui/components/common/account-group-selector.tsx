@@ -48,7 +48,7 @@ import {
 } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { cn } from "@/lib/utils";
-import { AccountGroup } from "@/types/account";
+import { AccountGroup } from "@/types/account-group-types";
 import { getAccountGroups } from "@/services/accountGroupService";
 import logger from "@/lib/logger";
 import { useAccountGroupStore } from "@/store/account-group-store";
@@ -106,6 +106,7 @@ export function AccountGroupSwitcher({
   const router = useRouter();
 
   const setGroupId = useAccountGroupStore((s) => s.setGroupId);
+  const refreshKey = useAccountGroupStore((s) => s.refreshKey);
   // خواندن گروه ذخیره شده از localStorage
   useEffect(() => {
     const savedGroupId = localStorage.getItem("selected-account-group");
@@ -166,7 +167,7 @@ export function AccountGroupSwitcher({
     };
 
     fetchAccountGroups();
-  }, [session, value]);
+  }, [session, value, refreshKey]);
 
   const handleChange = (group: AccountGroup) => {
     setActiveGroup(group);

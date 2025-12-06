@@ -1,32 +1,25 @@
 /**
  * Account Group Service
  * سرویس مدیریت گروه‌های حساب
- *
- * این سرویس شامل توابع مربوط به واکشی و مدیریت گروه‌های حساب است.
- * در حال حاضر از داده‌های موک استفاده می‌شود و بعد از آماده شدن API، کد فراخوانی سرویس باید از حالت کامنت خارج شود.
- *
- * @module services/accountGroupService
  */
 
 import apiClient from "@/lib/api-client";
-import { AccountGroup } from "@/types/account";
+import {
+  AccountGroup,
+  AccountGroupDetail,
+  CreateAccountGroupParams,
+  EditAccountGroupParams,
+  FilterAccountGroupsParams,
+  FilterAccountGroupsResponse,
+  ChangeAccountGroupStatusParams,
+  AddGroupAccountsParams,
+} from "@/types/account-group-types";
+
+const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
 
 /**
- * واکشی لیست گروه‌های حساب
- *
- * این تابع لیست تمام گروه‌های حساب را از سرور دریافت می‌کند.
- * در حال حاضر از داده‌های موک استفاده می‌شود.
- *
- * @param accessToken - توکن دسترسی کاربر
- * @returns لیست گروه‌های حساب
- *
- * @example
- * ```tsx
- * const { data: session } = useSession();
- * const groups = await getAccountGroups(session.accessToken);
- * ```
+ * واکشی لیست گروه‌های حساب (برای سلکت)
  */
-const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
 export const getAccountGroups = async (
   accessToken: string
 ): Promise<AccountGroup[]> => {
@@ -38,7 +31,7 @@ export const getAccountGroups = async (
       },
     }
   );
-  // Normalize here
+
   return response.data.map((g) => ({
     ...g,
     id: g.id === EMPTY_GUID ? "all" : g.id,
@@ -46,25 +39,157 @@ export const getAccountGroups = async (
 };
 
 /**
+ * واکشی لیست گروه‌ها با فیلتر و صفحه‌بندی
+ */
+export const filterAccountGroups = async (
+  params: FilterAccountGroupsParams,
+  accessToken: string
+): Promise<FilterAccountGroupsResponse> => {
+  const response = await apiClient.post<FilterAccountGroupsResponse>(
+    "/v1-Cartable/ManageAccount/FilterAccountGroups",
+    params,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json-patch+json",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
  * واکشی جزئیات یک گروه حساب
- *
- * این تابع اطلاعات کامل یک گروه حساب را بر اساس شناسه آن دریافت می‌کند.
- *
- * @param id - شناسه گروه حساب
- * @param accessToken - توکن دسترسی کاربر
- * @returns جزئیات گروه حساب
- *
- * @example
- * ```tsx
- * const groupDetails = await getAccountGroupById("group_1", token);
- * ```
  */
 export const getAccountGroupById = async (
   id: string,
   accessToken: string
-): Promise<AccountGroup> => {
-  const response = await apiClient.get<AccountGroup>(
+): Promise<AccountGroupDetail> => {
+  const response = await apiClient.get<AccountGroupDetail>(
     `/v1-Cartable/ManageAccount/GetAccountGroupById/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * ایجاد گروه حساب جدید
+ */
+export const createAccountGroup = async (
+  params: CreateAccountGroupParams,
+  accessToken: string
+): Promise<string> => {
+  const response = await apiClient.post<string>(
+    "/v1-Cartable/ManageAccount/CreateAccountGroup",
+    params,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json-patch+json",
+      },
+    }
+  );
+
+  return response.data; // شناسه گروه ثبت شده
+};
+
+/**
+ * ویرایش گروه حساب
+ */
+export const editAccountGroup = async (
+  params: EditAccountGroupParams,
+  accessToken: string
+): Promise<string> => {
+  const response = await apiClient.put<string>(
+    "/v1-Cartable/ManageAccount/EditAccountGroup",
+    params,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json-patch+json",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * تغییر وضعیت گروه حساب
+ */
+export const changeAccountGroupStatus = async (
+  params: ChangeAccountGroupStatusParams,
+  accessToken: string
+): Promise<string> => {
+  const response = await apiClient.put<string>(
+    "/v1-Cartable/ManageAccount/ChangeAccountGroupStatus",
+    params,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json-patch+json",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * حذف گروه حساب
+ */
+export const deleteAccountGroup = async (
+  id: string,
+  accessToken: string
+): Promise<string> => {
+  const response = await apiClient.delete<string>(
+    `/v1-Cartable/ManageAccount/DeleteAccountGroups/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * افزودن حساب‌ها به گروه
+ */
+export const addGroupAccounts = async (
+  params: AddGroupAccountsParams,
+  accessToken: string
+): Promise<string> => {
+  const response = await apiClient.post<string>(
+    "/v1-Cartable/ManageAccount/AddGroupAccounts",
+    params,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json-patch+json",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * حذف حساب از گروه
+ */
+export const removeGroupAccount = async (
+  itemId: string,
+  accessToken: string
+): Promise<string> => {
+  const response = await apiClient.delete<string>(
+    `/v1-Cartable/ManageAccount/RemoveItem/${itemId}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,

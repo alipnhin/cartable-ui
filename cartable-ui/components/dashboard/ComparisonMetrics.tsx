@@ -103,7 +103,7 @@ export default function ComparisonMetrics({
       <div className="p-5">
         <div className="grid grid-cols-2 gap-3">
           {metrics.map((metric, index) => (
-            <div key={index} className="p-3 rounded-lg border bg-card">
+            <div key={index} className="p-3 rounded-lg border-2 bg-card transition-all duration-200 hover:shadow-lg hover:border-primary/20">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-muted-foreground">
                   {metric.title}

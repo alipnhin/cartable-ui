@@ -38,19 +38,16 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
       {accounts.map((account) => (
         <div
           key={account.id}
-          className="rounded-xl border bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
-          style={{
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.06)",
-          }}
+          className="rounded-xl border-2 bg-card p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/20 cursor-pointer"
           onClick={() => router.push(`/accounts/${account.id}`)}
         >
           {/* Header */}
           <div className="flex items-start gap-3 mb-4">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <BankLogo bankCode={account.bankCode} size="md" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-base mb-1 truncate">
+              <h3 className="font-semibold text-base mb-1 truncate max-w-[200px] sm:max-w-[300px] md:max-w-none">
                 {account.title}
               </h3>
               <p className="text-sm text-muted-foreground truncate">
@@ -60,7 +57,7 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
             <Badge
               variant={account.isEnable ? "success" : "secondary"}
               appearance="light"
-              className="flex-shrink-0"
+              className="shrink-0"
             >
               {account.isEnable ? t("common.active") : t("common.inactive")}
             </Badge>
@@ -95,7 +92,7 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
                 <CreditCard className="h-3.5 w-3.5" />
                 {t("accounts.iban")}
               </span>
-              <span className="text-xs font-mono text-end max-w-[180px] truncate">
+              <span className="text-xs font-mono text-end truncate">
                 {formatIBAN(account.shebaNumber)}
               </span>
             </div>

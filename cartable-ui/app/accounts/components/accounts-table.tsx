@@ -35,12 +35,7 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
   };
 
   return (
-    <div
-      className="rounded-xl border bg-card overflow-hidden"
-      style={{
-        boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.06)",
-      }}
-    >
+    <div className="rounded-xl border-2 bg-card overflow-hidden transition-all duration-200 hover:shadow-lg hover:border-primary/20">
       <Table>
         <TableHeader className="bg-accent/60 font-bold">
           <TableRow>
