@@ -119,9 +119,9 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
         <DrawerContent className="max-h-[95vh]">
           <div className="p-6 overflow-y-auto">
             {/* Header */}
-            <div className="flex items-center gap-4 mb-6 p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5">
+            <div className="flex items-center gap-4 mb-4 p-3 rounded-2xl bg-linear-to-br from-primary/10 to-primary/5">
               <img
-                className="w-16 h-16 rounded-2xl border-2 border-primary/20 shadow-lg"
+                className="w-14 h-14 rounded-2xl border-2 border-primary/20 shadow-lg"
                 src={userImage}
                 alt="User avatar"
               />
@@ -136,10 +136,10 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             </div>
 
             {/* Menu Items */}
-            <div className="space-y-2 mb-6">
+            <div className="space-y-2 mb-4">
               <Link
                 href="/profile"
-                className="flex items-center gap-3 p-4 rounded-xl hover:bg-muted/80 active:bg-muted transition-all"
+                className="flex items-center gap-2 p-3 rounded-xl hover:bg-muted/80 active:bg-muted transition-all"
                 onClick={() => setOpen(false)}
               >
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -152,7 +152,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             </div>
 
             {/* Language Selection */}
-            <div className="mb-6">
+            <div className="mb-4">
               <div className="text-sm font-semibold text-foreground mb-3 px-2">
                 {t("userMenu.changeLanguage")}
               </div>
@@ -181,7 +181,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             </div>
 
             {/* Theme Selection */}
-            <div className="mb-6">
+            <div className="mb-4">
               <div className="text-sm font-semibold text-foreground mb-3 px-2">
                 {t("userMenu.changeTheme")}
               </div>
@@ -216,14 +216,14 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             </div>
 
             {/* Dark/Light Mode Toggle */}
-            <div className="mb-6">
+            <div className="mb-4">
               <div className="text-sm font-semibold text-foreground mb-3 px-2">
                 {t("userMenu.appearance")}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setTheme("light")}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
+                  className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
                     theme === "light"
                       ? "bg-primary text-primary-foreground shadow-md"
                       : "bg-muted/50 hover:bg-muted"
@@ -236,7 +236,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
                 </button>
                 <button
                   onClick={() => setTheme("dark")}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
+                  className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
                     theme === "dark"
                       ? "bg-primary text-primary-foreground shadow-md"
                       : "bg-muted/50 hover:bg-muted"
