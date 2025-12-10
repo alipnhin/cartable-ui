@@ -178,58 +178,30 @@ try {
 
 Write-Host ""
 
-# نصب pm2-installer به صورت global (اگر نصب نشده)
-Write-Host "Checking pm2-installer installation..." -ForegroundColor Yellow
-$pm2InstallerInstalled = $false
+# نصب pm2-windows-startup به صورت global (اگر نصب نشده)
+Write-Host "Checking pm2-windows-startup installation..." -ForegroundColor Yellow
+$pm2WindowsStartupInstalled = $false
 try {
-    $pm2InstallerPath = & npm list -g pm2-installer --depth=0 2>$null
-    if ($pm2InstallerPath -match "pm2-installer") {
-        Write-Host "pm2-installer is already installed." -ForegroundColor Green
-        $pm2InstallerInstalled = $true
+    $pm2WindowsStartupPath = & npm list -g pm2-windows-startup --depth=0 2>$null
+    if ($pm2WindowsStartupPath -match "pm2-windows-startup") {
+        Write-Host "pm2-windows-startup is already installed." -ForegroundColor Green
+        $pm2WindowsStartupInstalled = $true
     }
 } catch {
-    # pm2-installer not installed
+    # pm2-windows-startup not installed
 }
 
-if (-not $pm2InstallerInstalled) {
-    Write-Host "Installing pm2-installer from GitHub..." -ForegroundColor Yellow
-    Write-Host "Note: This requires Git to be installed on the system." -ForegroundColor Yellow
-    & npm install -g github:jessety/pm2-installer
+if (-not $pm2WindowsStartupInstalled) {
+    Write-Host "Installing pm2-windows-startup..." -ForegroundColor Yellow
+    & npm install -g pm2-windows-startup
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "ERROR: Failed to install pm2-installer!" -ForegroundColor Red
-        Write-Host "Make sure Git is installed and accessible in PATH." -ForegroundColor Red
-        Write-Host "Or manually download from: https://github.com/jessety/pm2-installer" -ForegroundColor Yellow
+        Write-Host "ERROR: Failed to install pm2-windows-startup!" -ForegroundColor Red
+        Write-Host "This package is required for PM2 to run as Windows service." -ForegroundColor Yellow
         exit 1
     }
-    Write-Host "pm2-installer installed successfully." -ForegroundColor Green
+    Write-Host "pm2-windows-startup installed successfully." -ForegroundColor Green
 }
 
-Write-Host ""
-
-# پیکربندی npm برای Local Service access
-Write-Host "Configuring npm for Local Service access..." -ForegroundColor Yellow
-$pm2InstallerLocation = & npm root -g
-$pm2InstallerPath = Join-Path $pm2InstallerLocation "pm2-installer"
-if (Test-Path $pm2InstallerPath) {
-    Push-Location $pm2InstallerPath
-    & npm run configure 2>&1 | Out-Null
-    Pop-Location
-    Write-Host "npm configuration completed." -ForegroundColor Green
-} else {
-    Write-Host "WARNING: pm2-installer directory not found. Skipping configure." -ForegroundColor Yellow
-}
-Write-Host ""
-
-# پیکربندی PowerShell Execution Policy
-Write-Host "Configuring PowerShell execution policy..." -ForegroundColor Yellow
-if (Test-Path $pm2InstallerPath) {
-    Push-Location $pm2InstallerPath
-    & npm run configure-policy 2>&1 | Out-Null
-    Pop-Location
-    Write-Host "PowerShell policy configured." -ForegroundColor Green
-} else {
-    Write-Host "WARNING: pm2-installer directory not found. Skipping policy configuration." -ForegroundColor Yellow
-}
 Write-Host ""
 
 # شروع PM2
