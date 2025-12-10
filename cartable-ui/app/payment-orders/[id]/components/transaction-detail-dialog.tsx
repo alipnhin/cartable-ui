@@ -179,7 +179,7 @@ export function TransactionDetailDialog({
               <div className="text-sm text-muted-foreground mb-1">
                 مبلغ تراکنش
               </div>
-              <div className="flex items-center justify-center gap-1 text-3xl font-bold text-foreground mb-32">
+              <div className="flex items-center justify-center gap-1 text-3xl font-bold text-foreground mb-3">
                 {formatCurrencyNoneUnit(
                   parseFloat(transaction.amount) || 0,
                   locale

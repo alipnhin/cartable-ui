@@ -75,7 +75,8 @@ export function DataTable<TData, TValue>({
 
   // استفاده از sorting سرور یا کلاینت
   const [internalSorting, setInternalSorting] = useState<SortingState>([]);
-  const sorting = externalSorting !== undefined ? externalSorting : internalSorting;
+  const sorting =
+    externalSorting !== undefined ? externalSorting : internalSorting;
   const setSorting = externalOnSortingChange || setInternalSorting;
 
   // تشخیص server-side یا client-side mode
@@ -141,14 +142,17 @@ export function DataTable<TData, TValue>({
 
   if (data.length === 0) {
     return (
-      <div className="rounded-lg border-2 bg-card transition-all duration-200 hover:shadow-lg hover:border-primary/20">
-        <div className="flex flex-col items-center gap-3 py-16">
-          <FileX className="h-12 w-12 text-muted-foreground/50" />
-          <div className="space-y-1 text-center">
-            <p className="font-medium text-muted-foreground">
+      <div className="rounded-xl border bg-card/40 backdrop-blur-sm transition-all duration-200 hover:shadow-xl hover:border-primary/30">
+        <div className="flex flex-col items-center gap-4 py-16 px-6">
+          <div className="rounded-full bg-muted bg-opacity-20 p-4">
+            <FileX className="h-10 w-10 text-muted-foreground/60" />
+          </div>
+
+          <div className="text-center space-y-1.5">
+            <p className="text-lg font-semibold text-foreground/80">
               {t("orders.noOrders")}
             </p>
-            <p className="text-sm text-muted-foreground/70">
+            <p className="text-sm text-muted-foreground/70 leading-relaxed max-w-xs mx-auto">
               فیلترهای جستجو را تغییر دهید یا دستور پرداخت جدید ایجاد کنید
             </p>
           </div>
@@ -231,7 +235,12 @@ export function DataTable<TData, TValue>({
               </span>{" "}
               {t("common.pagination.to")}{" "}
               <span className="font-medium text-foreground">
-                {Math.min(pageNumber * pageSize, data.length > 0 ? (pageNumber - 1) * pageSize + data.length : 0)}
+                {Math.min(
+                  pageNumber * pageSize,
+                  data.length > 0
+                    ? (pageNumber - 1) * pageSize + data.length
+                    : 0
+                )}
               </span>
             </>
           ) : (
@@ -262,7 +271,9 @@ export function DataTable<TData, TValue>({
               {t("common.pagination.pageSize")}
             </p>
             <Select
-              value={`${isServerSide ? pageSize : table.getState().pagination.pageSize}`}
+              value={`${
+                isServerSide ? pageSize : table.getState().pagination.pageSize
+              }`}
               onValueChange={(value) => {
                 if (isServerSide && onPageSizeChange) {
                   onPageSizeChange(Number(value));
@@ -273,7 +284,13 @@ export function DataTable<TData, TValue>({
               }}
             >
               <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue placeholder={isServerSide ? pageSize : table.getState().pagination.pageSize} />
+                <SelectValue
+                  placeholder={
+                    isServerSide
+                      ? pageSize
+                      : table.getState().pagination.pageSize
+                  }
+                />
               </SelectTrigger>
               <SelectContent side="top">
                 {[10, 20, 30, 40, 50].map((size) => (
@@ -288,7 +305,9 @@ export function DataTable<TData, TValue>({
           {/* Page Info */}
           <div className="flex w-[100px] items-center justify-center text-sm font-medium">
             {t("common.pagination.page")}{" "}
-            {isServerSide ? pageNumber : table.getState().pagination.pageIndex + 1}{" "}
+            {isServerSide
+              ? pageNumber
+              : table.getState().pagination.pageIndex + 1}{" "}
             {t("common.pagination.of")}{" "}
             {isServerSide ? totalPages : table.getPageCount()}
           </div>
@@ -310,7 +329,9 @@ export function DataTable<TData, TValue>({
                 isServerSide ? pageNumber === 1 : !table.getCanPreviousPage()
               }
             >
-              <span className="sr-only">{t("common.pagination.firstPage")}</span>
+              <span className="sr-only">
+                {t("common.pagination.firstPage")}
+              </span>
               {language.direction === "rtl" ? (
                 <ChevronsRight className="h-4 w-4" />
               ) : (
@@ -332,7 +353,9 @@ export function DataTable<TData, TValue>({
                 isServerSide ? pageNumber === 1 : !table.getCanPreviousPage()
               }
             >
-              <span className="sr-only">{t("common.pagination.previousPage")}</span>
+              <span className="sr-only">
+                {t("common.pagination.previousPage")}
+              </span>
               {language.direction === "rtl" ? (
                 <ChevronRight className="h-4 w-4" />
               ) : (

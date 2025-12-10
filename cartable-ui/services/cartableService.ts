@@ -42,7 +42,7 @@ export const getApproverCartable = async (
   }
 
   const response = await apiClient.post<PaymentListResponse>(
-    `/v1-Cartable/Approver/ApproverCartable`,
+    `/Cartable/approver-cartable`,
     requestBody,
     {
       headers: {
@@ -64,15 +64,11 @@ export const sendOperationOtp = async (
   request: SendOperationOtpRequest,
   accessToken: string
 ): Promise<string> => {
-  const response = await apiClient.post<string>(
-    `/v1-Cartable/Approver/SendOperationOtp`,
-    request,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
+  const response = await apiClient.post<string>(`/Cartable/send-otp`, request, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   return response.data;
 };
@@ -87,15 +83,11 @@ export const approvePayment = async (
   request: ApproveRequest,
   accessToken: string
 ): Promise<string> => {
-  const response = await apiClient.post<string>(
-    `/v1-Cartable/Approver/Approve`,
-    request,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
+  const response = await apiClient.post<string>(`/Cartable/approve`, request, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   return response.data;
 };
@@ -111,7 +103,7 @@ export const sendBatchOperationOtp = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
-    `/v1-Cartable/Approver/SendBatchOperationOtp`,
+    `/Cartable/send-batch-otp`,
     request,
     {
       headers: {
@@ -134,7 +126,7 @@ export const batchApprovePayments = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
-    `/v1-Cartable/Approver/BatchApprove`,
+    `/Cartable/batch-approve`,
     request,
     {
       headers: {

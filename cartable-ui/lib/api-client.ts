@@ -84,20 +84,20 @@ apiClient.interceptors.response.use(
 
       // اگر 401 بود، یعنی unauthorized - token منقضی شده یا invalid است
       if (error.response.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
         // اگر در browser هستیم
         if (typeof window !== "undefined") {
           // اگر در حال refresh هستیم، صبر کن تا تمام شود
           if (isRefreshing) {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
               subscribeTokenRefresh(() => {
-                // بعد از refresh، درخواست اصلی باید با توکن جدید از session گرفته شود
-                // این کار در component انجام می‌شود
-                resolve(Promise.reject(error));
+                // بعد از refresh موفق، reject می‌کنیم تا component دوباره درخواست را با توکن جدید بفرستد
+                reject(error);
               });
             });
           }
 
-          originalRequest._retry = true;
           isRefreshing = true;
 
           console.error(
@@ -116,8 +116,8 @@ apiClient.interceptors.response.use(
                 "auth:token-refreshed",
                 handleRefreshed
               );
-              // بعد از refresh موفق، کاربر باید درخواست را دوباره انجام دهد
-              // چون توکن جدید از session گرفته می‌شود
+              window.removeEventListener("auth:refresh-failed", handleFailed);
+              // بعد از refresh موفق، reject می‌کنیم تا component دوباره درخواست را با توکن جدید بفرستد
               reject(error);
             };
 
@@ -128,14 +128,22 @@ apiClient.interceptors.response.use(
                 "auth:token-refreshed",
                 handleRefreshed
               );
+              window.removeEventListener("auth:refresh-failed", handleFailed);
               reject(error);
             };
 
-            window.addEventListener("auth:token-refreshed", handleRefreshed);
+            window.addEventListener("auth:token-refreshed", handleRefreshed, {
+              once: true,
+            });
+            window.addEventListener("auth:refresh-failed", handleFailed, {
+              once: true,
+            });
 
             // اگر بعد از 10 ثانیه هنوز refresh نشد، fail کن
             setTimeout(() => {
-              handleFailed();
+              if (isRefreshing) {
+                handleFailed();
+              }
             }, 10000);
           });
         }

@@ -15,7 +15,7 @@ export const getTransactionProgress = async (
       : null;
 
   const response = await apiClient.post<TransactionProgressResponse>(
-    "/v1-Cartable/Withdrawal/transaction-progress",
+    "/Dashboard/transaction-progress",
     {
       bankGatewayId: params.bankGatewayId || null,
       accountGroupId,

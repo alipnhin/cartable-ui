@@ -94,10 +94,16 @@ export interface AddSignerParams {
  */
 export const getAccountsSelectData = async (
   params: AccountSelectParams,
-  accessToken: string
+  accessToken: string,
+  accountGroupId?: string
 ): Promise<AccountSelectResponse> => {
+  let url = "/Accounts/AccountSelect";
+  if (accountGroupId && accountGroupId !== "all") {
+    const queryParams = new URLSearchParams({ accountGroupId });
+    url = `${url}?${queryParams.toString()}`;
+  }
   const response = await apiClient.post<AccountSelectResponse>(
-    "/v1-Cartable/ManageAccount/SelectData",
+    url,
     {
       searchTerm: params.searchTerm || "",
       pageSize: params.pageSize || 50,
@@ -121,7 +127,7 @@ export const getAccountsList = async (
   accountGroupId?: string
 ): Promise<AccountListItem[]> => {
   // ساخت query parameters
-  let url = "/v1-Cartable/ManageAccount/GetList";
+  let url = "/Accounts";
 
   // اگر accountGroupId وجود داشت و "all" نبود، به query string اضافه کن
   if (accountGroupId && accountGroupId !== "all") {
@@ -129,14 +135,11 @@ export const getAccountsList = async (
     url = `${url}?${queryParams.toString()}`;
   }
 
-  const response = await apiClient.get<AccountListItem[]>(
-    url,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
+  const response = await apiClient.get<AccountListItem[]>(url, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   return response.data;
 };
@@ -149,7 +152,7 @@ export const getAccountDetail = async (
   accessToken: string
 ): Promise<AccountDetailResponse> => {
   const response = await apiClient.get<AccountDetailResponse>(
-    `/v1-Cartable/ManageAccount/${id}/find`,
+    `/Accounts/${id}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -168,7 +171,7 @@ export const changeMinimumSignature = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
-    "/v1-Cartable/ManageAccount/ChangeMinimumSignature",
+    "/Accounts/change-minimum-signature",
     params,
     {
       headers: {
@@ -189,7 +192,7 @@ export const addSigner = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
-    "/v1-Cartable/ManageAccount",
+    "/Accounts/add-signer",
     params,
     {
       headers: {
@@ -208,14 +211,11 @@ export const addSigner = async (
 export const getUsersList = async (
   accessToken: string
 ): Promise<UserSelectItem[]> => {
-  const response = await apiClient.get<UserSelectItem[]>(
-    "/v1-Cartable/ManageAccount/GetUsers",
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
+  const response = await apiClient.get<UserSelectItem[]>("/Accounts/users", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   return response.data;
 };
@@ -228,7 +228,7 @@ export const disableSigner = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
-    `/v1-Cartable/ManageAccount/DisableApproverStatus/${signerId}`,
+    `/Accounts/signers/${signerId}/disable`,
     {},
     {
       headers: {
@@ -248,7 +248,7 @@ export const enableSigner = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
-    `/v1-Cartable/ManageAccount/EnableApproverStatus/${signerId}`,
+    `/Accounts/signers/${signerId}/enable`,
     {},
     {
       headers: {

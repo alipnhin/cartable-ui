@@ -79,7 +79,7 @@ export const getTransactionsList = async (
   accessToken: string
 ): Promise<TransactionsResponse> => {
   const response = await apiClient.post<TransactionsResponse>(
-    "/v1-Cartable/Withdrawal/withdrawal-transactions/paged",
+    "/transaction/paged",
     request,
     {
       headers: {
@@ -98,16 +98,12 @@ export const exportTransactionsToExcel = async (
   request: TransactionsRequest,
   accessToken: string
 ): Promise<Blob> => {
-  const response = await apiClient.post(
-    "/v1-Cartable/Withdrawal/withdrawal-transactions/export",
-    request,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      responseType: "blob",
-    }
-  );
+  const response = await apiClient.post("/transaction/export", request, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    responseType: "blob",
+  });
   return response.data;
 };
 

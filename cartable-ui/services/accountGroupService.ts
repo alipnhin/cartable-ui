@@ -23,15 +23,11 @@ const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
 export const getAccountGroups = async (
   accessToken: string
 ): Promise<AccountGroup[]> => {
-  const response = await apiClient.get<AccountGroup[]>(
-    "/v1-Cartable/ManageAccount/GetAccountGroups",
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
-
+  const response = await apiClient.get<AccountGroup[]>("/AccountGroups", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
   return response.data.map((g) => ({
     ...g,
     id: g.id === EMPTY_GUID ? "all" : g.id,
@@ -46,7 +42,7 @@ export const filterAccountGroups = async (
   accessToken: string
 ): Promise<FilterAccountGroupsResponse> => {
   const response = await apiClient.post<FilterAccountGroupsResponse>(
-    "/v1-Cartable/ManageAccount/FilterAccountGroups",
+    "/AccountGroups/filter",
     params,
     {
       headers: {
@@ -67,7 +63,7 @@ export const getAccountGroupById = async (
   accessToken: string
 ): Promise<AccountGroupDetail> => {
   const response = await apiClient.get<AccountGroupDetail>(
-    `/v1-Cartable/ManageAccount/GetAccountGroupById/${id}`,
+    `/AccountGroups/${id}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -85,16 +81,12 @@ export const createAccountGroup = async (
   params: CreateAccountGroupParams,
   accessToken: string
 ): Promise<string> => {
-  const response = await apiClient.post<string>(
-    "/v1-Cartable/ManageAccount/CreateAccountGroup",
-    params,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json-patch+json",
-      },
-    }
-  );
+  const response = await apiClient.post<string>("/AccountGroups", params, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json-patch+json",
+    },
+  });
 
   return response.data; // شناسه گروه ثبت شده
 };
@@ -106,16 +98,12 @@ export const editAccountGroup = async (
   params: EditAccountGroupParams,
   accessToken: string
 ): Promise<string> => {
-  const response = await apiClient.put<string>(
-    "/v1-Cartable/ManageAccount/EditAccountGroup",
-    params,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json-patch+json",
-      },
-    }
-  );
+  const response = await apiClient.put<string>("/AccountGroups", params, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json-patch+json",
+    },
+  });
 
   return response.data;
 };
@@ -128,7 +116,7 @@ export const changeAccountGroupStatus = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.put<string>(
-    "/v1-Cartable/ManageAccount/ChangeAccountGroupStatus",
+    "/AccountGroups/status",
     params,
     {
       headers: {
@@ -148,14 +136,11 @@ export const deleteAccountGroup = async (
   id: string,
   accessToken: string
 ): Promise<string> => {
-  const response = await apiClient.delete<string>(
-    `/v1-Cartable/ManageAccount/DeleteAccountGroups/${id}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
+  const response = await apiClient.delete<string>(`/AccountGroups/${id}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   return response.data;
 };
@@ -168,7 +153,7 @@ export const addGroupAccounts = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
-    "/v1-Cartable/ManageAccount/AddGroupAccounts",
+    "/AccountGroups/accounts",
     params,
     {
       headers: {
@@ -189,7 +174,7 @@ export const removeGroupAccount = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.delete<string>(
-    `/v1-Cartable/ManageAccount/RemoveItem/${itemId}`,
+    `/AccountGroups/accounts/${itemId}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,

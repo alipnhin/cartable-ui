@@ -58,7 +58,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       authorization: {
         params: {
           scope:
-            "openid profile email offline_access TadbirPay.Cartable.Api.Scope admin_ui_webhooks",
+            "openid profile email offline_access TadbirPay.Cartable.Api.Scope admin_ui_webhooks cartable-bff-api.scope",
           response_type: "code",
         },
       },
@@ -88,7 +88,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // اگر توکن هنوز معتبر است، برگردان
       // 60 ثانیه قبل از انقضا refresh می‌کنیم
-      if (token.expiresAt && Date.now() < ((token.expiresAt as number) * 1000 - 60000)) {
+      if (
+        token.expiresAt &&
+        Date.now() < (token.expiresAt as number) * 1000 - 60000
+      ) {
         return token;
       }
 
@@ -120,13 +123,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if ("token" in message && message.token?.idToken) {
         const params = new URLSearchParams({
           id_token_hint: message.token.idToken as string,
-          post_logout_redirect_uri: process.env.NEXTAUTH_URL || "http://localhost:3000",
+          post_logout_redirect_uri:
+            process.env.NEXTAUTH_URL || "http://localhost:3000",
         });
 
         try {
-          await fetch(`${process.env.AUTH_ISSUER}/connect/endsession?${params.toString()}`, {
-            method: "GET",
-          });
+          await fetch(
+            `${
+              process.env.AUTH_ISSUER
+            }/connect/endsession?${params.toString()}`,
+            {
+              method: "GET",
+            }
+          );
         } catch (error) {
           console.error("Error logging out from Identity Server:", error);
         }

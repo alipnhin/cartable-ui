@@ -20,7 +20,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Edit2, Minus, Plus, AlertCircle, Loader2, PenLine } from "lucide-react";
+import {
+  Edit2,
+  Minus,
+  Plus,
+  AlertCircle,
+  Loader2,
+  PenLine,
+} from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 
 interface MinimumSignaturesFormProps {
@@ -103,7 +110,9 @@ export function MinimumSignaturesForm({
                 {t("accounts.minSignatures") || "حداقل امضای مورد نیاز"}
               </Label>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-primary">{currentValue}</span>
+                <span className="text-3xl font-bold text-primary">
+                  {currentValue}
+                </span>
                 <span className="text-sm text-muted-foreground">
                   از {maxValue} امضادار
                 </span>
@@ -143,20 +152,24 @@ export function MinimumSignaturesForm({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-9 w-9 p-0"
+                  className="h-9 w-10 p-0"
                   onClick={handleDecrement}
                   disabled={value <= 1}
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
-                <div className="flex items-baseline gap-1 min-w-[80px] justify-center">
-                  <span className="text-3xl font-bold text-primary">{value}</span>
-                  <span className="text-sm text-muted-foreground">/ {maxValue}</span>
+                <div className="flex items-baseline gap-1 min-w-30 justify-center">
+                  <span className="text-3xl font-bold text-primary">
+                    {value}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    / {maxValue}
+                  </span>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-9 w-9 p-0"
+                  className="h-9 w-10 p-0"
                   onClick={handleIncrement}
                   disabled={value >= maxValue}
                 >
@@ -169,7 +182,7 @@ export function MinimumSignaturesForm({
           <div className="flex gap-2">
             <Button
               variant="outline"
-              size="sm"
+              size="md"
               onClick={handleCancel}
               disabled={isLoading}
             >
@@ -214,9 +227,13 @@ export function MinimumSignaturesForm({
             <AlertDialogTitle>تغییر حداقل امضا</AlertDialogTitle>
             <AlertDialogDescription>
               آیا مطمئن هستید که می‌خواهید حداقل امضای مورد نیاز را از{" "}
-              <Badge variant="secondary" className="mx-1">{currentValue}</Badge>
+              <Badge variant="secondary" className="mx-1">
+                {currentValue}
+              </Badge>
               به{" "}
-              <Badge variant="primary" className="mx-1">{value}</Badge>
+              <Badge variant="primary" className="mx-1">
+                {value}
+              </Badge>
               تغییر دهید؟
             </AlertDialogDescription>
           </AlertDialogHeader>

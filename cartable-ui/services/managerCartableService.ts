@@ -45,7 +45,7 @@ export const getManagerCartable = async (
   }
 
   const response = await apiClient.post<PaymentListResponse>(
-    `/v1-Cartable/Manager/ManagerCartable`,
+    `/ManagerCartable/manager-cartable`,
     requestBody,
     {
       headers: {
@@ -68,7 +68,7 @@ export const sendManagerOperationOtp = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
-    `/v1-Cartable/Manager/SendOperationOtp`,
+    `/ManagerCartable/send-otp`,
     request,
     {
       headers: {
@@ -91,7 +91,7 @@ export const managerApprovePayment = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
-    `/v1-Cartable/Manager/Approve`,
+    `/ManagerCartable/Approve`,
     request,
     {
       headers: {
@@ -114,7 +114,7 @@ export const sendManagerBatchOperationOtp = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
-    `/v1-Cartable/Manager/SendBatchOperationOtp`,
+    `/ManagerCartable/send-batch-otp`,
     request,
     {
       headers: {
@@ -137,7 +137,7 @@ export const managerBatchApprovePayments = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
-    `/v1-Cartable/Manager/BatchApprove`,
+    `/ManagerCartable/batch-approve`,
     request,
     {
       headers: {

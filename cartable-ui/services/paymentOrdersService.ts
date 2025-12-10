@@ -81,7 +81,7 @@ export const searchPaymentOrders = async (
   if (toDate) requestBody.toDate = toDate;
 
   const response = await apiClient.post<PaymentListResponse>(
-    `/v1-Cartable/Withdrawal/Search`,
+    `/PaymentOrders/search`,
     requestBody,
     {
       headers: {
@@ -105,7 +105,7 @@ export const getWithdrawalOrderDetails = async (
   accessToken: string
 ): Promise<WithdrawalOrderDetails> => {
   const response = await apiClient.get<WithdrawalOrderDetails>(
-    `/v1-Cartable/Withdrawal/${id}/find`,
+    `/PaymentOrders/${id}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -128,7 +128,7 @@ export const getWithdrawalStatistics = async (
   accessToken: string
 ): Promise<WithdrawalStatistics> => {
   const response = await apiClient.get<WithdrawalStatistics>(
-    `/v1-Cartable/Withdrawal/${id}/statistics/complete`,
+    `/PaymentOrders/${id}/statistics`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -176,7 +176,7 @@ export const getWithdrawalTransactions = async (
   if (paymentType) requestBody.paymentType = paymentType;
 
   const response = await apiClient.post<TransactionListResponse>(
-    `/v1-Cartable/Withdrawal/GetWithdrawalTransactions`,
+    `/PaymentOrders/transactions`,
     requestBody,
     {
       headers: {
@@ -223,14 +223,11 @@ export const inquiryOrderById = async (
   orderId: string,
   accessToken: string
 ): Promise<void> => {
-  await apiClient.get(
-    `/v1-Cartable/Withdrawal/InquiryById/${orderId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
+  await apiClient.get(`/PaymentOrders/${orderId}/inquiry`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 };
 
 /**
@@ -246,7 +243,7 @@ export const inquiryTransactionById = async (
   accessToken: string
 ): Promise<WithdrawalTransaction> => {
   const response = await apiClient.get<WithdrawalTransaction>(
-    `/v1-Cartable/Withdrawal/TransactionInquiryById/${transactionId}`,
+    `/PaymentOrders/transactions/${transactionId}/inquiry`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -270,7 +267,7 @@ export const sendToBank = async (
   accessToken: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
-    `/v1-Cartable/Withdrawal/SendToBank/${orderId}`,
+    `/PaymentOrders/${orderId}/send-to-bank`,
     {},
     {
       headers: {
@@ -294,7 +291,7 @@ export const exportOrderTransactionsToExcel = async (
   accessToken: string
 ): Promise<Blob> => {
   const response = await apiClient.post(
-    `/v1-Cartable/Withdrawal/ExportTransaction/${orderId}`,
+    `/PaymentOrders/${orderId}/transactions/export`,
     {},
     {
       headers: {

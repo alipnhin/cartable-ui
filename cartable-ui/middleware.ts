@@ -79,7 +79,12 @@ export default async function middleware(request: NextRequest) {
   }
 
   // صفحات خطا - همیشه در دسترس
-  if (pathname.startsWith("/error") || pathname.startsWith("/404") || pathname.startsWith("/403") || pathname.startsWith("/500")) {
+  if (
+    pathname.startsWith("/error") ||
+    pathname.startsWith("/404") ||
+    pathname.startsWith("/403") ||
+    pathname.startsWith("/500")
+  ) {
     return NextResponse.next();
   }
 

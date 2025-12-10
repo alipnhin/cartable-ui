@@ -45,7 +45,10 @@ const SignerStatus = {
 
 interface SignerCardProps {
   signer: AccountUser;
-  onRequestStatusChange: (signerId: string, currentStatus: string | number) => void;
+  onRequestStatusChange: (
+    signerId: string,
+    currentStatus: string | number
+  ) => void;
   isUpdating?: boolean;
 }
 
@@ -196,7 +199,7 @@ export function SignerCard({
           <Badge
             variant={statusInfo.badgeVariant}
             appearance={statusInfo.badgeAppearance}
-            className="gap-1 mb-2"
+            className="gap-1 mb-2 p-3"
           >
             <statusInfo.icon className="h-3 w-3" />
             {statusInfo.label}

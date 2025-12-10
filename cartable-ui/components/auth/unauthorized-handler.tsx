@@ -13,7 +13,16 @@ export function UnauthorizedHandler() {
   const { data: session, update } = useSession();
 
   useEffect(() => {
+    let isHandling = false;
+
     const handleUnauthorized = async () => {
+      // جلوگیری از اجرای همزمان چندین refresh
+      if (isHandling) {
+        logger.info("Already handling unauthorized event - skipping...");
+        return;
+      }
+
+      isHandling = true;
       logger.info("Unauthorized event received - attempting to refresh token...");
 
       try {
@@ -23,15 +32,19 @@ export function UnauthorizedHandler() {
         // اگر session خطا دارد یا accessToken ندارد، logout کن
         if (!newSession?.accessToken || newSession?.error === "RefreshAccessTokenError") {
           logger.info("Token refresh failed - signing out...");
+          window.dispatchEvent(new CustomEvent("auth:refresh-failed"));
           await signOut({ callbackUrl: "/" });
         } else {
           logger.info("Token refreshed successfully");
-          // می‌توانید یک event برای retry کردن request dispatch کنید
+          // dispatch event برای اطلاع به api-client که refresh موفق بود
           window.dispatchEvent(new CustomEvent("auth:token-refreshed"));
         }
       } catch (error) {
         logger.error("Error refreshing token:", error instanceof Error ? error : undefined);
+        window.dispatchEvent(new CustomEvent("auth:refresh-failed"));
         await signOut({ callbackUrl: "/" });
+      } finally {
+        isHandling = false;
       }
     };
 

@@ -387,16 +387,21 @@ export default function PaymentOrdersPage() {
           ) : (
             <>
               {orders.length === 0 ? (
-                <div className="flex flex-col items-center gap-3 py-16">
-                  <FileX className="h-12 w-12 text-muted-foreground/50" />
-                  <div className="space-y-1 text-center">
-                    <p className="font-medium text-muted-foreground">
-                      {t("orders.noOrders")}
-                    </p>
-                    <p className="text-sm text-muted-foreground/70">
-                      فیلترهای جستجو را تغییر دهید یا دستور پرداخت جدید ایجاد
-                      کنید
-                    </p>
+                <div className="rounded-xl border bg-card/40 backdrop-blur-sm transition-all duration-200 hover:shadow-xl hover:border-primary/30">
+                  <div className="flex flex-col items-center gap-4 py-16 px-6">
+                    <div className="rounded-full bg-muted bg-opacity-20 p-4">
+                      <FileX className="h-10 w-10 text-muted-foreground/60" />
+                    </div>
+
+                    <div className="text-center space-y-1.5">
+                      <p className="text-lg font-semibold text-foreground/80">
+                        {t("orders.noOrders")}
+                      </p>
+                      <p className="text-sm text-muted-foreground/70 leading-relaxed max-w-xs mx-auto">
+                        فیلترهای جستجو را تغییر دهید یا دستور پرداخت جدید ایجاد
+                        کنید
+                      </p>
+                    </div>
                   </div>
                 </div>
               ) : (

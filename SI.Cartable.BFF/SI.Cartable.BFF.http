@@ -1,0 +1,6 @@
+@SI.Cartable.BFF_HostAddress = http://localhost:5056
+
+GET {{SI.Cartable.BFF_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
