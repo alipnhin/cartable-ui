@@ -28,6 +28,7 @@
 ### 1.1 دانلود Dependencies (روی سیستم با اینترنت)
 
 **در CMD:**
+
 ```cmd
 REM کلون کردن پروژه
 git clone https://github.com/your-repo/cartable-ui.git
@@ -41,6 +42,7 @@ tar -czf node_modules.tar.gz node_modules\
 ```
 
 **در PowerShell:**
+
 ```powershell
 # کلون کردن پروژه
 git clone https://github.com/your-repo/cartable-ui.git
@@ -58,6 +60,7 @@ Compress-Archive -Path .\node_modules -DestinationPath node_modules.zip
 قبل از build، فایل `.env.production` بسازید:
 
 **در CMD:**
+
 ```cmd
 REM ایجاد فایل .env.production
 (
@@ -65,7 +68,7 @@ echo AUTH_ISSUER=https://your-identity-server.com
 echo AUTH_CLIENT_ID=cartable-ui
 echo AUTH_CLIENT_SECRET=your-secret-here
 echo AUTH_SECRET=your-nextauth-secret-here
-echo NEXTAUTH_URL=https://cartable.yourcompany.com
+echo NEXTAUTH_URL=https://newecartable.etadbirco.ir
 echo NEXT_PUBLIC_API_BASE_URL=https://api.yourcompany.com/api
 echo NEXT_PUBLIC_API_TIMEOUT=30000
 echo NODE_ENV=production
@@ -73,26 +76,29 @@ echo NODE_ENV=production
 ```
 
 **در PowerShell:**
+
 ```powershell
 # ایجاد فایل .env.production
 @"
-AUTH_ISSUER=https://your-identity-server.com
-AUTH_CLIENT_ID=cartable-ui
-AUTH_CLIENT_SECRET=your-secret-here
-AUTH_SECRET=your-nextauth-secret-here
-NEXTAUTH_URL=https://cartable.yourcompany.com
-NEXT_PUBLIC_API_BASE_URL=https://api.yourcompany.com/api
+AUTH_ISSUER=https://accounts.etadbirco.ir
+AUTH_CLIENT_ID=cartable-new
+AUTH_CLIENT_SECRET=ce2833384df04b51bef9f03502998fef
+AUTH_SECRET=ce2833384df04b51bef9f03502998fef
+NEXTAUTH_URL=https://newecartable.etadbirco.ir
+NEXT_PUBLIC_API_BASE_URL=https://ecartableapi.etadbirco.ir/api
 NEXT_PUBLIC_API_TIMEOUT=30000
 NODE_ENV=production
 "@ | Out-File -FilePath .env.production -Encoding UTF8
 ```
 
 **Build پروژه:**
+
 ```cmd
 npm run build
 ```
 
 فایل build شامل این موارد می‌شود:
+
 - `.next/` (Build output)
 - `public/` (Static files)
 - `node_modules/`
@@ -102,6 +108,7 @@ npm run build
 ### 1.3 بسته‌بندی برای انتقال
 
 **در CMD:**
+
 ```cmd
 REM ایجاد پوشه deployment
 mkdir deployment-package
@@ -123,6 +130,7 @@ tar -czf cartable-ui-deployment.zip deployment-package\
 ```
 
 **در PowerShell:**
+
 ```powershell
 # ایجاد پوشه deployment
 New-Item -ItemType Directory -Path "deployment-package" -Force
@@ -150,6 +158,7 @@ Compress-Archive -Path .\deployment-package\* -DestinationPath cartable-ui-deplo
 ### 2.1 نصب IIS
 
 **در PowerShell (به عنوان Administrator):**
+
 ```powershell
 # نصب IIS با ابزارهای مدیریتی
 Install-WindowsFeature -Name Web-Server -IncludeManagementTools
@@ -164,6 +173,7 @@ Get-WindowsFeature -Name Web-Server
 2. انتقال به سرور و نصب:
 
 **در CMD:**
+
 ```cmd
 REM نصب URL Rewrite Module
 msiexec /i rewrite_amd64_en-US.msi /quiet /qn /norestart
@@ -173,6 +183,7 @@ dir "C:\Program Files\IIS\URL Rewrite"
 ```
 
 **در PowerShell:**
+
 ```powershell
 # نصب URL Rewrite Module
 Start-Process msiexec.exe -Wait -ArgumentList '/i rewrite_amd64_en-US.msi /quiet /qn /norestart'
@@ -187,6 +198,7 @@ Test-Path "C:\Program Files\IIS\URL Rewrite"
 2. نصب روی سرور:
 
 **در CMD:**
+
 ```cmd
 REM نصب Node.js (فایل را جایگزین کنید)
 msiexec /i node-v20.11.0-x64.msi /quiet /qn /norestart
@@ -197,6 +209,7 @@ npm --version
 ```
 
 **در PowerShell:**
+
 ```powershell
 # نصب Node.js
 Start-Process msiexec.exe -Wait -ArgumentList '/i node-v20.11.0-x64.msi /quiet /qn /norestart'
@@ -216,6 +229,7 @@ $env:Path += ";C:\Program Files\nodejs\"
 2. نصب:
 
 **در CMD:**
+
 ```cmd
 REM نصب iisnode
 msiexec /i iisnode-full-v0.2.26-x64.msi /quiet /qn /norestart
@@ -225,6 +239,7 @@ dir "%ProgramFiles%\iisnode"
 ```
 
 **در PowerShell:**
+
 ```powershell
 # نصب iisnode
 Start-Process msiexec.exe -Wait -ArgumentList '/i iisnode-full-v0.2.26-x64.msi /quiet /qn /norestart'
@@ -240,72 +255,78 @@ Test-Path "$env:ProgramFiles\iisnode"
 ### 3.1 ایجاد ساختار پوشه‌ها
 
 **در CMD:**
+
 ```cmd
 REM ایجاد پوشه اصلی
-mkdir "C:\inetpub\wwwroot\cartable-ui"
+mkdir "E:\Publish\Cartable-UI\cartable-ui"
 
 REM استخراج فایل‌های deployment
-tar -xzf cartable-ui-deployment.zip -C "C:\inetpub\wwwroot\cartable-ui"
+tar -xzf cartable-ui-deployment.zip -C "E:\Publish\Cartable-UI\cartable-ui"
 ```
 
 **در PowerShell:**
+
 ```powershell
 # ایجاد پوشه اصلی
-New-Item -ItemType Directory -Path "C:\inetpub\wwwroot\cartable-ui" -Force
+New-Item -ItemType Directory -Path "E:\Publish\Cartable-UI\cartable-ui" -Force
 
 # استخراج فایل‌های deployment
-Expand-Archive -Path ".\cartable-ui-deployment.zip" -DestinationPath "C:\inetpub\wwwroot\cartable-ui" -Force
+Expand-Archive -Path ".\cartable-ui-deployment.zip" -DestinationPath "E:\Publish\Cartable-UI\cartable-ui" -Force
 ```
 
 ### 3.2 پیکربندی دسترسی‌ها
 
 **در CMD:**
+
 ```cmd
 REM دادن دسترسی به IIS_IUSRS
-icacls "C:\inetpub\wwwroot\cartable-ui" /grant "IIS_IUSRS:(OI)(CI)F" /T
+icacls "E:\Publish\Cartable-UI\cartable-ui" /grant "IIS_IUSRS:(OI)(CI)F" /T
 
 REM دادن دسترسی به NETWORK SERVICE
-icacls "C:\inetpub\wwwroot\cartable-ui" /grant "NETWORK SERVICE:(OI)(CI)F" /T
+icacls "E:\Publish\Cartable-UI\cartable-ui" /grant "NETWORK SERVICE:(OI)(CI)F" /T
 ```
 
 **در PowerShell:**
+
 ```powershell
 # دادن دسترسی به IIS_IUSRS
-$acl = Get-Acl "C:\inetpub\wwwroot\cartable-ui"
+$acl = Get-Acl "E:\Publish\Cartable-UI\cartable-ui"
 $permission = "IIS_IUSRS","FullControl","ContainerInherit,ObjectInherit","None","Allow"
 $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule $permission
 $acl.SetAccessRule($accessRule)
-Set-Acl "C:\inetpub\wwwroot\cartable-ui" $acl
+Set-Acl "E:\Publish\Cartable-UI\cartable-ui" $acl
 
 # یا استفاده از icacls
-icacls "C:\inetpub\wwwroot\cartable-ui" /grant "IIS_IUSRS:(OI)(CI)F" /T
+icacls "E:\Publish\Cartable-UI\cartable-ui" /grant "IIS_IUSRS:(OI)(CI)F" /T
 ```
 
 ### 3.3 ایجاد Application Pool در IIS
 
 **در PowerShell:**
+
 ```powershell
 # Import IIS Module
 Import-Module WebAdministration
 
 # ایجاد Application Pool
-New-WebAppPool -Name "CartableUIPool"
+New-WebAppPool -Name "New-Cartable"
 
 # تنظیمات Application Pool
-Set-ItemProperty "IIS:\AppPools\CartableUIPool" -Name "managedRuntimeVersion" -Value ""
-Set-ItemProperty "IIS:\AppPools\CartableUIPool" -Name "enable32BitAppOnWin64" -Value $false
-Set-ItemProperty "IIS:\AppPools\CartableUIPool" -Name "processModel.identityType" -Value "ApplicationPoolIdentity"
-Set-ItemProperty "IIS:\AppPools\CartableUIPool" -Name "recycling.periodicRestart.time" -Value "00:00:00"
-Set-ItemProperty "IIS:\AppPools\CartableUIPool" -Name "startMode" -Value "AlwaysRunning"
-Set-ItemProperty "IIS:\AppPools\CartableUIPool" -Name "processModel.idleTimeout" -Value "00:00:00"
+Set-ItemProperty "IIS:\AppPools\New-Cartable" -Name "managedRuntimeVersion" -Value ""
+Set-ItemProperty "IIS:\AppPools\New-Cartable" -Name "enable32BitAppOnWin64" -Value $false
+Set-ItemProperty "IIS:\AppPools\New-Cartable" -Name "processModel.identityType" -Value "ApplicationPoolIdentity"
+Set-ItemProperty "IIS:\AppPools\New-Cartable" -Name "recycling.periodicRestart.time" -Value "00:00:00"
+Set-ItemProperty "IIS:\AppPools\New-Cartable" -Name "startMode" -Value "AlwaysRunning"
+Set-ItemProperty "IIS:\AppPools\New-Cartable" -Name "processModel.idleTimeout" -Value "00:00:00"
 
 # بررسی وضعیت
-Get-WebAppPoolState -Name "CartableUIPool"
+Get-WebAppPoolState -Name "New-Cartable"
 ```
 
 ### 3.4 ایجاد وب‌سایت در IIS
 
 **در PowerShell:**
+
 ```powershell
 # حذف Default Website (اختیاری)
 # Remove-Website -Name "Default Web Site"
@@ -314,31 +335,32 @@ Get-WebAppPoolState -Name "CartableUIPool"
 New-Website -Name "Cartable-UI" `
             -Port 80 `
             -HostHeader "cartable.local" `
-            -PhysicalPath "C:\inetpub\wwwroot\cartable-ui" `
-            -ApplicationPool "CartableUIPool"
+            -PhysicalPath "E:\Publish\Cartable-UI\cartable-ui" `
+            -ApplicationPool "New-Cartable"
 
 # یا برای HTTPS (اگر SSL Certificate داشته باشید):
 New-Website -Name "Cartable-UI" `
             -Port 443 `
-            -HostHeader "cartable.yourcompany.com" `
-            -PhysicalPath "C:\inetpub\wwwroot\cartable-ui" `
-            -ApplicationPool "CartableUIPool" `
+            -HostHeader "newecartable.etadbirco.ir" `
+            -PhysicalPath "E:\Publish\Cartable-UI\cartable-ui" `
+            -ApplicationPool "New-Cartable" `
             -Ssl
 
 # افزودن Binding
-New-WebBinding -Name "Cartable-UI" -Protocol https -Port 443 -HostHeader "cartable.yourcompany.com"
+New-WebBinding -Name "Cartable-UI" -Protocol https -Port 443 -HostHeader "newecartable.etadbirco.ir"
 
 # بررسی وضعیت
 Get-Website -Name "Cartable-UI"
 ```
 
 **در CMD (با استفاده از appcmd):**
+
 ```cmd
 REM ایجاد سایت
-%windir%\system32\inetsrv\appcmd add site /name:"Cartable-UI" /physicalPath:"C:\inetpub\wwwroot\cartable-ui" /bindings:http/*:80:cartable.local
+%windir%\system32\inetsrv\appcmd add site /name:"Cartable-UI" /physicalPath:"E:\Publish\Cartable-UI\cartable-ui" /bindings:http/*:80:cartable.local
 
 REM تنظیم Application Pool
-%windir%\system32\inetsrv\appcmd set site "Cartable-UI" /[path='/'].applicationPool:"CartableUIPool"
+%windir%\system32\inetsrv\appcmd set site "Cartable-UI" /[path='/'].applicationPool:"New-Cartable"
 
 REM شروع سایت
 %windir%\system32\inetsrv\appcmd start site "Cartable-UI"
@@ -347,6 +369,7 @@ REM شروع سایت
 ### 3.5 ایجاد web.config
 
 **در PowerShell:**
+
 ```powershell
 # ایجاد فایل web.config
 $webConfigContent = @"
@@ -423,12 +446,13 @@ $webConfigContent = @"
 "@
 
 # نوشتن فایل
-Set-Content -Path "C:\inetpub\wwwroot\cartable-ui\web.config" -Value $webConfigContent -Encoding UTF8
+Set-Content -Path "E:\Publish\Cartable-UI\cartable-ui\web.config" -Value $webConfigContent -Encoding UTF8
 ```
 
 ### 3.6 ایجاد server.js (Entry Point)
 
 **در PowerShell:**
+
 ```powershell
 $serverJsContent = @"
 // server.js
@@ -464,7 +488,7 @@ app.prepare().then(() => {
 })
 "@
 
-Set-Content -Path "C:\inetpub\wwwroot\cartable-ui\server.js" -Value $serverJsContent -Encoding UTF8
+Set-Content -Path "E:\Publish\Cartable-UI\cartable-ui\server.js" -Value $serverJsContent -Encoding UTF8
 ```
 
 ---
@@ -474,6 +498,7 @@ Set-Content -Path "C:\inetpub\wwwroot\cartable-ui\server.js" -Value $serverJsCon
 ### 4.1 نصب Certificate
 
 **در PowerShell:**
+
 ```powershell
 # Import کردن Certificate
 $certPath = "C:\Certificates\cartable.pfx"
@@ -485,6 +510,7 @@ Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object {$_.Subject -like "*car
 ```
 
 **در CMD:**
+
 ```cmd
 REM Import کردن Certificate با certutil
 certutil -importpfx -p "YourPassword" "C:\Certificates\cartable.pfx"
@@ -496,22 +522,24 @@ certutil -store My
 ### 4.2 Binding Certificate به سایت
 
 **در PowerShell:**
+
 ```powershell
 # جایگزینی Thumbprint با مقدار واقعی
 $thumbprint = "YOUR_CERT_THUMBPRINT_HERE"
 
 # افزودن HTTPS Binding (اگر قبلاً اضافه نشده)
-New-WebBinding -Name "Cartable-UI" -Protocol https -Port 443 -HostHeader "cartable.yourcompany.com"
+New-WebBinding -Name "Cartable-UI" -Protocol https -Port 443 -HostHeader "newecartable.etadbirco.ir"
 
 # Bind کردن Certificate
 $cert = Get-Item -Path "Cert:\LocalMachine\My\$thumbprint"
 New-Item -Path "IIS:\SslBindings\0.0.0.0!443" -Value $cert -Force
 
 # یا برای hostname خاص:
-New-Item -Path "IIS:\SslBindings\!443!cartable.yourcompany.com" -Value $cert -Force
+New-Item -Path "IIS:\SslBindings\!443!newecartable.etadbirco.ir" -Value $cert -Force
 ```
 
 **در CMD:**
+
 ```cmd
 REM Bind کردن Certificate با netsh
 netsh http add sslcert ipport=0.0.0.0:443 certhash=YOUR_CERT_THUMBPRINT appid={YOUR-APP-GUID}
@@ -525,6 +553,7 @@ netsh http add sslcert ipport=0.0.0.0:443 certhash=YOUR_CERT_THUMBPRINT appid={Y
 این بخش فقط در صورت نیاز اجرا شود.
 
 **در PowerShell:**
+
 ```powershell
 # فعال کردن Cookie-based affinity
 Set-WebConfigurationProperty -PSPath 'MACHINE/WEBROOT/APPHOST' `
@@ -540,6 +569,7 @@ Set-WebConfigurationProperty -PSPath 'MACHINE/WEBROOT/APPHOST' `
 ### 6.1 فعال‌سازی IIS Logs
 
 **در PowerShell:**
+
 ```powershell
 # تنظیم مسیر لاگ
 Set-ItemProperty "IIS:\Sites\Cartable-UI" -Name logFile.directory -Value "C:\inetpub\logs\CartableUI"
@@ -555,6 +585,7 @@ Set-ItemProperty "IIS:\Sites\Cartable-UI" -Name logFile.enabled -Value $true
 ```
 
 **در CMD:**
+
 ```cmd
 REM فعال‌سازی لاگ با appcmd
 %windir%\system32\inetsrv\appcmd set site "Cartable-UI" /logFile.enabled:true
@@ -564,17 +595,19 @@ REM فعال‌سازی لاگ با appcmd
 ### 6.2 فعال‌سازی iisnode Logging
 
 **در PowerShell:**
+
 ```powershell
 # ایجاد پوشه لاگ iisnode
-New-Item -ItemType Directory -Path "C:\inetpub\wwwroot\cartable-ui\iisnode" -Force
+New-Item -ItemType Directory -Path "E:\Publish\Cartable-UI\cartable-ui\iisnode" -Force
 
 # دادن دسترسی
-icacls "C:\inetpub\wwwroot\cartable-ui\iisnode" /grant "IIS_IUSRS:(OI)(CI)F" /T
+icacls "E:\Publish\Cartable-UI\cartable-ui\iisnode" /grant "IIS_IUSRS:(OI)(CI)F" /T
 ```
 
 ### 6.3 Performance Counters
 
 **در PowerShell:**
+
 ```powershell
 # نصب Performance Monitor Feature
 Install-WindowsFeature Web-Performance -IncludeAllSubFeature
@@ -591,28 +624,30 @@ Get-Counter -ListSet "*ASP.NET*"
 ### 7.1 راه‌اندازی سرویس
 
 **در PowerShell:**
+
 ```powershell
 # Restart Application Pool
-Restart-WebAppPool -Name "CartableUIPool"
+Restart-WebAppPool -Name "New-Cartable"
 
 # Restart Website
 Restart-WebItem "IIS:\Sites\Cartable-UI"
 
 # بررسی وضعیت Application Pool
-Get-WebAppPoolState -Name "CartableUIPool"
+Get-WebAppPoolState -Name "New-Cartable"
 
 # بررسی وضعیت Website
 Get-WebItemState "IIS:\Sites\Cartable-UI"
 
 # شروع سایت (اگر متوقف باشد)
 Start-Website -Name "Cartable-UI"
-Start-WebAppPool -Name "CartableUIPool"
+Start-WebAppPool -Name "New-Cartable"
 ```
 
 **در CMD:**
+
 ```cmd
 REM Restart Application Pool
-%windir%\system32\inetsrv\appcmd recycle apppool "CartableUIPool"
+%windir%\system32\inetsrv\appcmd recycle apppool "New-Cartable"
 
 REM شروع سایت
 %windir%\system32\inetsrv\appcmd start site "Cartable-UI"
@@ -624,12 +659,13 @@ REM بررسی وضعیت
 ### 7.2 تست‌های اولیه
 
 **در PowerShell:**
+
 ```powershell
 # تست localhost
 Invoke-WebRequest -Uri "http://localhost" -UseBasicParsing
 
 # تست با domain
-Invoke-WebRequest -Uri "https://cartable.yourcompany.com" -UseBasicParsing
+Invoke-WebRequest -Uri "https://newecartable.etadbirco.ir" -UseBasicParsing
 
 # تست با curl (اگر نصب باشد)
 curl -I http://localhost
@@ -640,10 +676,11 @@ Test-NetConnection -ComputerName localhost -Port 443
 ```
 
 **در CMD:**
+
 ```cmd
 REM تست با curl
 curl -I http://localhost
-curl -I https://cartable.yourcompany.com
+curl -I https://newecartable.etadbirco.ir
 
 REM یا با PowerShell از CMD
 powershell -Command "Invoke-WebRequest -Uri 'http://localhost' -UseBasicParsing"
@@ -652,9 +689,10 @@ powershell -Command "Invoke-WebRequest -Uri 'http://localhost' -UseBasicParsing"
 ### 7.3 بررسی لاگ‌ها
 
 **در PowerShell:**
+
 ```powershell
 # بررسی لاگ‌های iisnode
-Get-Content "C:\inetpub\wwwroot\cartable-ui\iisnode\*.log" -Tail 50
+Get-Content "E:\Publish\Cartable-UI\cartable-ui\iisnode\*.log" -Tail 50
 
 # بررسی Event Viewer
 Get-EventLog -LogName Application -Source "iisnode" -Newest 10
@@ -664,9 +702,10 @@ Get-Content "C:\inetpub\logs\LogFiles\W3SVC1\*.log" -Tail 50
 ```
 
 **در CMD:**
+
 ```cmd
 REM نمایش آخرین لاگ‌های iisnode
-type "C:\inetpub\wwwroot\cartable-ui\iisnode\*.log"
+type "E:\Publish\Cartable-UI\cartable-ui\iisnode\*.log"
 
 REM Event Viewer
 eventvwr.msc
@@ -679,9 +718,10 @@ eventvwr.msc
 ### 8.1 اپلیکیشن شروع نمی‌شود
 
 **در PowerShell:**
+
 ```powershell
 # بررسی لاگ‌های iisnode
-Get-ChildItem "C:\inetpub\wwwroot\cartable-ui\iisnode" |
+Get-ChildItem "E:\Publish\Cartable-UI\cartable-ui\iisnode" |
     Sort-Object LastWriteTime -Descending |
     Select-Object -First 1 |
     Get-Content -Tail 50
@@ -691,13 +731,14 @@ Get-EventLog -LogName Application -Newest 20 |
     Where-Object {$_.Source -like "*iis*" -or $_.Source -like "*node*"}
 
 # بررسی وضعیت Application Pool
-Get-WebAppPoolState -Name "CartableUIPool"
+Get-WebAppPoolState -Name "New-Cartable"
 
 # بررسی Process های Node.js
 Get-Process -Name node -ErrorAction SilentlyContinue
 ```
 
 **در CMD:**
+
 ```cmd
 REM بررسی Process های Node
 tasklist | findstr node
@@ -710,19 +751,21 @@ netstat -ano | findstr :80
 ### 8.2 خطای 500 Internal Server Error
 
 **چک‌لیست:**
+
 1. بررسی `web.config` برای خطای syntax
 2. بررسی دسترسی‌های پوشه
 3. بررسی Environment Variables
 4. بررسی فایل `.env`
 
 **در PowerShell:**
+
 ```powershell
 # بررسی دسترسی‌ها
-Get-Acl "C:\inetpub\wwwroot\cartable-ui" | Format-List
+Get-Acl "E:\Publish\Cartable-UI\cartable-ui" | Format-List
 
 # بررسی web.config
-Test-Path "C:\inetpub\wwwroot\cartable-ui\web.config"
-Get-Content "C:\inetpub\wwwroot\cartable-ui\web.config" -ErrorAction SilentlyContinue
+Test-Path "E:\Publish\Cartable-UI\cartable-ui\web.config"
+Get-Content "E:\Publish\Cartable-UI\cartable-ui\web.config" -ErrorAction SilentlyContinue
 
 # بررسی Environment Variables
 Get-ChildItem Env: | Where-Object {$_.Name -like "*NODE*"}
@@ -733,35 +776,38 @@ Get-ChildItem Env: | Where-Object {$_.Name -like "*NODE*"}
 این خطا معمولاً وقتی اتفاق می‌افتد که Node.js process شروع نشده یا crash کرده باشد.
 
 **در PowerShell:**
+
 ```powershell
 # بررسی Process های Node.js
 Get-Process -Name node -ErrorAction SilentlyContinue | Format-Table -AutoSize
 
 # اگر process وجود نداشت، Application Pool را restart کنید
-Restart-WebAppPool -Name "CartableUIPool"
+Restart-WebAppPool -Name "New-Cartable"
 
 # بررسی لاگ‌های iisnode
-Get-Content "C:\inetpub\wwwroot\cartable-ui\iisnode\*.log" -Tail 100
+Get-Content "E:\Publish\Cartable-UI\cartable-ui\iisnode\*.log" -Tail 100
 ```
 
 ### 8.4 خطای Module Not Found
 
 **در PowerShell:**
+
 ```powershell
 # بررسی وجود node_modules
-Test-Path "C:\inetpub\wwwroot\cartable-ui\node_modules"
+Test-Path "E:\Publish\Cartable-UI\cartable-ui\node_modules"
 
 # نصب مجدد dependencies در سرور
-Set-Location "C:\inetpub\wwwroot\cartable-ui"
+Set-Location "E:\Publish\Cartable-UI\cartable-ui"
 npm install --production
 
 # بررسی package.json
-Test-Path "C:\inetpub\wwwroot\cartable-ui\package.json"
+Test-Path "E:\Publish\Cartable-UI\cartable-ui\package.json"
 ```
 
 ### 8.5 مشکلات Performance
 
 **در PowerShell:**
+
 ```powershell
 # بررسی استفاده از CPU و Memory
 Get-Process -Name node | Format-Table Name, CPU, WS -AutoSize
@@ -770,7 +816,7 @@ Get-Process -Name node | Format-Table Name, CPU, WS -AutoSize
 # nodeProcessCountPerApplication را به 4 یا 8 تغییر دهید
 
 # کاهش idle timeout
-Set-ItemProperty "IIS:\AppPools\CartableUIPool" -Name "processModel.idleTimeout" -Value "00:00:00"
+Set-ItemProperty "IIS:\AppPools\New-Cartable" -Name "processModel.idleTimeout" -Value "00:00:00"
 ```
 
 ---
@@ -778,6 +824,7 @@ Set-ItemProperty "IIS:\AppPools\CartableUIPool" -Name "processModel.idleTimeout"
 ## 📋 Checklist نهایی
 
 **پیش از Deploy:**
+
 - [ ] Node.js نصب شده است
 - [ ] IIS و URL Rewrite Module نصب شده است
 - [ ] iisnode نصب شده است
@@ -785,6 +832,7 @@ Set-ItemProperty "IIS:\AppPools\CartableUIPool" -Name "processModel.idleTimeout"
 - [ ] فایل `.env` با مقادیر صحیح تنظیم شده
 
 **حین Deploy:**
+
 - [ ] پوشه اپلیکیشن ایجاد شد
 - [ ] فایل‌های build کپی شد
 - [ ] دسترسی‌های پوشه تنظیم شد
@@ -794,6 +842,7 @@ Set-ItemProperty "IIS:\AppPools\CartableUIPool" -Name "processModel.idleTimeout"
 - [ ] `server.js` ایجاد شد
 
 **پس از Deploy:**
+
 - [ ] SSL Certificate نصب و bind شد
 - [ ] Logging فعال شد
 - [ ] سایت راه‌اندازی شد
@@ -821,13 +870,13 @@ Stop-Website -Name "Cartable-UI"
 Start-Website -Name "Cartable-UI"
 
 # Recycle کردن Application Pool
-Restart-WebAppPool -Name "CartableUIPool"
+Restart-WebAppPool -Name "New-Cartable"
 
 # حذف سایت
 Remove-Website -Name "Cartable-UI"
 
 # حذف Application Pool
-Remove-WebAppPool -Name "CartableUIPool"
+Remove-WebAppPool -Name "New-Cartable"
 ```
 
 ### مانیتورینگ
@@ -851,13 +900,14 @@ Get-Counter '\Web Service(_Total)\Current Connections'
 ### منابع لاگ
 
 1. **IIS Logs**: `C:\inetpub\logs\LogFiles\`
-2. **iisnode Logs**: `C:\inetpub\wwwroot\cartable-ui\iisnode\`
+2. **iisnode Logs**: `E:\Publish\Cartable-UI\cartable-ui\iisnode\`
 3. **Event Viewer**: Application و System logs
 4. **Node.js stdout/stderr**: در لاگ‌های iisnode
 
 ### دستورات مفید برای عیب‌یابی
 
 **در PowerShell:**
+
 ```powershell
 # خلاصه وضعیت سیستم
 Get-Website | Format-Table Name, State, PhysicalPath
@@ -868,11 +918,12 @@ Get-Process | Where-Object {$_.Path -like "*cartable-ui*"}
 
 # پاک کردن cache IIS
 Stop-Website -Name "Cartable-UI"
-Remove-Item "C:\inetpub\wwwroot\cartable-ui\.next\cache\*" -Recurse -Force
+Remove-Item "E:\Publish\Cartable-UI\cartable-ui\.next\cache\*" -Recurse -Force
 Start-Website -Name "Cartable-UI"
 ```
 
 در صورت بروز مشکل:
+
 1. ✅ لاگ‌های IIS را بررسی کنید
 2. ✅ Event Viewer ویندوز را چک کنید
 3. ✅ لاگ‌های iisnode را مطالعه کنید

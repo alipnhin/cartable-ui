@@ -22,6 +22,7 @@ import StatisticCard, { StatisticCardProps } from "./components/statistic-card";
 import { searchPaymentOrders } from "@/services/paymentOrdersService";
 import { mapPaymentListDtosToPaymentOrders } from "@/lib/api-mappers";
 import { useAccountGroupStore } from "@/store/account-group-store";
+import { getErrorMessage } from "@/lib/error-handler";
 
 export default function PaymentOrdersPage() {
   const { t, locale } = useTranslation();
@@ -158,10 +159,10 @@ export default function PaymentOrdersPage() {
         setTotalItems(response.totalItemCount);
         setTotalPages(response.totalPageCount);
       } catch (error) {
-        console.error("Error fetching payment orders:", error);
+        const errorMessage = getErrorMessage(error);
         toast({
           title: t("common.error"),
-          description: t("paymentOrders.fetchError"),
+          description: errorMessage,
           variant: "error",
         });
       } finally {

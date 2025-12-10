@@ -48,6 +48,7 @@ import { CreateEditGroupDialog } from "../components/create-edit-group-dialog";
 import { AddAccountsDialog } from "../components/add-accounts-dialog";
 import { GroupAccountCard } from "../components/group-account-card";
 import { RefreshCw, Folders, Edit2, Loader2 } from "lucide-react";
+import { getErrorMessage } from "@/lib/error-handler";
 
 export default function AccountGroupDetailPage() {
   const { t } = useTranslation();
@@ -87,11 +88,11 @@ export default function AccountGroupDetailPage() {
       setGroup(groupData);
       setAllAccounts(accountsData);
     } catch (err) {
-      console.error("Error fetching group detail:", err);
-      setError("خطا در دریافت اطلاعات گروه");
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
       toast({
         title: t("toast.error"),
-        description: "خطا در دریافت اطلاعات گروه",
+        description: errorMessage,
         variant: "error",
       });
     } finally {
@@ -117,10 +118,10 @@ export default function AccountGroupDetailPage() {
       });
       await fetchGroupDetail();
     } catch (error: any) {
-      console.error("Error removing account:", error);
+      const errorMessage = getErrorMessage(error);
       toast({
         title: t("toast.error"),
-        description: error.response?.data || "خطا در حذف حساب از گروه",
+        description: errorMessage,
         variant: "error",
       });
     } finally {

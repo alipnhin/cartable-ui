@@ -1,0 +1,52 @@
+# IISNode Configuration for Cartable UI (Next.js)
+# https://github.com/tjanczuk/iisnode/blob/master/src/samples/configuration/iisnode.yml
+
+# Node environment (production)
+node_env: production
+
+# Number of node.js processes per application
+# For production, use number of CPU cores (0 = auto)
+# برای production از تعداد هسته‌های CPU استفاده کنید
+nodeProcessCountPerApplication: 0
+
+# Maximum concurrent requests per process
+maxConcurrentRequestsPerProcess: 1024
+
+# Named pipe connection settings
+maxNamedPipeConnectionRetry: 100
+namedPipeConnectionRetryDelay: 250
+maxNamedPipeConnectionPoolSize: 512
+maxNamedPipePooledConnectionAge: 30000
+
+# Thread settings (0 = auto)
+asyncCompletionThreadCount: 0
+
+# Buffer sizes
+initialRequestBufferSize: 4096
+maxRequestBufferSize: 65536
+
+# Watch for file changes (*.js and iisnode.yml)
+watchedFiles: "*.js;iisnode.yml;web.config"
+
+# Polling interval for UNC file changes (milliseconds)
+uncFileChangesPollingInterval: 5000
+
+# Graceful shutdown timeout (milliseconds)
+gracefulShutdownTimeout: 60000
+
+# Logging configuration
+loggingEnabled: true
+logDirectory: iisnode
+
+# Debugging (set to false in production for security)
+debuggingEnabled: false
+devErrorsEnabled: false
+
+# Response settings
+flushResponse: false
+
+# Enable X-Forwarded-For header support (for reverse proxy)
+enableXFF: true
+
+# Promote server variables to process.env
+promoteServerVars: HTTPS,HTTP_HOST,SERVER_NAME,REQUEST_URI,REMOTE_ADDR,HTTP_X_FORWARDED_PROTO

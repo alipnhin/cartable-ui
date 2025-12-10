@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import useTranslation from "@/hooks/useTranslation";
 import { useToast } from "@/hooks/use-toast";
+import { getErrorMessage } from "@/lib/error-handler";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -131,11 +132,11 @@ export default function PaymentOrderDetailPage() {
       setOrderDetails(detailsData);
       setStatistics(statsData);
     } catch (err) {
-      console.error("Error fetching order data:", err);
-      setError(t("paymentOrders.detailsFetchError"));
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
       toast({
         title: t("common.error"),
-        description: t("paymentOrders.detailsFetchError"),
+        description: errorMessage,
         variant: "error",
       });
     } finally {
@@ -170,10 +171,10 @@ export default function PaymentOrderDetailPage() {
       setTotalTransactionPages(response.totalPageCount);
       setTotalTransactions(response.totalItemCount);
     } catch (err) {
-      console.error("Error fetching transactions:", err);
+      const errorMessage = getErrorMessage(err);
       toast({
         title: t("common.error"),
-        description: t("paymentOrders.transactionsFetchError"),
+        description: errorMessage,
         variant: "error",
       });
     } finally {
@@ -201,16 +202,8 @@ export default function PaymentOrderDetailPage() {
       // رفرش بدون فلیکر - فقط داده‌ها را به‌روزرسانی می‌کنیم
       await fetchOrderData();
       await fetchTransactions();
-    } catch (err: any) {
-      console.error("Error inquiring order:", err);
-
-      // نمایش پیام خطای دقیق‌تر از API
-      const errorMessage =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        t("paymentOrders.inquiryOrderError");
-
+    } catch (err) {
+      const errorMessage = getErrorMessage(err);
       toast({
         title: t("common.error"),
         description: errorMessage,
@@ -248,10 +241,10 @@ export default function PaymentOrderDetailPage() {
       // ریلود کامل صفحه
       await reloadPage();
     } catch (err) {
-      console.error("Error sending to bank:", err);
+      const errorMessage = getErrorMessage(err);
       toast({
         title: t("common.error"),
-        description: t("paymentOrders.sendToBankError"),
+        description: errorMessage,
         variant: "error",
       });
     }
@@ -292,10 +285,10 @@ export default function PaymentOrderDetailPage() {
       // فقط لیست تراکنش‌ها را refresh کن (نه کل صفحه)
       await refreshTransactions();
     } catch (err) {
-      console.error("Error inquiring transaction:", err);
+      const errorMessage = getErrorMessage(err);
       toast({
         title: t("common.error"),
-        description: t("paymentOrders.inquiryTransactionError"),
+        description: errorMessage,
         variant: "error",
       });
     } finally {
@@ -339,10 +332,10 @@ export default function PaymentOrderDetailPage() {
         variant: "success",
       });
     } catch (err) {
-      console.error("Error requesting OTP for approve:", err);
+      const errorMessage = getErrorMessage(err);
       toast({
         title: t("common.error"),
-        description: t("paymentOrders.otpSendError"),
+        description: errorMessage,
         variant: "error",
       });
       // بستن دیالوگ در صورت خطا
@@ -386,10 +379,10 @@ export default function PaymentOrderDetailPage() {
         variant: "success",
       });
     } catch (err) {
-      console.error("Error requesting OTP for reject:", err);
+      const errorMessage = getErrorMessage(err);
       toast({
         title: t("common.error"),
-        description: t("paymentOrders.otpSendError"),
+        description: errorMessage,
         variant: "error",
       });
       // بستن دیالوگ در صورت خطا
@@ -433,10 +426,10 @@ export default function PaymentOrderDetailPage() {
       // ریلود کامل صفحه
       await reloadPage();
     } catch (err) {
-      console.error("Error confirming OTP:", err);
+      const errorMessage = getErrorMessage(err);
       toast({
         title: t("common.error"),
-        description: t("paymentOrders.otpInvalid"),
+        description: errorMessage,
         variant: "error",
       });
       throw err; // برای نمایش خطا در OtpDialog
@@ -469,10 +462,10 @@ export default function PaymentOrderDetailPage() {
         variant: "success",
       });
     } catch (err) {
-      console.error("Error resending OTP:", err);
+      const errorMessage = getErrorMessage(err);
       toast({
         title: t("common.error"),
-        description: t("paymentOrders.otpResendError"),
+        description: errorMessage,
         variant: "error",
       });
       throw err;
@@ -501,8 +494,8 @@ export default function PaymentOrderDetailPage() {
       downloadBlobAsFile(blob, filename);
       setExportStatus("success");
     } catch (error) {
-      console.error("Error exporting transactions:", error);
-      setExportError(t("paymentOrders.exportError"));
+      const errorMessage = getErrorMessage(error);
+      setExportError(errorMessage);
       setExportStatus("error");
     }
   };

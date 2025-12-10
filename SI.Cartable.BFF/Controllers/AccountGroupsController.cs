@@ -12,7 +12,7 @@ public class AccountGroupsController : BaseController
 {
     private readonly IAccountGroupService _accountGroupService;
     private readonly ILogger<AccountGroupsController> _logger;
-
+    private const string _appMudole = "Account Groups API";
     public AccountGroupsController(
         IAccountGroupService accountGroupService,
         ILogger<AccountGroupsController> logger)

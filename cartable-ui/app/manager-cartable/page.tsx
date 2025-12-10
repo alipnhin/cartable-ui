@@ -100,10 +100,10 @@ export default function ManagerCartablePage() {
         setTotalItems(response.totalItemCount);
         setTotalPages(response.totalPageCount);
       } catch (error) {
-        console.error("Error fetching manager cartable:", error);
+        const errorMessage = getErrorMessage(error);
         toast({
           title: t("toast.error"),
-          description: t("managerCartable.errorLoading"),
+          description: errorMessage,
           variant: "error",
         });
       } finally {
@@ -143,7 +143,12 @@ export default function ManagerCartablePage() {
       setTotalItems(response.totalItemCount);
       setTotalPages(response.totalPageCount);
     } catch (error) {
-      console.error("Error fetching manager cartable:", error);
+      const errorMessage = getErrorMessage(error);
+      toast({
+        title: t("toast.error"),
+        description: errorMessage,
+        variant: "error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -187,7 +192,7 @@ export default function ManagerCartablePage() {
           variant: "success",
         });
       } catch (error) {
-        console.error("Error sending OTP:", error);
+        const errorMessage = getErrorMessage(error);
         setOtpDialog({
           open: false,
           type: "approve",
@@ -197,7 +202,7 @@ export default function ManagerCartablePage() {
         });
         toast({
           title: t("toast.error"),
-          description: getErrorMessage(error),
+          description: errorMessage,
           variant: "error",
         });
       }
@@ -243,7 +248,7 @@ export default function ManagerCartablePage() {
           variant: "success",
         });
       } catch (error) {
-        console.error("Error sending OTP:", error);
+        const errorMessage = getErrorMessage(error);
         setOtpDialog({
           open: false,
           type: "reject",
@@ -253,7 +258,7 @@ export default function ManagerCartablePage() {
         });
         toast({
           title: t("toast.error"),
-          description: getErrorMessage(error),
+          description: errorMessage,
           variant: "error",
         });
       }
@@ -304,7 +309,7 @@ export default function ManagerCartablePage() {
         variant: "success",
       });
     } catch (error) {
-      console.error("Error sending batch OTP:", error);
+      const errorMessage = getErrorMessage(error);
       setOtpDialog({
         open: false,
         type: "approve",
@@ -314,7 +319,7 @@ export default function ManagerCartablePage() {
       });
       toast({
         title: t("toast.error"),
-        description: getErrorMessage(error),
+        description: errorMessage,
         variant: "error",
       });
     }
@@ -363,7 +368,7 @@ export default function ManagerCartablePage() {
         variant: "success",
       });
     } catch (error) {
-      console.error("Error sending batch OTP:", error);
+      const errorMessage = getErrorMessage(error);
       setOtpDialog({
         open: false,
         type: "reject",
@@ -373,7 +378,7 @@ export default function ManagerCartablePage() {
       });
       toast({
         title: t("toast.error"),
-        description: getErrorMessage(error),
+        description: errorMessage,
         variant: "error",
       });
     }
@@ -438,10 +443,10 @@ export default function ManagerCartablePage() {
 
       await reloadData();
     } catch (error) {
-      console.error("Error confirming operation:", error);
+      const errorMessage = getErrorMessage(error);
       toast({
         title: t("toast.error"),
-        description: getErrorMessage(error),
+        description: errorMessage,
         variant: "error",
       });
       throw error;
@@ -484,10 +489,10 @@ export default function ManagerCartablePage() {
         variant: "info",
       });
     } catch (error) {
-      console.error("Error resending OTP:", error);
+      const errorMessage = getErrorMessage(error);
       toast({
         title: t("toast.error"),
-        description: getErrorMessage(error),
+        description: errorMessage,
         variant: "error",
       });
     }

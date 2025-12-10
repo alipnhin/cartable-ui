@@ -1,7 +1,7 @@
 using SI.Cartable.BFF.Models;
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using TPG.SI.SplunkLogger.Utils;
 
 namespace SI.Cartable.BFF.Services;
 
@@ -10,6 +10,8 @@ public class TadbirPayService : ITadbirPayService
     private readonly HttpClient _httpClient;
     private readonly ILogger<TadbirPayService> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
+    private const string _appMudole = "TadbirPayService";
+
     public TadbirPayService(
         HttpClient httpClient,
         ILogger<TadbirPayService> logger)
@@ -22,7 +24,7 @@ public class TadbirPayService : ITadbirPayService
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             ReferenceHandler = ReferenceHandler.IgnoreCycles,
             Converters = { new JsonStringEnumConverter() },
-            PropertyNameCaseInsensitive = true 
+            PropertyNameCaseInsensitive = true
         };
     }
 
@@ -77,8 +79,7 @@ public class TadbirPayService : ITadbirPayService
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                _logger.LogWarning("TadbirPay request failed with status {StatusCode}: {Error}",
-                    statusCode, errorContent);
+                _logger.LogWarningSplunk($"TadbirPay request failed with status {statusCode}: {errorContent}", appModule: _appMudole);
 
                 return new TadbirPayResponse<T>
                 {
@@ -90,7 +91,7 @@ public class TadbirPayService : ITadbirPayService
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "HTTP request exception occurred");
+            _logger.LogErrorSplunk("HTTP request exception occurred", appModule: _appMudole, metaData: ex);
             return new TadbirPayResponse<T>
             {
                 Success = false,
@@ -100,7 +101,7 @@ public class TadbirPayService : ITadbirPayService
         }
         catch (TaskCanceledException ex)
         {
-            _logger.LogError(ex, "Request timeout");
+            _logger.LogErrorSplunk("Request timeout", appModule: _appMudole, metaData: ex);
             return new TadbirPayResponse<T>
             {
                 Success = false,
@@ -110,7 +111,7 @@ public class TadbirPayService : ITadbirPayService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error occurred");
+            _logger.LogErrorSplunk("Unexpected error occurred", appModule: _appMudole, metaData: ex);
             return new TadbirPayResponse<T>
             {
                 Success = false,

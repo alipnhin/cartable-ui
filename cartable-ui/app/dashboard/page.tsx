@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 import { AppLayout, PageHeader } from "@/components/layout";
 import {
   ChartLine,
@@ -25,6 +26,7 @@ import AmountVsCountChart from "@/components/dashboard/AmountVsCountChart";
 import ComparisonMetrics from "@/components/dashboard/ComparisonMetrics";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import useTranslation from "@/hooks/useTranslation";
+import { getErrorMessage } from "@/lib/error-handler";
 
 export default function DashboardPage() {
   const { t } = useTranslation();
@@ -59,8 +61,9 @@ export default function DashboardPage() {
       const data = await getTransactionProgress(filters, session.accessToken);
       setDashboardData(data);
     } catch (err) {
-      console.error("Error fetching dashboard data:", err);
-      setError(t("dashboard.errorLoadingData"));
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

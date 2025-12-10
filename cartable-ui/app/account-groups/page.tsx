@@ -25,6 +25,7 @@ import type { AccountGroupDetail } from "@/types/account-group-types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getErrorMessage } from "@/lib/error-handler";
 import {
   Select,
   SelectContent,
@@ -97,10 +98,10 @@ export default function AccountGroupsPage() {
       );
       setGroups(data.items);
     } catch (error) {
-      console.error("Error fetching groups:", error);
+      const errorMessage = getErrorMessage(error);
       toast({
         title: t("toast.error"),
-        description: "خطا در دریافت لیست گروه‌ها",
+        description: errorMessage,
         variant: "error",
       });
     } finally {
@@ -146,10 +147,10 @@ export default function AccountGroupsPage() {
       fetchGroups();
       triggerRefresh();
     } catch (error: any) {
-      console.error("Error toggling status:", error);
+      const errorMessage = getErrorMessage(error);
       toast({
         title: t("toast.error"),
-        description: error.response?.data || "خطا در تغییر وضعیت گروه",
+        description: errorMessage,
         variant: "error",
       });
     } finally {
@@ -173,10 +174,10 @@ export default function AccountGroupsPage() {
       fetchGroups();
       triggerRefresh();
     } catch (error: any) {
-      console.error("Error deleting group:", error);
+      const errorMessage = getErrorMessage(error);
       toast({
         title: t("toast.error"),
-        description: error.response?.data || "خطا در حذف گروه",
+        description: errorMessage,
         variant: "error",
       });
     } finally {

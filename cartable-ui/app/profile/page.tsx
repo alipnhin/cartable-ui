@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { getErrorMessage } from "@/lib/error-handler";
 import {
   User,
   Mail,
@@ -60,10 +61,8 @@ export default function ProfilePage() {
       const data: UserInfoResponse = await response.json();
       setUserInfo(data);
     } catch (err) {
-      console.error("Error fetching user info:", err);
-      setError(
-        err instanceof Error ? err.message : "خطا در دریافت اطلاعات کاربر"
-      );
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);

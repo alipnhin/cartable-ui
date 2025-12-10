@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/input-group";
 import { Group, LayoutGrid, List, Search, UserPen } from "lucide-react";
 import Link from "next/link";
+import { getErrorMessage } from "@/lib/error-handler";
 
 export default function AccountsPage() {
   const { t } = useTranslation();
@@ -71,10 +72,10 @@ export default function AccountsPage() {
         );
         setAccounts(data);
       } catch (error) {
-        console.error("Error fetching accounts:", error);
+        const errorMessage = getErrorMessage(error);
         toast({
           title: t("toast.error"),
-          description: t("accounts.fetchError") || "خطا در دریافت لیست حساب‌ها",
+          description: errorMessage,
           variant: "error",
         });
       } finally {

@@ -1,16 +1,24 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import axios, {
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+  AxiosError,
+} from "axios";
+import { isValidationError, extractErrorMessage } from "@/types/api-error";
 
 // Base URL برای API - از environment variable استفاده می‌شود
 // در صورت عدم وجود، از مقدار پیش‌فرض استفاده می‌شود
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://si-lab-tadbirpay.etadbir.com/api";
+  "https://ecartableapi.etadbirco.ir/api";
 
 // Timeout برای درخواست‌های API
 const API_TIMEOUT = parseInt(
-  process.env.NEXT_PUBLIC_API_TIMEOUT || "30000",
+  process.env.NEXT_PUBLIC_API_TIMEOUT || "120000",
   10
 );
+
+// فعال‌سازی لاگ‌ها فقط در development
+const isDevelopment = process.env.NODE_ENV === "development";
 
 // متغیر برای جلوگیری از چندین درخواست refresh همزمان
 let isRefreshing = false;
@@ -75,15 +83,51 @@ apiClient.interceptors.response.use(
   (response) => {
     return response;
   },
-  async (error) => {
-    const originalRequest = error.config;
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
     if (error.response) {
       // سرور پاسخ با status code خارج از 2xx داده
-      console.error("API Error:", error.response.data);
+      const { status, data } = error.response;
 
-      // اگر 401 بود، یعنی unauthorized - token منقضی شده یا invalid است
-      if (error.response.status === 401 && !originalRequest._retry) {
+      // لاگ فقط در development
+      if (isDevelopment) {
+        console.error(`API Error [${status}]:`, data);
+      }
+
+      // مدیریت خطاهای 400 (Validation & Bad Request)
+      if (status === 400) {
+        const errorData = data as any;
+
+        // اگر خطای validation است
+        if (isValidationError(errorData)) {
+          const clientError = extractErrorMessage(errorData);
+
+          if (isDevelopment) {
+            console.error("Validation Errors:", clientError.validationErrors);
+          }
+
+          // اضافه کردن اطلاعات خطا به error object برای دسترسی در component
+          return Promise.reject({
+            ...error,
+            isValidationError: true,
+            validationErrors: clientError.validationErrors,
+            clientMessage: clientError.message,
+          });
+        }
+
+        // خطای عادی 400
+        return Promise.reject({
+          ...error,
+          isValidationError: false,
+          clientMessage: errorData.message || "درخواست نامعتبر است",
+        });
+      }
+
+      // مدیریت 401 - Unauthorized
+      if (status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
 
         // اگر در browser هستیم
@@ -100,9 +144,11 @@ apiClient.interceptors.response.use(
 
           isRefreshing = true;
 
-          console.error(
-            "Unauthorized: Token is invalid or expired - attempting refresh..."
-          );
+          if (isDevelopment) {
+            console.warn(
+              "Unauthorized: Token is invalid or expired - attempting refresh..."
+            );
+          }
 
           // dispatch event برای refresh توکن
           window.dispatchEvent(new CustomEvent("auth:unauthorized"));
@@ -148,14 +194,34 @@ apiClient.interceptors.response.use(
           });
         }
       }
+
+      // سایر خطاهای HTTP
+      return Promise.reject({
+        ...error,
+        clientMessage: (data as any)?.message || `خطای سرور: ${status}`,
+      });
     } else if (error.request) {
       // درخواست ارسال شده ولی پاسخی دریافت نشده
-      console.error("Network Error:", error.request);
+      if (isDevelopment) {
+        console.error("Network Error:", error.message);
+      }
+
+      return Promise.reject({
+        ...error,
+        clientMessage:
+          "خطا در ارتباط با سرور. لطفاً اتصال اینترنت خود را بررسی کنید.",
+      });
     } else {
-      // خطای دیگر
-      console.error("Error:", error.message);
+      // خطای دیگر (مثلاً در تنظیمات درخواست)
+      if (isDevelopment) {
+        console.error("Request Setup Error:", error.message);
+      }
+
+      return Promise.reject({
+        ...error,
+        clientMessage: "خطا در ارسال درخواست",
+      });
     }
-    return Promise.reject(error);
   }
 );
 

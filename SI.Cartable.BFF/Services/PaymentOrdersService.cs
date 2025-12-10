@@ -1,6 +1,5 @@
 using SI.Cartable.BFF.Models.Common;
 using SI.Cartable.BFF.Models.PaymentOrders;
-using System.Net.Http.Json;
 
 namespace SI.Cartable.BFF.Services;
 
@@ -127,7 +126,7 @@ public class PaymentOrdersService : IPaymentOrdersService
         }
 
         return ServiceResult<PagedListResponse<WithdrawalTransaction>>.Success(
-            response.Data );
+            response.Data);
     }
 
     public async Task<ServiceResult<WithdrawalTransaction>> GetTransactionDetailsAsync(

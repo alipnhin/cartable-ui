@@ -1,10 +1,17 @@
+using AspNetCoreRateLimit;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Polly;
 using Polly.Extensions.Http;
 using SI.Cartable.BFF.Configuration;
+using SI.Cartable.BFF.Extensions;
 using SI.Cartable.BFF.Services;
+using System.Reflection;
 using System.Text.Json;
+using TPG.SI.SplunkLogger;
+using TPG.SI.SplunkLogger.Utils.HttpClientLogger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +23,7 @@ builder.Services.Configure<IdentityServerSettings>(
 
 // Add CORS
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-    ?? new[] { "http://localhost:3000" };
+    ?? new[] { "http://localhost:3000", "https://newecartable.etadbirco.ir" };
 
 builder.Services.AddCors(options =>
 {
@@ -63,15 +70,32 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// Add HttpClient for TadbirPayService with Polly retry policy
+// Add Rate Limiting
+builder.Services.AddMemoryCache();
+builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
+// Add HttpClient for TadbirPayService (NO RETRY - SAFE FOR PAYMENT)
 var tadbirPaySettings = builder.Configuration.GetSection("TadbirPay").Get<TadbirPaySettings>();
 builder.Services.AddHttpClient<ITadbirPayService, TadbirPayService>(client =>
 {
-    client.BaseAddress = new Uri(tadbirPaySettings?.BaseUrl ?? "https://si-lab-tadbirpay.etadbir.com/api/");
-    client.Timeout = TimeSpan.FromSeconds(tadbirPaySettings?.TimeoutSeconds ?? 30);
+    client.BaseAddress = new Uri(tadbirPaySettings?.BaseUrl ?? "https://pay.etadbir.com/api/");
+    client.Timeout = TimeSpan.FromSeconds(tadbirPaySettings?.TimeoutSeconds ?? 90);
 })
-    .AddPolicyHandler(GetRetryPolicy())
-    .AddPolicyHandler(GetCircuitBreakerPolicy());
+    .AddPolicyHandler(GetCircuitBreakerPolicy()) 
+    .AddEnhancedLogging(options =>
+    {
+        options.ClientName = "TadbirPay";
+        options.LogHeaders = true;
+        options.RequestBodyLoggingMode = RequestBodyLoggingMode.Always;
+        options.SensitiveHeaders = new[] {
+            "Authorization", "X-Api-Key", "Api-Key",
+            "X-Auth-Token", "Session-Token", "Bearer",
+            "X-Access-Token"
+        };
+    });
 
 // Add HttpClient for UserProfileService
 builder.Services.AddHttpClient<IUserProfileService, UserProfileService>();
@@ -86,6 +110,10 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IBadgeService, BadgeService>();
 builder.Services.AddScoped<IManagerCartableService, ManagerCartableService>();
+
+// Add FluentValidation
+builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+builder.Services.AddFluentValidationAutoValidation();
 
 // Add Controllers
 builder.Services.AddControllers()
@@ -104,6 +132,9 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Logging.EnableEnrichment();
+builder.Logging.AddSplunkLogger(builder.Configuration);
+builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -114,9 +145,13 @@ if (app.Environment.IsDevelopment())
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "Cartable BFF API v1");
     });
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
+
+app.UseGlobalExceptionHandler();
+// Use Rate Limiting (before CORS and Authentication)
+app.UseIpRateLimiting();
 
 // Use CORS
 app.UseCors("CartablePolicy");
@@ -126,7 +161,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapHealthChecks("/health");
 app.Run();
 
 // Polly retry policy
@@ -160,3 +195,6 @@ static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
                 Console.WriteLine("Circuit breaker reset");
             });
 }
+
+
+

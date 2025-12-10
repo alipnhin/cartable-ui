@@ -42,6 +42,7 @@ import {
   disableSigner,
   AccountDetailResponse,
 } from "@/services/accountService";
+import { getErrorMessage } from "@/lib/error-handler";
 
 export default function AccountDetailPage() {
   const { t } = useTranslation();
@@ -69,11 +70,11 @@ export default function AccountDetailPage() {
       const data = await getAccountDetail(accountId, session.accessToken);
       setAccount(data);
     } catch (err) {
-      console.error("Error fetching account detail:", err);
-      setError("خطا در دریافت اطلاعات حساب");
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
       toast({
         title: t("toast.error"),
-        description: "خطا در دریافت اطلاعات حساب",
+        description: errorMessage,
         variant: "error",
       });
     } finally {
@@ -104,10 +105,10 @@ export default function AccountDetailPage() {
       // Reload data
       await fetchAccountDetail();
     } catch (err) {
-      console.error("Error changing minimum signature:", err);
+      const errorMessage = getErrorMessage(err);
       toast({
         title: t("toast.error"),
-        description: "خطا در تغییر حداقل امضا",
+        description: errorMessage,
         variant: "error",
       });
     } finally {
@@ -146,10 +147,10 @@ export default function AccountDetailPage() {
       // Reload data
       await fetchAccountDetail();
     } catch (err) {
-      console.error("Error changing signer status:", err);
+      const errorMessage = getErrorMessage(err);
       toast({
         title: t("toast.error"),
-        description: "خطا در تغییر وضعیت امضادار",
+        description: errorMessage,
         variant: "error",
       });
     } finally {

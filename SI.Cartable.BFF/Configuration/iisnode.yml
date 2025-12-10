@@ -1,0 +1,8 @@
+node_env: production
+nodeProcessCountPerApplication: 1
+loggingEnabled: true
+logDirectory: iisnode
+debuggingEnabled: true
+devErrorsEnabled: true
+enableXFF: true
+promoteServerVars: HTTPS,HTTP_HOST,SERVER_NAME,REQUEST_URI

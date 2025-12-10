@@ -109,10 +109,10 @@ export default function MyCartablePage() {
         setTotalItems(response.totalItemCount);
         setTotalPages(response.totalPageCount);
       } catch (error) {
-        console.error("Error fetching cartable:", error);
+        const errorMessage = getErrorMessage(error);
         toast({
           title: t("toast.error"),
-          description: "خطا در دریافت اطلاعات کارتابل",
+          description: errorMessage,
           variant: "error",
         });
       } finally {
@@ -154,11 +154,16 @@ export default function MyCartablePage() {
       setTotalItems(response.totalItemCount);
       setTotalPages(response.totalPageCount);
     } catch (error) {
-      console.error("Error fetching cartable:", error);
+      const errorMessage = getErrorMessage(error);
+      toast({
+        title: t("toast.error"),
+        description: errorMessage,
+        variant: "error",
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [session?.accessToken, pageNumber, pageSize]);
+  }, [session?.accessToken, pageNumber, pageSize, t, toast]);
 
   /**
    * مدیریت عملیات تأیید تکی
@@ -206,7 +211,6 @@ export default function MyCartablePage() {
           variant: "success",
         });
       } catch (error) {
-        console.error("Error sending OTP:", error);
         // بستن دیالوگ و نمایش خطا
         setOtpDialog({
           open: false,
@@ -271,7 +275,6 @@ export default function MyCartablePage() {
           variant: "success",
         });
       } catch (error) {
-        console.error("Error sending OTP:", error);
         // بستن دیالوگ و نمایش خطا
         setOtpDialog({
           open: false,
@@ -343,7 +346,6 @@ export default function MyCartablePage() {
         variant: "success",
       });
     } catch (error) {
-      console.error("Error sending batch OTP:", error);
       // بستن دیالوگ و نمایش خطا
       setOtpDialog({
         open: false,
@@ -413,7 +415,6 @@ export default function MyCartablePage() {
         variant: "success",
       });
     } catch (error) {
-      console.error("Error sending batch OTP:", error);
       // بستن دیالوگ و نمایش خطا
       setOtpDialog({
         open: false,
@@ -497,7 +498,6 @@ export default function MyCartablePage() {
       // بارگذاری مجدد لیست برای نمایش تغییرات
       await reloadData();
     } catch (error) {
-      console.error("Error confirming operation:", error);
       toast({
         title: t("toast.error"),
         description: getErrorMessage(error),
@@ -548,7 +548,6 @@ export default function MyCartablePage() {
         variant: "info",
       });
     } catch (error) {
-      console.error("Error resending OTP:", error);
       toast({
         title: t("toast.error"),
         description: getErrorMessage(error),

@@ -73,7 +73,7 @@ export default async function middleware(request: NextRequest) {
   const userRoles = getUserRoles(session);
 
   // صفحات عمومی که همیشه در دسترس هستند
-  const publicPaths = ["/", "/auth/error", "/not-found", "/unauthorized"];
+  const publicPaths = ["/", "/auth/error", "/unauthorized"];
   if (publicPaths.includes(pathname)) {
     return NextResponse.next();
   }
@@ -92,7 +92,18 @@ export default async function middleware(request: NextRequest) {
   if (!isAuthenticated) {
     // اگر کاربر احراز هویت نشده، به صفحه لاگین هدایت شود
     const loginUrl = new URL("/", request.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
+
+    // فقط اگر pathname معتبر باشد و شامل // یا /pipe/ نباشد
+    // (این مسیرها internal routes هستند که نباید در callbackUrl قرار بگیرند)
+    if (
+      pathname &&
+      !pathname.startsWith("//") &&
+      !pathname.includes("/pipe/") &&
+      pathname !== "/"
+    ) {
+      loginUrl.searchParams.set("callbackUrl", pathname);
+    }
+
     return NextResponse.redirect(loginUrl);
   }
 
