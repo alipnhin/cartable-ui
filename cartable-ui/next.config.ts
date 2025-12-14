@@ -1,60 +1,67 @@
 import type { NextConfig } from "next";
+import withPWAInit from "@ducanh2912/next-pwa";
 
-const withPWA = require("next-pwa")({
+const withPWA = withPWAInit({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
   register: true,
-  skipWaiting: true,
-
-  // استراتژی‌های cache
-  runtimeCaching: [
-    {
-      urlPattern: /^https?.*/,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "offlineCache",
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 24 * 60 * 60, // 24 ساعت
-        },
-        networkTimeoutSeconds: 10,
-      },
-    },
-    {
-      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
-      handler: "CacheFirst",
-      options: {
-        cacheName: "image-cache",
-        expiration: {
-          maxEntries: 60,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 روز
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  workboxOptions: {
+    disableDevLogs: true,
+    skipWaiting: true,
+    clientsClaim: true,
+    maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+    runtimeCaching: [
+      {
+        urlPattern: /^https?.*/,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "offlineCache",
+          expiration: {
+            maxEntries: 200,
+            maxAgeSeconds: 24 * 60 * 60,
+          },
+          networkTimeoutSeconds: 10,
         },
       },
-    },
-    {
-      urlPattern: /\.(?:js|css)$/i,
-      handler: "StaleWhileRevalidate",
-      options: {
-        cacheName: "static-resources",
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 روز
+      {
+        urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "image-cache",
+          expiration: {
+            maxEntries: 60,
+            maxAgeSeconds: 30 * 24 * 60 * 60,
+          },
         },
       },
-    },
-    {
-      urlPattern: /\/api\/.*/i,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "api-cache",
-        networkTimeoutSeconds: 5,
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 5 * 60, // 5 دقیقه
+      {
+        urlPattern: /\.(?:js|css)$/i,
+        handler: "StaleWhileRevalidate",
+        options: {
+          cacheName: "static-resources",
+          expiration: {
+            maxEntries: 100,
+            maxAgeSeconds: 7 * 24 * 60 * 60,
+          },
         },
       },
-    },
-  ],
+      {
+        urlPattern: /\/api\/.*/i,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "api-cache",
+          networkTimeoutSeconds: 5,
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 5 * 60,
+          },
+        },
+      },
+    ],
+  },
 });
 
 const nextConfig: NextConfig = {
@@ -97,7 +104,7 @@ const nextConfig: NextConfig = {
      * - NEXT_PUBLIC_API_BASE_URL: Backend API
      * - localhost:* (فقط در development)
      */
-    const allowedOrigins: string[] = ["'self'"];
+    const allowedOrigins = ["'self'"];
 
     // Add Identity Server origin
     if (process.env.AUTH_ISSUER) {
@@ -129,7 +136,7 @@ const nextConfig: NextConfig = {
     // In development, be more lenient with localhost
     if (process.env.NODE_ENV === "development") {
       allowedOrigins.push("http://localhost:*");
-      allowedOrigins.push("https://localhost:*");
+      allowedOrigins.push("https://ecartableapi.etadbirco.ir:*");
       allowedOrigins.push("https://si-lab-tadbirpay.etadbir.com:*");
     }
 
@@ -216,14 +223,38 @@ const nextConfig: NextConfig = {
         runtimeChunk: "single",
         splitChunks: {
           chunks: "all",
+          maxInitialRequests: 25,
+          maxAsyncRequests: 25,
+          minSize: 20000,
           cacheGroups: {
             default: false,
             vendors: false,
+            // Split large vendor libraries into separate chunks
+            react: {
+              name: "react-vendor",
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+              priority: 40,
+              enforce: true,
+            },
+            nextjs: {
+              name: "nextjs-vendor",
+              test: /[\\/]node_modules[\\/](next)[\\/]/,
+              priority: 35,
+              enforce: true,
+            },
+            ui: {
+              name: "ui-vendor",
+              test: /[\\/]node_modules[\\/](@radix-ui|class-variance-authority|clsx|tailwind-merge)[\\/]/,
+              priority: 30,
+              enforce: true,
+            },
             vendor: {
               name: "vendor",
               chunks: "all",
               test: /node_modules/,
               priority: 20,
+              minChunks: 1,
+              reuseExistingChunk: true,
             },
             common: {
               name: "common",

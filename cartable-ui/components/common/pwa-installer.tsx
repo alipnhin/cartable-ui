@@ -18,14 +18,9 @@ import {
   RiDownloadLine,
   RiCloseLine,
   RiAppleLine,
-  RiAndroidLine,
-  RiMoreLine,
-  RiShareLine,
-  RiHomeLine,
   RiAddBoxLine,
 } from "@remixicon/react";
-
-import { Plus, Share, SquarePlus } from "lucide-react";
+import { Share } from "lucide-react";
 // Type برای BeforeInstallPromptEvent
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -198,34 +193,31 @@ export function PWAInstaller() {
   // Android Chrome Install Prompt
   if (showInstallPrompt && deferredPrompt && deviceInfo.isAndroid) {
     return (
-      <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96">
+      <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:w-80">
         <div className="rounded-lg border border-border bg-card p-4 shadow-lg animate-in slide-in-from-bottom-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <RiDownloadLine className="h-6 w-6 text-primary-foreground" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+              <RiDownloadLine className="h-5 w-5 text-primary-foreground" />
             </div>
 
-            <div className="flex-1">
-              <h3 className="font-semibold text-card-foreground">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium text-sm text-card-foreground">
                 {t("pwa.installApp")}
               </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
                 {t("pwa.description")}
               </p>
 
               <div className="mt-3 flex gap-2">
                 <button
                   onClick={handleInstallClick}
-                  className="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                  className="flex-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
                 >
-                  <span className="flex items-center justify-center gap-2">
-                    <RiAndroidLine className="h-4 w-4" />
-                    {t("pwa.install")}
-                  </span>
+                  {t("pwa.install")}
                 </button>
                 <button
                   onClick={handleDismiss}
-                  className="rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
+                  className="rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition-colors"
                 >
                   {t("pwa.later")}
                 </button>
@@ -237,7 +229,7 @@ export function PWAInstaller() {
               className="text-muted-foreground hover:text-foreground transition-colors"
               aria-label={t("pwa.close")}
             >
-              <RiCloseLine className="h-5 w-5" />
+              <RiCloseLine className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -249,101 +241,63 @@ export function PWAInstaller() {
   if (showIOSInstructions && deviceInfo.isIOS && deviceInfo.isSafari) {
     return (
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 animate-in fade-in">
-        <div className="w-full max-w-lg rounded-t-2xl bg-card p-6 shadow-xl animate-in slide-in-from-bottom-8">
-          <div className="flex items-start justify-between mb-4">
+        <div className="w-full max-w-md rounded-t-2xl bg-card p-6 shadow-xl animate-in slide-in-from-bottom-8">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-                <RiAppleLine className="h-7 w-7 text-primary-foreground" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+                <RiAppleLine className="h-6 w-6 text-primary-foreground" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-card-foreground">
-                  {t("pwa.installApp")}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {t("pwa.iosSubtitle")}
-                </p>
-              </div>
+              <h3 className="text-base font-semibold text-card-foreground">
+                {t("pwa.installApp")}
+              </h3>
             </div>
             <button
               onClick={handleDismiss}
               className="text-muted-foreground hover:text-foreground transition-colors"
               aria-label={t("pwa.close")}
             >
-              <RiCloseLine className="h-6 w-6" />
+              <RiCloseLine className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">{t("pwa.iosIntro")}</p>
-
-            <div className="space-y-3">
-              {/* Step 1 */}
-              <div className="flex gap-3 rounded-lg bg-accent/50 p-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                  ۱
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-card-foreground">
-                    {t("pwa.iosStep1Title")}
-                  </p>
-                  <div className="mt-2 flex items-center gap-2 text-muted-foreground">
-                    <span className="text-xs">{t("pwa.iosStep1Tap")}</span>
-                    <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500">
-                      <Share className="h-4 w-4 text-white" />
-                    </div>
-                    <span className="text-xs">{t("pwa.iosStep1At")}</span>
-                  </div>
-                </div>
+          <div className="space-y-3">
+            {/* Step 1 */}
+            <div className="flex gap-3 items-center">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                ۱
               </div>
-
-              {/* Step 2 */}
-              <div className="flex gap-3 rounded-lg bg-accent/50 p-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                  ۲
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-card-foreground">
-                    {t("pwa.iosStep2Title")}
-                  </p>
-                  <div className="mt-2 flex items-center gap-2 text-muted-foreground">
-                    <span className="text-xs">{t("pwa.iosStep2Select")}</span>
-                    <div className="flex items-center gap-1 rounded bg-gray-200 px-2 py-1 dark:bg-gray-700">
-                      <RiAddBoxLine className="h-3 w-3" />
-                      <span className="text-xs">Add to Home Screen</span>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span>فشردن دکمه</span>
+                <Share className="h-4 w-4 text-blue-500" />
+                <span>در پایین صفحه</span>
               </div>
+            </div>
 
-              {/* Step 3 */}
-              <div className="flex gap-3 rounded-lg bg-accent/50 p-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                  ۳
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-card-foreground">
-                    {t("pwa.iosStep3Title")}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {t("pwa.iosStep3Desc")}
-                  </p>
+            {/* Step 2 */}
+            <div className="flex gap-3 items-center">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                ۲
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span>انتخاب</span>
+                <div className="flex items-center gap-1 rounded bg-muted px-1.5 py-0.5">
+                  <RiAddBoxLine className="h-3 w-3" />
+                  <span className="text-xs">Add to Home Screen</span>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950">
-              <div className="flex gap-2">
-                <RiAppleLine className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
-                <p className="text-xs text-blue-800 dark:text-blue-200">
-                  <strong>{t("pwa.iosNoteTitle")}</strong>{" "}
-                  {t("pwa.iosNoteDesc")}
-                </p>
+            {/* Step 3 */}
+            <div className="flex gap-3 items-center">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                ۳
               </div>
+              <span className="text-sm">تایید نصب</span>
             </div>
 
             <button
               onClick={handleDismiss}
-              className="w-full rounded-lg bg-secondary px-4 py-3 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors"
+              className="w-full mt-4 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               {t("pwa.understood")}
             </button>

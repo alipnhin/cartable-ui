@@ -32,7 +32,7 @@ export const getUserInfo = async (
   accessToken: string
 ): Promise<UserInfoResponse> => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_AUTH_ISSUER}/connect/userinfo`,
+    `${process.env.AUTH_ISSUER}/connect/userinfo`,
     {
       method: "GET",
       headers: {
