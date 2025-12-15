@@ -5,7 +5,9 @@ param(
     [string]$ServiceName = "CartableUI",
     [string]$ProjectPath = (Get-Location).Path,
     [string]$NodePath = "node.exe",
-    [int]$Port = 3000
+    [int]$Port = 3000,
+    [string]$ServiceUser = "",
+    [string]$ServicePassword = ""
 )
 
 Write-Host "=====================================" -ForegroundColor Cyan
@@ -129,6 +131,52 @@ nssm set $ServiceName AppRotateBytes 10485760
 nssm set $ServiceName AppExit Default Restart
 nssm set $ServiceName AppRestartDelay 4000
 
+# Configure service account if provided
+if ($ServiceUser -and $ServicePassword) {
+    Write-Host "Configuring service account..." -ForegroundColor Cyan
+    nssm set $ServiceName ObjectName $ServiceUser $ServicePassword
+
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "✅ Service account configured: $ServiceUser" -ForegroundColor Green
+
+        # Grant permissions to project folder
+        Write-Host "Granting permissions to project folder..." -ForegroundColor Cyan
+        try {
+            $acl = Get-Acl $ProjectPath
+            $permission = "$ServiceUser", "FullControl", "ContainerInherit,ObjectInherit", "None", "Allow"
+            $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule $permission
+            $acl.SetAccessRule($accessRule)
+            Set-Acl $ProjectPath $acl
+            Write-Host "✅ Permissions granted to: $ProjectPath" -ForegroundColor Green
+        } catch {
+            Write-Host "⚠️  Warning: Failed to set permissions automatically" -ForegroundColor Yellow
+            Write-Host "Please grant permissions manually using:" -ForegroundColor Yellow
+            Write-Host "  icacls `"$ProjectPath`" /grant `"${ServiceUser}:(OI)(CI)F`" /T" -ForegroundColor White
+        }
+
+        # Grant permissions to logs folder
+        Write-Host "Granting permissions to logs folder..." -ForegroundColor Cyan
+        try {
+            $acl = Get-Acl $logPath
+            $permission = "$ServiceUser", "FullControl", "ContainerInherit,ObjectInherit", "None", "Allow"
+            $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule $permission
+            $acl.SetAccessRule($accessRule)
+            Set-Acl $logPath $acl
+            Write-Host "✅ Permissions granted to: $logPath" -ForegroundColor Green
+        } catch {
+            Write-Host "⚠️  Warning: Failed to set log permissions automatically" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "❌ Failed to configure service account!" -ForegroundColor Red
+        Write-Host "Please verify the username and password are correct." -ForegroundColor Yellow
+        nssm remove $ServiceName confirm
+        exit 1
+    }
+} else {
+    Write-Host "⚠️  Running service as Local System account" -ForegroundColor Yellow
+    Write-Host "For production, consider using a dedicated service account." -ForegroundColor Yellow
+}
+
 Write-Host ""
 Write-Host "✅ Service installed successfully!" -ForegroundColor Green
 Write-Host ""
@@ -148,6 +196,11 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host ""
     Write-Host "Service Name:    $ServiceName" -ForegroundColor White
     Write-Host "Status:          $($serviceStatus.Status)" -ForegroundColor White
+    if ($ServiceUser) {
+        Write-Host "Run As:          $ServiceUser" -ForegroundColor White
+    } else {
+        Write-Host "Run As:          Local System" -ForegroundColor White
+    }
     Write-Host "URL:             http://localhost:$Port" -ForegroundColor White
     Write-Host "Logs:            $logPath" -ForegroundColor White
     Write-Host ""

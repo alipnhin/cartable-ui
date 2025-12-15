@@ -38,11 +38,20 @@ nssm version
 
 ## نصب به عنوان Service
 
-### دستور سریع
+### دستور سریع (Development - Local System)
 
 ```powershell
 # اجرا به عنوان Administrator
 npm run service:install
+```
+
+### دستور سریع (Production - با حساب کاربری)
+
+```powershell
+# اجرا به عنوان Administrator
+.\scripts\install-nssm-service.ps1 `
+    -ServiceUser "SI.Ecartable@etadbir.local" `
+    -ServicePassword "YourPassword"
 ```
 
 ### نصب Manual
@@ -57,10 +66,12 @@ npm run service:install
 ### پارامترهای قابل تنظیم
 
 ```powershell
--ServiceName    # نام service (پیش‌فرض: CartableUI)
--ProjectPath    # مسیر پروژه (پیش‌فرض: مسیر فعلی)
--NodePath       # مسیر node.exe (پیش‌فرض: node.exe در PATH)
--Port           # پورت اجرا (پیش‌فرض: 3000)
+-ServiceName       # نام service (پیش‌فرض: CartableUI)
+-ProjectPath       # مسیر پروژه (پیش‌فرض: مسیر فعلی)
+-NodePath          # مسیر node.exe (پیش‌فرض: node.exe در PATH)
+-Port              # پورت اجرا (پیش‌فرض: 3000)
+-ServiceUser       # حساب کاربری برای اجرای Service (اختیاری)
+-ServicePassword   # رمز عبور حساب کاربری (اختیاری)
 ```
 
 ### مثال با پارامترهای سفارشی
@@ -70,6 +81,41 @@ npm run service:install
     -ServiceName "Cartable-Production" `
     -Port 8080 `
     -ProjectPath "D:\Apps\cartable-ui"
+```
+
+### نصب با حساب کاربری سفارشی (توصیه شده برای Production)
+
+**برای Application Pool و Service از همان حساب کاربری استفاده کنید:**
+
+```powershell
+# اجرا به عنوان Administrator
+.\scripts\install-nssm-service.ps1 `
+    -ServiceName "CartableUI" `
+    -Port 3000 `
+    -ServiceUser "SI.Ecartable@etadbir.local" `
+    -ServicePassword "YourPassword"
+```
+
+**این روش:**
+- ✅ Service را با حساب کاربری IIS Application Pool اجرا می‌کند
+- ✅ دسترسی‌های لازم را به پوشه پروژه می‌دهد
+- ✅ دسترسی‌های لازم را به پوشه logs می‌دهد
+- ✅ امنیت و یکپارچگی بیشتری دارد
+
+**نکته امنیتی:** برای جلوگیری از ذخیره password در history:
+
+```powershell
+# روش 1: استفاده از Secure String
+$password = Read-Host "Enter password" -AsSecureString
+$BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($password)
+$plainPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+
+.\scripts\install-nssm-service.ps1 `
+    -ServiceUser "SI.Ecartable@etadbir.local" `
+    -ServicePassword $plainPassword
+
+# روش 2: اجرای script و وارد کردن password در هنگام اجرا
+# در این صورت script را تغییر دهید تا از Read-Host استفاده کند
 ```
 
 ---
@@ -144,6 +190,32 @@ Get-Content logs\service-error.log -Tail 50 -Wait
 ---
 
 ## تنظیمات پیشرفته
+
+### تغییر حساب کاربری Service
+
+```powershell
+# تنظیم حساب کاربری جدید
+nssm set CartableUI ObjectName "SI.Ecartable@etadbir.local" "YourPassword"
+
+# بررسی حساب کاربری فعلی
+nssm get CartableUI ObjectName
+
+# بازگشت به Local System
+nssm set CartableUI ObjectName LocalSystem
+```
+
+**نکته:** پس از تغییر حساب کاربری، باید دسترسی‌های لازم را به پوشه‌ها بدهید:
+
+```powershell
+# دسترسی به پوشه پروژه
+icacls "D:\Path\To\cartable-ui" /grant "SI.Ecartable@etadbir.local:(OI)(CI)F" /T
+
+# دسترسی به پوشه logs
+icacls "D:\Path\To\cartable-ui\logs" /grant "SI.Ecartable@etadbir.local:(OI)(CI)F" /T
+
+# ریستارت service
+nssm restart CartableUI
+```
 
 ### تغییر Environment Variables
 
@@ -296,14 +368,68 @@ nssm status CartableUI
 
 ---
 
+## یکپارچگی با IIS
+
+### تنظیم یکسان Application Pool و Service
+
+برای بهترین امنیت و کارایی، از **یک حساب کاربری** برای هر دو استفاده کنید:
+
+#### 1. تنظیم IIS Application Pool
+
+```powershell
+# Import WebAdministration module
+Import-Module WebAdministration
+
+# تنظیم Identity برای Application Pool
+Set-ItemProperty IIS:\AppPools\CartableUI -name processModel.userName -value "SI.Ecartable@etadbir.local"
+Set-ItemProperty IIS:\AppPools\CartableUI -name processModel.password -value "YourPassword"
+Set-ItemProperty IIS:\AppPools\CartableUI -name processModel.identityType -value 3
+
+# یا از IIS Manager:
+# Sites → Cartable-UI → Application Pool → Advanced Settings
+# Process Model → Identity → Custom Account
+# Username: SI.Ecartable@etadbir.local
+```
+
+#### 2. نصب Service با همان حساب کاربری
+
+```powershell
+.\scripts\install-nssm-service.ps1 `
+    -ServiceUser "SI.Ecartable@etadbir.local" `
+    -ServicePassword "YourPassword"
+```
+
+#### 3. بررسی دسترسی‌ها
+
+```powershell
+# بررسی دسترسی به پوشه پروژه
+icacls "D:\Path\To\cartable-ui"
+
+# اگر دسترسی لازم وجود ندارد:
+icacls "D:\Path\To\cartable-ui" /grant "SI.Ecartable@etadbir.local:(OI)(CI)F" /T
+```
+
+### مزایای این روش
+
+- ✅ **امنیت بیشتر**: دسترسی‌های محدود به یک حساب کاربری
+- ✅ **مدیریت آسان‌تر**: یک حساب کاربری برای مدیریت
+- ✅ **عیب‌یابی راحت‌تر**: لاگ‌ها و دسترسی‌ها یکسان
+- ✅ **Audit Trail**: تمام فعالیت‌ها با یک user ثبت می‌شود
+
+---
+
 ## چک‌لیست دیپلویمنت
 
 - [ ] NSSM نصب شده است
+- [ ] حساب کاربری سرویس آماده است (مثلاً SI.Ecartable@etadbir.local)
 - [ ] Build انجام شده (`npm run build`)
 - [ ] فایل‌های standalone کپی شدند
 - [ ] PowerShell به عنوان Administrator اجرا شد
-- [ ] Service نصب شد (`npm run service:install`)
+- [ ] Service با حساب کاربری مناسب نصب شد
+- [ ] دسترسی‌های پوشه پروژه تنظیم شدند
+- [ ] دسترسی‌های پوشه logs تنظیم شدند
 - [ ] Service در حال اجرا است
+- [ ] IIS Application Pool با همان حساب کاربری تنظیم شد
 - [ ] اپلیکیشن از طریق browser قابل دسترسی است
 - [ ] لاگ‌ها بررسی شدند
 - [ ] Auto-start با Windows تست شد

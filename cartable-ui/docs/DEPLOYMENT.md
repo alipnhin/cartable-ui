@@ -4,6 +4,8 @@
 
 ## دستورات سریع (Quick Start)
 
+### نصب با Local System (Development)
+
 ```powershell
 # 1. نصب dependencies
 npm install
@@ -16,10 +18,36 @@ npm run service:install
 
 # 4. بررسی وضعیت
 nssm status CartableUI
-# یا
-Get-Service CartableUI
 
 # 5. مشاهده لاگ‌ها
+Get-Content logs\service-output.log -Tail 50 -Wait
+```
+
+### نصب با حساب کاربری سفارشی (Production - توصیه شده)
+
+```powershell
+# 1. نصب dependencies
+npm install
+
+# 2. Build (شامل کپی فایل‌ها به standalone)
+npm run build
+
+# 3. نصب Service با حساب کاربری IIS (به عنوان Administrator)
+.\scripts\install-nssm-service.ps1 `
+    -ServiceUser "SI.Ecartable@etadbir.local" `
+    -ServicePassword "YourPassword"
+
+# 4. تنظیم IIS Application Pool با همان حساب کاربری
+Import-Module WebAdministration
+Set-ItemProperty IIS:\AppPools\CartableUI -name processModel.userName -value "SI.Ecartable@etadbir.local"
+Set-ItemProperty IIS:\AppPools\CartableUI -name processModel.password -value "YourPassword"
+Set-ItemProperty IIS:\AppPools\CartableUI -name processModel.identityType -value 3
+
+# 5. بررسی وضعیت
+nssm status CartableUI
+Get-Service CartableUI
+
+# 6. مشاهده لاگ‌ها
 Get-Content logs\service-output.log -Tail 50 -Wait
 ```
 
@@ -187,7 +215,7 @@ npm run service:install
 **به عنوان Administrator** PowerShell را اجرا کنید:
 
 ```powershell
-# نصب با تنظیمات پیش‌فرض
+# نصب با تنظیمات پیش‌فرض (Local System)
 npm run service:install
 ```
 
@@ -197,8 +225,19 @@ npm run service:install
 .\scripts\install-nssm-service.ps1 -ServiceName "CartableUI" -Port 3000
 ```
 
+**نصب با حساب کاربری سفارشی (توصیه شده برای Production):**
+
+```powershell
+# استفاده از همان حساب کاربری IIS Application Pool
+.\scripts\install-nssm-service.ps1 `
+    -ServiceUser "SI.Ecartable@etadbir.local" `
+    -ServicePassword "YourPassword"
+```
+
 Script به صورت خودکار:
 - Service را نصب می‌کند
+- حساب کاربری را تنظیم می‌کند (در صورت تعیین)
+- دسترسی‌های لازم را به پوشه‌ها می‌دهد
 - Environment variables را تنظیم می‌کند
 - Log rotation را فعال می‌کند
 - Auto-start را فعال می‌کند
@@ -265,6 +304,44 @@ Get-Content logs\service-error.log -Tail 50 -Wait
 ---
 
 ## تنظیمات IIS
+
+### یکپارچگی Application Pool و Windows Service
+
+**مهم:** برای امنیت و یکپارچگی بهتر، از **یک حساب کاربری** برای IIS Application Pool و Windows Service استفاده کنید.
+
+#### مثال با حساب کاربری: `SI.Ecartable@etadbir.local`
+
+**مرحله 1: نصب Windows Service با حساب کاربری**
+
+```powershell
+.\scripts\install-nssm-service.ps1 `
+    -ServiceUser "SI.Ecartable@etadbir.local" `
+    -ServicePassword "YourPassword"
+```
+
+**مرحله 2: تنظیم IIS Application Pool با همان حساب**
+
+از IIS Manager:
+1. Sites → Cartable-UI → Application Pools
+2. انتخاب Application Pool
+3. Advanced Settings → Process Model → Identity → Custom Account
+4. وارد کردن: `SI.Ecartable@etadbir.local`
+
+یا از PowerShell:
+```powershell
+Import-Module WebAdministration
+Set-ItemProperty IIS:\AppPools\CartableUI -name processModel.userName -value "SI.Ecartable@etadbir.local"
+Set-ItemProperty IIS:\AppPools\CartableUI -name processModel.password -value "YourPassword"
+Set-ItemProperty IIS:\AppPools\CartableUI -name processModel.identityType -value 3
+```
+
+**مزایا:**
+- ✅ امنیت بیشتر (دسترسی‌های محدود)
+- ✅ مدیریت آسان‌تر
+- ✅ عیب‌یابی راحت‌تر
+- ✅ Audit trail یکپارچه
+
+---
 
 ### 1. فعال‌سازی ARR Proxy
 
@@ -620,13 +697,17 @@ npm run test:coverage
 
 ---
 
-**نسخه:** 3.0.0
+**نسخه:** 3.1.0
 **تاریخ به‌روزرسانی:** دسامبر 2025
 **تغییرات اخیر:**
+- **پشتیبانی از حساب کاربری سفارشی برای Windows Service**
+- اضافه شدن پارامترهای `-ServiceUser` و `-ServicePassword`
+- تنظیم خودکار دسترسی‌های پوشه پروژه و logs
+- راهنمای یکپارچگی IIS Application Pool و Windows Service
+- به‌روزرسانی Quick Start با حساب کاربری
 - مهاجرت از PM2 به NSSM برای Windows Service
 - حذف کامل PM2 و فایل‌های مربوطه
 - اضافه شدن PowerShell scripts برای مدیریت Service
-- به‌روزرسانی کامل مستندات deployment
 - اضافه شدن script خودکار کپی فایل‌ها
 - رفع مشکل 404 برای فایل‌های static/public
 - بهینه‌سازی webpack bundle splitting
