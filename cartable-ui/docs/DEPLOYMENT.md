@@ -1,24 +1,26 @@
 # راهنمای دیپلویمنت
 
-این راهنما مراحل دیپلویمنت اپلیکیشن Cartable UI را با استفاده از PM2 و IIS شرح می‌دهد.
+این راهنما مراحل دیپلویمنت اپلیکیشن Cartable UI را با استفاده از NSSM (Windows Service) و IIS شرح می‌دهد.
 
 ## دستورات سریع (Quick Start)
 
-```bash
+```powershell
 # 1. نصب dependencies
 npm install
 
 # 2. Build (شامل کپی فایل‌ها به standalone)
 npm run build
 
-# 3. Start با PM2
-npm run pm2:start
+# 3. نصب به عنوان Windows Service (به عنوان Administrator)
+npm run service:install
 
 # 4. بررسی وضعیت
-pm2 status
+nssm status CartableUI
+# یا
+Get-Service CartableUI
 
 # 5. مشاهده لاگ‌ها
-pm2 logs cartable-ui
+Get-Content logs\service-output.log -Tail 50 -Wait
 ```
 
 ## فهرست مطالب
@@ -27,7 +29,7 @@ pm2 logs cartable-ui
 - [پیش‌نیازها](#پیش‌نیازها)
 - [تنظیمات محیط](#تنظیمات-محیط)
 - [بیلد اپلیکیشن](#بیلد-اپلیکیشن)
-- [دیپلویمنت با PM2](#دیپلویمنت-با-pm2)
+- [دیپلویمنت با NSSM](#دیپلویمنت-با-nssm)
 - [تنظیمات IIS](#تنظیمات-iis)
 - [تنظیمات PWA](#تنظیمات-pwa)
 - [مانیتورینگ و لاگ‌ها](#مانیتورینگ-و-لاگ‌ها)
@@ -45,9 +47,20 @@ pm2 logs cartable-ui
    node --version  # باید >= 18.x باشد
    ```
 
-2. **PM2** (برای مدیریت پروسه)
-   ```bash
-   npm install -g pm2
+2. **NSSM** (Non-Sucking Service Manager)
+
+   **روش 1: دانلود Manual**
+   - دانلود از: https://nssm.cc/download
+   - کپی `nssm.exe` به `C:\Windows\System32\`
+
+   **روش 2: نصب با Chocolatey**
+   ```powershell
+   choco install nssm
+   ```
+
+   **بررسی نصب:**
+   ```powershell
+   nssm version
    ```
 
 3. **IIS** (Internet Information Services)
@@ -153,9 +166,10 @@ npm run deploy:standalone
 npm run dev
 ```
 
-#### حالت Production (Standalone با PM2)
-```bash
-npm run pm2:start
+#### حالت Production (Standalone با NSSM)
+```powershell
+# به عنوان Administrator
+npm run service:install
 ```
 
 **Standalone Mode چیست؟**
@@ -166,85 +180,87 @@ npm run pm2:start
 
 ---
 
-## دیپلویمنت با PM2
+## دیپلویمنت با NSSM
 
-### 1. بررسی تنظیمات PM2
+### 1. نصب Service
 
-فایل `ecosystem.config.js` را بررسی کنید:
+**به عنوان Administrator** PowerShell را اجرا کنید:
 
-```javascript
-module.exports = {
-  apps: [
-    {
-      name: 'cartable-ui',
-      script: '.next/standalone/server.js',  // Standalone server
-      cwd: './',
-      instances: 1,
-      exec_mode: 'fork',  // fork برای 1 instance (نه cluster)
-      watch: false,
-      max_memory_restart: '1G',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3000,
-      },
-      error_file: 'logs/pm2-error.log',
-      out_file: 'logs/pm2-out.log',
-      // ... سایر تنظیمات
-    },
-  ],
-};
+```powershell
+# نصب با تنظیمات پیش‌فرض
+npm run service:install
 ```
 
-**نکات مهم:**
-- `script`: از standalone server استفاده می‌کند (`.next/standalone/server.js`)
-- `exec_mode`: `fork` برای 1 instance (cluster فقط برای چند instance)
-- `instances`: 1 (برای افزایش به چند instance، exec_mode را به cluster تغییر دهید)
+یا با پارامترهای سفارشی:
 
-### 2. راه‌اندازی با PM2
-
-```bash
-# شروع اپلیکیشن
-npm run pm2:start
-
-# یا به صورت مستقیم
-pm2 start ecosystem.config.js
-
-# ذخیره تنظیمات برای restart خودکار
-pm2 save
-pm2 startup
+```powershell
+.\scripts\install-nssm-service.ps1 -ServiceName "CartableUI" -Port 3000
 ```
 
-### 3. دستورات مدیریتی PM2
+Script به صورت خودکار:
+- Service را نصب می‌کند
+- Environment variables را تنظیم می‌کند
+- Log rotation را فعال می‌کند
+- Auto-start را فعال می‌کند
+- Service را شروع می‌کند
 
-```bash
-# مشاهده وضعیت
-pm2 status
+### 2. مدیریت Service
 
-# مشاهده لاگ‌ها
-npm run pm2:logs
-# یا
-pm2 logs cartable-ui
+**دستورات NSSM:**
 
-# ریستارت
-npm run pm2:restart
-# یا
-pm2 restart cartable-ui
+```powershell
+# بررسی وضعیت
+nssm status CartableUI
+
+# شروع
+nssm start CartableUI
 
 # توقف
-npm run pm2:stop
-# یا
-pm2 stop cartable-ui
+nssm stop CartableUI
 
-# حذف از PM2
-npm run pm2:delete
-# یا
-pm2 delete cartable-ui
+# ریستارت
+nssm restart CartableUI
 
-# مانیتورینگ
-npm run pm2:monit
+# حذف
+nssm remove CartableUI confirm
 # یا
-pm2 monit
+npm run service:remove
 ```
+
+**دستورات PowerShell:**
+
+```powershell
+# بررسی وضعیت
+Get-Service CartableUI
+
+# شروع
+Start-Service CartableUI
+
+# توقف
+Stop-Service CartableUI
+
+# ریستارت
+Restart-Service CartableUI
+```
+
+**مدیریت از طریق Windows Services:**
+
+1. فشار `Win + R`
+2. تایپ `services.msc` و Enter
+3. پیدا کردن "Cartable UI Application"
+4. راست‌کلیک → Start/Stop/Restart
+
+### 3. مشاهده لاگ‌ها
+
+```powershell
+# لاگ‌های خروجی (realtime)
+Get-Content logs\service-output.log -Tail 50 -Wait
+
+# لاگ‌های خطا
+Get-Content logs\service-error.log -Tail 50 -Wait
+```
+
+**مستندات کامل:** برای اطلاعات بیشتر، [NSSM-DEPLOYMENT.md](./NSSM-DEPLOYMENT.md) را مشاهده کنید.
 
 ---
 
@@ -284,7 +300,7 @@ pm2 monit
 
 فایل `web.config` در ریشه پروژه باید وجود داشته باشد. این فایل:
 
-- درخواست‌ها را از IIS به PM2 (localhost:3000) هدایت می‌کند
+- درخواست‌ها را از IIS به Windows Service (localhost:3000) هدایت می‌کند
 - HTTPS را اجباری می‌کند
 - فایل‌های حساس را مخفی می‌کند
 - هدرهای امنیتی را تنظیم می‌کند
@@ -292,9 +308,10 @@ pm2 monit
 
 ### 5. تست کانفیگوریشن
 
-```bash
-# بررسی اینکه PM2 در حال اجرا است
-pm2 status
+```powershell
+# بررسی اینکه Service در حال اجرا است
+nssm status CartableUI
+Get-Service CartableUI
 
 # تست اتصال مستقیم به Next.js
 curl http://localhost:3000
@@ -339,15 +356,18 @@ public/
 
 ## مانیتورینگ و لاگ‌ها
 
-### 1. لاگ‌های PM2
+### 1. لاگ‌های NSSM Service
 
-```bash
-# مشاهده لاگ‌های زنده
-pm2 logs cartable-ui
+```powershell
+# مشاهده لاگ‌های خروجی (realtime)
+Get-Content logs\service-output.log -Tail 50 -Wait
 
-# مشاهده فایل‌های لاگ
-# error logs: logs/pm2-error.log
-# output logs: logs/pm2-out.log
+# مشاهده لاگ‌های خطا (realtime)
+Get-Content logs\service-error.log -Tail 50 -Wait
+
+# مشاهده لاگ‌های Event Viewer
+eventvwr.msc
+# Windows Logs → Application → Filter: CartableUI
 ```
 
 ### 2. لاگ‌های IIS
@@ -359,12 +379,16 @@ C:\inetpub\logs\LogFiles\W3SVC{site-id}\
 
 ### 3. مانیتورینگ منابع
 
-```bash
-# مشاهده استفاده از CPU و RAM
-pm2 monit
+```powershell
+# بررسی وضعیت Service
+nssm status CartableUI
+Get-Service CartableUI
 
-# اطلاعات تکمیلی
-pm2 info cartable-ui
+# مشاهده استفاده از CPU و RAM
+Get-Process -Name node | Select-Object CPU, WorkingSet, ProcessName
+
+# بررسی تنظیمات Service
+nssm dump CartableUI
 ```
 
 ---
@@ -374,23 +398,24 @@ pm2 info cartable-ui
 ### مشکل 1: سایت در دسترس نیست
 
 **علل احتمالی:**
-- PM2 در حال اجرا نیست
+- Service در حال اجرا نیست
 - پورت 3000 در حال استفاده است
 - تنظیمات IIS اشتباه است
 
 **راه‌حل:**
-```bash
-# بررسی وضعیت PM2
-pm2 status
+```powershell
+# بررسی وضعیت Service
+nssm status CartableUI
+Get-Service CartableUI
 
 # بررسی پورت 3000
 netstat -ano | findstr :3000
 
-# ریستارت PM2
-pm2 restart cartable-ui
+# ریستارت Service
+nssm restart CartableUI
 
 # بررسی لاگ‌ها
-pm2 logs cartable-ui --lines 50
+Get-Content logs\service-error.log -Tail 50
 ```
 
 ### مشکل 2: فایل‌های static/public در دسترس نیست (404 Error)
@@ -406,12 +431,12 @@ npm run deploy:standalone
 # یا rebuild کامل
 npm run build
 
-# ریستارت PM2
-pm2 restart cartable-ui
+# ریستارت Service
+nssm restart CartableUI
 
 # بررسی فایل‌ها در standalone
-ls .next/standalone/public/
-ls .next/standalone/.next/static/
+dir .next\standalone\public\
+dir .next\standalone\.next\static\
 ```
 
 ### مشکل 3: فایل‌های PWA ساخته نمی‌شوند
@@ -437,30 +462,35 @@ ls .next/standalone/public/sw.js
 ### مشکل 4: خطای 502 Bad Gateway
 
 **علل احتمالی:**
-- PM2 متوقف شده
+- Service متوقف شده
 - پورت اشتباه در web.config
 
 **راه‌حل:**
-```bash
-# ریستارت PM2
-pm2 restart cartable-ui
+```powershell
+# ریستارت Service
+nssm restart CartableUI
 
-# بررسی پورت در ecosystem.config.js (باید 3000 باشد)
+# بررسی تنظیمات پورت
+nssm get CartableUI AppEnvironmentExtra
+
 # بررسی پورت در web.config (باید localhost:3000 باشد)
 ```
 
 ### مشکل 5: Environment Variables کار نمی‌کنند
 
 **راه‌حل:**
-```bash
+```powershell
 # بررسی فایل .env.production.local
-cat .env.production.local
+Get-Content .env.production.local
 
-# ریستارت PM2 بعد از تغییر env
-pm2 restart cartable-ui
+# بررسی environment variables service
+nssm get CartableUI AppEnvironmentExtra
 
-# یا با reload برای zero-downtime
-pm2 reload cartable-ui
+# تنظیم مجدد env variables
+nssm set CartableUI AppEnvironmentExtra NODE_ENV=production PORT=3000
+
+# ریستارت Service
+nssm restart CartableUI
 ```
 
 ### مشکل 6: SSL/HTTPS کار نمی‌کند
@@ -475,7 +505,7 @@ pm2 reload cartable-ui
 ## چک‌لیست دیپلویمنت
 
 - [ ] Node.js نصب شده (>= 18.x)
-- [ ] PM2 نصب شده
+- [ ] NSSM نصب شده
 - [ ] IIS نصب شده
 - [ ] URL Rewrite Module نصب شده
 - [ ] ARR نصب شده و فعال است
@@ -483,7 +513,9 @@ pm2 reload cartable-ui
 - [ ] Dependencies نصب شدند (`npm install`)
 - [ ] Build موفق بود (`npm run build`)
 - [ ] فایل‌های PWA ساخته شدند (sw.js, workbox-*.js)
-- [ ] PM2 راه‌اندازی شد و در حال اجرا است
+- [ ] فایل‌های standalone کپی شدند
+- [ ] Windows Service نصب شد (`npm run service:install`)
+- [ ] Service در حال اجرا است
 - [ ] سایت در IIS ایجاد شد
 - [ ] Binding های HTTP و HTTPS تنظیم شدند
 - [ ] ARR Proxy فعال است
@@ -497,9 +529,10 @@ pm2 reload cartable-ui
 ## منابع مفید
 
 - [Next.js Deployment](https://nextjs.org/docs/deployment)
-- [PM2 Documentation](https://pm2.keymetrics.io/docs/usage/quick-start/)
+- [NSSM Documentation](https://nssm.cc/usage)
 - [IIS Reverse Proxy](https://docs.microsoft.com/en-us/iis/extensions/url-rewrite-module/reverse-proxy-with-url-rewrite-v2-and-application-request-routing)
 - [PWA Documentation](https://web.dev/progressive-web-apps/)
+- [NSSM Deployment Guide](./NSSM-DEPLOYMENT.md)
 
 ---
 
@@ -518,26 +551,30 @@ npm run build:only
 npm run deploy:standalone
 ```
 
-### PM2 Management
+### Windows Service Management
 
-```bash
-# Start
-npm run pm2:start
+```powershell
+# نصب Service (به عنوان Administrator)
+npm run service:install
 
-# Stop
-npm run pm2:stop
+# حذف Service
+npm run service:remove
 
-# Restart
-npm run pm2:restart
+# مدیریت با NSSM
+nssm start CartableUI
+nssm stop CartableUI
+nssm restart CartableUI
+nssm status CartableUI
 
-# Delete
-npm run pm2:delete
+# مدیریت با PowerShell
+Start-Service CartableUI
+Stop-Service CartableUI
+Restart-Service CartableUI
+Get-Service CartableUI
 
-# Logs
-npm run pm2:logs
-
-# Monitor
-npm run pm2:monit
+# مشاهده لاگ‌ها
+Get-Content logs\service-output.log -Tail 50 -Wait
+Get-Content logs\service-error.log -Tail 50 -Wait
 ```
 
 ### Development
@@ -567,24 +604,30 @@ npm run test:coverage
 | سرعت | سریع‌تر | کندتر |
 | Setup | نیاز به کپی manual فایل‌ها | بدون نیاز به کپی |
 | استفاده | Production (Docker, IIS) | Development و Production |
-| PM2 Config | `.next/standalone/server.js` | `next start` |
+| NSSM Config | `.next/standalone/server.js` | `next start` |
 
-### Fork vs Cluster Mode
+### NSSM vs PM2
 
-| ویژگی | Fork | Cluster |
-|-------|------|---------|
-| Instances | 1 | چند instance (2+) |
-| CPU Usage | کمتر | بیشتر (load balancing) |
-| Memory | کمتر | بیشتر |
-| استفاده | سرورهای کوچک | سرورهای بزرگ با CPU چند هسته‌ای |
+| ویژگی | NSSM | PM2 |
+|-------|------|-----|
+| پلتفرم | Windows Only | Cross-platform |
+| یکپارچگی با Windows | ✅ Native Service | ⚠️ محدود |
+| Auto-start | ✅ خودکار | ⚠️ نیاز به تنظیم |
+| مدیریت | Services.msc + PowerShell | PM2 CLI |
+| لاگ‌ها | Event Viewer + File | File Only |
+| پایداری در Windows | ✅✅ عالی | ✅ خوب |
+| حافظه | کمتر | بیشتر |
 
 ---
 
-**نسخه:** 2.0.0
+**نسخه:** 3.0.0
 **تاریخ به‌روزرسانی:** دسامبر 2025
 **تغییرات اخیر:**
+- مهاجرت از PM2 به NSSM برای Windows Service
+- حذف کامل PM2 و فایل‌های مربوطه
+- اضافه شدن PowerShell scripts برای مدیریت Service
+- به‌روزرسانی کامل مستندات deployment
 - اضافه شدن script خودکار کپی فایل‌ها
-- به‌روزرسانی تنظیمات PM2 به fork mode
 - رفع مشکل 404 برای فایل‌های static/public
 - بهینه‌سازی webpack bundle splitting
 - رفع warnings میان‌افزار (middleware → proxy)
