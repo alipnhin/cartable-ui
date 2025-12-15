@@ -21,7 +21,7 @@ export enum UserRole {
   CARTABLE_MANAGER = "cartableadmin.role",
 
   /** ادمین سیستم - دسترسی کامل */
-  ADMIN = "Administrator",
+  ADMIN = "TadbirPayAdmin",
 }
 
 /**

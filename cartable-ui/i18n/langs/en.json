@@ -627,7 +627,8 @@
     "orderRejected": "Order rejected successfully",
     "ordersApproved": "{{count}} orders approved successfully",
     "ordersRejected": "{{count}} orders rejected successfully",
-    "exportStarted": "Excel export is being prepared"
+    "exportStarted": "Excel export is being prepared",
+    "error": "Error"
   },
   "otp": {
     "enterCode": "Enter Verification Code",

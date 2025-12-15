@@ -634,7 +634,8 @@
     "orderRejected": "دستور با موفقیت رد شد",
     "ordersApproved": "{{count}} دستور با موفقیت تأیید شدند",
     "ordersRejected": "{{count}} دستور با موفقیت رد شدند",
-    "exportStarted": "خروجی Excel در حال آماده‌سازی است"
+    "exportStarted": "خروجی Excel در حال آماده‌سازی است",
+    "error": "خطا"
   },
   "otp": {
     "enterCode": "کد تأیید را وارد کنید",

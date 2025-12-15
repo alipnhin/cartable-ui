@@ -247,12 +247,12 @@ function OtpForm({ onConfirm, onResend, onClose }: OtpFormProps) {
     <div className="space-y-4 py-4">
       {/* OTP Input */}
       <div className="space-y-2">
-        <label className="text-sm font-medium mb-2">{t("otp.enterCode")}</label>
+        <label className=" font-medium mb-2">{t("otp.enterCode")}</label>
         <OtpInput value={otp} onChange={setOtp} />
       </div>
 
       {/* Timer and Resend */}
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center justify-between ">
         {timeLeft > 0 ? (
           <span className="text-muted-foreground">
             {t("otp.expiresIn")}:{" "}

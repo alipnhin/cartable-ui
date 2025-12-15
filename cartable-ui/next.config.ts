@@ -5,69 +5,124 @@ const withPWA = withPWAInit({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
   register: true,
+  scope: "/",
+
   cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: true,
+  aggressiveFrontEndNavCaching: false,
   reloadOnOnline: true,
+
   workboxOptions: {
     disableDevLogs: true,
     skipWaiting: true,
     clientsClaim: true,
-    maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+    maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+
+    // ✅ بدون API caching - فقط static assets
     runtimeCaching: [
+      // Navigation requests
       {
-        urlPattern: /^https?.*/,
+        urlPattern: ({ request, url }) => {
+          return (
+            request.mode === "navigate" && url.origin === self.location.origin
+          );
+        },
         handler: "NetworkFirst",
         options: {
-          cacheName: "offlineCache",
+          cacheName: "pages-cache",
           expiration: {
-            maxEntries: 200,
-            maxAgeSeconds: 24 * 60 * 60,
+            maxEntries: 30,
+            maxAgeSeconds: 60 * 60, // 1 hour
           },
-          networkTimeoutSeconds: 10,
+          networkTimeoutSeconds: 5,
         },
       },
+
+      // Images
       {
-        urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
+        urlPattern: ({ url }) => {
+          return (
+            url.origin === self.location.origin &&
+            /\.(?:png|jpg|jpeg|svg|gif|webp|ico|avif)$/i.test(url.pathname)
+          );
+        },
         handler: "CacheFirst",
         options: {
           cacheName: "image-cache",
           expiration: {
             maxEntries: 60,
-            maxAgeSeconds: 30 * 24 * 60 * 60,
-          },
-        },
-      },
-      {
-        urlPattern: /\.(?:js|css)$/i,
-        handler: "StaleWhileRevalidate",
-        options: {
-          cacheName: "static-resources",
-          expiration: {
-            maxEntries: 100,
             maxAgeSeconds: 7 * 24 * 60 * 60,
           },
         },
       },
+
+      // Next.js static assets (immutable)
       {
-        urlPattern: /\/api\/.*/i,
-        handler: "NetworkFirst",
+        urlPattern: ({ url }) => {
+          return (
+            url.origin === self.location.origin &&
+            url.pathname.startsWith("/_next/static/")
+          );
+        },
+        handler: "CacheFirst",
         options: {
-          cacheName: "api-cache",
-          networkTimeoutSeconds: 5,
+          cacheName: "next-static",
           expiration: {
-            maxEntries: 50,
-            maxAgeSeconds: 5 * 60,
+            maxEntries: 200,
+            maxAgeSeconds: 365 * 24 * 60 * 60,
           },
         },
       },
+
+      // JS/CSS (not in _next/static)
+      {
+        urlPattern: ({ url }) => {
+          return (
+            url.origin === self.location.origin &&
+            /\.(?:js|css)$/i.test(url.pathname) &&
+            !url.pathname.startsWith("/_next/static/")
+          );
+        },
+        handler: "StaleWhileRevalidate",
+        options: {
+          cacheName: "js-css-cache",
+          expiration: {
+            maxEntries: 60,
+            maxAgeSeconds: 24 * 60 * 60,
+          },
+        },
+      },
+
+      // Fonts
+      {
+        urlPattern: ({ url }) => {
+          return (
+            url.origin === self.location.origin &&
+            /\.(?:woff|woff2|ttf|eot)$/i.test(url.pathname)
+          );
+        },
+        handler: "CacheFirst",
+        options: {
+          cacheName: "font-cache",
+          expiration: {
+            maxEntries: 30,
+            maxAgeSeconds: 365 * 24 * 60 * 60,
+          },
+        },
+      },
+
+      // ❌ API caching کاملاً حذف شد - همیشه از network بیاد
     ],
+
+    // ✅ مطمئن میشیم که API requests اصلاً cache نمیشن
+    navigateFallback: undefined,
+    navigateFallbackDenylist: [/^\/api\//],
   },
 });
 
 const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: true,
-  turbopack: {},
+
   compiler: {
     removeConsole:
       process.env.NODE_ENV === "production"
@@ -92,21 +147,9 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
-    /**
-     * Content Security Policy (CSP) Configuration
-     *
-     * فقط origin های مشخص شده در environment variables مجاز هستند.
-     * این تنظیمات امنیت برنامه را در مقابل XSS و injection attacks افزایش می‌دهد.
-     *
-     * Allowed Origins:
-     * - 'self': همان دامنه برنامه
-     * - AUTH_ISSUER: Identity Server (احراز هویت)
-     * - NEXT_PUBLIC_API_BASE_URL: Backend API
-     * - localhost:* (فقط در development)
-     */
     const allowedOrigins = ["'self'"];
 
-    // Add Identity Server origin
+    // Identity Server
     if (process.env.AUTH_ISSUER) {
       try {
         const authUrl = new URL(process.env.AUTH_ISSUER);
@@ -116,12 +159,11 @@ const nextConfig: NextConfig = {
       }
     }
 
-    // Add API origin (extract from NEXT_PUBLIC_API_BASE_URL)
+    // API origin
     if (process.env.NEXT_PUBLIC_API_BASE_URL) {
       try {
         const apiUrl = new URL(process.env.NEXT_PUBLIC_API_BASE_URL);
         const apiOrigin = apiUrl.origin;
-        // Only add if not already in list
         if (!allowedOrigins.includes(apiOrigin)) {
           allowedOrigins.push(apiOrigin);
         }
@@ -133,17 +175,14 @@ const nextConfig: NextConfig = {
       }
     }
 
-    // In development, be more lenient with localhost
+    // Development only
     if (process.env.NODE_ENV === "development") {
       allowedOrigins.push("http://localhost:*");
-      allowedOrigins.push("https://ecartableapi.etadbirco.ir:*");
-      allowedOrigins.push("https://si-lab-tadbirpay.etadbir.com:*");
+      allowedOrigins.push("https://ecartableapi.etadbirco.ir");
+      allowedOrigins.push("https://si-lab-tadbirpay.etadbir.com");
     }
 
-    // Log allowed origins for debugging (only in development)
-    if (process.env.NODE_ENV === "development") {
-      console.log("[CSP] Allowed origins for connect-src:", allowedOrigins);
-    }
+    const isDev = process.env.NODE_ENV === "development";
 
     return [
       {
@@ -162,22 +201,31 @@ const nextConfig: NextConfig = {
             value: "1; mode=block",
           },
           {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-              "style-src 'self' 'unsafe-inline'",
+              isDev
+                ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
+                : "script-src 'self' 'unsafe-inline'", // Next.js نیاز داره
+              isDev
+                ? "style-src 'self' 'unsafe-inline'"
+                : "style-src 'self' 'unsafe-inline'", // Tailwind نیاز داره
               "img-src 'self' data: https: blob:",
               "font-src 'self' data:",
               `connect-src ${allowedOrigins.join(" ")}`,
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
+              "upgrade-insecure-requests",
             ].join("; "),
           },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
+            value: "camera=(), microphone=(), geolocation=(), payment=()",
           },
           {
             key: "Referrer-Policy",
@@ -185,6 +233,8 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+
+      // Static assets - aggressive caching
       {
         source: "/static/:path*",
         headers: [
@@ -203,12 +253,60 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+
+      // Images
+      {
+        source: "/:path*.{jpg,jpeg,png,gif,webp,svg,ico}",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=86400",
+          },
+        ],
+      },
+
+      // Service Worker - NEVER cache
       {
         source: "/sw.js",
         headers: [
           {
             key: "Cache-Control",
             value: "public, max-age=0, must-revalidate",
+          },
+          {
+            key: "Service-Worker-Allowed",
+            value: "/",
+          },
+        ],
+      },
+
+      // Workbox runtime
+      {
+        source: "/workbox-:hash.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+
+      // ✅ API responses - NEVER cache (مهم برای سیستم مالی)
+      {
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value:
+              "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          },
+          {
+            key: "Pragma",
+            value: "no-cache",
+          },
+          {
+            key: "Expires",
+            value: "0",
           },
         ],
       },
@@ -221,6 +319,7 @@ const nextConfig: NextConfig = {
         ...config.optimization,
         moduleIds: "deterministic",
         runtimeChunk: "single",
+        minimize: true,
         splitChunks: {
           chunks: "all",
           maxInitialRequests: 25,
@@ -229,7 +328,6 @@ const nextConfig: NextConfig = {
           cacheGroups: {
             default: false,
             vendors: false,
-            // Split large vendor libraries into separate chunks
             react: {
               name: "react-vendor",
               test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,

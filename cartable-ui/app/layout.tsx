@@ -102,11 +102,11 @@ export default function RootLayout({
         {/* Apple PWA Meta Tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="تدبیر پی" />
+        <meta name="apple-mobile-web-app-title" content="Tadbir Pay" />
 
         {/* Mobile Web App */}
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="تدبیر پی" />
+        <meta name="application-name" content="Tadbir Pay" />
 
         {/* Favicons */}
         <link

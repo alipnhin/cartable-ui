@@ -21,7 +21,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-white dark:bg-black">
+    <main className="min-h-screen w-full ">
       {/* Container برای وسط‌چین کردن محتوا */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* محتوای اصلی */}

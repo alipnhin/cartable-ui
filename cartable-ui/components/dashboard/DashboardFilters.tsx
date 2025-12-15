@@ -75,9 +75,9 @@ export default function DashboardFilters({
   return (
     <Card className="mb-5 animate-fade-in border-2">
       <div className="p-4 lg:p-5">
-        <div className="flex flex-wrap items-end gap-3 lg:gap-4">
-          {/* Account Selection */}
-          <div className="flex-1 min-w-[200px] lg:flex-initial lg:w-56">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-4">
+          {/* Account */}
+          <div className="w-full lg:w-56">
             <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
               {t("dashboard.filters.bankAccount")}
             </Label>
@@ -85,36 +85,37 @@ export default function DashboardFilters({
               value={selectedAccount}
               onValueChange={setSelectedAccount}
               placeholder={t("dashboard.filters.allAccounts")}
-              showAllOption={true}
+              showAllOption
               className="bg-background h-9"
             />
           </div>
 
-          {/* From Date */}
-          <div className="flex-1 min-w-40 lg:flex-initial lg:w-48">
-            <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
-              {t("dashboard.filters.fromDate")}
-            </Label>
-            <PersianDatePicker
-              value={fromDate}
-              onChange={setFromDate}
-              placeholder={t("common.selectDate")}
-            />
+          {/* Dates (mobile: row / desktop: fixed width) */}
+          <div className="grid grid-cols-2 gap-3 w-full lg:flex lg:w-auto lg:gap-4">
+            <div className="lg:w-48">
+              <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
+                {t("dashboard.filters.fromDate")}
+              </Label>
+              <PersianDatePicker
+                value={fromDate}
+                onChange={setFromDate}
+                placeholder={t("common.selectDate")}
+              />
+            </div>
+
+            <div className="lg:w-48">
+              <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
+                {t("dashboard.filters.toDate")}
+              </Label>
+              <PersianDatePicker
+                value={toDate}
+                onChange={setToDate}
+                placeholder={t("common.selectDate")}
+              />
+            </div>
           </div>
 
-          {/* To Date */}
-          <div className="flex-1 min-w-40 lg:flex-initial lg:w-48">
-            <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
-              {t("dashboard.filters.toDate")}
-            </Label>
-            <PersianDatePicker
-              value={toDate}
-              onChange={setToDate}
-              placeholder={t("common.selectDate")}
-            />
-          </div>
-
-          {/* Apply Filter Button */}
+          {/* Button */}
           <div className="w-full lg:w-auto lg:ms-auto">
             <Button
               onClick={handleApplyFilters}

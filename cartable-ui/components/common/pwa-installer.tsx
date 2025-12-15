@@ -201,23 +201,23 @@ export function PWAInstaller() {
             </div>
 
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-sm text-card-foreground">
+              <h3 className="font-medium  text-card-foreground">
                 {t("pwa.installApp")}
               </h3>
-              <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
+              <p className="mt-0.5  text-muted-foreground line-clamp-1">
                 {t("pwa.description")}
               </p>
 
               <div className="mt-3 flex gap-2">
                 <button
                   onClick={handleInstallClick}
-                  className="flex-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                  className="flex-1 rounded-md bg-primary px-3 py-2  font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
                 >
                   {t("pwa.install")}
                 </button>
                 <button
                   onClick={handleDismiss}
-                  className="rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition-colors"
+                  className="rounded-md border border-border px-3 py-2 font-medium hover:bg-accent transition-colors"
                 >
                   {t("pwa.later")}
                 </button>
@@ -242,7 +242,7 @@ export function PWAInstaller() {
     return (
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 animate-in fade-in">
         <div className="w-full max-w-md rounded-t-2xl bg-card p-6 shadow-xl animate-in slide-in-from-bottom-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
                 <RiAppleLine className="h-6 w-6 text-primary-foreground" />
@@ -260,13 +260,13 @@ export function PWAInstaller() {
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-5">
             {/* Step 1 */}
             <div className="flex gap-3 items-center">
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                ۱
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
+                1
               </div>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 ">
                 <span>فشردن دکمه</span>
                 <Share className="h-4 w-4 text-blue-500" />
                 <span>در پایین صفحه</span>
@@ -275,29 +275,29 @@ export function PWAInstaller() {
 
             {/* Step 2 */}
             <div className="flex gap-3 items-center">
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                ۲
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
+                2
               </div>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2">
                 <span>انتخاب</span>
-                <div className="flex items-center gap-1 rounded bg-muted px-1.5 py-0.5">
-                  <RiAddBoxLine className="h-3 w-3" />
-                  <span className="text-xs">Add to Home Screen</span>
+                <div className="flex items-center gap-1 rounded bg-muted px-2 py-1">
+                  <RiAddBoxLine className="h-4 w-4" />
+                  <span className="">Add to Home Screen</span>
                 </div>
               </div>
             </div>
 
             {/* Step 3 */}
             <div className="flex gap-3 items-center">
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                ۳
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
+                3
               </div>
-              <span className="text-sm">تایید نصب</span>
+              <span className="">تایید نصب</span>
             </div>
 
             <button
               onClick={handleDismiss}
-              className="w-full mt-4 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="w-full mt-4 rounded-lg bg-primary px-4 py-3 font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               {t("pwa.understood")}
             </button>

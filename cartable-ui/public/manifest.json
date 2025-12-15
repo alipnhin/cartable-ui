@@ -1,6 +1,6 @@
 {
   "name": "کارتابل پرداخت",
-  "short_name": "کارتابل",
+  "short_name": "Tadbir Pay",
   "description": "سیستم مدیریت و تأیید دستورهای پرداخت",
   "start_url": "/",
   "display": "standalone",
