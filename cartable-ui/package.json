@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
+    "start:standalone": "node .next/standalone/server.js",
     "pm2:start": "pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop cartable-ui",
     "pm2:restart": "pm2 restart cartable-ui",

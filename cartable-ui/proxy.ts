@@ -1,14 +1,14 @@
 /**
- * Next.js Middleware for Authentication and Authorization
- * میان‌افزار Next.js برای احراز هویت و مجوزدهی
+ * Next.js Proxy for Authentication and Authorization
+ * پروکسی Next.js برای احراز هویت و مجوزدهی
  *
- * این middleware در هر درخواست اجرا می‌شود و:
+ * این proxy در هر درخواست اجرا می‌شود و:
  * 1. وضعیت احراز هویت کاربر را بررسی می‌کند
  * 2. نقش‌های کاربر را از توکن استخراج می‌کند
  * 3. دسترسی به صفحات را بر اساس نقش کنترل می‌کند
  * 4. کاربران غیرمجاز را به صفحات مناسب هدایت می‌کند
  *
- * @module middleware
+ * @module proxy
  */
 
 import { NextResponse } from "next/server";
@@ -40,8 +40,8 @@ function getUserRoles(session: Session | null): string[] {
 }
 
 /**
- * Middleware Configuration
- * تنظیمات middleware
+ * Proxy Configuration
+ * تنظیمات proxy
  */
 export const config = {
   matcher: [
@@ -58,13 +58,13 @@ export const config = {
 };
 
 /**
- * Middleware Function
- * تابع اصلی middleware
+ * Proxy Function
+ * تابع اصلی proxy
  *
  * @param request - درخواست Next.js
  * @returns پاسخ Next.js (ادامه، هدایت یا خطا)
  */
-export default async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Get user session

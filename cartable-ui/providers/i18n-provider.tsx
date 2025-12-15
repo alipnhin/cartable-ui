@@ -10,59 +10,62 @@ import LanguageDetector from "i18next-browser-languagedetector";
 
 // Import translation files
 import enTranslations from "@/i18n/langs/en.json";
-import arTranslations from "@/i18n/langs/ar.json";
 import faTranslations from "@/i18n/langs/fa.json";
 
 interface I18nProviderProps {
   children: ReactNode;
 }
 
+// Initialize i18n instance immediately (before component render)
+const resources = {
+  en: { translation: enTranslations },
+  // ar: { translation: arTranslations },
+  fa: { translation: faTranslations },
+};
+
+// Initialize i18n synchronously if not already initialized
+if (!i18n.isInitialized) {
+  i18n
+    .use(LanguageDetector)
+    .use(initReactI18next)
+    .init({
+      resources,
+      lng: "fa", // Default language
+      fallbackLng: "fa",
+      debug: process.env.NODE_ENV === "development",
+      supportedLngs: ["fa", "en"],
+
+      interpolation: {
+        escapeValue: false,
+      },
+
+      detection: {
+        order: ["localStorage", "navigator", "htmlTag"],
+        caches: ["localStorage"],
+        lookupLocalStorage: "language",
+      },
+
+      react: {
+        useSuspense: false,
+      },
+    });
+}
+
 function I18nProvider({ children }: I18nProviderProps) {
-  const [isI18nInitialized, setIsI18nInitialized] = useState(false);
+  const [isI18nInitialized, setIsI18nInitialized] = useState(i18n.isInitialized);
 
   useEffect(() => {
-    // Initialize i18n only on client side
-    if (!i18n.isInitialized) {
-      const resources = {
-        en: { translation: enTranslations },
-        // ar: { translation: arTranslations },
-        fa: { translation: faTranslations },
-      };
-
-      // Get stored language or use default
-      const storedLanguage =
-        typeof window !== "undefined" ? localStorage.getItem("language") : null;
-      const defaultLng = storedLanguage || "fa";
-
-      i18n
-        .use(LanguageDetector)
-        .use(initReactI18next)
-        .init({
-          resources,
-          lng: defaultLng, // Set initial language
-          fallbackLng: "fa", // Changed to Persian as default
-          debug: process.env.NODE_ENV === "development",
-          supportedLngs: ["fa", "en"], // Explicitly define supported languages
-
-          interpolation: {
-            escapeValue: false, // React already does escaping
-          },
-
-          detection: {
-            order: ["localStorage", "navigator", "htmlTag"],
-            caches: ["localStorage"],
-            lookupLocalStorage: "language",
-          },
-
-          react: {
-            useSuspense: false, // Important for Next.js SSR
-          },
-        })
-        .then(() => {
-          setIsI18nInitialized(true);
-        });
-    } else {
+    // If i18n is already initialized, just set the state
+    if (i18n.isInitialized) {
       setIsI18nInitialized(true);
+
+      // Update language from localStorage if available
+      if (typeof window !== "undefined") {
+        const storedLanguage = localStorage.getItem("language");
+        if (storedLanguage && storedLanguage !== i18n.language) {
+          i18n.changeLanguage(storedLanguage);
+        }
+      }
     }
 
     // Update document direction and lang attribute when language changes
