@@ -12,7 +12,7 @@ module.exports = {
       script: '.next/standalone/server.js',
       cwd: './',
       instances: 1,
-      exec_mode: 'cluster',
+      exec_mode: 'fork',
       watch: false,
       max_memory_restart: '1G',
       env: {

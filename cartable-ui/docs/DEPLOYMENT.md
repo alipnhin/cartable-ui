@@ -2,8 +2,28 @@
 
 این راهنما مراحل دیپلویمنت اپلیکیشن Cartable UI را با استفاده از PM2 و IIS شرح می‌دهد.
 
+## دستورات سریع (Quick Start)
+
+```bash
+# 1. نصب dependencies
+npm install
+
+# 2. Build (شامل کپی فایل‌ها به standalone)
+npm run build
+
+# 3. Start با PM2
+npm run pm2:start
+
+# 4. بررسی وضعیت
+pm2 status
+
+# 5. مشاهده لاگ‌ها
+pm2 logs cartable-ui
+```
+
 ## فهرست مطالب
 
+- [دستورات سریع](#دستورات-سریع-quick-start)
 - [پیش‌نیازها](#پیش‌نیازها)
 - [تنظیمات محیط](#تنظیمات-محیط)
 - [بیلد اپلیکیشن](#بیلد-اپلیکیشن)
@@ -12,6 +32,7 @@
 - [تنظیمات PWA](#تنظیمات-pwa)
 - [مانیتورینگ و لاگ‌ها](#مانیتورینگ-و-لاگ‌ها)
 - [عیب‌یابی](#عیب‌یابی)
+- [Scripts مفید](#scripts-مفید)
 
 ---
 
@@ -81,37 +102,67 @@ npm install --production=false
 npm run build
 ```
 
-**نکته مهم**: این پروژه از webpack استفاده می‌کند (نه Turbopack) برای سازگاری با PWA. دستور build به صورت خودکار flag `--webpack` را اضافه می‌کند.
+**این دستور به صورت خودکار:**
+1. Build را با webpack می‌سازد (`--webpack` flag برای PWA لازم است)
+2. فایل‌های PWA را تولید می‌کند (sw.js, workbox-*.js)
+3. Standalone build می‌سازد
+4. فایل‌های `public` و `.next/static` را به `.next/standalone/` کپی می‌کند
+
+**نکته:** اگر فقط می‌خواهید build بگیرید بدون کپی فایل‌ها:
+```bash
+npm run build:only
+```
 
 ### 3. بررسی خروجی Build
 
-فایل‌های زیر باید ساخته شوند:
+پس از build موفق، ساختار زیر باید وجود داشته باشد:
 
-- `.next/` - فایل‌های build شده Next.js
-- `.next/standalone/` - فایل‌های standalone برای production
-- `public/sw.js` - Service Worker برای PWA
-- `public/workbox-*.js` - کتابخانه Workbox
+```
+.next/
+├── standalone/              # Standalone server
+│   ├── server.js           # Entry point برای production
+│   ├── .next/
+│   │   └── static/         # فایل‌های static (کپی شده)
+│   ├── public/             # فایل‌های public (کپی شده)
+│   │   ├── sw.js
+│   │   ├── workbox-*.js
+│   │   └── manifest.json
+│   └── node_modules/       # Dependencies مورد نیاز
+└── static/                  # فایل‌های static اصلی
 
-**نکته:** با تنظیم `output: "standalone"` در next.config.ts، یک standalone server در `.next/standalone/` ساخته می‌شود که تمام dependencies لازم را شامل می‌شود.
+public/
+├── sw.js                    # Service Worker
+├── workbox-*.js             # Workbox runtime
+└── manifest.json            # Web App Manifest
+```
 
-### 4. روش‌های اجرای Production
+### 4. کپی Manual فایل‌ها (در صورت نیاز)
 
-این پروژه از **دو روش** برای اجرای production پشتیبانی می‌کند:
+اگر به هر دلیلی فایل‌ها کپی نشدند:
 
-#### روش 1: استفاده از PM2 (پیشنهادی)
+```bash
+npm run deploy:standalone
+```
+
+این script فایل‌های `public` و `.next/static` را به `.next/standalone/` کپی می‌کند.
+
+### 5. حالت‌های اجرا
+
+#### حالت Development
+```bash
+npm run dev
+```
+
+#### حالت Production (Standalone با PM2)
 ```bash
 npm run pm2:start
 ```
 
-#### روش 2: استفاده از server.js
-```bash
-NODE_ENV=production node server.js
-```
-
-فایل `server.js` به صورت خودکار:
-- Standalone build را شناسایی و اجرا می‌کند
-- فایل‌های `public` و `static` را کپی می‌کند
-- در development mode از Next.js dev server استفاده می‌کند
+**Standalone Mode چیست؟**
+- Server مستقل با تمام dependencies لازم
+- حجم کمتر و سریع‌تر از next start
+- مناسب برای deployment در production
+- نیاز به کپی manual فایل‌های static و public دارد
 
 ---
 
@@ -126,22 +177,28 @@ module.exports = {
   apps: [
     {
       name: 'cartable-ui',
-      script: 'node_modules/next/dist/bin/next',
-      args: 'start',
+      script: '.next/standalone/server.js',  // Standalone server
       cwd: './',
       instances: 1,
-      exec_mode: 'cluster',
+      exec_mode: 'fork',  // fork برای 1 instance (نه cluster)
       watch: false,
       max_memory_restart: '1G',
       env: {
         NODE_ENV: 'production',
         PORT: 3000,
       },
+      error_file: 'logs/pm2-error.log',
+      out_file: 'logs/pm2-out.log',
       // ... سایر تنظیمات
     },
   ],
 };
 ```
+
+**نکات مهم:**
+- `script`: از standalone server استفاده می‌کند (`.next/standalone/server.js`)
+- `exec_mode`: `fork` برای 1 instance (cluster فقط برای چند instance)
+- `instances`: 1 (برای افزایش به چند instance، exec_mode را به cluster تغییر دهید)
 
 ### 2. راه‌اندازی با PM2
 
@@ -336,7 +393,28 @@ pm2 restart cartable-ui
 pm2 logs cartable-ui --lines 50
 ```
 
-### مشکل 2: فایل‌های PWA ساخته نمی‌شوند
+### مشکل 2: فایل‌های static/public در دسترس نیست (404 Error)
+
+**علت:**
+- فایل‌های `public` و `.next/static` به standalone کپی نشده‌اند
+
+**راه‌حل:**
+```bash
+# کپی فایل‌ها به standalone
+npm run deploy:standalone
+
+# یا rebuild کامل
+npm run build
+
+# ریستارت PM2
+pm2 restart cartable-ui
+
+# بررسی فایل‌ها در standalone
+ls .next/standalone/public/
+ls .next/standalone/.next/static/
+```
+
+### مشکل 3: فایل‌های PWA ساخته نمی‌شوند
 
 **علل احتمالی:**
 - build با Turbopack انجام شده (به جای webpack)
@@ -347,15 +425,16 @@ pm2 logs cartable-ui --lines 50
 # اطمینان از نصب پکیج
 npm install @ducanh2912/next-pwa
 
-# بیلد با webpack
+# بیلد با webpack (همیشه از npm run build استفاده کنید)
 npm run build
 
 # بررسی وجود فایل‌ها
 ls public/sw.js
 ls public/workbox-*.js
+ls .next/standalone/public/sw.js
 ```
 
-### مشکل 3: خطای 502 Bad Gateway
+### مشکل 4: خطای 502 Bad Gateway
 
 **علل احتمالی:**
 - PM2 متوقف شده
@@ -370,7 +449,7 @@ pm2 restart cartable-ui
 # بررسی پورت در web.config (باید localhost:3000 باشد)
 ```
 
-### مشکل 4: Environment Variables کار نمی‌کنند
+### مشکل 5: Environment Variables کار نمی‌کنند
 
 **راه‌حل:**
 ```bash
@@ -384,7 +463,7 @@ pm2 restart cartable-ui
 pm2 reload cartable-ui
 ```
 
-### مشکل 5: SSL/HTTPS کار نمی‌کند
+### مشکل 6: SSL/HTTPS کار نمی‌کند
 
 **راه‌حل:**
 1. بررسی گواهینامه SSL در IIS
@@ -424,5 +503,88 @@ pm2 reload cartable-ui
 
 ---
 
-**نسخه:** 1.0.0
+## Scripts مفید
+
+### Build و Deployment
+
+```bash
+# Build کامل (با کپی فایل‌ها)
+npm run build
+
+# Build بدون کپی فایل‌ها
+npm run build:only
+
+# کپی فایل‌ها به standalone
+npm run deploy:standalone
+```
+
+### PM2 Management
+
+```bash
+# Start
+npm run pm2:start
+
+# Stop
+npm run pm2:stop
+
+# Restart
+npm run pm2:restart
+
+# Delete
+npm run pm2:delete
+
+# Logs
+npm run pm2:logs
+
+# Monitor
+npm run pm2:monit
+```
+
+### Development
+
+```bash
+# Dev server
+npm run dev
+
+# Lint
+npm run lint
+
+# Test
+npm run test
+npm run test:watch
+npm run test:coverage
+```
+
+---
+
+## تفاوت‌های مهم
+
+### Standalone vs Next Start
+
+| ویژگی | Standalone | Next Start |
+|-------|-----------|------------|
+| حجم | کمتر (فقط dependencies لازم) | بیشتر (تمام node_modules) |
+| سرعت | سریع‌تر | کندتر |
+| Setup | نیاز به کپی manual فایل‌ها | بدون نیاز به کپی |
+| استفاده | Production (Docker, IIS) | Development و Production |
+| PM2 Config | `.next/standalone/server.js` | `next start` |
+
+### Fork vs Cluster Mode
+
+| ویژگی | Fork | Cluster |
+|-------|------|---------|
+| Instances | 1 | چند instance (2+) |
+| CPU Usage | کمتر | بیشتر (load balancing) |
+| Memory | کمتر | بیشتر |
+| استفاده | سرورهای کوچک | سرورهای بزرگ با CPU چند هسته‌ای |
+
+---
+
+**نسخه:** 2.0.0
 **تاریخ به‌روزرسانی:** دسامبر 2025
+**تغییرات اخیر:**
+- اضافه شدن script خودکار کپی فایل‌ها
+- به‌روزرسانی تنظیمات PM2 به fork mode
+- رفع مشکل 404 برای فایل‌های static/public
+- بهینه‌سازی webpack bundle splitting
+- رفع warnings میان‌افزار (middleware → proxy)

@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack",
+    "build": "next build --webpack && node scripts/deploy-standalone.js",
+    "build:only": "next build --webpack",
     "start": "next start",
-    "start:standalone": "node .next/standalone/server.js",
+    "deploy:standalone": "node scripts/deploy-standalone.js",
     "pm2:start": "pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop cartable-ui",
     "pm2:restart": "pm2 restart cartable-ui",
