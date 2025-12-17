@@ -25,6 +25,7 @@ import ExportButtons from "@/components/dashboard/ExportButtons";
 import AmountVsCountChart from "@/components/dashboard/AmountVsCountChart";
 import ComparisonMetrics from "@/components/dashboard/ComparisonMetrics";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+import { ErrorState } from "@/components/common/error-state";
 import useTranslation from "@/hooks/useTranslation";
 import { getErrorMessage } from "@/lib/error-handler";
 
@@ -105,14 +106,11 @@ export default function DashboardPage() {
             toDate: filters.toDate || "",
           }}
         />
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <XCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-            <p className="text-destructive font-semibold">
-              {error || t("dashboard.error")}
-            </p>
-          </div>
-        </div>
+        <ErrorState
+          title={t("dashboard.error")}
+          message={error}
+          onRetry={fetchDashboardData}
+        />
       </AppLayout>
     );
   }

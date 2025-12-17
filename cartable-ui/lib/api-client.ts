@@ -3,6 +3,7 @@ import axios, {
   InternalAxiosRequestConfig,
   AxiosError,
 } from "axios";
+import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
 import { isValidationError, extractErrorMessage } from "@/types/api-error";
 
 // Base URL برای API - از environment variable استفاده می‌شود
@@ -11,11 +12,21 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   "https://ecartableapi.etadbirco.ir/api";
 
-// Timeout برای درخواست‌های API
-const API_TIMEOUT = parseInt(
-  process.env.NEXT_PUBLIC_API_TIMEOUT || "120000",
+// Timeout های بهینه شده برای موبایل
+// GET requests: تایم‌اوت کوتاه‌تر (معمولاً سریع‌تر هستند)
+// POST/PUT/DELETE: تایم‌اوت بلندتر (ممکن است پردازش طولانی داشته باشند)
+const API_TIMEOUT_GET = parseInt(
+  process.env.NEXT_PUBLIC_API_TIMEOUT_GET || "20000", // 20 ثانیه برای GET
   10
 );
+const API_TIMEOUT_DEFAULT = parseInt(
+  process.env.NEXT_PUBLIC_API_TIMEOUT || "30000", // 30 ثانیه برای بقیه
+  10
+);
+
+// تنظیمات Retry
+const RETRY_COUNT = parseInt(process.env.NEXT_PUBLIC_API_RETRY_COUNT || "3", 10);
+const RETRY_DELAY = parseInt(process.env.NEXT_PUBLIC_API_RETRY_DELAY || "1000", 10);
 
 // فعال‌سازی لاگ‌ها فقط در development
 const isDevelopment = process.env.NODE_ENV === "development";
@@ -45,18 +56,90 @@ const apiClient: AxiosInstance = axios.create({
     Pragma: "no-cache",
     Expires: "0",
   },
-  timeout: API_TIMEOUT,
+  timeout: API_TIMEOUT_DEFAULT,
 });
 
-// Interceptor برای اضافه کردن Authorization token و timestamp برای cache busting
+// پیکربندی axios-retry با شرایط هوشمند
+axiosRetry(apiClient, {
+  retries: RETRY_COUNT,
+
+  // استراتژی Exponential Backoff برای تأخیر بین تلاش‌ها
+  retryDelay: (retryCount) => {
+    const delay = Math.min(RETRY_DELAY * Math.pow(2, retryCount - 1), 10000);
+    if (isDevelopment) {
+      console.log(`Retry attempt ${retryCount}, waiting ${delay}ms...`);
+    }
+    return delay;
+  },
+
+  // شرایط هوشمند برای retry
+  retryCondition: (error: AxiosError) => {
+    // نوع خطا را بررسی می‌کنیم
+    const status = error.response?.status;
+    const code = error.code;
+
+    // ❌ موارد زیر RETRY نمی‌شوند (خطاهای client-side یا منطقی):
+    // - 400 Bad Request (داده نامعتبر)
+    // - 401 Unauthorized (مدیریت توسط interceptor)
+    // - 403 Forbidden (عدم دسترسی)
+    // - 404 Not Found (منبع وجود ندارد)
+    // - 422 Unprocessable Entity (validation error)
+    if (status && [400, 401, 403, 404, 422].includes(status)) {
+      return false;
+    }
+
+    // ✅ موارد زیر RETRY می‌شوند:
+    // 1. خطاهای شبکه (network errors)
+    if (isNetworkOrIdempotentRequestError(error)) {
+      return true;
+    }
+
+    // 2. خطاهای 5xx سرور (server errors)
+    if (status && status >= 500 && status < 600) {
+      return true;
+    }
+
+    // 3. Timeout errors
+    if (code === "ECONNABORTED" || code === "ETIMEDOUT") {
+      return true;
+    }
+
+    // 4. Rate limiting (429 Too Many Requests) - با تأخیر بیشتر
+    if (status === 429) {
+      return true;
+    }
+
+    // بقیه موارد retry نمی‌شوند
+    return false;
+  },
+
+  // فقط GET requests به صورت پیش‌فرض idempotent هستند
+  // POST/PUT/DELETE ممکن است side-effect داشته باشند
+  shouldResetTimeout: true,
+
+  // Callback برای لاگ کردن retry ها در development
+  onRetry: (retryCount, error, requestConfig) => {
+    if (isDevelopment) {
+      console.warn(
+        `[Retry ${retryCount}/${RETRY_COUNT}] ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`,
+        error.message
+      );
+    }
+  },
+});
+
+// Interceptor برای تنظیم timeout بر اساس method و اضافه کردن timestamp
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // در سمت کلاینت، توکن از session گرفته می‌شود
-    // این کار در هر component که از API استفاده می‌کند انجام می‌شود
+    // تنظیم timeout بر اساس نوع درخواست
+    if (config.method === "get") {
+      config.timeout = API_TIMEOUT_GET;
+    } else {
+      config.timeout = API_TIMEOUT_DEFAULT;
+    }
 
     // اضافه کردن timestamp به URL برای جلوگیری از cache
     // فقط برای GET requests
-    // استثنا: endpoint های inquiry که با POST کار می‌کنند یا query parameter قبول نمی‌کنند
     if (config.method === "get" && config.url) {
       // لیست endpoint هایی که نباید timestamp اضافه شود
       const excludedPatterns = ["/exclude urls/"];

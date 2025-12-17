@@ -21,6 +21,7 @@ import { OtpDialog } from "@/components/common/otp-dialog";
 import { cn } from "@/lib/utils";
 import { IStatisticsItems, Statistics } from "./components/statistics";
 import { useAccountGroupStore } from "@/store/account-group-store";
+import { ErrorState } from "@/components/common/error-state";
 import {
   getApproverCartable,
   sendOperationOtp,
@@ -72,6 +73,7 @@ export default function MyCartablePage() {
    */
   const [orders, setOrders] = useState<PaymentOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
@@ -86,6 +88,8 @@ export default function MyCartablePage() {
       if (!session?.accessToken) return;
 
       setIsLoading(true);
+      setError(null);
+
       try {
         // خواندن accountGroupId از localStorage
         const savedGroupId =
@@ -110,11 +114,7 @@ export default function MyCartablePage() {
         setTotalPages(response.totalPageCount);
       } catch (error) {
         const errorMessage = getErrorMessage(error);
-        toast({
-          title: t("toast.error"),
-          description: errorMessage,
-          variant: "error",
-        });
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }
@@ -132,6 +132,8 @@ export default function MyCartablePage() {
     if (!session?.accessToken) return;
 
     setIsLoading(true);
+    setError(null);
+
     try {
       // خواندن accountGroupId از localStorage
       const savedGroupId =
@@ -155,15 +157,11 @@ export default function MyCartablePage() {
       setTotalPages(response.totalPageCount);
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-      toast({
-        title: t("toast.error"),
-        description: errorMessage,
-        variant: "error",
-      });
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  }, [session?.accessToken, pageNumber, pageSize, t, toast]);
+  }, [session?.accessToken, pageNumber, pageSize]);
 
   /**
    * مدیریت عملیات تأیید تکی
@@ -641,6 +639,23 @@ export default function MyCartablePage() {
       label: `${t("myCartable.totalAmount")}`,
     },
   ];
+
+  // نمایش error state با retry button
+  if (error && !isLoading && orders.length === 0) {
+    return (
+      <AppLayout>
+        <PageHeader
+          title={t("myCartable.pageTitle")}
+          description={t("myCartable.pageSubtitle")}
+        />
+        <ErrorState
+          title={t("toast.error")}
+          message={error}
+          onRetry={reloadData}
+        />
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
