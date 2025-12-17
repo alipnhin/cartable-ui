@@ -7,19 +7,15 @@ public class DashboardFilterParamsValidator : AbstractValidator<DashboardFilterP
 {
     public DashboardFilterParamsValidator()
     {
-        RuleFor(x => x.FromDate)
-            .Must(date => date!.Value.Date <= DateTimeOffset.UtcNow.Date)
-            .When(x => x.FromDate.HasValue)
-            .WithMessage("تاریخ شروع نمی‌تواند در آینده باشد");
-
-        RuleFor(x => x.ToDate)
-            .Must(date => date!.Value.Date <= DateTimeOffset.UtcNow.Date)
-            .When(x => x.ToDate.HasValue)
-            .WithMessage("تاریخ پایان نمی‌تواند در آینده باشد");
-
-        RuleFor(x => x.ToDate)
-            .GreaterThanOrEqualTo(x => x.FromDate)
+        RuleFor(x => x)
+            .Must(HaveValidDateRange)
             .When(x => x.FromDate.HasValue && x.ToDate.HasValue)
-            .WithMessage("تاریخ پایان باید بزرگتر یا مساوی تاریخ شروع باشد");
+            .WithMessage("تاریخ پایان باید بزرگتر یا مساوی تاریخ شروع باشد")
+            .OverridePropertyName(nameof(DashboardFilterParams.ToDate));
+    }
+
+    private static bool HaveValidDateRange(DashboardFilterParams model)
+    {
+        return model.ToDate!.Value >= model.FromDate!.Value;
     }
 }

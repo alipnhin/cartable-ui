@@ -17,7 +17,6 @@ const withPWA = withPWAInit({
     clientsClaim: true,
     maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
 
-    // ✅ بدون API caching - فقط static assets
     runtimeCaching: [
       // Navigation requests
       {
@@ -31,7 +30,7 @@ const withPWA = withPWAInit({
           cacheName: "pages-cache",
           expiration: {
             maxEntries: 30,
-            maxAgeSeconds: 60 * 60, // 1 hour
+            maxAgeSeconds: 60 * 60,
           },
           networkTimeoutSeconds: 5,
         },
@@ -55,7 +54,7 @@ const withPWA = withPWAInit({
         },
       },
 
-      // Next.js static assets (immutable)
+      // Next.js static assets
       {
         urlPattern: ({ url }) => {
           return (
@@ -73,7 +72,7 @@ const withPWA = withPWAInit({
         },
       },
 
-      // JS/CSS (not in _next/static)
+      // JS/CSS
       {
         urlPattern: ({ url }) => {
           return (
@@ -109,11 +108,8 @@ const withPWA = withPWAInit({
           },
         },
       },
-
-      // ❌ API caching کاملاً حذف شد - همیشه از network بیاد
     ],
 
-    // ✅ مطمئن میشیم که API requests اصلاً cache نمیشن
     navigateFallback: undefined,
     navigateFallbackDenylist: [/^\/api\//],
   },
@@ -149,40 +145,42 @@ const nextConfig: NextConfig = {
   async headers() {
     const allowedOrigins = ["'self'"];
 
-    // Identity Server
-    if (process.env.AUTH_ISSUER) {
+    // ✅ API Base URL از environment
+    const apiBaseUrl =
+      process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_BFF_URL;
+    if (apiBaseUrl) {
       try {
-        const authUrl = new URL(process.env.AUTH_ISSUER);
-        allowedOrigins.push(authUrl.origin);
+        const apiUrl = new URL(apiBaseUrl);
+        allowedOrigins.push(apiUrl.origin);
       } catch (e) {
-        console.warn("Invalid AUTH_ISSUER URL:", process.env.AUTH_ISSUER);
+        console.warn("Invalid API URL:", apiBaseUrl);
       }
     }
 
-    // API origin
-    if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+    // ✅ Identity Server از environment
+    const authIssuer =
+      process.env.AUTH_ISSUER || process.env.NEXT_PUBLIC_AUTH_ISSUER;
+    if (authIssuer) {
       try {
-        const apiUrl = new URL(process.env.NEXT_PUBLIC_API_BASE_URL);
-        const apiOrigin = apiUrl.origin;
-        if (!allowedOrigins.includes(apiOrigin)) {
-          allowedOrigins.push(apiOrigin);
+        const authUrl = new URL(authIssuer);
+        if (!allowedOrigins.includes(authUrl.origin)) {
+          allowedOrigins.push(authUrl.origin);
         }
       } catch (e) {
-        console.warn(
-          "Invalid NEXT_PUBLIC_API_BASE_URL:",
-          process.env.NEXT_PUBLIC_API_BASE_URL
-        );
+        console.warn("Invalid AUTH_ISSUER:", authIssuer);
       }
     }
 
     // Development only
     if (process.env.NODE_ENV === "development") {
       allowedOrigins.push("http://localhost:*");
-      allowedOrigins.push("https://ecartableapi.etadbirco.ir");
-      allowedOrigins.push("https://si-lab-tadbirpay.etadbir.com");
+      allowedOrigins.push("https://localhost:*");
     }
 
     const isDev = process.env.NODE_ENV === "development";
+
+    // Log برای debugging
+    console.log("[CSP] connect-src origins:", allowedOrigins);
 
     return [
       {
@@ -210,10 +208,10 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               isDev
                 ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
-                : "script-src 'self' 'unsafe-inline'", // Next.js نیاز داره
+                : "script-src 'self' 'unsafe-inline'",
               isDev
                 ? "style-src 'self' 'unsafe-inline'"
-                : "style-src 'self' 'unsafe-inline'", // Tailwind نیاز داره
+                : "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data:",
               `connect-src ${allowedOrigins.join(" ")}`,
@@ -256,7 +254,7 @@ const nextConfig: NextConfig = {
 
       // Images
       {
-        source: "/:path*.{jpg,jpeg,png,gif,webp,svg,ico}",
+        source: "/:path*.{jpg,jpeg,png,gif,webp,svg,ico,avif}",
         headers: [
           {
             key: "Cache-Control",
@@ -291,7 +289,7 @@ const nextConfig: NextConfig = {
         ],
       },
 
-      // ✅ API responses - NEVER cache (مهم برای سیستم مالی)
+      // API responses - NEVER cache
       {
         source: "/api/:path*",
         headers: [
