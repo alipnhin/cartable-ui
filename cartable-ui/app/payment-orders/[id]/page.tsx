@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { OrderDetailHeader } from "./components/order-detail-header";
 import { OrderDetailTransactions } from "./components/order-detail-transactions";
 import { OrderDetailApprovers } from "./components/order-detail-approvers";
@@ -13,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import useTranslation from "@/hooks/useTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/error-handler";
+import { mapOrderDetailsToHeader } from "@/lib/order-utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,12 +38,6 @@ import Link from "next/link";
 import { FixHeader } from "@/components/layout/Fix-Header";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  getWithdrawalOrderDetails,
-  getWithdrawalStatistics,
-  getWithdrawalTransactions,
-  inquiryOrderById,
-  inquiryTransactionById,
-  sendToBank,
   exportOrderTransactionsToExcel,
   downloadBlobAsFile,
 } from "@/services/paymentOrdersService";
@@ -51,11 +45,7 @@ import {
   ExportProgressDialog,
   ExportStatus,
 } from "@/app/reports/components/export-progress-dialog";
-import { sendOperationOtp, approvePayment } from "@/services/cartableService";
 import {
-  WithdrawalOrderDetails,
-  WithdrawalStatistics,
-  WithdrawalTransaction,
   TransactionFilterParams,
   PaymentStatusEnum,
   OperationTypeEnum,
@@ -63,6 +53,10 @@ import {
 } from "@/types/api";
 import { OtpDialog } from "@/components/common/otp-dialog";
 import { InquiryLoadingDialog } from "./components/inquiry-loading-dialog";
+import { usePaymentOrderDetailQuery } from "@/hooks/usePaymentOrderDetailQuery";
+import { usePaymentOrderTransactionsQuery } from "@/hooks/usePaymentOrderTransactionsQuery";
+import { usePaymentOrderActions } from "@/hooks/usePaymentOrderActions";
+import { useSession } from "next-auth/react";
 
 export default function PaymentOrderDetailPage() {
   const params = useParams();
@@ -71,28 +65,12 @@ export default function PaymentOrderDetailPage() {
   const { data: session } = useSession();
   const orderId = params.id as string;
 
-  // State for order details
-  const [orderDetails, setOrderDetails] =
-    useState<WithdrawalOrderDetails | null>(null);
-  const [statistics, setStatistics] = useState<WithdrawalStatistics | null>(
-    null
-  );
-  const [transactions, setTransactions] = useState<WithdrawalTransaction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Inquiry loading states
-  const [isInquiringOrder, setIsInquiringOrder] = useState(false);
-  const [inquiringTransactionId, setInquiringTransactionId] = useState<
-    string | null
-  >(null);
-
   // Transaction pagination and filters
   const [transactionPage, setTransactionPage] = useState(1);
-  const [transactionPageSize] = useState(25); // پیشفرض 25
-  const [totalTransactionPages, setTotalTransactionPages] = useState(0);
-  const [totalTransactions, setTotalTransactions] = useState(0);
+  const [transactionPageSize] = useState(25);
+  const [transactionFilters, setTransactionFilters] = useState<
+    Partial<TransactionFilterParams>
+  >({});
 
   // Dialog states
   const [showSendToBankDialog, setShowSendToBankDialog] = useState(false);
@@ -113,105 +91,54 @@ export default function PaymentOrderDetailPage() {
   const [exportStatus, setExportStatus] = useState<ExportStatus>("idle");
   const [exportError, setExportError] = useState<string>("");
 
-  /**
-   * واکشی جزئیات دستور پرداخت و آمار
-   */
-  const fetchOrderData = async () => {
-    if (!session?.accessToken || !orderId) return;
+  // Inquiry loading states (برای نمایش دایالوگ لودینگ)
+  const [inquiringTransactionId, setInquiringTransactionId] = useState<
+    string | null
+  >(null);
 
-    setIsLoading(true);
-    setError(null);
+  // React Query hooks
+  const {
+    data: orderData,
+    isLoading,
+    error: queryError,
+    refetch: refetchOrderData,
+  } = usePaymentOrderDetailQuery(orderId);
 
-    try {
-      // واکشی موازی جزئیات و آمار
-      const [detailsData, statsData] = await Promise.all([
-        getWithdrawalOrderDetails(orderId, session.accessToken),
-        getWithdrawalStatistics(orderId, session.accessToken),
-      ]);
+  const {
+    data: transactionsData,
+    isLoading: isLoadingTransactions,
+    refetch: refetchTransactions,
+  } = usePaymentOrderTransactionsQuery({
+    withdrawalOrderId: orderId,
+    pageNumber: transactionPage,
+    pageSize: transactionPageSize,
+    ...transactionFilters,
+  });
 
-      setOrderDetails(detailsData);
-      setStatistics(statsData);
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      setError(errorMessage);
-      toast({
-        title: t("common.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  /**
-   * واکشی لیست تراکنش‌ها
-   */
-  const fetchTransactions = async (
-    filters?: Partial<TransactionFilterParams>
-  ) => {
-    if (!session?.accessToken || !orderId) return;
-
-    setIsLoadingTransactions(true);
-
-    try {
-      const params: TransactionFilterParams = {
-        withdrawalOrderId: orderId,
-        pageNumber: transactionPage,
-        pageSize: transactionPageSize,
-        ...filters,
-      };
-
-      const response = await getWithdrawalTransactions(
-        params,
-        session.accessToken
-      );
-
-      setTransactions(response.items);
-      setTotalTransactionPages(response.totalPageCount);
-      setTotalTransactions(response.totalItemCount);
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      toast({
-        title: t("common.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-    } finally {
-      setIsLoadingTransactions(false);
-    }
-  };
+  // Payment order actions
+  const actions = usePaymentOrderActions(orderId);
 
   /**
    * استعلام دستور پرداخت
    */
   const handleInquiryOrder = async () => {
-    if (!session?.accessToken || !orderId) return;
-
-    setIsInquiringOrder(true);
-
-    try {
-      await inquiryOrderById(orderId, session.accessToken);
-
-      toast({
-        title: t("common.success"),
-        description: t("paymentOrders.inquiryOrderSuccess"),
-        variant: "success",
-      });
-
-      // رفرش بدون فلیکر - فقط داده‌ها را به‌روزرسانی می‌کنیم
-      await fetchOrderData();
-      await fetchTransactions();
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      toast({
-        title: t("common.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-    } finally {
-      setIsInquiringOrder(false);
-    }
+    actions.inquiry.mutate(undefined, {
+      onSuccess: () => {
+        toast({
+          title: t("common.success"),
+          description: t("paymentOrders.inquiryOrderSuccess"),
+          variant: "success",
+        });
+      },
+      onError: (err) => {
+        const errorMessage = getErrorMessage(err);
+        toast({
+          title: t("common.error"),
+          description: errorMessage,
+          variant: "error",
+        });
+      },
+    });
   };
 
   /**
@@ -225,83 +152,74 @@ export default function PaymentOrderDetailPage() {
    * ارسال به بانک
    */
   const handleSendToBank = async () => {
-    if (!session?.accessToken || !orderId) return;
-
     setShowSendToBankDialog(false);
 
-    try {
-      const message = await sendToBank(orderId, session.accessToken);
-
-      toast({
-        title: t("common.success"),
-        description: message || t("paymentOrders.sendToBankSuccess"),
-        variant: "success",
-      });
-
-      // ریلود کامل صفحه
-      await reloadPage();
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      toast({
-        title: t("common.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-    }
+    actions.sendToBank.mutate(undefined, {
+      onSuccess: (message) => {
+        toast({
+          title: t("common.success"),
+          description: message || t("paymentOrders.sendToBankSuccess"),
+          variant: "success",
+        });
+      },
+      onError: (err) => {
+        const errorMessage = getErrorMessage(err);
+        toast({
+          title: t("common.error"),
+          description: errorMessage,
+          variant: "error",
+        });
+      },
+    });
   };
 
   /**
    * ریلود کامل صفحه
    */
   const reloadPage = async () => {
-    await fetchOrderData();
-    await fetchTransactions();
+    await refetchOrderData();
+    await refetchTransactions();
   };
 
   /**
    * آپدیت لیست تراکنش‌ها (بعد از استعلام یک تراکنش)
    */
   const refreshTransactions = async () => {
-    await fetchTransactions();
+    await refetchTransactions();
   };
 
   /**
    * استعلام تراکنش
    */
   const handleInquiryTransaction = async (transactionId: string) => {
-    if (!session?.accessToken) return;
-
     setInquiringTransactionId(transactionId);
 
-    try {
-      await inquiryTransactionById(transactionId, session.accessToken);
-
-      toast({
-        title: t("common.success"),
-        description: t("paymentOrders.inquiryTransactionSuccess"),
-        variant: "success",
-      });
-
-      // فقط لیست تراکنش‌ها را refresh کن (نه کل صفحه)
-      await refreshTransactions();
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      toast({
-        title: t("common.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-    } finally {
-      setInquiringTransactionId(null);
-    }
+    actions.inquiryTransaction.mutate(transactionId, {
+      onSuccess: () => {
+        toast({
+          title: t("common.success"),
+          description: t("paymentOrders.inquiryTransactionSuccess"),
+          variant: "success",
+        });
+      },
+      onError: (err) => {
+        const errorMessage = getErrorMessage(err);
+        toast({
+          title: t("common.error"),
+          description: errorMessage,
+          variant: "error",
+        });
+      },
+      onSettled: () => {
+        setInquiringTransactionId(null);
+      },
+    });
   };
 
   /**
    * تایید دستور پرداخت (مرحله 1: درخواست OTP)
    */
   const handleApprove = async () => {
-    if (!session?.accessToken || !orderId) return;
-
     // نمایش دیالوگ در حالت loading
     setOtpDialog({
       open: true,
@@ -309,46 +227,44 @@ export default function PaymentOrderDetailPage() {
       isRequestingOtp: true,
     });
 
-    try {
-      // مرحله 1: درخواست ارسال کد OTP
-      await sendOperationOtp(
-        {
-          objectId: orderId,
-          operation: OperationTypeEnum.ApproveCartablePayment,
+    actions.requestOtp.mutate(
+      {
+        objectId: orderId,
+        operation: OperationTypeEnum.ApproveCartablePayment,
+      },
+      {
+        onSuccess: () => {
+          // موفقیت - نمایش فرم OTP
+          setOtpDialog({
+            open: true,
+            type: "approve",
+            isRequestingOtp: false,
+          });
+
+          toast({
+            title: t("common.success"),
+            description: t("paymentOrders.otpSentSuccess"),
+            variant: "success",
+          });
         },
-        session.accessToken
-      );
-
-      // موفقیت - نمایش فرم OTP
-      setOtpDialog({
-        open: true,
-        type: "approve",
-        isRequestingOtp: false,
-      });
-
-      toast({
-        title: t("common.success"),
-        description: t("paymentOrders.otpSentSuccess"),
-        variant: "success",
-      });
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      toast({
-        title: t("common.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-      // بستن دیالوگ در صورت خطا
-      setOtpDialog({ open: false, type: "approve", isRequestingOtp: false });
-    }
+        onError: (err) => {
+          const errorMessage = getErrorMessage(err);
+          toast({
+            title: t("common.error"),
+            description: errorMessage,
+            variant: "error",
+          });
+          // بستن دیالوگ در صورت خطا
+          setOtpDialog({ open: false, type: "approve", isRequestingOtp: false });
+        },
+      }
+    );
   };
 
   /**
    * رد دستور پرداخت (مرحله 1: درخواست OTP)
    */
   const handleReject = async () => {
-    if (!session?.accessToken || !orderId) return;
-
     // نمایش دیالوگ در حالت loading
     setOtpDialog({
       open: true,
@@ -356,60 +272,55 @@ export default function PaymentOrderDetailPage() {
       isRequestingOtp: true,
     });
 
-    try {
-      // مرحله 1: درخواست ارسال کد OTP
-      await sendOperationOtp(
-        {
-          objectId: orderId,
-          operation: OperationTypeEnum.RejectCartablePayment,
+    actions.requestOtp.mutate(
+      {
+        objectId: orderId,
+        operation: OperationTypeEnum.RejectCartablePayment,
+      },
+      {
+        onSuccess: () => {
+          // موفقیت - نمایش فرم OTP
+          setOtpDialog({
+            open: true,
+            type: "reject",
+            isRequestingOtp: false,
+          });
+
+          toast({
+            title: t("common.success"),
+            description: t("paymentOrders.otpSentSuccess"),
+            variant: "success",
+          });
         },
-        session.accessToken
-      );
-
-      // موفقیت - نمایش فرم OTP
-      setOtpDialog({
-        open: true,
-        type: "reject",
-        isRequestingOtp: false,
-      });
-
-      toast({
-        title: t("common.success"),
-        description: t("paymentOrders.otpSentSuccess"),
-        variant: "success",
-      });
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      toast({
-        title: t("common.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-      // بستن دیالوگ در صورت خطا
-      setOtpDialog({ open: false, type: "reject", isRequestingOtp: false });
-    }
+        onError: (err) => {
+          const errorMessage = getErrorMessage(err);
+          toast({
+            title: t("common.error"),
+            description: errorMessage,
+            variant: "error",
+          });
+          // بستن دیالوگ در صورت خطا
+          setOtpDialog({ open: false, type: "reject", isRequestingOtp: false });
+        },
+      }
+    );
   };
 
   /**
    * تایید کد OTP و انجام عملیات (مرحله 2: تایید یا رد با OTP)
    */
   const handleOtpConfirm = async (otp: string) => {
-    if (!session?.accessToken || !orderId) return;
-
     const operationType =
       otpDialog.type === "approve"
         ? OperationTypeEnum.ApproveCartablePayment
         : OperationTypeEnum.RejectCartablePayment;
 
     try {
-      await approvePayment(
-        {
-          operationType,
-          withdrawalOrderId: orderId,
-          otpCode: otp,
-        },
-        session.accessToken
-      );
+      await actions.approveWithOtp.mutateAsync({
+        operationType,
+        withdrawalOrderId: orderId,
+        otpCode: otp,
+      });
 
       toast({
         title: t("common.success"),
@@ -422,9 +333,6 @@ export default function PaymentOrderDetailPage() {
 
       // بستن دیالوگ
       setOtpDialog({ open: false, type: "approve", isRequestingOtp: false });
-
-      // ریلود کامل صفحه
-      await reloadPage();
     } catch (err) {
       const errorMessage = getErrorMessage(err);
       toast({
@@ -440,21 +348,16 @@ export default function PaymentOrderDetailPage() {
    * ارسال مجدد کد OTP
    */
   const handleOtpResend = async () => {
-    if (!session?.accessToken || !orderId) return;
-
     const operationType =
       otpDialog.type === "approve"
         ? OperationTypeEnum.ApproveCartablePayment
         : OperationTypeEnum.RejectCartablePayment;
 
     try {
-      await sendOperationOtp(
-        {
-          objectId: orderId,
-          operation: operationType,
-        },
-        session.accessToken
-      );
+      await actions.requestOtp.mutateAsync({
+        objectId: orderId,
+        operation: operationType,
+      });
 
       toast({
         title: t("common.success"),
@@ -488,7 +391,7 @@ export default function PaymentOrderDetailPage() {
         orderId,
         session.accessToken
       );
-      const filename = `transactions-${orderDetails?.orderId || orderId}-${
+      const filename = `transactions-${orderData?.orderDetails.orderId || orderId}-${
         new Date().toISOString().split("T")[0]
       }.xlsx`;
       downloadBlobAsFile(blob, filename);
@@ -508,17 +411,23 @@ export default function PaymentOrderDetailPage() {
     setExportStatus("idle");
   };
 
-  // واکشی اولیه داده‌ها
-  useEffect(() => {
-    fetchOrderData();
-  }, [orderId, session?.accessToken]);
+  /**
+   * آپدیت فیلترهای تراکنش
+   */
+  const handleFilterChange = (filters?: Partial<TransactionFilterParams>) => {
+    setTransactionFilters(filters || {});
+    setTransactionPage(1); // ریست pagination
+  };
 
-  // واکشی تراکنش‌ها
-  useEffect(() => {
-    if (orderDetails) {
-      fetchTransactions();
-    }
-  }, [orderId, session?.accessToken, transactionPage, orderDetails]);
+  // Extract data از React Query
+  const orderDetails = orderData?.orderDetails;
+  const statistics = orderData?.statistics;
+  const transactions = transactionsData?.items || [];
+  const totalTransactionPages = transactionsData?.totalPageCount || 0;
+  const totalTransactions = transactionsData?.totalItemCount || 0;
+
+  // Error از React Query
+  const error = queryError ? getErrorMessage(queryError) : null;
 
   // Loading state with Skeleton
   if (isLoading) {
@@ -665,45 +574,50 @@ export default function PaymentOrderDetailPage() {
     );
   }
 
-  // تبدیل orderDetails به فرمت مورد نیاز header
-  const orderForHeader = {
-    id: orderDetails.id,
-    orderId: orderDetails.orderId,
-    title: orderDetails.name,
-    accountSheba: orderDetails.sourceIban,
-    bankName: orderDetails.bankName,
-    numberOfTransactions: parseInt(orderDetails.numberOfTransactions),
-    totalAmount: parseFloat(orderDetails.totalAmount),
-    status: orderDetails.status as any, // Map enum
-    createdAt: orderDetails.createdDateTime,
-    description: orderDetails.description,
-    trackingId: orderDetails.trackingId,
-    gatewayTitle: orderDetails.gatewayTitle,
-    accountTitle: orderDetails.name, // عنوان حساب
-    accountNumber: orderDetails.accountNumber,
-  };
+  // تبدیل orderDetails به فرمت مورد نیاز header با useMemo (برای جلوگیری از re-render)
+  const orderForHeader = useMemo(() => {
+    if (!orderDetails) return null;
+    return mapOrderDetailsToHeader(orderDetails);
+  }, [orderDetails]);
 
-  const canInquiry = orderDetails.status === PaymentStatusEnum.SubmittedToBank;
-  const canApproveReject =
-    orderDetails.status === PaymentStatusEnum.WaitingForOwnersApproval;
-  const canSendToBank =
-    orderDetails.status === PaymentStatusEnum.OwnersApproved;
+  // محاسبات مربوط به دکمه‌های عملیات
+  const canInquiry = useMemo(
+    () => orderDetails?.status === PaymentStatusEnum.SubmittedToBank,
+    [orderDetails?.status]
+  );
+
+  const canApproveReject = useMemo(
+    () => orderDetails?.status === PaymentStatusEnum.WaitingForOwnersApproval,
+    [orderDetails?.status]
+  );
+
+  const canSendToBank = useMemo(
+    () => orderDetails?.status === PaymentStatusEnum.OwnersApproved,
+    [orderDetails?.status]
+  );
 
   // محاسبه تعداد تراکنش‌های در انتظار (WaitForExecution + WaitForBank)
-  const waitForBankCount = statistics
-    ? (statistics.statusStatistics.breakdown.find(
+  const waitForBankCount = useMemo(() => {
+    if (!statistics) return 0;
+    return (
+      (statistics.statusStatistics.breakdown.find(
         (s) => s.status === PaymentItemStatusEnum.WaitForExecution
       )?.count || 0) +
       (statistics.statusStatistics.breakdown.find(
         (s) => s.status === PaymentItemStatusEnum.WaitForBank
       )?.count || 0)
-    : 0;
+    );
+  }, [statistics]);
 
   // محاسبه تعداد امضاها
-  const approvalCount = orderDetails.approvers.filter(
-    (a) => a.status === "Accepted"
-  ).length;
-  const totalApprovers = orderDetails.approvers.length;
+  const approvalCount = useMemo(() => {
+    if (!orderDetails) return 0;
+    return orderDetails.approvers.filter((a) => a.status === "Accepted").length;
+  }, [orderDetails?.approvers]);
+
+  const totalApprovers = useMemo(() => {
+    return orderDetails?.approvers.length || 0;
+  }, [orderDetails?.approvers]);
 
   return (
     <>
@@ -715,19 +629,21 @@ export default function PaymentOrderDetailPage() {
       </FixHeader>
       <div className="container mx-auto p-4 md:p-6 space-y-6 mt-14">
         {/* Header با کارت‌های آماری */}
-        <OrderDetailHeader
-          order={orderForHeader}
-          canInquiry={canInquiry}
-          canApproveReject={canApproveReject}
-          canSendToBank={canSendToBank}
-          onInquiry={handleInquiryOrder}
-          onApprove={handleApprove}
-          onReject={handleReject}
-          onSendToBank={confirmSendToBank}
-          waitForBankCount={waitForBankCount}
-          approvalCount={approvalCount}
-          totalApprovers={totalApprovers}
-        />
+        {orderForHeader && (
+          <OrderDetailHeader
+            order={orderForHeader}
+            canInquiry={canInquiry}
+            canApproveReject={canApproveReject}
+            canSendToBank={canSendToBank}
+            onInquiry={handleInquiryOrder}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            onSendToBank={confirmSendToBank}
+            waitForBankCount={waitForBankCount}
+            approvalCount={approvalCount}
+            totalApprovers={totalApprovers}
+          />
+        )}
 
         {/* تب‌های جزئیات */}
         <Tabs defaultValue="statistics" className="w-full space-y-6 ">
@@ -804,7 +720,7 @@ export default function PaymentOrderDetailPage() {
               pageSize={transactionPageSize}
               onPageChange={setTransactionPage}
               onRefresh={refreshTransactions}
-              onFilterChange={fetchTransactions}
+              onFilterChange={handleFilterChange}
               onInquiryTransaction={handleInquiryTransaction}
               onExport={handleExportExcel}
               inquiringTransactionId={inquiringTransactionId}
@@ -812,11 +728,15 @@ export default function PaymentOrderDetailPage() {
           </TabsContent>
 
           <TabsContent value="approvers" className="mt-0">
-            <OrderDetailApprovers approvers={orderDetails.approvers} />
+            {orderDetails && (
+              <OrderDetailApprovers approvers={orderDetails.approvers} />
+            )}
           </TabsContent>
 
           <TabsContent value="history" className="mt-0">
-            <OrderDetailHistory changeHistory={orderDetails.changeHistory} />
+            {orderDetails && (
+              <OrderDetailHistory changeHistory={orderDetails.changeHistory} />
+            )}
           </TabsContent>
         </Tabs>
 
@@ -875,7 +795,7 @@ export default function PaymentOrderDetailPage() {
         />
 
         {/* دایالوگ لودینگ استعلام دستور پرداخت */}
-        <InquiryLoadingDialog open={isInquiringOrder} type="order" />
+        <InquiryLoadingDialog open={actions.inquiry.isPending} type="order" />
 
         {/* دایالوگ لودینگ استعلام تراکنش */}
         <InquiryLoadingDialog
