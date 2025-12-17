@@ -67,7 +67,7 @@ axiosRetry(apiClient, {
   retryDelay: (retryCount) => {
     const delay = Math.min(RETRY_DELAY * Math.pow(2, retryCount - 1), 10000);
     if (isDevelopment) {
-      console.log(`Retry attempt ${retryCount}, waiting ${delay}ms...`);
+      console.log(`[axios-retry] Retry attempt ${retryCount}, waiting ${delay}ms...`);
     }
     return delay;
   },

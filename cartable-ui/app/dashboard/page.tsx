@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { toast } from "sonner";
 import { AppLayout, PageHeader } from "@/components/layout";
 import {
   ChartLine,
@@ -10,11 +8,7 @@ import {
   Timer,
   XCircle,
 } from "lucide-react";
-import { getTransactionProgress } from "@/services/dashboardService";
-import type {
-  TransactionProgressResponse,
-  DashboardFilterParams,
-} from "@/types/dashboard";
+import type { DashboardFilterParams } from "@/types/dashboard";
 import StatCard from "@/components/dashboard/StatCard";
 import TransactionStatusChart from "@/components/dashboard/TransactionStatusChart";
 import PaymentTypeChart from "@/components/dashboard/PaymentTypeChart";
@@ -28,58 +22,38 @@ import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { ErrorState } from "@/components/common/error-state";
 import useTranslation from "@/hooks/useTranslation";
 import { getErrorMessage } from "@/lib/error-handler";
+import {
+  useDashboardQuery,
+  getDefaultDashboardFilters,
+} from "@/hooks/useDashboardQuery";
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const { data: session } = useSession();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [dashboardData, setDashboardData] =
-    useState<TransactionProgressResponse | null>(null);
 
-  // Default filters: last 7 days, all accounts
-  const getDefaultFilters = (): DashboardFilterParams => {
-    const today = new Date();
-    const weekAgo = new Date(today);
-    weekAgo.setDate(weekAgo.getDate() - 7);
+  // مدیریت فیلترها
+  const [filters, setFilters] = useState<DashboardFilterParams>(
+    getDefaultDashboardFilters()
+  );
 
-    return {
-      bankGatewayId: undefined,
-      fromDate: weekAgo.toISOString(),
-      toDate: today.toISOString(),
-    };
-  };
+  // استفاده از React Query hook
+  const {
+    data: dashboardData,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useDashboardQuery({
+    filters,
+  });
 
-  const [filters, setFilters] = useState<DashboardFilterParams>(getDefaultFilters());
-
-  const fetchDashboardData = async () => {
-    if (!session?.accessToken) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await getTransactionProgress(filters, session.accessToken);
-      setDashboardData(data);
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, [session, filters]);
+  // تبدیل خطای React Query به string
+  const error = queryError ? getErrorMessage(queryError) : null;
 
   const handleFilterApply = (newFilters: DashboardFilterParams) => {
     setFilters(newFilters);
   };
 
   // Show skeleton during loading (both initial and filter changes)
-  if (loading) {
+  if (isLoading) {
     return (
       <AppLayout>
         <PageHeader
@@ -109,7 +83,7 @@ export default function DashboardPage() {
         <ErrorState
           title={t("dashboard.error")}
           message={error}
-          onRetry={fetchDashboardData}
+          onRetry={() => refetch()}
         />
       </AppLayout>
     );

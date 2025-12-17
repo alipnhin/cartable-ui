@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { AppLayout, PageHeader } from "@/components/layout";
 import { OrderCard, OrderCardSkeleton } from "./components/order-card";
@@ -21,6 +21,7 @@ import { OtpDialog } from "@/components/common/otp-dialog";
 import { cn } from "@/lib/utils";
 import { IStatisticsItems, Statistics } from "./components/statistics";
 import { ErrorState } from "@/components/common/error-state";
+import { useCartableQuery } from "@/hooks/useCartableQuery";
 import {
   getManagerCartable,
   sendManagerOperationOtp,
@@ -28,8 +29,6 @@ import {
   sendManagerBatchOperationOtp,
   managerBatchApprovePayments,
 } from "@/services/managerCartableService";
-import { mapPaymentListDtosToPaymentOrders } from "@/lib/api-mappers";
-import { PaymentOrder } from "@/types/order";
 import { OperationTypeEnum } from "@/types/api";
 import { getErrorMessage } from "@/lib/error-handler";
 
@@ -38,6 +37,25 @@ export default function ManagerCartablePage() {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const { data: session } = useSession();
+
+  // استفاده از React Query hook برای مدیریت داده‌های کارتابل
+  const {
+    orders,
+    isLoading,
+    error: queryError,
+    pageNumber,
+    totalItems,
+    totalPages,
+    setPageNumber,
+    reloadData,
+  } = useCartableQuery({
+    fetchFunction: getManagerCartable,
+    cartableType: "manager",
+    pageSize: 10,
+  });
+
+  // تبدیل خطای React Query به string
+  const error = queryError ? getErrorMessage(queryError) : null;
 
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [selectedRowIds, setSelectedRowIds] = useState<Record<string, boolean>>(
@@ -60,97 +78,6 @@ export default function ManagerCartablePage() {
     isRequestingOtp: false,
     isBatchOperation: false,
   });
-
-  /**
-   * State مدیریت داده‌های صفحه
-   */
-  const [orders, setOrders] = useState<PaymentOrder[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize] = useState(10);
-  const [totalItems, setTotalItems] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-
-  /**
-   * واکشی اولیه داده‌ها از API
-   */
-  useEffect(() => {
-    const fetchOrders = async () => {
-      if (!session?.accessToken) return;
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        // خواندن accountGroupId از localStorage
-        const savedGroupId =
-          typeof window !== "undefined"
-            ? localStorage.getItem("selected-account-group")
-            : null;
-
-        const response = await getManagerCartable(
-          {
-            pageNumber,
-            pageSize,
-            orderBy: "createdDateTime",
-            accountGroupId: savedGroupId || undefined,
-          },
-          session.accessToken
-        );
-
-        const mappedOrders = mapPaymentListDtosToPaymentOrders(response.items);
-        setOrders(mappedOrders);
-        setTotalItems(response.totalItemCount);
-        setTotalPages(response.totalPageCount);
-      } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        setError(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, [session?.accessToken, pageNumber, pageSize]);
-
-  /**
-   * بارگذاری مجدد داده‌ها
-   */
-  const reloadData = useCallback(async () => {
-    if (!session?.accessToken) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // خواندن accountGroupId از localStorage
-      const savedGroupId =
-        typeof window !== "undefined"
-          ? localStorage.getItem("selected-account-group")
-          : null;
-
-      const response = await getManagerCartable(
-        {
-          pageNumber,
-          pageSize,
-          orderBy: "createdDateTime",
-          accountGroupId: savedGroupId || undefined,
-        },
-        session.accessToken
-      );
-
-      const mappedOrders = mapPaymentListDtosToPaymentOrders(response.items);
-      setOrders(mappedOrders);
-      setTotalItems(response.totalItemCount);
-      setTotalPages(response.totalPageCount);
-    } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [session?.accessToken, pageNumber, pageSize]);
 
   // نمایش error state با retry button
   if (error && !isLoading && orders.length === 0) {

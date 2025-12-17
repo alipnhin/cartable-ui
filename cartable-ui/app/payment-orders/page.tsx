@@ -1,47 +1,39 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
+import { useMemo, useState, useEffect } from "react";
 import { AppLayout, PageHeader } from "@/components/layout";
 import { DataTable } from "./components/data-table";
 import { createColumns } from "./components/columns";
 import { OrderCard, OrderCardSkeleton } from "./components/order-card";
 import { OrderFilters } from "./components/order-filters";
-import { Button } from "@/components/ui/button";
 import { FileBadge, Timer, FileX } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
-import { OrderStatus, PaymentOrder } from "@/types/order";
+import { OrderStatus } from "@/types/order";
 import { PaymentStatusEnum } from "@/types/api";
 import { useRouter } from "next/navigation";
 import { MobilePagination } from "@/components/common/mobile-pagination";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import StatisticCard, { StatisticCardProps } from "./components/statistic-card";
-import { searchPaymentOrders } from "@/services/paymentOrdersService";
-import { mapPaymentListDtosToPaymentOrders } from "@/lib/api-mappers";
 import { useAccountGroupStore } from "@/store/account-group-store";
 import { getErrorMessage } from "@/lib/error-handler";
+import { usePaymentOrdersQuery } from "@/hooks/usePaymentOrdersQuery";
 
 export default function PaymentOrdersPage() {
   const { t, locale } = useTranslation();
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const router = useRouter();
-  const { data: session } = useSession();
+  const groupId = useAccountGroupStore((s) => s.groupId);
 
   /**
-   * State مدیریت داده‌های صفحه
+   * State برای pagination
    */
-  const [orders, setOrders] = useState<PaymentOrder[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [initialLoading, setInitialLoading] = useState(true);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [totalItems, setTotalItems] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const groupId = useAccountGroupStore((s) => s.groupId);
+
   /**
    * State برای sorting سمت سرور
    */
@@ -81,114 +73,102 @@ export default function PaymentOrdersPage() {
     ]
   );
 
-  /**
-   * واکشی داده‌ها از API
-   * این تابع هر بار که فیلترها، صفحه یا sorting تغییر کند، اجرا می‌شود
-   */
+  // خواندن accountGroupId از localStorage
+  const [savedGroupId, setSavedGroupId] = useState<string | null>(null);
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      if (!session?.accessToken) return;
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("selected-account-group");
+      setSavedGroupId(stored);
+    }
+  }, [groupId]);
 
-      setIsLoading(true);
-      try {
-        // خواندن accountGroupId از localStorage
-        const savedGroupId =
-          typeof window !== "undefined"
-            ? localStorage.getItem("selected-account-group")
-            : null;
-
-        // ساخت پارامترهای فیلتر برای API
-        const apiFilters: any = {
-          pageNumber,
-          pageSize,
-        };
-
-        // اضافه کردن accountGroupId
-        if (savedGroupId && savedGroupId !== "all") {
-          apiFilters.accountGroupId = savedGroupId;
-        }
-
-        // اضافه کردن sorting
-        if (sorting.length > 0) {
-          const sortField = sorting[0];
-          // تبدیل نام فیلد از frontend به backend format
-          const fieldMap: Record<string, string> = {
-            orderNumber: "orderId",
-            accountTitle: "name",
-            totalAmount: "totalAmount",
-            numberOfTransactions: "numberOfTransactions",
-            status: "status",
-            createdDateTime: "createdDateTime",
-          };
-          const backendField = fieldMap[sortField.id] || sortField.id;
-          apiFilters.orderBy = sortField.desc
-            ? `${backendField} desc`
-            : backendField;
-        } else {
-          apiFilters.orderBy = "createdDateTime desc";
-        }
-
-        // اضافه کردن فیلترهای اختیاری
-        if (trackingId) apiFilters.trackingId = trackingId;
-        if (orderNumber) apiFilters.orderId = orderNumber;
-        if (orderTitle) apiFilters.name = orderTitle;
-        if (accountId && accountId !== "all")
-          apiFilters.bankGatewayId = accountId;
-        if (statusFilter) {
-          // تبدیل OrderStatus به PaymentStatusEnum
-          apiFilters.status = statusFilter as unknown as PaymentStatusEnum;
-        }
-        if (dateFrom) {
-          const fromDate = new Date(dateFrom);
-          apiFilters.fromDate = fromDate.toISOString();
-        }
-        if (dateTo) {
-          const toDate = new Date(dateTo);
-          toDate.setHours(23, 59, 59, 999);
-          apiFilters.toDate = toDate.toISOString();
-        }
-
-        const response = await searchPaymentOrders(
-          apiFilters,
-          session.accessToken
-        );
-
-        // تبدیل داده‌های API به فرمت داخلی
-        const mappedOrders = mapPaymentListDtosToPaymentOrders(response.items);
-        setOrders(mappedOrders);
-        setTotalItems(response.totalItemCount);
-        setTotalPages(response.totalPageCount);
-      } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        toast({
-          title: t("common.error"),
-          description: errorMessage,
-          variant: "error",
-        });
-      } finally {
-        setIsLoading(false);
-        setInitialLoading(false);
-      }
+  // ساخت پارامترهای API
+  const apiFilters = useMemo(() => {
+    const params: any = {
+      pageNumber,
+      pageSize,
     };
 
-    fetchOrders();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // اضافه کردن accountGroupId
+    if (savedGroupId && savedGroupId !== "all") {
+      params.accountGroupId = savedGroupId;
+    }
+
+    // اضافه کردن sorting
+    if (sorting.length > 0) {
+      const sortField = sorting[0];
+      // تبدیل نام فیلد از frontend به backend format
+      const fieldMap: Record<string, string> = {
+        orderNumber: "orderId",
+        accountTitle: "name",
+        totalAmount: "totalAmount",
+        numberOfTransactions: "numberOfTransactions",
+        status: "status",
+        createdDateTime: "createdDateTime",
+      };
+      const backendField = fieldMap[sortField.id] || sortField.id;
+      params.orderBy = sortField.desc ? `${backendField} desc` : backendField;
+    } else {
+      params.orderBy = "createdDateTime desc";
+    }
+
+    // اضافه کردن فیلترهای اختیاری
+    if (trackingId) params.trackingId = trackingId;
+    if (orderNumber) params.orderId = orderNumber;
+    if (orderTitle) params.name = orderTitle;
+    if (accountId && accountId !== "all") params.bankGatewayId = accountId;
+    if (statusFilter) {
+      params.status = statusFilter as unknown as PaymentStatusEnum;
+    }
+    if (dateFrom) {
+      const fromDate = new Date(dateFrom);
+      params.fromDate = fromDate.toISOString();
+    }
+    if (dateTo) {
+      const toDate = new Date(dateTo);
+      toDate.setHours(23, 59, 59, 999);
+      params.toDate = toDate.toISOString();
+    }
+
+    return params;
   }, [
-    session?.accessToken,
     pageNumber,
     pageSize,
+    savedGroupId,
+    sorting,
     trackingId,
     orderNumber,
     orderTitle,
     accountId,
-    statusFilter, // statusFilter حالا string است نه array
+    statusFilter,
     dateFrom,
     dateTo,
-    groupId,
-    // sorting نباید مستقیماً در dependency باشد چون array است
-    JSON.stringify(sorting),
-    // toast و t را حذف کردیم چون باعث re-render می‌شوند
   ]);
+
+  // استفاده از React Query hook
+  const {
+    orders,
+    isLoading,
+    error: queryError,
+    totalItems,
+    totalPages,
+    refetch,
+  } = usePaymentOrdersQuery({
+    filterParams: apiFilters,
+  });
+
+  // نمایش toast برای خطا
+  useEffect(() => {
+    if (queryError) {
+      const errorMessage = getErrorMessage(queryError);
+      toast({
+        title: t("common.error"),
+        description: errorMessage,
+        variant: "error",
+      });
+    }
+  }, [queryError, toast, t]);
 
   /**
    * محاسبه آمار
@@ -298,7 +278,7 @@ export default function PaymentOrdersPage() {
   ];
 
   // نمایش اسکلت لودینگ فقط در بارگذاری اولیه
-  if (initialLoading) {
+  if (isLoading && orders.length === 0) {
     return (
       <AppLayout>
         <PageHeader

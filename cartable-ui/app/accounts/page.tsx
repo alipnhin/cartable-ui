@@ -6,18 +6,17 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { AppLayout, PageHeader } from "@/components/layout";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { AccountsTable } from "./components/accounts-table";
 import { AccountsCards } from "./components/accounts-cards";
-import { getAccountsList, AccountListItem } from "@/services/accountService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAccountGroupStore } from "@/store/account-group-store";
+import { useAccountsQuery } from "@/hooks/useAccountsQuery";
+import { getErrorMessage } from "@/lib/error-handler";
 import {
   Select,
   SelectContent,
@@ -30,22 +29,18 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Group, LayoutGrid, List, Search, UserPen } from "lucide-react";
+import { Group, LayoutGrid, List, Search } from "lucide-react";
 import Link from "next/link";
-import { getErrorMessage } from "@/lib/error-handler";
 
 export default function AccountsPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { data: session } = useSession();
   const isMobile = useIsMobile();
 
-  const [accounts, setAccounts] = useState<AccountListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"list" | "card">("list");
-  const groupId = useAccountGroupStore((s) => s.groupId);
+
   // Set default view mode based on device
   useEffect(() => {
     if (isMobile) {
@@ -53,39 +48,25 @@ export default function AccountsPage() {
     }
   }, [isMobile]);
 
-  // واکشی لیست حساب‌ها
+  // استفاده از React Query hook
+  const {
+    accounts,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useAccountsQuery();
+
+  // نمایش toast برای خطا
   useEffect(() => {
-    const fetchAccounts = async () => {
-      if (!session?.accessToken) return;
-
-      setIsLoading(true);
-      try {
-        // خواندن accountGroupId از localStorage
-        const savedGroupId =
-          typeof window !== "undefined"
-            ? localStorage.getItem("selected-account-group")
-            : null;
-
-        const data = await getAccountsList(
-          session.accessToken,
-          savedGroupId || undefined
-        );
-        setAccounts(data);
-      } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        toast({
-          title: t("toast.error"),
-          description: errorMessage,
-          variant: "error",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAccounts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.accessToken, groupId]);
+    if (queryError) {
+      const errorMessage = getErrorMessage(queryError);
+      toast({
+        title: t("toast.error"),
+        description: errorMessage,
+        variant: "error",
+      });
+    }
+  }, [queryError, toast, t]);
 
   // فیلتر کردن حساب‌ها
   const filteredAccounts = useMemo(() => {

@@ -7,7 +7,6 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { AppLayout, PageHeader } from "@/components/layout";
 import useTranslation from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -17,10 +16,9 @@ import { GroupTable } from "./components/group-table";
 import { GroupCard } from "./components/group-card";
 import { CreateEditGroupDialog } from "./components/create-edit-group-dialog";
 import {
-  filterAccountGroups,
-  changeAccountGroupStatus,
-  deleteAccountGroup,
-} from "@/services/accountGroupService";
+  useAccountGroupsQuery,
+  useAccountGroupMutations,
+} from "@/hooks/useAccountGroupsQuery";
 import type { AccountGroupDetail } from "@/types/account-group-types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -58,12 +56,9 @@ type DialogState = {
 export default function AccountGroupsPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { data: session } = useSession();
   const isMobile = useIsMobile();
   const triggerRefresh = useAccountGroupStore((s) => s.triggerRefresh);
 
-  const [groups, setGroups] = useState<AccountGroupDetail[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"list" | "card">("list");
@@ -71,7 +66,6 @@ export default function AccountGroupsPage() {
     type: null,
     group: null,
   });
-  const [isProcessing, setIsProcessing] = useState(false);
 
   // Set default view mode based on device
   useEffect(() => {
@@ -80,38 +74,36 @@ export default function AccountGroupsPage() {
     }
   }, [isMobile]);
 
-  // واکشی لیست گروه‌ها
-  const fetchGroups = async () => {
-    if (!session?.accessToken) return;
+  // استفاده از React Query
+  const {
+    groups,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useAccountGroupsQuery({
+    filterParams: {
+      pageNumber: 1,
+      pageSize: 100,
+      title: searchText || undefined,
+      isEnable:
+        selectedStatus === "all" ? undefined : selectedStatus === "active",
+    },
+  });
 
-    setIsLoading(true);
-    try {
-      const data = await filterAccountGroups(
-        {
-          pageNumber: 1,
-          pageSize: 100,
-          title: searchText || undefined,
-          isEnable:
-            selectedStatus === "all" ? undefined : selectedStatus === "active",
-        },
-        session.accessToken
-      );
-      setGroups(data.items);
-    } catch (error) {
-      const errorMessage = getErrorMessage(error);
+  // استفاده از mutations
+  const mutations = useAccountGroupMutations();
+
+  // نمایش toast برای خطا
+  useEffect(() => {
+    if (queryError) {
+      const errorMessage = getErrorMessage(queryError);
       toast({
         title: t("toast.error"),
         description: errorMessage,
         variant: "error",
       });
-    } finally {
-      setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchGroups();
-  }, [session?.accessToken, selectedStatus]);
+  }, [queryError, toast, t]);
 
   // فیلتر جستجو (client-side برای واکنش سریع‌تر)
   const filteredGroups = useMemo(() => {
@@ -126,64 +118,59 @@ export default function AccountGroupsPage() {
 
   // تغییر وضعیت
   const handleToggleStatus = async () => {
-    if (!dialogState.group || !session?.accessToken) return;
+    if (!dialogState.group) return;
 
-    setIsProcessing(true);
-    try {
-      await changeAccountGroupStatus(
-        {
-          bankGatewayGroupId: dialogState.group.id,
-          status: !dialogState.group.isEnable,
+    const currentGroup = dialogState.group;
+    mutations.changeStatus.mutate(
+      {
+        bankGatewayGroupId: currentGroup.id,
+        status: !currentGroup.isEnable,
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: t("toast.success"),
+            description: `گروه با موفقیت ${
+              currentGroup.isEnable ? "غیرفعال" : "فعال"
+            } شد`,
+            variant: "success",
+          });
+          triggerRefresh();
+          setDialogState({ type: null, group: null });
         },
-        session.accessToken
-      );
-      toast({
-        title: t("toast.success"),
-        description: `گروه با موفقیت ${
-          dialogState.group.isEnable ? "غیرفعال" : "فعال"
-        } شد`,
-        variant: "success",
-      });
-      fetchGroups();
-      triggerRefresh();
-    } catch (error: any) {
-      const errorMessage = getErrorMessage(error);
-      toast({
-        title: t("toast.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-    } finally {
-      setIsProcessing(false);
-      setDialogState({ type: null, group: null });
-    }
+        onError: (error) => {
+          toast({
+            title: t("toast.error"),
+            description: getErrorMessage(error),
+            variant: "error",
+          });
+        },
+      }
+    );
   };
 
   // حذف گروه
   const handleDelete = async () => {
-    if (!dialogState.group || !session?.accessToken) return;
+    if (!dialogState.group) return;
 
-    setIsProcessing(true);
-    try {
-      await deleteAccountGroup(dialogState.group.id, session.accessToken);
-      toast({
-        title: t("toast.success"),
-        description: "گروه با موفقیت حذف شد",
-        variant: "success",
-      });
-      fetchGroups();
-      triggerRefresh();
-    } catch (error: any) {
-      const errorMessage = getErrorMessage(error);
-      toast({
-        title: t("toast.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-    } finally {
-      setIsProcessing(false);
-      setDialogState({ type: null, group: null });
-    }
+    mutations.delete.mutate(dialogState.group.id, {
+      onSuccess: () => {
+        toast({
+          title: t("toast.success"),
+          description: "گروه با موفقیت حذف شد",
+          variant: "success",
+        });
+        triggerRefresh();
+        setDialogState({ type: null, group: null });
+      },
+      onError: (error) => {
+        toast({
+          title: t("toast.error"),
+          description: getErrorMessage(error),
+          variant: "error",
+        });
+      },
+    });
   };
 
   // Skeleton برای لودینگ
@@ -241,7 +228,7 @@ export default function AccountGroupsPage() {
         actions={
           <CreateEditGroupDialog
             onSuccess={() => {
-              fetchGroups();
+              refetch();
               triggerRefresh();
             }}
           />
@@ -324,7 +311,7 @@ export default function AccountGroupsPage() {
               {!searchText && selectedStatus === "all" && (
                 <CreateEditGroupDialog
                   onSuccess={() => {
-                    fetchGroups();
+                    refetch();
                     triggerRefresh();
                   }}
                   trigger={
@@ -373,7 +360,7 @@ export default function AccountGroupsPage() {
         <CreateEditGroupDialog
           group={dialogState.group}
           onSuccess={() => {
-            fetchGroups();
+            refetch();
             triggerRefresh();
             setDialogState({ type: null, group: null });
           }}
@@ -397,14 +384,14 @@ export default function AccountGroupsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>
+            <AlertDialogCancel disabled={mutations.changeStatus.isPending}>
               انصراف
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleToggleStatus}
-              disabled={isProcessing}
+              disabled={mutations.changeStatus.isPending}
             >
-              {isProcessing ? (
+              {mutations.changeStatus.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin me-2" />
                   در حال انجام...
@@ -433,15 +420,15 @@ export default function AccountGroupsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>
+            <AlertDialogCancel disabled={mutations.delete.isPending}>
               انصراف
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={isProcessing}
+              disabled={mutations.delete.isPending}
               className="bg-destructive hover:bg-destructive/90"
             >
-              {isProcessing ? (
+              {mutations.delete.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin me-2" />
                   در حال حذف...

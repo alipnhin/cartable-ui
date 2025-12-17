@@ -14,6 +14,7 @@ import { OfflineIndicator } from "@/components/common/offline-indicator";
 import { SessionProvider } from "next-auth/react";
 import { UnauthorizedHandler } from "@/components/auth/unauthorized-handler";
 import { NavigationProgressProvider } from "@/providers/navigation-progress-provider";
+import { QueryProvider } from "@/components/providers/query-provider";
 import ErrorBoundary from "@/components/common/error-boundary";
 import localFont from "next/font/local";
 
@@ -136,20 +137,22 @@ export default function RootLayout({
         <ErrorBoundary>
           <SessionProvider>
             <UnauthorizedHandler />
-            <ThemeProvider>
-              <ColorThemeProvider>
-                <I18nProvider>
-                  <TooltipsProvider>
-                    <DirectionProvider dir="rtl">
-                      <NavigationProgressProvider>
-                        {children}
-                      </NavigationProgressProvider>
-                      <Toaster />
-                    </DirectionProvider>
-                  </TooltipsProvider>
-                </I18nProvider>
-              </ColorThemeProvider>
-            </ThemeProvider>
+            <QueryProvider>
+              <ThemeProvider>
+                <ColorThemeProvider>
+                  <I18nProvider>
+                    <TooltipsProvider>
+                      <DirectionProvider dir="rtl">
+                        <NavigationProgressProvider>
+                          {children}
+                        </NavigationProgressProvider>
+                        <Toaster />
+                      </DirectionProvider>
+                    </TooltipsProvider>
+                  </I18nProvider>
+                </ColorThemeProvider>
+              </ThemeProvider>
+            </QueryProvider>
           </SessionProvider>
         </ErrorBoundary>
       </body>
