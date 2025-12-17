@@ -73,11 +73,11 @@ export const queryKeys = {
     detail: (id: string) => ["payment-orders", "detail", id] as const,
   },
 
-  // Reports
-  reports: {
-    all: ["reports"] as const,
-    list: (params: unknown) => ["reports", "list", params] as const,
-    export: (params: unknown) => ["reports", "export", params] as const,
+  // Transactions (Reports)
+  transactions: {
+    all: ["transactions"] as const,
+    list: (params: unknown) => ["transactions", "list", params] as const,
+    export: (params: unknown) => ["transactions", "export", params] as const,
   },
 
   // Account Groups

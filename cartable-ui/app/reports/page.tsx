@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import { TransactionFilters } from "./components/transaction-filters";
@@ -14,13 +14,16 @@ import useTranslation from "@/hooks/useTranslation";
 import { AppLayout, PageHeader } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  getTransactionsList,
   exportTransactionsToExcel,
   downloadBlobAsFile,
-  TransactionItem,
-  TransactionsRequest,
+  type TransactionsRequest,
 } from "@/services/transactionService";
 import { toast } from "sonner";
+import {
+  useTransactionsQuery,
+  getDefaultTransactionDates,
+} from "@/hooks/useTransactionsQuery";
+import { getErrorMessage } from "@/lib/error-handler";
 
 export interface TransactionFiltersType {
   search: string;
@@ -41,16 +44,8 @@ export default function TransactionReportsPage() {
   const { t } = useTranslation();
   const { data: session } = useSession();
 
-  // Get default date range (last 7 days) - use useMemo to avoid recreation
-  const defaultDates = useMemo(() => {
-    const toDate = new Date();
-    const fromDate = new Date();
-    fromDate.setDate(fromDate.getDate() - 7);
-    return {
-      fromDate: fromDate.toISOString().split("T")[0],
-      toDate: toDate.toISOString().split("T")[0],
-    };
-  }, []);
+  // Get default date range (last 7 days)
+  const defaultDates = useMemo(() => getDefaultTransactionDates(), []);
 
   // Individual filter states (like payment-orders page)
   const [status, setStatus] = useState<string | null>(null);
@@ -66,12 +61,8 @@ export default function TransactionReportsPage() {
   const [transferToDate, setTransferToDate] = useState("");
   const [search, setSearch] = useState("");
 
-  const [transactions, setTransactions] = useState<TransactionItem[]>([]);
-  const [totalRecords, setTotalRecords] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
-  const [loading, setLoading] = useState(true);
-  const [initialLoading, setInitialLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [exportStatus, setExportStatus] = useState<ExportStatus>("idle");
@@ -111,65 +102,35 @@ export default function TransactionReportsPage() {
     ]
   );
 
-  // Fetch transactions from API
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      if (!session?.accessToken) return;
-
-      setLoading(true);
-      try {
-        // خواندن accountGroupId از localStorage
-        const savedGroupId =
-          typeof window !== "undefined"
-            ? localStorage.getItem("selected-account-group")
-            : null;
-
-        const request: TransactionsRequest = {
-          pageNumber: currentPage,
-          pageSize: pageSize,
-          fromDate: fromDate,
-          toDate: toDate,
-        };
-
-        // Add optional filters
-        if (status !== null) request.status = status;
-        if (paymentType !== null) request.paymentType = paymentType;
-        if (bankGatewayId && bankGatewayId !== "all") {
-          request.bankGatewayId = bankGatewayId;
-        }
-        if (savedGroupId && savedGroupId !== "all") {
-          request.accountGroupId = savedGroupId;
-        }
-        if (nationalCode) request.nationalCode = nationalCode;
-        if (destinationIban) request.destinationIban = destinationIban;
-        if (accountNumber) request.accountNumber = accountNumber;
-        if (orderId) request.orderId = orderId;
-        if (transferFromDate) request.transferFromDate = transferFromDate;
-        if (transferToDate) request.transferToDate = transferToDate;
-
-        // Add sorting
-        if (sortField) {
-          request.orderBy = `${sortField} ${sortDirection}`;
-        }
-
-        const response = await getTransactionsList(
-          request,
-          session.accessToken
-        );
-        setTransactions(response.items);
-        setTotalRecords(response.totalItemCount);
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
-        toast.error("خطا در دریافت لیست تراکنش‌ها");
-      } finally {
-        setLoading(false);
-        setInitialLoading(false);
-      }
+  // ساخت پارامترهای API با useMemo برای optimization
+  const apiFilters = useMemo(() => {
+    const params: TransactionsRequest = {
+      pageNumber: currentPage,
+      pageSize: pageSize,
+      fromDate: fromDate,
+      toDate: toDate,
     };
 
-    fetchTransactions();
+    // Add optional filters
+    if (status !== null) params.status = status;
+    if (paymentType !== null) params.paymentType = paymentType;
+    if (bankGatewayId && bankGatewayId !== "all") {
+      params.bankGatewayId = bankGatewayId;
+    }
+    if (nationalCode) params.nationalCode = nationalCode;
+    if (destinationIban) params.destinationIban = destinationIban;
+    if (accountNumber) params.accountNumber = accountNumber;
+    if (orderId) params.orderId = orderId;
+    if (transferFromDate) params.transferFromDate = transferFromDate;
+    if (transferToDate) params.transferToDate = transferToDate;
+
+    // Add sorting
+    if (sortField) {
+      params.orderBy = `${sortField} ${sortDirection}`;
+    }
+
+    return params;
   }, [
-    session?.accessToken,
     currentPage,
     pageSize,
     fromDate,
@@ -186,6 +147,25 @@ export default function TransactionReportsPage() {
     sortField,
     sortDirection,
   ]);
+
+  // استفاده از React Query hook
+  const {
+    transactions,
+    totalRecords,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useTransactionsQuery({
+    filterParams: apiFilters,
+  });
+
+  // نمایش toast برای خطا
+  useEffect(() => {
+    if (queryError) {
+      const errorMessage = getErrorMessage(queryError);
+      toast.error(errorMessage);
+    }
+  }, [queryError]);
 
   // Handle sort
   const handleSort = (field: string) => {
@@ -208,38 +188,16 @@ export default function TransactionReportsPage() {
     setExportError("");
 
     try {
-      // خواندن accountGroupId از localStorage
-      const savedGroupId =
-        typeof window !== "undefined"
-          ? localStorage.getItem("selected-account-group")
-          : null;
-
-      const request: TransactionsRequest = {
+      // استفاده از همان فیلترهای API، فقط با pageSize بزرگتر برای export
+      const exportParams: TransactionsRequest = {
+        ...apiFilters,
         pageNumber: 1,
         pageSize: totalRecords || 10000,
-        fromDate: fromDate,
-        toDate: toDate,
       };
-
-      // Add optional filters
-      if (status !== null) request.status = status;
-      if (paymentType !== null) request.paymentType = paymentType;
-      if (bankGatewayId && bankGatewayId !== "all") {
-        request.bankGatewayId = bankGatewayId;
-      }
-      if (savedGroupId && savedGroupId !== "all") {
-        request.accountGroupId = savedGroupId;
-      }
-      if (nationalCode) request.nationalCode = nationalCode;
-      if (destinationIban) request.destinationIban = destinationIban;
-      if (accountNumber) request.accountNumber = accountNumber;
-      if (orderId) request.orderId = orderId;
-      if (transferFromDate) request.transferFromDate = transferFromDate;
-      if (transferToDate) request.transferToDate = transferToDate;
 
       setExportStatus("downloading");
       const blob = await exportTransactionsToExcel(
-        request,
+        exportParams,
         session.accessToken
       );
       const filename = `transactions-${
@@ -292,7 +250,7 @@ export default function TransactionReportsPage() {
   };
 
   // Loading skeleton - only show on initial load
-  if (initialLoading) {
+  if (isLoading && transactions.length === 0) {
     return (
       <AppLayout>
         <div className="space-y-4">
@@ -356,7 +314,7 @@ export default function TransactionReportsPage() {
           totalRecords={totalRecords}
           currentPage={currentPage}
           pageSize={pageSize}
-          loading={loading}
+          loading={isLoading}
           exporting={exporting}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
