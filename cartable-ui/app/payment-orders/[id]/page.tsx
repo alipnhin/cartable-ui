@@ -689,11 +689,14 @@ export default function PaymentOrderDetailPage() {
   const canSendToBank =
     orderDetails.status === PaymentStatusEnum.OwnersApproved;
 
-  // محاسبه تعداد تراکنش‌های در صف بانک
+  // محاسبه تعداد تراکنش‌های در انتظار (WaitForExecution + WaitForBank)
   const waitForBankCount = statistics
-    ? statistics.statusStatistics.breakdown.find(
+    ? (statistics.statusStatistics.breakdown.find(
+        (s) => s.status === PaymentItemStatusEnum.WaitForExecution
+      )?.count || 0) +
+      (statistics.statusStatistics.breakdown.find(
         (s) => s.status === PaymentItemStatusEnum.WaitForBank
-      )?.count || 0
+      )?.count || 0)
     : 0;
 
   // محاسبه تعداد امضاها
