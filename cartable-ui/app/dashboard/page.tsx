@@ -26,6 +26,7 @@ import {
   useDashboardQuery,
   getDefaultDashboardFilters,
 } from "@/hooks/useDashboardQuery";
+import { PageTitle } from "@/components/common/page-title";
 
 export default function DashboardPage() {
   const { t } = useTranslation();
@@ -95,6 +96,7 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
+      <PageTitle title={t("dashboard.pageTitle")} />
       <PageHeader
         title={t("dashboard.pageTitle")}
         description={t("dashboard.pageSubtitle")}

@@ -284,11 +284,13 @@ export const sendToBank = async (
  *
  * @param orderId شناسه دستور پرداخت
  * @param accessToken توکن دسترسی کاربر
+ * @param signal AbortSignal برای لغو درخواست
  * @returns فایل اکسل به صورت Blob
  */
 export const exportOrderTransactionsToExcel = async (
   orderId: string,
-  accessToken: string
+  accessToken: string,
+  signal?: AbortSignal
 ): Promise<Blob> => {
   const response = await apiClient.post(
     `/PaymentOrders/${orderId}/transactions/export`,
@@ -298,6 +300,7 @@ export const exportOrderTransactionsToExcel = async (
         Authorization: `Bearer ${accessToken}`,
       },
       responseType: "blob",
+      signal, // Add abort signal support
     }
   );
 

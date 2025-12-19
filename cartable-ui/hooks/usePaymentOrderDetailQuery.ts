@@ -81,7 +81,7 @@ export function usePaymentOrderDetailQuery(orderId: string) {
 
     // عدم refetch خودکار
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnReconnect: true,
 
     // عدم retry (axios-retry انجام می‌دهد)

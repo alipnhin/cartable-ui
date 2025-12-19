@@ -67,7 +67,7 @@ export function useAccountGroupsQuery({
     },
 
     enabled: enabled && !!session?.accessToken,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     staleTime: 60 * 1000, // 1 دقیقه
     gcTime: 10 * 60 * 1000, // 10 دقیقه

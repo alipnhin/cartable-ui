@@ -37,32 +37,22 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { FixHeader } from "@/components/layout/Fix-Header";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  exportOrderTransactionsToExcel,
-  downloadBlobAsFile,
-} from "@/services/paymentOrdersService";
-import {
-  ExportProgressDialog,
-  ExportStatus,
-} from "@/app/reports/components/export-progress-dialog";
-import {
-  TransactionFilterParams,
-  PaymentStatusEnum,
-  OperationTypeEnum,
-  PaymentItemStatusEnum,
-} from "@/types/api";
+import { ExportProgressDialog } from "@/app/reports/components/export-progress-dialog";
+import { TransactionFilterParams } from "@/types/api";
 import { OtpDialog } from "@/components/common/otp-dialog";
 import { InquiryLoadingDialog } from "./components/inquiry-loading-dialog";
 import { usePaymentOrderDetailQuery } from "@/hooks/usePaymentOrderDetailQuery";
 import { usePaymentOrderTransactionsQuery } from "@/hooks/usePaymentOrderTransactionsQuery";
 import { usePaymentOrderActions } from "@/hooks/usePaymentOrderActions";
-import { useSession } from "next-auth/react";
+import { usePaymentOrderPermissions } from "@/hooks/usePaymentOrderPermissions";
+import { usePaymentOrderOtpFlow } from "@/hooks/usePaymentOrderOtpFlow";
+import { usePaymentOrderExport } from "@/hooks/usePaymentOrderExport";
+import { PageTitle } from "@/components/common/page-title";
 
 export default function PaymentOrderDetailPage() {
   const params = useParams();
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { data: session } = useSession();
   const orderId = params.id as string;
 
   // Transaction pagination and filters
@@ -74,22 +64,6 @@ export default function PaymentOrderDetailPage() {
 
   // Dialog states
   const [showSendToBankDialog, setShowSendToBankDialog] = useState(false);
-
-  // OTP dialog state
-  const [otpDialog, setOtpDialog] = useState<{
-    open: boolean;
-    type: "approve" | "reject";
-    isRequestingOtp: boolean;
-  }>({
-    open: false,
-    type: "approve",
-    isRequestingOtp: false,
-  });
-
-  // Export state
-  const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const [exportStatus, setExportStatus] = useState<ExportStatus>("idle");
-  const [exportError, setExportError] = useState<string>("");
 
   // Inquiry loading states (برای نمایش دایالوگ لودینگ)
   const [inquiringTransactionId, setInquiringTransactionId] = useState<
@@ -117,6 +91,15 @@ export default function PaymentOrderDetailPage() {
 
   // Payment order actions
   const actions = usePaymentOrderActions(orderId);
+
+  // ✅ Custom hooks for business logic
+  const permissions = usePaymentOrderPermissions({
+    orderStatus: orderData?.orderDetails?.status,
+    statistics: orderData?.statistics,
+  });
+
+  const otpFlow = usePaymentOrderOtpFlow(orderId);
+  const exportFlow = usePaymentOrderExport();
 
   /**
    * استعلام دستور پرداخت
@@ -174,76 +157,32 @@ export default function PaymentOrderDetailPage() {
   }, [actions.sendToBank, toast, t]);
 
   /**
-   * ریلود کامل صفحه
+   * ریلود کامل صفحه - بدون await غیرضروری
    */
-  const reloadPage = useCallback(async () => {
-    await refetchOrderData();
-    await refetchTransactions();
+  const reloadPage = useCallback(() => {
+    refetchOrderData();
+    refetchTransactions();
   }, [refetchOrderData, refetchTransactions]);
 
   /**
    * آپدیت لیست تراکنش‌ها (بعد از استعلام یک تراکنش)
    */
-  const refreshTransactions = useCallback(async () => {
-    await refetchTransactions();
+  const refreshTransactions = useCallback(() => {
+    refetchTransactions();
   }, [refetchTransactions]);
 
   /**
    * استعلام تراکنش
    */
-  const handleInquiryTransaction = useCallback((transactionId: string) => {
-    setInquiringTransactionId(transactionId);
+  const handleInquiryTransaction = useCallback(
+    (transactionId: string) => {
+      setInquiringTransactionId(transactionId);
 
-    actions.inquiryTransaction.mutate(transactionId, {
-      onSuccess: () => {
-        toast({
-          title: t("common.success"),
-          description: t("paymentOrders.inquiryTransactionSuccess"),
-          variant: "success",
-        });
-      },
-      onError: (err) => {
-        const errorMessage = getErrorMessage(err);
-        toast({
-          title: t("common.error"),
-          description: errorMessage,
-          variant: "error",
-        });
-      },
-      onSettled: () => {
-        setInquiringTransactionId(null);
-      },
-    });
-  }, [actions.inquiryTransaction, toast, t]);
-
-  /**
-   * تایید دستور پرداخت (مرحله 1: درخواست OTP)
-   */
-  const handleApprove = async () => {
-    // نمایش دیالوگ در حالت loading
-    setOtpDialog({
-      open: true,
-      type: "approve",
-      isRequestingOtp: true,
-    });
-
-    actions.requestOtp.mutate(
-      {
-        objectId: orderId,
-        operation: OperationTypeEnum.ApproveCartablePayment,
-      },
-      {
+      actions.inquiryTransaction.mutate(transactionId, {
         onSuccess: () => {
-          // موفقیت - نمایش فرم OTP
-          setOtpDialog({
-            open: true,
-            type: "approve",
-            isRequestingOtp: false,
-          });
-
           toast({
             title: t("common.success"),
-            description: t("paymentOrders.otpSentSuccess"),
+            description: t("paymentOrders.inquiryTransactionSuccess"),
             variant: "success",
           });
         },
@@ -254,162 +193,24 @@ export default function PaymentOrderDetailPage() {
             description: errorMessage,
             variant: "error",
           });
-          // بستن دیالوگ در صورت خطا
-          setOtpDialog({ open: false, type: "approve", isRequestingOtp: false });
         },
-      }
-    );
-  };
-
-  /**
-   * رد دستور پرداخت (مرحله 1: درخواست OTP)
-   */
-  const handleReject = async () => {
-    // نمایش دیالوگ در حالت loading
-    setOtpDialog({
-      open: true,
-      type: "reject",
-      isRequestingOtp: true,
-    });
-
-    actions.requestOtp.mutate(
-      {
-        objectId: orderId,
-        operation: OperationTypeEnum.RejectCartablePayment,
-      },
-      {
-        onSuccess: () => {
-          // موفقیت - نمایش فرم OTP
-          setOtpDialog({
-            open: true,
-            type: "reject",
-            isRequestingOtp: false,
-          });
-
-          toast({
-            title: t("common.success"),
-            description: t("paymentOrders.otpSentSuccess"),
-            variant: "success",
-          });
+        onSettled: () => {
+          setInquiringTransactionId(null);
         },
-        onError: (err) => {
-          const errorMessage = getErrorMessage(err);
-          toast({
-            title: t("common.error"),
-            description: errorMessage,
-            variant: "error",
-          });
-          // بستن دیالوگ در صورت خطا
-          setOtpDialog({ open: false, type: "reject", isRequestingOtp: false });
-        },
-      }
-    );
-  };
-
-  /**
-   * تایید کد OTP و انجام عملیات (مرحله 2: تایید یا رد با OTP)
-   */
-  const handleOtpConfirm = async (otp: string) => {
-    const operationType =
-      otpDialog.type === "approve"
-        ? OperationTypeEnum.ApproveCartablePayment
-        : OperationTypeEnum.RejectCartablePayment;
-
-    try {
-      await actions.approveWithOtp.mutateAsync({
-        operationType,
-        withdrawalOrderId: orderId,
-        otpCode: otp,
       });
-
-      toast({
-        title: t("common.success"),
-        description:
-          otpDialog.type === "approve"
-            ? t("paymentOrders.orderApprovedSuccess")
-            : t("paymentOrders.orderRejectedSuccess"),
-        variant: "success",
-      });
-
-      // بستن دیالوگ
-      setOtpDialog({ open: false, type: "approve", isRequestingOtp: false });
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      toast({
-        title: t("common.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-      throw err; // برای نمایش خطا در OtpDialog
-    }
-  };
-
-  /**
-   * ارسال مجدد کد OTP
-   */
-  const handleOtpResend = async () => {
-    const operationType =
-      otpDialog.type === "approve"
-        ? OperationTypeEnum.ApproveCartablePayment
-        : OperationTypeEnum.RejectCartablePayment;
-
-    try {
-      await actions.requestOtp.mutateAsync({
-        objectId: orderId,
-        operation: operationType,
-      });
-
-      toast({
-        title: t("common.success"),
-        description: t("paymentOrders.otpResentSuccess"),
-        variant: "success",
-      });
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      toast({
-        title: t("common.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-      throw err;
-    }
-  };
+    },
+    [actions.inquiryTransaction, toast, t]
+  );
 
   /**
    * دانلود فایل اکسل تراکنش‌ها
    */
-  const handleExportExcel = async () => {
-    if (!session?.accessToken || !orderId) return;
-
-    setExportDialogOpen(true);
-    setExportStatus("preparing");
-    setExportError("");
-
-    try {
-      setExportStatus("downloading");
-      const blob = await exportOrderTransactionsToExcel(
-        orderId,
-        session.accessToken
-      );
-      const filename = `transactions-${orderData?.orderDetails.orderId || orderId}-${
-        new Date().toISOString().split("T")[0]
-      }.xlsx`;
-      downloadBlobAsFile(blob, filename);
-      setExportStatus("success");
-    } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      setExportError(errorMessage);
-      setExportStatus("error");
-    }
-  };
-
-  /**
-   * لغو دانلود
-   */
-  const handleCancelExport = () => {
-    setExportDialogOpen(false);
-    setExportStatus("idle");
-  };
+  const handleExportExcel = useCallback(async () => {
+    await exportFlow.startExport(
+      orderId,
+      orderData?.orderDetails.orderId || orderId
+    );
+  }, [orderId, orderData?.orderDetails.orderId, exportFlow]);
 
   /**
    * آپدیت فیلترهای تراکنش
@@ -428,6 +229,23 @@ export default function PaymentOrderDetailPage() {
 
   // Error از React Query
   const error = queryError ? getErrorMessage(queryError) : null;
+
+  // تبدیل orderDetails به فرمت مورد نیاز header با useMemo (برای جلوگیری از re-render)
+  // IMPORTANT: All hooks must be called before any early returns
+  const orderForHeader = useMemo(() => {
+    if (!orderDetails) return null;
+    return mapOrderDetailsToHeader(orderDetails);
+  }, [orderDetails]);
+
+  // محاسبه تعداد امضاها
+  const approvalCount = useMemo(() => {
+    if (!orderDetails) return 0;
+    return orderDetails.approvers.filter((a) => a.status === "Accepted").length;
+  }, [orderDetails?.approvers]);
+
+  const totalApprovers = useMemo(() => {
+    return orderDetails?.approvers.length || 0;
+  }, [orderDetails?.approvers]);
 
   // Loading state with Skeleton
   if (isLoading) {
@@ -574,53 +392,9 @@ export default function PaymentOrderDetailPage() {
     );
   }
 
-  // تبدیل orderDetails به فرمت مورد نیاز header با useMemo (برای جلوگیری از re-render)
-  const orderForHeader = useMemo(() => {
-    if (!orderDetails) return null;
-    return mapOrderDetailsToHeader(orderDetails);
-  }, [orderDetails]);
-
-  // محاسبات مربوط به دکمه‌های عملیات
-  const canInquiry = useMemo(
-    () => orderDetails?.status === PaymentStatusEnum.SubmittedToBank,
-    [orderDetails?.status]
-  );
-
-  const canApproveReject = useMemo(
-    () => orderDetails?.status === PaymentStatusEnum.WaitingForOwnersApproval,
-    [orderDetails?.status]
-  );
-
-  const canSendToBank = useMemo(
-    () => orderDetails?.status === PaymentStatusEnum.OwnersApproved,
-    [orderDetails?.status]
-  );
-
-  // محاسبه تعداد تراکنش‌های در انتظار (WaitForExecution + WaitForBank)
-  const waitForBankCount = useMemo(() => {
-    if (!statistics) return 0;
-    return (
-      (statistics.statusStatistics.breakdown.find(
-        (s) => s.status === PaymentItemStatusEnum.WaitForExecution
-      )?.count || 0) +
-      (statistics.statusStatistics.breakdown.find(
-        (s) => s.status === PaymentItemStatusEnum.WaitForBank
-      )?.count || 0)
-    );
-  }, [statistics]);
-
-  // محاسبه تعداد امضاها
-  const approvalCount = useMemo(() => {
-    if (!orderDetails) return 0;
-    return orderDetails.approvers.filter((a) => a.status === "Accepted").length;
-  }, [orderDetails?.approvers]);
-
-  const totalApprovers = useMemo(() => {
-    return orderDetails?.approvers.length || 0;
-  }, [orderDetails?.approvers]);
-
   return (
     <>
+      <PageTitle title={orderDetails?.name || t("paymentOrders.detailTitle")} />
       <FixHeader returnUrl="/payment-orders">
         <Button variant="dashed" onClick={reloadPage} className="gap-2">
           <RefreshCw />
@@ -632,14 +406,14 @@ export default function PaymentOrderDetailPage() {
         {orderForHeader && (
           <OrderDetailHeader
             order={orderForHeader}
-            canInquiry={canInquiry}
-            canApproveReject={canApproveReject}
-            canSendToBank={canSendToBank}
+            canInquiry={permissions.canInquiry}
+            canApproveReject={permissions.canApproveReject}
+            canSendToBank={permissions.canSendToBank}
             onInquiry={handleInquiryOrder}
-            onApprove={handleApprove}
-            onReject={handleReject}
+            onApprove={otpFlow.startApproveFlow}
+            onReject={otpFlow.startRejectFlow}
             onSendToBank={confirmSendToBank}
-            waitForBankCount={waitForBankCount}
+            waitForBankCount={permissions.waitForBankCount}
             approvalCount={approvalCount}
             totalApprovers={totalApprovers}
           />
@@ -685,9 +459,6 @@ export default function PaymentOrderDetailPage() {
                 <span className="sm:hidden">
                   {t("paymentOrders.approversShort")}
                 </span>
-                {/* <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
-                  {orderDetails.approvers.length}
-                </span> */}
               </TabsTrigger>
 
               <TabsTrigger value="history">
@@ -698,9 +469,6 @@ export default function PaymentOrderDetailPage() {
                 <span className="sm:hidden">
                   {t("paymentOrders.historyShort")}
                 </span>
-                {/* <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
-                  {orderDetails.changeHistory.length}
-                </span> */}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -767,31 +535,33 @@ export default function PaymentOrderDetailPage() {
 
         {/* دایالوگ OTP برای تایید/رد */}
         <OtpDialog
-          open={otpDialog.open}
-          onOpenChange={(open) => setOtpDialog((prev) => ({ ...prev, open }))}
+          open={otpFlow.otpDialog.open}
+          onOpenChange={(open) =>
+            open ? undefined : otpFlow.closeDialog()
+          }
           title={
-            otpDialog.type === "approve"
+            otpFlow.otpDialog.type === "approve"
               ? "تایید دستور پرداخت"
               : "رد دستور پرداخت"
           }
           description={
-            otpDialog.type === "approve"
+            otpFlow.otpDialog.type === "approve"
               ? "برای تایید دستور پرداخت، کد ارسال شده به موبایل خود را وارد نمایید"
               : "برای رد دستور پرداخت، کد ارسال شده به موبایل خود را وارد نمایید"
           }
-          onConfirm={handleOtpConfirm}
-          onResend={handleOtpResend}
-          isRequestingOtp={otpDialog.isRequestingOtp}
+          onConfirm={otpFlow.confirmOtp}
+          onResend={otpFlow.resendOtp}
+          isRequestingOtp={otpFlow.otpDialog.isRequestingOtp}
         />
 
         {/* دایالوگ پیشرفت دانلود اکسل */}
         <ExportProgressDialog
-          open={exportDialogOpen}
-          onOpenChange={setExportDialogOpen}
-          status={exportStatus}
+          open={exportFlow.dialogOpen}
+          onOpenChange={(open) => !open && exportFlow.cancelExport()}
+          status={exportFlow.status}
           totalRecords={totalTransactions}
-          onCancel={handleCancelExport}
-          errorMessage={exportError}
+          onCancel={exportFlow.cancelExport}
+          errorMessage={exportFlow.error}
         />
 
         {/* دایالوگ لودینگ استعلام دستور پرداخت */}

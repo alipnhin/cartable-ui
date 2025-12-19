@@ -20,6 +20,7 @@ import StatisticCard, { StatisticCardProps } from "./components/statistic-card";
 import { useAccountGroupStore } from "@/store/account-group-store";
 import { getErrorMessage } from "@/lib/error-handler";
 import { usePaymentOrdersQuery } from "@/hooks/usePaymentOrdersQuery";
+import { PageTitle } from "@/components/common/page-title";
 
 export default function PaymentOrdersPage() {
   const { t, locale } = useTranslation();
@@ -281,6 +282,7 @@ export default function PaymentOrdersPage() {
   if (isLoading && orders.length === 0) {
     return (
       <AppLayout>
+        <PageTitle title={t("paymentCartable.pageTitle")} />
         <PageHeader
           title={t("paymentCartable.pageTitle")}
           description={t("paymentCartable.pageSubtitle")}
@@ -333,6 +335,7 @@ export default function PaymentOrdersPage() {
 
   return (
     <AppLayout>
+      <PageTitle title={t("paymentCartable.pageTitle")} />
       <PageHeader
         title={t("paymentCartable.pageTitle")}
         description={t("paymentCartable.pageSubtitle")}

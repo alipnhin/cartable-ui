@@ -24,6 +24,7 @@ import {
   getDefaultTransactionDates,
 } from "@/hooks/useTransactionsQuery";
 import { getErrorMessage } from "@/lib/error-handler";
+import { PageTitle } from "@/components/common/page-title";
 
 export interface TransactionFiltersType {
   search: string;
@@ -253,6 +254,7 @@ export default function TransactionReportsPage() {
   if (isLoading && transactions.length === 0) {
     return (
       <AppLayout>
+        <PageTitle title={t("reports.transactionReports")} />
         <div className="space-y-4">
           <PageHeader
             title={t("reports.transactionReports")}
@@ -293,6 +295,7 @@ export default function TransactionReportsPage() {
 
   return (
     <AppLayout>
+      <PageTitle title={t("reports.transactionReports")} />
       <div className="space-y-4">
         <PageHeader
           title={t("reports.transactionReports")}

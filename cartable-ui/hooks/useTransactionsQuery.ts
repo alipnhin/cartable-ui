@@ -112,7 +112,7 @@ export function useTransactionsQuery({
     enabled: enabled && !!session?.accessToken,
 
     // اگر mount شد refetch نکند (در صورت داشتن cache)
-    refetchOnMount: false,
+    refetchOnMount: true,
 
     // اگر window focus شد refetch نکند (بهینه برای PWA)
     refetchOnWindowFocus: false,

@@ -90,7 +90,7 @@ export function GroupTable({
                 </TableCell>
                 <TableCell className="text-center">
                   <Badge variant="secondary" appearance="light">
-                    {group.items?.length || 0}
+                    {group.accountCount || 0}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-center">

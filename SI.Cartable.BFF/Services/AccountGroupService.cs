@@ -81,24 +81,24 @@ public class AccountGroupService : IAccountGroupService
             response.Data ?? new AccountGroupDetail());
     }
 
-    public async Task<ServiceResult> CreateAccountGroupAsync(
+    public async Task<ServiceResult<string>> CreateAccountGroupAsync(
         CreateAccountGroupParams request,
         string accessToken)
     {
-        var response = await _tadbirPayService.PostAsync(
+        var response = await _tadbirPayService.PostAsync<string>(
             "v1-Cartable/ManageAccount/CreateAccountGroup",
             accessToken,
             request);
 
         if (!response.Success)
         {
-            return ServiceResult.Fail(
-                response.Message ?? "خطا در ایجاد گروه حساب",
+            return ServiceResult<string>.Fail(
+                response.ErrorMessage ?? "خطا در ایجاد گروه حساب",
                 response.StatusCode);
         }
 
-        return ServiceResult.Success(
-            response.Message ?? "گروه حساب با موفقیت ایجاد شد");
+        return ServiceResult<string>.Success(
+            response.Data ?? "گروه حساب با موفقیت ایجاد شد");
     }
 
     public async Task<ServiceResult> EditAccountGroupAsync(

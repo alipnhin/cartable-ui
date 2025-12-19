@@ -62,7 +62,7 @@ export function useDashboardQuery({
     enabled: enabled && !!session?.accessToken,
 
     // اگر mount شد refetch نکند (در صورت داشتن cache)
-    refetchOnMount: false,
+    refetchOnMount: true,
 
     // اگر window focus شد refetch نکند
     refetchOnWindowFocus: false,

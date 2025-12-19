@@ -35,8 +35,6 @@ export function GroupCard({
     return Icon ? <Icon className="h-6 w-6" /> : null;
   };
 
-  const accountCount = group.items?.length || 0;
-
   return (
     <div className="group rounded-xl border-2 bg-card transition-all duration-200 hover:shadow-lg hover:border-primary/20 overflow-hidden">
       <div className="p-5">
@@ -73,7 +71,7 @@ export function GroupCard({
           <div className="flex items-center gap-1.5">
             <span className="text-xs text-muted-foreground">تعداد حساب:</span>
             <Badge variant="secondary" appearance="light">
-              {accountCount}
+              {group.accountCount}
             </Badge>
           </div>
           <div className="h-3 w-px bg-border" />

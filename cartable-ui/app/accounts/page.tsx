@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/input-group";
 import { Group, LayoutGrid, List, Search } from "lucide-react";
 import Link from "next/link";
+import { PageTitle } from "@/components/common/page-title";
 
 export default function AccountsPage() {
   const { t } = useTranslation();
@@ -138,6 +139,7 @@ export default function AccountsPage() {
 
   return (
     <AppLayout>
+      <PageTitle title={t("accounts.pageTitle")} />
       <PageHeader
         title={t("accounts.pageTitle")}
         description={t("accounts.pageSubtitle")}

@@ -78,6 +78,8 @@ export const sendOperationOtp = async (
  * @param request درخواست شامل شناسه، نوع عملیات و کد OTP
  * @param accessToken توکن دسترسی کاربر
  * @returns پیام موفقیت
+ *
+ * توجه: این عملیات ممکن است تا 60 ثانیه زمان ببرد (بسته به سرعت بانک)
  */
 export const approvePayment = async (
   request: ApproveRequest,
@@ -87,7 +89,11 @@ export const approvePayment = async (
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-  });
+    timeout: 60000, // 60 ثانیه برای عملیات بانکی کند
+    "axios-retry": {
+      retries: 0, // غیرفعال کردن retry برای جلوگیری از ارسال مجدد
+    },
+  } as any);
 
   return response.data;
 };
@@ -120,6 +126,9 @@ export const sendBatchOperationOtp = async (
  * @param request درخواست شامل لیست شناسه‌ها، نوع عملیات و کد OTP
  * @param accessToken توکن دسترسی کاربر
  * @returns پیام موفقیت
+ *
+ * توجه: این عملیات ممکن است برای هر دستور تا 40 ثانیه زمان ببرد
+ * برای 10 دستور: حدود 400 ثانیه (6-7 دقیقه)
  */
 export const batchApprovePayments = async (
   request: BatchApproveRequest,
@@ -132,7 +141,11 @@ export const batchApprovePayments = async (
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-    }
+      timeout: 420000, // 7 دقیقه (420 ثانیه) برای عملیات گروهی
+      "axios-retry": {
+        retries: 0, // غیرفعال کردن retry برای جلوگیری از ارسال مجدد
+      },
+    } as any
   );
 
   return response.data;

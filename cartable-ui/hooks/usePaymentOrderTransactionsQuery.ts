@@ -107,7 +107,7 @@ export function usePaymentOrderTransactionsQuery(params: UseTransactionsParams) 
 
     // عدم refetch خودکار
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnReconnect: true,
 
     // عدم retry (axios-retry انجام می‌دهد)

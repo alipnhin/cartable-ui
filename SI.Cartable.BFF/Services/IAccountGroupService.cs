@@ -15,7 +15,7 @@ public interface IAccountGroupService
         string id,
         string accessToken);
 
-    Task<ServiceResult> CreateAccountGroupAsync(
+    Task<ServiceResult<string>> CreateAccountGroupAsync(
         CreateAccountGroupParams request,
         string accessToken);
 

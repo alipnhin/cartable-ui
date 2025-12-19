@@ -47,6 +47,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { LayoutGrid, List, Search, Loader2 } from "lucide-react";
+import { PageTitle } from "@/components/common/page-title";
 
 type DialogState = {
   type: "edit" | "delete" | "toggle" | null;
@@ -222,6 +223,7 @@ export default function AccountGroupsPage() {
 
   return (
     <AppLayout>
+      <PageTitle title="مدیریت گروه حساب" />
       <PageHeader
         title="مدیریت گروه حساب"
         description="مشاهده، ایجاد و مدیریت گروه‌های حساب"
