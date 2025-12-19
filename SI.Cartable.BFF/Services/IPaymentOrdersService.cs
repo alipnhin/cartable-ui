@@ -25,7 +25,7 @@ public interface IPaymentOrdersService
         string transactionId,
         string accessToken);
 
-    Task<ServiceResult<string>> InquiryOrderByIdAsync(
+    Task<ServiceResult> InquiryOrderByIdAsync(
         string orderId,
         string accessToken);
 
@@ -33,7 +33,7 @@ public interface IPaymentOrdersService
         string transactionId,
         string accessToken);
 
-    Task<ServiceResult<string>> SendToBankAsync(
+    Task<ServiceResult> SendToBankAsync(
         string orderId,
         string accessToken);
 

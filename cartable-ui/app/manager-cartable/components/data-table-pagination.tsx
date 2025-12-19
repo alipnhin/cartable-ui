@@ -99,7 +99,7 @@ export function DataTablePagination<TData>({
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            <span className="sr-only">{t("common.pagination.nexxtPage")}</span>
+            <span className="sr-only">{t("common.pagination.nextPage")}</span>
 
             {language.direction === "rtl" ? (
               <ChevronLeft className="h-4 w-4" />

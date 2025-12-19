@@ -55,44 +55,44 @@ public class AccountService : IAccountService
             response.Data ?? new AccountDetailResponse());
     }
 
-    public async Task<ServiceResult<string>> ChangeMinimumSignatureAsync(
+    public async Task<ServiceResult> ChangeMinimumSignatureAsync(
         ChangeMinimumSignatureRequest request,
         string accessToken)
     {
-        var response = await _tadbirPayService.PostAsync<string>(
+        var response = await _tadbirPayService.PostAsync(
             "v1-Cartable/ManageAccount/ChangeMinimumSignature",
             accessToken,
             request);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در تغییر حداقل تعداد امضا",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در تغییر حداقل تعداد امضا",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "حداقل تعداد امضا با موفقیت تغییر یافت");
+        return ServiceResult.Success(
+            response.Message ?? "حداقل تعداد امضا با موفقیت تغییر یافت");
     }
 
-    public async Task<ServiceResult<string>> AddSignerAsync(
+    public async Task<ServiceResult> AddSignerAsync(
         AddSignerRequest request,
         string accessToken)
     {
-        var response = await _tadbirPayService.PostAsync<string>(
+        var response = await _tadbirPayService.PostAsync(
             "v1-Cartable/ManageAccount",
             accessToken,
             request);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در افزودن امضادار",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در افزودن امضادار",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "امضادار با موفقیت اضافه شد");
+        return ServiceResult.Success(
+            response.Message ?? "امضادار با موفقیت اضافه شد");
     }
 
     public async Task<ServiceResult<List<UserSelectItem>>> GetUsersListAsync(
@@ -113,44 +113,44 @@ public class AccountService : IAccountService
             response.Data ?? new List<UserSelectItem>());
     }
 
-    public async Task<ServiceResult<string>> DisableSignerAsync(
+    public async Task<ServiceResult> DisableSignerAsync(
         string signerId,
         string accessToken)
     {
-        var response = await _tadbirPayService.PostAsync<string>(
+        var response = await _tadbirPayService.PostAsync(
             $"v1-Cartable/ManageAccount/DisableApproverStatus/{signerId}",
             accessToken,
             null);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در غیرفعال کردن امضادار",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در غیرفعال کردن امضادار",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "امضادار با موفقیت غیرفعال شد");
+        return ServiceResult.Success(
+            response.Message ?? "امضادار با موفقیت غیرفعال شد");
     }
 
-    public async Task<ServiceResult<string>> EnableSignerAsync(
+    public async Task<ServiceResult> EnableSignerAsync(
         string signerId,
         string accessToken)
     {
-        var response = await _tadbirPayService.PostAsync<string>(
+        var response = await _tadbirPayService.PostAsync(
             $"v1-Cartable/ManageAccount/EnableApproverStatus/{signerId}",
             accessToken,
             null);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در فعال کردن امضادار",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در فعال کردن امضادار",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "امضادار با موفقیت فعال شد");
+        return ServiceResult.Success(
+            response.Message ?? "امضادار با موفقیت فعال شد");
     }
 
 

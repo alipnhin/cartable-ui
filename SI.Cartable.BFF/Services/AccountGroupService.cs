@@ -81,121 +81,121 @@ public class AccountGroupService : IAccountGroupService
             response.Data ?? new AccountGroupDetail());
     }
 
-    public async Task<ServiceResult<string>> CreateAccountGroupAsync(
+    public async Task<ServiceResult> CreateAccountGroupAsync(
         CreateAccountGroupParams request,
         string accessToken)
     {
-        var response = await _tadbirPayService.PostAsync<string>(
+        var response = await _tadbirPayService.PostAsync(
             "v1-Cartable/ManageAccount/CreateAccountGroup",
             accessToken,
             request);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در ایجاد گروه حساب",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در ایجاد گروه حساب",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "گروه حساب با موفقیت ایجاد شد");
+        return ServiceResult.Success(
+            response.Message ?? "گروه حساب با موفقیت ایجاد شد");
     }
 
-    public async Task<ServiceResult<string>> EditAccountGroupAsync(
+    public async Task<ServiceResult> EditAccountGroupAsync(
         EditAccountGroupParams request,
         string accessToken)
     {
-        var response = await _tadbirPayService.PutAsync<string>(
+        var response = await _tadbirPayService.PutAsync(
             "v1-Cartable/ManageAccount/EditAccountGroup",
             accessToken,
             request);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در ویرایش گروه حساب",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در ویرایش گروه حساب",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "گروه حساب با موفقیت ویرایش شد");
+        return ServiceResult.Success(
+            response.Message ?? "گروه حساب با موفقیت ویرایش شد");
     }
 
-    public async Task<ServiceResult<string>> ChangeAccountGroupStatusAsync(
+    public async Task<ServiceResult> ChangeAccountGroupStatusAsync(
         ChangeAccountGroupStatusParams request,
         string accessToken)
     {
-        var response = await _tadbirPayService.PutAsync<string>(
+        var response = await _tadbirPayService.PutAsync(
             "v1-Cartable/ManageAccount/ChangeAccountGroupStatus",
             accessToken,
             request);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در تغییر وضعیت گروه حساب",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در تغییر وضعیت گروه حساب",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "وضعیت گروه حساب با موفقیت تغییر یافت");
+        return ServiceResult.Success(
+            response.Message ?? "وضعیت گروه حساب با موفقیت تغییر یافت");
     }
 
-    public async Task<ServiceResult<string>> DeleteAccountGroupAsync(
+    public async Task<ServiceResult> DeleteAccountGroupAsync(
         string id,
         string accessToken)
     {
-        var response = await _tadbirPayService.DeleteAsync<string>(
+        var response = await _tadbirPayService.DeleteAsync(
             $"v1-Cartable/ManageAccount/DeleteAccountGroups/{id}",
             accessToken);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در حذف گروه حساب",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در حذف گروه حساب",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "گروه حساب با موفقیت حذف شد");
+        return ServiceResult.Success(
+            response.Message ?? "گروه حساب با موفقیت حذف شد");
     }
 
-    public async Task<ServiceResult<string>> AddGroupAccountsAsync(
+    public async Task<ServiceResult> AddGroupAccountsAsync(
         AddGroupAccountsParams request,
         string accessToken)
     {
-        var response = await _tadbirPayService.PostAsync<string>(
+        var response = await _tadbirPayService.PostAsync(
             "v1-Cartable/ManageAccount/AddGroupAccounts",
             accessToken,
             request);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در افزودن حساب‌ها به گروه",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در افزودن حساب‌ها به گروه",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "حساب‌ها با موفقیت به گروه اضافه شدند");
+        return ServiceResult.Success(
+            response.Message ?? "حساب‌ها با موفقیت به گروه اضافه شدند");
     }
 
-    public async Task<ServiceResult<string>> RemoveGroupAccountAsync(
+    public async Task<ServiceResult> RemoveGroupAccountAsync(
         string itemId,
         string accessToken)
     {
-        var response = await _tadbirPayService.DeleteAsync<string>(
+        var response = await _tadbirPayService.DeleteAsync(
             $"v1-Cartable/ManageAccount/RemoveItem/{itemId}",
             accessToken);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در حذف حساب از گروه",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در حذف حساب از گروه",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "حساب با موفقیت از گروه حذف شد");
+        return ServiceResult.Success(
+            response.Message ?? "حساب با موفقیت از گروه حذف شد");
     }
 }

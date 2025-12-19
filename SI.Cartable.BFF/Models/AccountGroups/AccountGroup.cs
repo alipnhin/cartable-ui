@@ -14,7 +14,7 @@ public class AccountGroup
 
 public class AccountGroupDetail : AccountGroup
 {
-    public List<AccountGroupItem> Accounts { get; set; } = new();
+    public List<AccountGroupItem> Items { get; set; } = new();
 }
 
 public class AccountGroupItem

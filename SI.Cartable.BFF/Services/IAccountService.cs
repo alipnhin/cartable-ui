@@ -14,22 +14,22 @@ public interface IAccountService
         string id,
         string accessToken);
 
-    Task<ServiceResult<string>> ChangeMinimumSignatureAsync(
+    Task<ServiceResult> ChangeMinimumSignatureAsync(
         ChangeMinimumSignatureRequest request,
         string accessToken);
 
-    Task<ServiceResult<string>> AddSignerAsync(
+    Task<ServiceResult> AddSignerAsync(
         AddSignerRequest request,
         string accessToken);
 
     Task<ServiceResult<List<UserSelectItem>>> GetUsersListAsync(
         string accessToken);
 
-    Task<ServiceResult<string>> DisableSignerAsync(
+    Task<ServiceResult> DisableSignerAsync(
         string signerId,
         string accessToken);
 
-    Task<ServiceResult<string>> EnableSignerAsync(
+    Task<ServiceResult> EnableSignerAsync(
         string signerId,
         string accessToken);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { OrderDetailHeader } from "./components/order-detail-header";
 import { OrderDetailTransactions } from "./components/order-detail-transactions";
@@ -121,7 +121,7 @@ export default function PaymentOrderDetailPage() {
   /**
    * استعلام دستور پرداخت
    */
-  const handleInquiryOrder = async () => {
+  const handleInquiryOrder = useCallback(() => {
     actions.inquiry.mutate(undefined, {
       onSuccess: () => {
         toast({
@@ -139,19 +139,19 @@ export default function PaymentOrderDetailPage() {
         });
       },
     });
-  };
+  }, [actions.inquiry, toast, t]);
 
   /**
    * نمایش دایالوگ تایید ارسال به بانک
    */
-  const confirmSendToBank = () => {
+  const confirmSendToBank = useCallback(() => {
     setShowSendToBankDialog(true);
-  };
+  }, []);
 
   /**
    * ارسال به بانک
    */
-  const handleSendToBank = async () => {
+  const handleSendToBank = useCallback(() => {
     setShowSendToBankDialog(false);
 
     actions.sendToBank.mutate(undefined, {
@@ -171,27 +171,27 @@ export default function PaymentOrderDetailPage() {
         });
       },
     });
-  };
+  }, [actions.sendToBank, toast, t]);
 
   /**
    * ریلود کامل صفحه
    */
-  const reloadPage = async () => {
+  const reloadPage = useCallback(async () => {
     await refetchOrderData();
     await refetchTransactions();
-  };
+  }, [refetchOrderData, refetchTransactions]);
 
   /**
    * آپدیت لیست تراکنش‌ها (بعد از استعلام یک تراکنش)
    */
-  const refreshTransactions = async () => {
+  const refreshTransactions = useCallback(async () => {
     await refetchTransactions();
-  };
+  }, [refetchTransactions]);
 
   /**
    * استعلام تراکنش
    */
-  const handleInquiryTransaction = async (transactionId: string) => {
+  const handleInquiryTransaction = useCallback((transactionId: string) => {
     setInquiringTransactionId(transactionId);
 
     actions.inquiryTransaction.mutate(transactionId, {
@@ -214,7 +214,7 @@ export default function PaymentOrderDetailPage() {
         setInquiringTransactionId(null);
       },
     });
-  };
+  }, [actions.inquiryTransaction, toast, t]);
 
   /**
    * تایید دستور پرداخت (مرحله 1: درخواست OTP)

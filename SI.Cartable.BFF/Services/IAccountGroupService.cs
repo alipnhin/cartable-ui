@@ -15,27 +15,27 @@ public interface IAccountGroupService
         string id,
         string accessToken);
 
-    Task<ServiceResult<string>> CreateAccountGroupAsync(
+    Task<ServiceResult> CreateAccountGroupAsync(
         CreateAccountGroupParams request,
         string accessToken);
 
-    Task<ServiceResult<string>> EditAccountGroupAsync(
+    Task<ServiceResult> EditAccountGroupAsync(
         EditAccountGroupParams request,
         string accessToken);
 
-    Task<ServiceResult<string>> ChangeAccountGroupStatusAsync(
+    Task<ServiceResult> ChangeAccountGroupStatusAsync(
         ChangeAccountGroupStatusParams request,
         string accessToken);
 
-    Task<ServiceResult<string>> DeleteAccountGroupAsync(
+    Task<ServiceResult> DeleteAccountGroupAsync(
         string id,
         string accessToken);
 
-    Task<ServiceResult<string>> AddGroupAccountsAsync(
+    Task<ServiceResult> AddGroupAccountsAsync(
         AddGroupAccountsParams request,
         string accessToken);
 
-    Task<ServiceResult<string>> RemoveGroupAccountAsync(
+    Task<ServiceResult> RemoveGroupAccountAsync(
         string itemId,
         string accessToken);
 }

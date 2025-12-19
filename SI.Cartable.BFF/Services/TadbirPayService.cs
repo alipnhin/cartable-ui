@@ -34,9 +34,21 @@ public class TadbirPayService : ITadbirPayService
             await _httpClient.GetAsync(endpoint));
     }
 
+    public async Task<TadbirPayResponse> GetAsync(string endpoint, string accessToken)
+    {
+        return await ExecuteAsync(accessToken, async () =>
+            await _httpClient.GetAsync(endpoint));
+    }
+
     public async Task<TadbirPayResponse<T>> PostAsync<T>(string endpoint, string accessToken, object? body = null)
     {
         return await ExecuteAsync<T>(accessToken, async () =>
+            await _httpClient.PostAsJsonAsync(endpoint, body));
+    }
+
+    public async Task<TadbirPayResponse> PostAsync(string endpoint, string accessToken, object? body = null)
+    {
+        return await ExecuteAsync(accessToken, async () =>
             await _httpClient.PostAsJsonAsync(endpoint, body));
     }
 
@@ -46,11 +58,25 @@ public class TadbirPayService : ITadbirPayService
             await _httpClient.PutAsJsonAsync(endpoint, body));
     }
 
+    public async Task<TadbirPayResponse> PutAsync(string endpoint, string accessToken, object? body = null)
+    {
+        return await ExecuteAsync(accessToken, async () =>
+            await _httpClient.PutAsJsonAsync(endpoint, body));
+    }
+
     public async Task<TadbirPayResponse<T>> DeleteAsync<T>(string endpoint, string accessToken)
     {
         return await ExecuteAsync<T>(accessToken, async () =>
             await _httpClient.DeleteAsync(endpoint));
     }
+
+
+    public async Task<TadbirPayResponse> DeleteAsync(string endpoint, string accessToken)
+    {
+        return await ExecuteAsync(accessToken, async () =>
+            await _httpClient.DeleteAsync(endpoint));
+    }
+
 
     private async Task<TadbirPayResponse<T>> ExecuteAsync<T>(string accessToken, Func<Task<HttpResponseMessage>> action)
     {
@@ -116,6 +142,76 @@ public class TadbirPayService : ITadbirPayService
             {
                 Success = false,
                 ErrorMessage = $"Unexpected error: {ex.Message}",
+                StatusCode = 500
+            };
+        }
+    }
+
+
+    private async Task<TadbirPayResponse> ExecuteAsync(string accessToken, Func<Task<HttpResponseMessage>> action)
+    {
+        try
+        {
+            // اضافه کردن Authorization header
+            _httpClient.DefaultRequestHeaders.Remove("Authorization");
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            }
+
+            var response = await action();
+            var statusCode = (int)response.StatusCode;
+
+            if (response.IsSuccessStatusCode)
+            {
+                var data = await response.Content.ReadAsStringAsync();
+                return new TadbirPayResponse
+                {
+                    Success = true,
+                    Message = data,
+                    StatusCode = statusCode
+                };
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogWarningSplunk($"TadbirPay request failed with status {statusCode}: {errorContent}", appModule: _appMudole);
+
+                return new TadbirPayResponse
+                {
+                    Success = false,
+                    Message = errorContent,
+                    StatusCode = statusCode
+                };
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogErrorSplunk("HTTP request exception occurred", appModule: _appMudole, metaData: ex);
+            return new TadbirPayResponse
+            {
+                Success = false,
+                Message = $"Network error: {ex.Message}",
+                StatusCode = 0
+            };
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogErrorSplunk("Request timeout", appModule: _appMudole, metaData: ex);
+            return new TadbirPayResponse
+            {
+                Success = false,
+                Message = "Request timeout",
+                StatusCode = 408
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogErrorSplunk("Unexpected error occurred", appModule: _appMudole, metaData: ex);
+            return new TadbirPayResponse
+            {
+                Success = false,
+                Message = $"Unexpected error: {ex.Message}",
                 StatusCode = 500
             };
         }

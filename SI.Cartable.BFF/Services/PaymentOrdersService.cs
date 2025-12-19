@@ -70,43 +70,43 @@ public class PaymentOrdersService : IPaymentOrdersService
             response.Data ?? new TransactionStatisticsResponseDto());
     }
 
-    public async Task<ServiceResult<string>> InquiryOrderByIdAsync(
+    public async Task<ServiceResult> InquiryOrderByIdAsync(
         string orderId,
         string accessToken)
     {
-        var response = await _tadbirPayService.GetAsync<string>(
+        var response = await _tadbirPayService.GetAsync(
             $"v1-Cartable/Withdrawal/InquiryById/{orderId}",
             accessToken);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در استعلام دستور پرداخت",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در استعلام دستور پرداخت",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "استعلام با موفقیت انجام شد");
+        return ServiceResult.Success(
+            response.Message ?? "استعلام با موفقیت انجام شد");
     }
 
-    public async Task<ServiceResult<string>> SendToBankAsync(
+    public async Task<ServiceResult> SendToBankAsync(
         string orderId,
         string accessToken)
     {
-        var response = await _tadbirPayService.PostAsync<string>(
+        var response = await _tadbirPayService.PostAsync(
             $"v1-Cartable/Withdrawal/SendToBank/{orderId}",
             accessToken,
             null);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در ارسال به بانک",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در ارسال به بانک",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "دستور با موفقیت به بانک ارسال شد");
+        return ServiceResult.Success(
+            response.Message ?? "دستور با موفقیت به بانک ارسال شد");
     }
 
     public async Task<ServiceResult<PagedListResponse<WithdrawalTransaction>>> GetWithdrawalTransactionsAsync(

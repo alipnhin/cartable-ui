@@ -33,83 +33,83 @@ public class ManagerCartableService : IManagerCartableService
             response.Data );
     }
 
-    public async Task<ServiceResult<string>> SendManagerOperationOtpAsync(
+    public async Task<ServiceResult> SendManagerOperationOtpAsync(
         SendOperationOtpRequest request,
         string accessToken)
     {
-        var response = await _tadbirPayService.PostAsync<string>(
+        var response = await _tadbirPayService.PostAsync(
             "v1-Cartable/Manager/SendOperationOtp",
             accessToken,
             request);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در ارسال کد یکبار مصرف",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در ارسال کد یکبار مصرف",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "کد یکبار مصرف با موفقیت ارسال شد");
+        return ServiceResult.Success(
+            response.Message ?? "کد یکبار مصرف با موفقیت ارسال شد");
     }
 
-    public async Task<ServiceResult<string>> ManagerApprovePaymentAsync(
+    public async Task<ServiceResult> ManagerApprovePaymentAsync(
         ApproveRequest request,
         string accessToken)
     {
-        var response = await _tadbirPayService.PostAsync<string>(
+        var response = await _tadbirPayService.PostAsync(
             "v1-Cartable/Manager/Approve",
             accessToken,
             request);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در تایید پرداخت",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در تایید پرداخت",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "پرداخت با موفقیت تایید شد");
+        return ServiceResult.Success(
+            response.Message ?? "پرداخت با موفقیت تایید شد");
     }
 
-    public async Task<ServiceResult<string>> SendManagerBatchOperationOtpAsync(
+    public async Task<ServiceResult> SendManagerBatchOperationOtpAsync(
         SendBatchOperationOtpRequest request,
         string accessToken)
     {
-        var response = await _tadbirPayService.PostAsync<string>(
+        var response = await _tadbirPayService.PostAsync(
             "v1-Cartable/Manager/SendBatchOperationOtp",
             accessToken,
             request);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در ارسال کد یکبار مصرف گروهی",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در ارسال کد یکبار مصرف گروهی",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "کد یکبار مصرف گروهی با موفقیت ارسال شد");
+        return ServiceResult.Success(
+            response.Message ?? "کد یکبار مصرف گروهی با موفقیت ارسال شد");
     }
 
-    public async Task<ServiceResult<string>> ManagerBatchApprovePaymentsAsync(
+    public async Task<ServiceResult> ManagerBatchApprovePaymentsAsync(
         BatchApproveRequest request,
         string accessToken)
     {
-        var response = await _tadbirPayService.PostAsync<string>(
+        var response = await _tadbirPayService.PostAsync(
             "v1-Cartable/Manager/BatchApprove",
             accessToken,
             request);
 
         if (!response.Success)
         {
-            return ServiceResult<string>.Fail(
-                response.ErrorMessage ?? "خطا در تایید گروهی پرداخت‌ها",
+            return ServiceResult.Fail(
+                response.Message ?? "خطا در تایید گروهی پرداخت‌ها",
                 response.StatusCode);
         }
 
-        return ServiceResult<string>.Success(
-            response.Data ?? "پرداخت‌ها با موفقیت به صورت گروهی تایید شدند");
+        return ServiceResult.Success(
+            response.Message ?? "پرداخت‌ها با موفقیت به صورت گروهی تایید شدند");
     }
 }

@@ -10,19 +10,19 @@ public interface IManagerCartableService
         CartableFilterParams filterParams,
         string accessToken);
 
-    Task<ServiceResult<string>> SendManagerOperationOtpAsync(
+    Task<ServiceResult> SendManagerOperationOtpAsync(
         SendOperationOtpRequest request,
         string accessToken);
 
-    Task<ServiceResult<string>> ManagerApprovePaymentAsync(
+    Task<ServiceResult> ManagerApprovePaymentAsync(
         ApproveRequest request,
         string accessToken);
 
-    Task<ServiceResult<string>> SendManagerBatchOperationOtpAsync(
+    Task<ServiceResult> SendManagerBatchOperationOtpAsync(
         SendBatchOperationOtpRequest request,
         string accessToken);
 
-    Task<ServiceResult<string>> ManagerBatchApprovePaymentsAsync(
+    Task<ServiceResult> ManagerBatchApprovePaymentsAsync(
         BatchApproveRequest request,
         string accessToken);
 }
