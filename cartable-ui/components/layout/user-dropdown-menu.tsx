@@ -72,14 +72,14 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             image:
               data.picture ||
               session?.user?.image ||
-              "/media/avatars/blank.jpg",
+              "/media/avatars/blank.png",
           });
         } else {
           // Fallback به session
           setUserInfo({
             fullName: session?.user?.name || "کاربر",
             email: session?.user?.email || "",
-            image: session?.user?.image || "/media/avatars/blank.jpg",
+            image: session?.user?.image || "/media/avatars/blank.png",
           });
         }
       } catch (error) {
@@ -87,7 +87,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
         setUserInfo({
           fullName: session?.user?.name || "کاربر",
           email: session?.user?.email || "",
-          image: session?.user?.image || "/media/avatars/blank.jpg",
+          image: session?.user?.image || "/media/avatars/blank.png",
         });
       }
     };
@@ -109,7 +109,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const userName = userInfo?.fullName || session?.user?.name || "کاربر";
   const userEmail = userInfo?.email || session?.user?.email || "";
   const userImage =
-    userInfo?.image || session?.user?.image || "/media/avatars/blank.jpg";
+    userInfo?.image || session?.user?.image || "/media/avatars/blank.png";
 
   // Mobile Drawer Version
   if (isMobile) {
@@ -121,7 +121,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             {/* Header */}
             <div className="flex items-center gap-3 mb-3 p-2.5 rounded-xl bg-linear-to-br from-primary/10 to-primary/5">
               <img
-                className="w-12 h-12 rounded-xl border-2 border-primary/20 shadow-md"
+                className="w-12 h-12 rounded-full border-2 border-primary/20 shadow-md"
                 src={userImage}
                 alt="User avatar"
               />
@@ -274,7 +274,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
         {/* Header */}
         <div className="flex items-center gap-3 p-4 bg-linear-to-br from-primary/10 to-primary/5 rounded-t-lg">
           <img
-            className="w-12 h-12 rounded-xl border-2 border-primary/20 shadow-md"
+            className="w-12 h-12 rounded-full border-2 border-primary/20 shadow-md"
             src={userImage}
             alt="User avatar"
           />

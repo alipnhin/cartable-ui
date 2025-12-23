@@ -278,7 +278,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
               <div className="px-4 pb-4 overflow-y-auto">
                 {mobileFiltersContent}
               </div>
-              <DrawerFooter className="flex-row gap-2">
+              <DrawerFooter className="flex-row gap-2 mb-8">
                 <Button
                   variant="outline"
                   onClick={handleResetFilters}

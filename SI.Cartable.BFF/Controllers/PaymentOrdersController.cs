@@ -128,7 +128,7 @@ public class PaymentOrdersController : BaseController
     /// <summary>
     /// خروجی اکسل تراکنش‌های یک دستور پرداخت
     /// </summary>
-    [HttpGet("{orderId}/transactions/export")]
+    [HttpPost("{orderId}/transactions/export")]
     public async Task<IActionResult> ExportOrderTransactions(
         string orderId,
         [FromHeader(Name = "Authorization")] string authorization)

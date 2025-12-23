@@ -33,10 +33,10 @@ interface UseCartableQueryOptions {
   fetchFunction: CartableFetchFunction;
 
   /**
-   * تعداد آیتم در هر صفحه
+   * تعداد آیتم در هر صفحه اولیه
    * @default 10
    */
-  pageSize?: number;
+  initialPageSize?: number;
 
   /**
    * نوع کارتابل (برای query key)
@@ -59,6 +59,9 @@ interface UseCartableQueryReturn {
   /** شماره صفحه فعلی */
   pageNumber: number;
 
+  /** تعداد آیتم در هر صفحه */
+  pageSize: number;
+
   /** تعداد کل آیتم‌ها */
   totalItems: number;
 
@@ -67,6 +70,9 @@ interface UseCartableQueryReturn {
 
   /** تابع تغییر شماره صفحه */
   setPageNumber: (page: number) => void;
+
+  /** تابع تغییر تعداد آیتم در صفحه */
+  setPageSize: (size: number) => void;
 
   /** تابع refetch داده‌ها */
   reloadData: () => Promise<void>;
@@ -92,7 +98,7 @@ interface UseCartableQueryReturn {
  */
 export function useCartableQuery({
   fetchFunction,
-  pageSize = 10,
+  initialPageSize = 10,
   cartableType,
 }: UseCartableQueryOptions): UseCartableQueryReturn {
   const { data: session } = useSession();
@@ -100,14 +106,19 @@ export function useCartableQuery({
 
   // مدیریت pagination در state
   const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(initialPageSize);
 
   // خواندن groupId از localStorage برای همگام‌سازی
-  const [savedGroupId, setSavedGroupId] = useState<string | null>(null);
+  const [savedGroupId, setSavedGroupId] = useState<string | null | undefined>(
+    undefined
+  );
+  const [isGroupIdLoaded, setIsGroupIdLoaded] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("selected-account-group");
       setSavedGroupId(stored);
+      setIsGroupIdLoaded(true);
     }
   }, [groupId]);
 
@@ -141,8 +152,8 @@ export function useCartableQuery({
       return await fetchFunction(queryParams, session.accessToken);
     },
 
-    // query فقط زمانی فعال است که accessToken موجود باشد
-    enabled: !!session?.accessToken,
+    // query فقط زمانی فعال است که accessToken موجود باشد و groupId از localStorage خوانده شده باشد
+    enabled: !!session?.accessToken && isGroupIdLoaded,
 
     // اگر mount شد refetch نکند (در صورت داشتن cache)
     refetchOnMount: true,
@@ -172,9 +183,11 @@ export function useCartableQuery({
     isLoading,
     error,
     pageNumber,
+    pageSize,
     totalItems: response?.totalItemCount || 0,
     totalPages: response?.totalPageCount || 0,
     setPageNumber,
+    setPageSize,
     reloadData,
   };
 }

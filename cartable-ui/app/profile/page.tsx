@@ -121,7 +121,7 @@ export default function ProfilePage() {
     (role) => role === "cartableadmin.role" || role === "cartableapprover.role"
   );
 
-  const userImage = userInfo?.picture || "/media/avatars/blank.jpg";
+  const userImage = userInfo?.picture || "/media/avatars/blank.png";
 
   return (
     <>
@@ -134,25 +134,22 @@ export default function ProfilePage() {
               <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
                 {/* Avatar */}
                 <div className="relative group">
-                  <div className="w-32 h-32 rounded-3xl overflow-hidden ring-4 ring-primary/20 shadow-2xl transition-transform group-hover:scale-105">
+                  <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-primary/20 shadow-2xl transition-transform group-hover:scale-105">
                     <img
                       src={userImage}
                       alt={fullName}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.currentTarget.src = "/media/avatars/blank.jpg";
+                        e.currentTarget.src = "/media/avatars/blank.png";
                       }}
                     />
-                  </div>
-                  <div className="absolute -bottom-3 -right-3 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-2xl p-3 shadow-lg">
-                    <User className="w-5 h-5" />
                   </div>
                 </div>
 
                 {/* User Info */}
                 <div className="flex-1 text-center md:text-start space-y-4 w-full">
                   <div>
-                    <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-l from-foreground to-foreground/70 bg-clip-text text-transparent">
+                    <h1 className="text-2xl md:text-3xl font-bold bg-linear-to-l from-foreground to-foreground/70 bg-clip-text text-transparent">
                       {fullName}
                     </h1>
                     <p className="text-base text-muted-foreground mt-1">

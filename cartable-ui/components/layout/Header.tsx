@@ -97,7 +97,7 @@ export function Header({
                     "group-hover:border-primary/80 group-hover:scale-105",
                     "shadow-sm group-hover:shadow-md"
                   )}
-                  src={toAbsoluteUrl("/media/avatars/blank.jpg")}
+                  src={toAbsoluteUrl("/media/avatars/blank.png")}
                   alt="User Avatar"
                 />
 

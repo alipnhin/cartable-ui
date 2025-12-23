@@ -94,7 +94,18 @@ public class TadbirPayService : ITadbirPayService
 
             if (response.IsSuccessStatusCode)
             {
-                var data = await response.Content.ReadFromJsonAsync<T>(_jsonOptions);
+                T data;
+
+                if (typeof(T) == typeof(byte[]))
+                {
+                    var bytes = await response.Content.ReadAsByteArrayAsync();
+                    data = (T)(object)bytes; 
+                }
+                else
+                {
+                    data = await response.Content.ReadFromJsonAsync<T>(_jsonOptions);
+                }
+
                 return new TadbirPayResponse<T>
                 {
                     Success = true,

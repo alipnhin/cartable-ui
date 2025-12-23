@@ -244,6 +244,8 @@ export function TransactionTable({
             <MobilePagination
               currentPage={currentPage}
               totalPages={totalPages}
+              totalItems={totalRecords}
+              pageSize={pageSize}
               onPageChange={handlePageChange}
             />
           )}
@@ -446,7 +448,7 @@ export function TransactionTable({
               value={pageSize.toString()}
               onValueChange={handlePageSizeChange}
             >
-              <SelectTrigger className="h-8 w-[70px]">
+              <SelectTrigger className="h-8 w-17.5">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent side="top">
@@ -459,7 +461,7 @@ export function TransactionTable({
             </Select>
           </div>
 
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+          <div className="flex w-25 items-center justify-center text-sm font-medium">
             {t("common.pagination.page")} {currentPage}{" "}
             {t("common.pagination.of")} {totalPages || 1}
           </div>

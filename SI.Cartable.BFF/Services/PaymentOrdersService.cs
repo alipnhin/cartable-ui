@@ -171,7 +171,7 @@ public class PaymentOrdersService : IPaymentOrdersService
         string orderId,
         string accessToken)
     {
-        var response = await _tadbirPayService.GetAsync<byte[]>(
+        var response = await _tadbirPayService.PostAsync<byte[]>(
             $"v1-Cartable/Withdrawal/ExportTransaction/{orderId}",
             accessToken);
 

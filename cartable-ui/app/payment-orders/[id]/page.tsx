@@ -29,7 +29,6 @@ import {
   Users,
   History,
   BarChart3,
-  AlertCircle,
   FileX,
   RefreshCw,
 } from "lucide-react";
@@ -48,12 +47,16 @@ import { usePaymentOrderPermissions } from "@/hooks/usePaymentOrderPermissions";
 import { usePaymentOrderOtpFlow } from "@/hooks/usePaymentOrderOtpFlow";
 import { usePaymentOrderExport } from "@/hooks/usePaymentOrderExport";
 import { PageTitle } from "@/components/common/page-title";
+import { useRegisterRefresh } from "@/contexts/pull-to-refresh-context";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ErrorState } from "@/components/common/error-state";
 
 export default function PaymentOrderDetailPage() {
   const params = useParams();
   const { t } = useTranslation();
   const { toast } = useToast();
   const orderId = params.id as string;
+  const isMobile = useIsMobile();
 
   // Transaction pagination and filters
   const [transactionPage, setTransactionPage] = useState(1);
@@ -87,6 +90,11 @@ export default function PaymentOrderDetailPage() {
     pageNumber: transactionPage,
     pageSize: transactionPageSize,
     ...transactionFilters,
+  });
+
+  // ثبت refetch برای Pull-to-Refresh
+  useRegisterRefresh(async () => {
+    await Promise.all([refetchOrderData(), refetchTransactions()]);
   });
 
   // Payment order actions
@@ -330,30 +338,14 @@ export default function PaymentOrderDetailPage() {
   if (error) {
     return (
       <>
+        <PageTitle title={t("paymentOrders.detailTitle")} />
         <FixHeader returnUrl="/payment-orders" />
         <div className="container mx-auto p-4 md:p-6 mt-14">
-          <Card className="p-12">
-            <div className="flex flex-col items-center justify-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
-                <AlertCircle className="h-8 w-8 text-destructive" />
-              </div>
-              <div className="space-y-2 text-center">
-                <h3 className="text-lg font-semibold text-foreground">
-                  {t("paymentOrders.errorTitle")}
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-sm">
-                  {error}
-                </p>
-              </div>
-              <Link
-                href="/payment-orders"
-                className="inline-flex items-center gap-2 mt-2 text-primary hover:underline text-sm font-medium"
-              >
-                <ArrowRight className="h-4 w-4" />
-                {t("paymentOrders.backToList")}
-              </Link>
-            </div>
-          </Card>
+          <ErrorState
+            title={t("paymentOrders.errorTitle")}
+            message={error}
+            onRetry={reloadPage}
+          />
         </div>
       </>
     );
@@ -392,6 +384,116 @@ export default function PaymentOrderDetailPage() {
     );
   }
 
+  const pageContent = (
+    <>
+      {/* Header با کارت‌های آماری */}
+      {orderForHeader && (
+        <OrderDetailHeader
+          order={orderForHeader}
+          canInquiry={permissions.canInquiry}
+          canApproveReject={permissions.canApproveReject}
+          canSendToBank={permissions.canSendToBank}
+          onInquiry={handleInquiryOrder}
+          onApprove={otpFlow.startApproveFlow}
+          onReject={otpFlow.startRejectFlow}
+          onSendToBank={confirmSendToBank}
+          waitForBankCount={permissions.waitForBankCount}
+          approvalCount={approvalCount}
+          totalApprovers={totalApprovers}
+        />
+      )}
+
+      {/* تب‌های جزئیات */}
+      <Tabs defaultValue="statistics" className="w-full space-y-6 ">
+        {/* Tab Navigation */}
+        <div className="rounded-lg  bg-card py-3 px-2 transition-all duration-200 hover:shadow-lg hover:border-primary/20 border-2">
+          <TabsList
+            className="w-full justify-center bg-transparent h-auto gap-2 flex-wrap"
+            size="md"
+            variant="button"
+          >
+            <TabsTrigger value="statistics">
+              <BarChart3 />{" "}
+              <span className="hidden sm:inline">
+                {t("paymentOrders.statisticsTab")}
+              </span>
+              <span className="sm:hidden">
+                {t("paymentOrders.statisticsShort")}
+              </span>
+            </TabsTrigger>
+
+            <TabsTrigger value="transactions">
+              <FileText className="" />
+              <span className="hidden sm:inline">
+                {t("paymentOrders.transactionsTab")}
+              </span>
+              <span className="sm:hidden">
+                {t("paymentOrders.transactionsShort")}
+              </span>
+              <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
+                {totalTransactions}
+              </span>
+            </TabsTrigger>
+
+            <TabsTrigger value="approvers">
+              <Users />
+              <span className="hidden sm:inline">
+                {t("paymentOrders.approversTab")}
+              </span>
+              <span className="sm:hidden">
+                {t("paymentOrders.approversShort")}
+              </span>
+            </TabsTrigger>
+
+            <TabsTrigger value="history">
+              <History />
+              <span className="hidden sm:inline">
+                {t("paymentOrders.historyTab")}
+              </span>
+              <span className="sm:hidden">
+                {t("paymentOrders.historyShort")}
+              </span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        {/* Tab Contents */}
+        <TabsContent value="statistics" className="mt-0">
+          {statistics && <OrderDetailStatistics statistics={statistics} />}
+        </TabsContent>
+
+        <TabsContent value="transactions" className="mt-0">
+          <OrderDetailTransactions
+            transactions={transactions}
+            isLoading={isLoadingTransactions}
+            pageNumber={transactionPage}
+            totalPages={totalTransactionPages}
+            totalItems={totalTransactions}
+            pageSize={transactionPageSize}
+            onPageChange={setTransactionPage}
+            onRefresh={refreshTransactions}
+            onFilterChange={handleFilterChange}
+            onInquiryTransaction={handleInquiryTransaction}
+            onExport={handleExportExcel}
+            inquiringTransactionId={inquiringTransactionId}
+          />
+        </TabsContent>
+
+        <TabsContent value="approvers" className="mt-0">
+          {orderDetails && (
+            <OrderDetailApprovers approvers={orderDetails.approvers} />
+          )}
+        </TabsContent>
+
+        <TabsContent value="history" className="mt-0">
+          {orderDetails && (
+            <OrderDetailHistory changeHistory={orderDetails.changeHistory} />
+          )}
+        </TabsContent>
+      </Tabs>
+    </>
+  );
+
   return (
     <>
       <PageTitle title={orderDetails?.name || t("paymentOrders.detailTitle")} />
@@ -402,111 +504,7 @@ export default function PaymentOrderDetailPage() {
         </Button>
       </FixHeader>
       <div className="container mx-auto p-4 md:p-6 space-y-6 mt-14">
-        {/* Header با کارت‌های آماری */}
-        {orderForHeader && (
-          <OrderDetailHeader
-            order={orderForHeader}
-            canInquiry={permissions.canInquiry}
-            canApproveReject={permissions.canApproveReject}
-            canSendToBank={permissions.canSendToBank}
-            onInquiry={handleInquiryOrder}
-            onApprove={otpFlow.startApproveFlow}
-            onReject={otpFlow.startRejectFlow}
-            onSendToBank={confirmSendToBank}
-            waitForBankCount={permissions.waitForBankCount}
-            approvalCount={approvalCount}
-            totalApprovers={totalApprovers}
-          />
-        )}
-
-        {/* تب‌های جزئیات */}
-        <Tabs defaultValue="statistics" className="w-full space-y-6 ">
-          {/* Tab Navigation */}
-          <div className="rounded-lg  bg-card py-3 px-2 transition-all duration-200 hover:shadow-lg hover:border-primary/20 border-2">
-            <TabsList
-              className="w-full justify-center bg-transparent h-auto gap-2 flex-wrap"
-              size="md"
-              variant="button"
-            >
-              <TabsTrigger value="statistics">
-                <BarChart3 />{" "}
-                <span className="hidden sm:inline">
-                  {t("paymentOrders.statisticsTab")}
-                </span>
-                <span className="sm:hidden">
-                  {t("paymentOrders.statisticsShort")}
-                </span>
-              </TabsTrigger>
-
-              <TabsTrigger value="transactions">
-                <FileText className="" />
-                <span className="hidden sm:inline">
-                  {t("paymentOrders.transactionsTab")}
-                </span>
-                <span className="sm:hidden">
-                  {t("paymentOrders.transactionsShort")}
-                </span>
-                <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">
-                  {totalTransactions}
-                </span>
-              </TabsTrigger>
-
-              <TabsTrigger value="approvers">
-                <Users />
-                <span className="hidden sm:inline">
-                  {t("paymentOrders.approversTab")}
-                </span>
-                <span className="sm:hidden">
-                  {t("paymentOrders.approversShort")}
-                </span>
-              </TabsTrigger>
-
-              <TabsTrigger value="history">
-                <History />
-                <span className="hidden sm:inline">
-                  {t("paymentOrders.historyTab")}
-                </span>
-                <span className="sm:hidden">
-                  {t("paymentOrders.historyShort")}
-                </span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          {/* Tab Contents */}
-          <TabsContent value="statistics" className="mt-0">
-            {statistics && <OrderDetailStatistics statistics={statistics} />}
-          </TabsContent>
-
-          <TabsContent value="transactions" className="mt-0">
-            <OrderDetailTransactions
-              transactions={transactions}
-              isLoading={isLoadingTransactions}
-              pageNumber={transactionPage}
-              totalPages={totalTransactionPages}
-              totalItems={totalTransactions}
-              pageSize={transactionPageSize}
-              onPageChange={setTransactionPage}
-              onRefresh={refreshTransactions}
-              onFilterChange={handleFilterChange}
-              onInquiryTransaction={handleInquiryTransaction}
-              onExport={handleExportExcel}
-              inquiringTransactionId={inquiringTransactionId}
-            />
-          </TabsContent>
-
-          <TabsContent value="approvers" className="mt-0">
-            {orderDetails && (
-              <OrderDetailApprovers approvers={orderDetails.approvers} />
-            )}
-          </TabsContent>
-
-          <TabsContent value="history" className="mt-0">
-            {orderDetails && (
-              <OrderDetailHistory changeHistory={orderDetails.changeHistory} />
-            )}
-          </TabsContent>
-        </Tabs>
+        {pageContent}
 
         {/* دایالوگ تایید ارسال به بانک */}
         <AlertDialog

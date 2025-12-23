@@ -32,22 +32,41 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading?: boolean;
+  rowSelection?: Record<string, boolean>;
   onRowSelectionChange?: (selection: Record<string, boolean>) => void;
+  pageCount?: number;
+  pageIndex?: number;
+  pageSize?: number;
+  onPageChange?: (pageIndex: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   isLoading = false,
+  rowSelection: externalRowSelection,
   onRowSelectionChange,
+  pageCount,
+  pageIndex,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
 }: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [rowSelection, setRowSelection] = React.useState(externalRowSelection || {});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
+
+  // Sync external rowSelection with internal state
+  React.useEffect(() => {
+    if (externalRowSelection) {
+      setRowSelection(externalRowSelection);
+    }
+  }, [externalRowSelection]);
 
   // Notify parent of row selection changes
   React.useEffect(() => {

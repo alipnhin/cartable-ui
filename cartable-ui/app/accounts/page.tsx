@@ -32,6 +32,7 @@ import {
 import { Group, LayoutGrid, List, Search } from "lucide-react";
 import Link from "next/link";
 import { PageTitle } from "@/components/common/page-title";
+import { useRegisterRefresh } from "@/contexts/pull-to-refresh-context";
 
 export default function AccountsPage() {
   const { t } = useTranslation();
@@ -56,6 +57,9 @@ export default function AccountsPage() {
     error: queryError,
     refetch,
   } = useAccountsQuery();
+
+  // ثبت refetch برای Pull-to-Refresh
+  useRegisterRefresh(refetch);
 
   // نمایش toast برای خطا
   useEffect(() => {
@@ -137,21 +141,8 @@ export default function AccountsPage() {
     </div>
   );
 
-  return (
-    <AppLayout>
-      <PageTitle title={t("accounts.pageTitle")} />
-      <PageHeader
-        title={t("accounts.pageTitle")}
-        description={t("accounts.pageSubtitle")}
-        actions={
-          <Button variant="primary" className="relative">
-            <Group />
-            <Link href="/account-groups"> مدیریت گروه حساب</Link>
-            <span className="border-2 border-background rounded-full size-3 bg-destructive absolute -top-1 -end-1 animate-bounce" />
-          </Button>
-        }
-      />
-
+  const pageContent = (
+    <>
       {/* فیلترها و کنترل‌ها */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         {/* سمت راست: جستجو */}
@@ -219,6 +210,24 @@ export default function AccountsPage() {
           <AccountsTable accounts={filteredAccounts} />
         )}
       </div>
+    </>
+  );
+
+  return (
+    <AppLayout>
+      <PageTitle title={t("accounts.pageTitle")} />
+      <PageHeader
+        title={t("accounts.pageTitle")}
+        description={t("accounts.pageSubtitle")}
+        actions={
+          <Button variant="primary" className="relative">
+            <Group className="size-5" />
+            <Link href="/account-groups"> مدیریت گروه حساب</Link>
+          </Button>
+        }
+      />
+
+      {pageContent}
 
       {/* تعداد نتایج */}
       {!isLoading && (

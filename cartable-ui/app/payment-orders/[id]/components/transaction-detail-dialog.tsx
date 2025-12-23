@@ -149,7 +149,10 @@ export function TransactionDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto w-full">
+      <DialogContent
+        className="max-w-3xl max-h-[90vh] overflow-y-auto w-full"
+        aria-description={transaction.orderId}
+      >
         <DialogHeader className="pb-4 border-b">
           <div className="flex items-center justify-between gap-4 pe-8">
             <DialogTitle className="text-lg font-semibold">

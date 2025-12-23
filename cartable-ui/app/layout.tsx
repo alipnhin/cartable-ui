@@ -16,6 +16,7 @@ import { UnauthorizedHandler } from "@/components/auth/unauthorized-handler";
 import { NavigationProgressProvider } from "@/providers/navigation-progress-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import ErrorBoundary from "@/components/common/error-boundary";
+import { PullToRefreshProvider } from "@/contexts/pull-to-refresh-context";
 import localFont from "next/font/local";
 
 const yekanBakh = localFont({
@@ -143,9 +144,11 @@ export default function RootLayout({
                   <I18nProvider>
                     <TooltipsProvider>
                       <DirectionProvider dir="rtl">
-                        <NavigationProgressProvider>
-                          {children}
-                        </NavigationProgressProvider>
+                        <PullToRefreshProvider>
+                          <NavigationProgressProvider>
+                            {children}
+                          </NavigationProgressProvider>
+                        </PullToRefreshProvider>
                         <Toaster />
                       </DirectionProvider>
                     </TooltipsProvider>

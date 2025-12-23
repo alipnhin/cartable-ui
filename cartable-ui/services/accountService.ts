@@ -31,6 +31,7 @@ export interface AccountListItem {
   accountNumber: string;
   isEnable: boolean;
   hasCartable: boolean;
+  hasCartableManager: boolean;
   createdDateTime: string;
 }
 

@@ -21,6 +21,7 @@ import { useAccountGroupStore } from "@/store/account-group-store";
 import { getErrorMessage } from "@/lib/error-handler";
 import { usePaymentOrdersQuery } from "@/hooks/usePaymentOrdersQuery";
 import { PageTitle } from "@/components/common/page-title";
+import { useRegisterRefresh } from "@/contexts/pull-to-refresh-context";
 
 export default function PaymentOrdersPage() {
   const { t, locale } = useTranslation();
@@ -75,12 +76,16 @@ export default function PaymentOrdersPage() {
   );
 
   // خواندن accountGroupId از localStorage
-  const [savedGroupId, setSavedGroupId] = useState<string | null>(null);
+  const [savedGroupId, setSavedGroupId] = useState<string | null | undefined>(
+    undefined
+  );
+  const [isGroupIdLoaded, setIsGroupIdLoaded] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("selected-account-group");
       setSavedGroupId(stored);
+      setIsGroupIdLoaded(true);
     }
   }, [groupId]);
 
@@ -157,6 +162,12 @@ export default function PaymentOrdersPage() {
     refetch,
   } = usePaymentOrdersQuery({
     filterParams: apiFilters,
+    enabled: isGroupIdLoaded,
+  });
+
+  // ثبت refetch برای Pull-to-Refresh
+  useRegisterRefresh(async () => {
+    await refetch();
   });
 
   // نمایش toast برای خطا
@@ -342,7 +353,7 @@ export default function PaymentOrdersPage() {
       />
 
       {/* Stats Cards */}
-      <StatisticCard cards={statisticCards} />
+      {/* <StatisticCard cards={statisticCards} /> */}
 
       {/* Inline Filters */}
       <OrderFilters filters={filters} onFiltersChange={handleFilterChange} />
@@ -356,6 +367,7 @@ export default function PaymentOrdersPage() {
           pageNumber={pageNumber}
           totalPages={totalPages}
           pageSize={pageSize}
+          totalItems={totalItems}
           onPageChange={setPageNumber}
           onPageSizeChange={setPageSize}
           sorting={sorting}
@@ -382,8 +394,8 @@ export default function PaymentOrdersPage() {
                         {t("orders.noOrders")}
                       </p>
                       <p className="text-sm text-muted-foreground/70 leading-relaxed max-w-xs mx-auto">
-                        فیلترهای جستجو را تغییر دهید یا دستور پرداخت جدید ایجاد
-                        کنید
+                        فیلترهای جستجو را تغییر دهید یا دستور پرداخت جدید
+                        ایجاد کنید
                       </p>
                     </div>
                   </div>
@@ -401,6 +413,8 @@ export default function PaymentOrdersPage() {
                 <MobilePagination
                   currentPage={pageNumber}
                   totalPages={totalPages}
+                  totalItems={totalItems}
+                  pageSize={pageSize}
                   onPageChange={handlePageChange}
                 />
               )}

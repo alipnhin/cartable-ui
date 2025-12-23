@@ -87,17 +87,12 @@ axiosRetry(apiClient, {
    Request Interceptor
 ========================= */
 
-apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    config.timeout =
-      config.method === "get"
-        ? API_TIMEOUT_GET
-        : API_TIMEOUT_DEFAULT;
+apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  config.timeout =
+    config.method === "get" ? API_TIMEOUT_GET : API_TIMEOUT_DEFAULT;
 
-    return config;
-  },
-  Promise.reject
-);
+  return config;
+}, Promise.reject);
 
 /* =========================
    Response Interceptor
@@ -133,64 +128,64 @@ apiClient.interceptors.response.use(
 
         return Promise.reject({
           ...error,
-          clientMessage: (data as any)?.message ?? "درخواست نامعتبر است",
+          clientMessage: (data as any) ?? "درخواست نامعتبر است",
         });
       }
 
-    /* ---- 401 Unauthorized ---- */
-if (status === 401 && originalRequest && !originalRequest._retry) {
-  originalRequest._retry = true;
+      /* ---- 401 Unauthorized ---- */
+      if (status === 401 && originalRequest && !originalRequest._retry) {
+        originalRequest._retry = true;
 
-  if (typeof window === "undefined") {
-    return Promise.reject(error);
-  }
+        if (typeof window === "undefined") {
+          return Promise.reject(error);
+        }
 
-  if (isRefreshing) {
-    return new Promise((resolve, reject) => {
-      subscribe((ok) =>
-        ok
-          ? resolve(apiClient(originalRequest))
-          : reject(error)
-      );
-    });
-  }
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            subscribe((ok) =>
+              ok ? resolve(apiClient(originalRequest)) : reject(error)
+            );
+          });
+        }
 
-  isRefreshing = true;
-  window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+        isRefreshing = true;
+        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
 
-  return new Promise((resolve, reject) => {
-    const onSuccess = () => {
-      cleanup();
-      notify(true);
-      resolve(apiClient(originalRequest));
-    };
+        return new Promise((resolve, reject) => {
+          const onSuccess = () => {
+            cleanup();
+            notify(true);
+            resolve(apiClient(originalRequest));
+          };
 
-    const onFail = () => {
-      cleanup();
-      notify(false);
-      window.dispatchEvent(new CustomEvent("auth:logout"));
-      reject(error);
-    };
+          const onFail = () => {
+            cleanup();
+            notify(false);
+            window.dispatchEvent(new CustomEvent("auth:logout"));
+            reject(error);
+          };
 
-    const cleanup = () => {
-      isRefreshing = false;
-      window.removeEventListener("auth:token-refreshed", onSuccess);
-      window.removeEventListener("auth:refresh-failed", onFail);
-    };
+          const cleanup = () => {
+            isRefreshing = false;
+            window.removeEventListener("auth:token-refreshed", onSuccess);
+            window.removeEventListener("auth:refresh-failed", onFail);
+          };
 
-    window.addEventListener("auth:token-refreshed", onSuccess, { once: true });
-    window.addEventListener("auth:refresh-failed", onFail, { once: true });
+          window.addEventListener("auth:token-refreshed", onSuccess, {
+            once: true,
+          });
+          window.addEventListener("auth:refresh-failed", onFail, {
+            once: true,
+          });
 
-    setTimeout(onFail, 10000);
-  });
-}
-
+          setTimeout(onFail, 10000);
+        });
+      }
 
       /* ---- Other HTTP errors ---- */
       return Promise.reject({
         ...error,
-        clientMessage:
-          (data as any)?.message ?? `خطای سرور (${status})`,
+        clientMessage: (data as any)?.message ?? `خطای سرور (${status})`,
       });
     }
 

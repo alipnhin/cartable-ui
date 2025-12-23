@@ -315,7 +315,7 @@ export function TransactionFilters({
   // Mobile view - just a button to open drawer
   if (isMobile) {
     return (
-      <Card>
+      <Card className="mb-4">
         <CardContent className="p-4">
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>

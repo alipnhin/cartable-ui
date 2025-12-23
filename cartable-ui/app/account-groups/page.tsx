@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/input-group";
 import { LayoutGrid, List, Search, Loader2 } from "lucide-react";
 import { PageTitle } from "@/components/common/page-title";
+import { useRegisterRefresh } from "@/contexts/pull-to-refresh-context";
 
 type DialogState = {
   type: "edit" | "delete" | "toggle" | null;
@@ -89,6 +90,11 @@ export default function AccountGroupsPage() {
       isEnable:
         selectedStatus === "all" ? undefined : selectedStatus === "active",
     },
+  });
+
+  // ثبت refetch برای Pull-to-Refresh
+  useRegisterRefresh(async () => {
+    await refetch();
   });
 
   // استفاده از mutations
@@ -221,22 +227,8 @@ export default function AccountGroupsPage() {
     </div>
   );
 
-  return (
-    <AppLayout>
-      <PageTitle title="مدیریت گروه حساب" />
-      <PageHeader
-        title="مدیریت گروه حساب"
-        description="مشاهده، ایجاد و مدیریت گروه‌های حساب"
-        actions={
-          <CreateEditGroupDialog
-            onSuccess={() => {
-              refetch();
-              triggerRefresh();
-            }}
-          />
-        }
-      />
-
+  const pageContent = (
+    <>
       {/* فیلترها و کنترل‌ها */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         {/* سمت راست: جستجو و دکمه افزودن */}
@@ -295,59 +287,59 @@ export default function AccountGroupsPage() {
         {isLoading ? (
           <GroupsSkeleton />
         ) : filteredGroups.length === 0 ? (
-          <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-16 px-4">
-              <div className="rounded-full bg-primary/10 p-6 mb-6">
-                <LayoutGrid className="h-12 w-12 text-primary" />
+              <Card className="border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-16 px-4">
+                  <div className="rounded-full bg-primary/10 p-6 mb-6">
+                    <LayoutGrid className="h-12 w-12 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">
+                    {searchText || selectedStatus !== "all"
+                      ? "گروهی یافت نشد"
+                      : "هنوز گروهی ایجاد نشده است"}
+                  </h3>
+                  <p className="text-muted-foreground text-center mb-6 max-w-md">
+                    {searchText || selectedStatus !== "all"
+                      ? "با فیلترهای فعلی هیچ گروهی یافت نشد. لطفاً فیلترها را تغییر دهید یا جستجوی دیگری انجام دهید."
+                      : "برای مدیریت بهتر حساب‌های خود، گروه‌های مختلفی ایجاد کنید و حساب‌ها را در آن‌ها دسته‌بندی نمایید."}
+                  </p>
+                  {!searchText && selectedStatus === "all" && (
+                    <CreateEditGroupDialog
+                      onSuccess={() => {
+                        refetch();
+                        triggerRefresh();
+                      }}
+                      trigger={
+                        <Button size="lg" className="gap-2">
+                          <LayoutGrid className="h-5 w-5" />
+                          ایجاد اولین گروه
+                        </Button>
+                      }
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            ) : viewMode === "card" ? (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredGroups.map((group) => (
+                  <GroupCard
+                    key={group.id}
+                    group={group}
+                    onEdit={(g) => setDialogState({ type: "edit", group: g })}
+                    onToggleStatus={(g) =>
+                      setDialogState({ type: "toggle", group: g })
+                    }
+                    onDelete={(g) => setDialogState({ type: "delete", group: g })}
+                  />
+                ))}
               </div>
-              <h3 className="text-xl font-semibold mb-2">
-                {searchText || selectedStatus !== "all"
-                  ? "گروهی یافت نشد"
-                  : "هنوز گروهی ایجاد نشده است"}
-              </h3>
-              <p className="text-muted-foreground text-center mb-6 max-w-md">
-                {searchText || selectedStatus !== "all"
-                  ? "با فیلترهای فعلی هیچ گروهی یافت نشد. لطفاً فیلترها را تغییر دهید یا جستجوی دیگری انجام دهید."
-                  : "برای مدیریت بهتر حساب‌های خود، گروه‌های مختلفی ایجاد کنید و حساب‌ها را در آن‌ها دسته‌بندی نمایید."}
-              </p>
-              {!searchText && selectedStatus === "all" && (
-                <CreateEditGroupDialog
-                  onSuccess={() => {
-                    refetch();
-                    triggerRefresh();
-                  }}
-                  trigger={
-                    <Button size="lg" className="gap-2">
-                      <LayoutGrid className="h-5 w-5" />
-                      ایجاد اولین گروه
-                    </Button>
-                  }
-                />
-              )}
-            </CardContent>
-          </Card>
-        ) : viewMode === "card" ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredGroups.map((group) => (
-              <GroupCard
-                key={group.id}
-                group={group}
+            ) : (
+              <GroupTable
+                groups={filteredGroups}
                 onEdit={(g) => setDialogState({ type: "edit", group: g })}
-                onToggleStatus={(g) =>
-                  setDialogState({ type: "toggle", group: g })
-                }
+                onToggleStatus={(g) => setDialogState({ type: "toggle", group: g })}
                 onDelete={(g) => setDialogState({ type: "delete", group: g })}
               />
-            ))}
-          </div>
-        ) : (
-          <GroupTable
-            groups={filteredGroups}
-            onEdit={(g) => setDialogState({ type: "edit", group: g })}
-            onToggleStatus={(g) => setDialogState({ type: "toggle", group: g })}
-            onDelete={(g) => setDialogState({ type: "delete", group: g })}
-          />
-        )}
+            )}
       </div>
 
       {/* تعداد نتایج */}
@@ -356,6 +348,26 @@ export default function AccountGroupsPage() {
           نمایش {filteredGroups.length} از {groups.length} گروه
         </div>
       )}
+    </>
+  );
+
+  return (
+    <AppLayout>
+      <PageTitle title="مدیریت گروه حساب" />
+      <PageHeader
+        title="مدیریت گروه حساب"
+        description="مشاهده، ایجاد و مدیریت گروه‌های حساب"
+        actions={
+          <CreateEditGroupDialog
+            onSuccess={() => {
+              refetch();
+              triggerRefresh();
+            }}
+          />
+        }
+      />
+
+      {pageContent}
 
       {/* Edit Dialog */}
       {dialogState.type === "edit" && dialogState.group && (

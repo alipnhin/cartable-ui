@@ -9,12 +9,7 @@ import {
 } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   Drawer,
   DrawerContent,
@@ -102,13 +97,9 @@ export function OrderCard({
                   <Check className="w-3 h-3 text-primary-foreground" />
                 </div>
               )}
-              <Link
-                href={`/payment-orders/${order.id}`}
-                onClick={(e) => e.stopPropagation()}
-                className="font-semibold text-sm text-foreground hover:text-primary transition-colors line-clamp-1"
-              >
+              <span className="font-semibold text-sm text-foreground hover:text-primary transition-colors line-clamp-1">
                 {order.title}
-              </Link>
+              </span>
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <OrderStatusBadge status={order.status} size="default" />

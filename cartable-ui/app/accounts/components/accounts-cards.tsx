@@ -6,7 +6,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Eye, Hash, CreditCard, CheckCircle2 } from "lucide-react";
+import { Eye, Hash, CreditCard, CheckCircle2, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BankLogo } from "@/components/common/bank-logo";
@@ -47,7 +47,7 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
               <BankLogo bankCode={account.bankCode} size="md" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-base mb-1 truncate max-w-[200px] sm:max-w-[300px] md:max-w-none">
+              <h3 className="font-semibold text-base mb-1 truncate max-w-50 sm:max-w-75 md:max-w-none">
                 {account.title}
               </h3>
               <p className="text-sm text-muted-foreground truncate">
@@ -73,21 +73,9 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
               </span>
               <span className="text-sm font-mono">{account.accountNumber}</span>
             </div>
-            <svg className="h-1 w-full max-md:hidden">
-              <line
-                x1="1.2"
-                y1="1.2"
-                x2="100%"
-                y2="1.2"
-                className="stroke-border-primary"
-                stroke="#eee"
-                stroke-width="2.4"
-                stroke-dasharray="0,6"
-                stroke-linecap="round"
-              ></line>
-            </svg>
+
             {/* شبا */}
-            <div className="flex items-center justify-between py-2">
+            <div className="flex items-center justify-between py-1">
               <span className="text-sm text-muted-foreground flex items-center gap-2">
                 <CreditCard className="h-3.5 w-3.5" />
                 {t("accounts.iban")}
@@ -96,21 +84,8 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
                 {formatIBAN(account.shebaNumber)}
               </span>
             </div>
-            <svg className="h-1 w-full max-md:hidden">
-              <line
-                x1="1.2"
-                y1="1.2"
-                x2="100%"
-                y2="1.2"
-                className="stroke-border-primary"
-                stroke="#eee"
-                stroke-width="2.4"
-                stroke-dasharray="0,6"
-                stroke-linecap="round"
-              ></line>
-            </svg>
             {/* کارتابل */}
-            <div className="flex items-center justify-between py-2">
+            <div className="flex items-center justify-between py-1">
               <span className="text-sm text-muted-foreground flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 {t("accounts.hasCartable")}
@@ -120,6 +95,18 @@ export function AccountsCards({ accounts }: AccountsCardsProps) {
                 appearance="light"
               >
                 {account.hasCartable ? t("common.yes") : t("common.no")}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between py-1">
+              <span className="text-sm text-muted-foreground flex items-center gap-2">
+                <UserCheck className="h-3.5 w-3.5" />
+                {t("accounts.hasCartableManager")}
+              </span>
+              <Badge
+                variant={account.hasCartableManager ? "success" : "secondary"}
+                appearance="light"
+              >
+                {account.hasCartableManager ? t("common.yes") : t("common.no")}
               </Badge>
             </div>
           </div>

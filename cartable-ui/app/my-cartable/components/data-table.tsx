@@ -33,6 +33,14 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   isLoading?: boolean;
   onRowSelectionChange?: (selection: Record<string, boolean>) => void;
+  // Server-side pagination props
+  pageCount?: number;
+  pageIndex?: number;
+  pageSize?: number;
+  onPageChange?: (pageIndex: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  // Controlled row selection
+  rowSelection?: Record<string, boolean>;
 }
 
 export function DataTable<TData, TValue>({
@@ -40,8 +48,14 @@ export function DataTable<TData, TValue>({
   data,
   isLoading = false,
   onRowSelectionChange,
+  pageCount,
+  pageIndex = 0,
+  pageSize = 10,
+  onPageChange,
+  onPageSizeChange,
+  rowSelection: controlledRowSelection,
 }: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [internalRowSelection, setInternalRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -49,12 +63,25 @@ export function DataTable<TData, TValue>({
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
-  // Notify parent of row selection changes
+  // استفاده از controlled یا uncontrolled row selection
+  const isControlled = controlledRowSelection !== undefined;
+  const rowSelection = isControlled ? controlledRowSelection : internalRowSelection;
+  const setRowSelection = isControlled ?
+    (updater: any) => {
+      const newSelection = typeof updater === 'function' ? updater(controlledRowSelection) : updater;
+      onRowSelectionChange?.(newSelection);
+    } :
+    setInternalRowSelection;
+
+  // Notify parent of row selection changes (only for uncontrolled)
   React.useEffect(() => {
-    if (onRowSelectionChange) {
-      onRowSelectionChange(rowSelection);
+    if (!isControlled && onRowSelectionChange) {
+      onRowSelectionChange(internalRowSelection);
     }
-  }, [rowSelection, onRowSelectionChange]);
+  }, [internalRowSelection, onRowSelectionChange, isControlled]);
+
+  // استفاده از server-side pagination اگر props مربوطه ارسال شده باشد
+  const isServerSidePagination = pageCount !== undefined && onPageChange !== undefined;
 
   const table = useReactTable({
     data,
@@ -64,12 +91,28 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      ...(isServerSidePagination && {
+        pagination: {
+          pageIndex,
+          pageSize,
+        },
+      }),
     },
-    initialState: {
-      pagination: {
-        pageSize: 10,
+    ...(isServerSidePagination && {
+      pageCount,
+      manualPagination: true,
+      onPaginationChange: (updater) => {
+        if (typeof updater === 'function') {
+          const newState = updater({ pageIndex, pageSize });
+          if (newState.pageIndex !== pageIndex) {
+            onPageChange(newState.pageIndex);
+          }
+          if (newState.pageSize !== pageSize && onPageSizeChange) {
+            onPageSizeChange(newState.pageSize);
+          }
+        }
       },
-    },
+    }),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
@@ -77,7 +120,9 @@ export function DataTable<TData, TValue>({
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(!isServerSidePagination && {
+      getPaginationRowModel: getPaginationRowModel(),
+    }),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),

@@ -27,6 +27,7 @@ import {
   getDefaultDashboardFilters,
 } from "@/hooks/useDashboardQuery";
 import { PageTitle } from "@/components/common/page-title";
+import { useRegisterRefresh } from "@/contexts/pull-to-refresh-context";
 
 export default function DashboardPage() {
   const { t } = useTranslation();
@@ -44,6 +45,11 @@ export default function DashboardPage() {
     refetch,
   } = useDashboardQuery({
     filters,
+  });
+
+  // ثبت refetch برای Pull-to-Refresh
+  useRegisterRefresh(async () => {
+    await refetch();
   });
 
   // تبدیل خطای React Query به string
@@ -94,15 +100,8 @@ export default function DashboardPage() {
     return null;
   }
 
-  return (
-    <AppLayout>
-      <PageTitle title={t("dashboard.pageTitle")} />
-      <PageHeader
-        title={t("dashboard.pageTitle")}
-        description={t("dashboard.pageSubtitle")}
-        actions={<ExportButtons data={dashboardData} filters={filters} />}
-      />
-
+  const dashboardContent = (
+    <>
       {/* Filters */}
       <DashboardFilters
         onFilterApply={handleFilterApply}
@@ -199,6 +198,19 @@ export default function DashboardPage() {
         />
         <ComparisonMetrics data={dashboardData} delay={1.0} />
       </div>
+    </>
+  );
+
+  return (
+    <AppLayout>
+      <PageTitle title={t("dashboard.pageTitle")} />
+      <PageHeader
+        title={t("dashboard.pageTitle")}
+        description={t("dashboard.pageSubtitle")}
+        actions={<ExportButtons data={dashboardData} filters={filters} />}
+      />
+
+      {dashboardContent}
     </AppLayout>
   );
 }

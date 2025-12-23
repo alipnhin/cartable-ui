@@ -68,12 +68,16 @@ export function useTransactionsQuery({
   const groupId = useAccountGroupStore((s) => s.groupId);
 
   // خواندن accountGroupId از localStorage
-  const [savedGroupId, setSavedGroupId] = useState<string | null>(null);
+  const [savedGroupId, setSavedGroupId] = useState<string | null | undefined>(
+    undefined
+  );
+  const [isGroupIdLoaded, setIsGroupIdLoaded] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("selected-account-group");
       setSavedGroupId(stored);
+      setIsGroupIdLoaded(true);
     }
   }, [groupId]);
 
@@ -108,8 +112,8 @@ export function useTransactionsQuery({
       return await getTransactionsList(finalParams, session.accessToken);
     },
 
-    // query فقط زمانی فعال است که accessToken موجود و enabled=true باشد
-    enabled: enabled && !!session?.accessToken,
+    // query فقط زمانی فعال است که accessToken موجود، enabled=true و groupId از localStorage خوانده شده باشد
+    enabled: enabled && !!session?.accessToken && isGroupIdLoaded,
 
     // اگر mount شد refetch نکند (در صورت داشتن cache)
     refetchOnMount: true,

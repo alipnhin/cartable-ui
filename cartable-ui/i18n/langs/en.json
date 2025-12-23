@@ -664,6 +664,8 @@
     "signatures": "Signatures",
     "min": "Minimum",
     "total": "Total",
+    "hasCartable": "Has Tadbir Cartable",
+    "hasCartableManager": "Manager Verify",
     "accounts": "Accounts",
     "noAccountsFound": "No Accounts Found",
     "accountDetails": "Account Details",

@@ -51,6 +51,7 @@ interface DataTableProps<TData, TValue> {
   pageNumber?: number;
   totalPages?: number;
   pageSize?: number;
+  totalItems?: number;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
   /** Server-side sorting */
@@ -65,6 +66,7 @@ export function DataTable<TData, TValue>({
   pageNumber = 1,
   totalPages = 1,
   pageSize = 10,
+  totalItems = 0,
   onPageChange,
   onPageSizeChange,
   sorting: externalSorting,
@@ -241,7 +243,9 @@ export function DataTable<TData, TValue>({
                     ? (pageNumber - 1) * pageSize + data.length
                     : 0
                 )}
-              </span>
+              </span>{" "}
+              {t("common.pagination.of")}{" "}
+              <span className="font-medium text-foreground">{totalItems}</span>
             </>
           ) : (
             <>
@@ -283,7 +287,7 @@ export function DataTable<TData, TValue>({
                 }
               }}
             >
-              <SelectTrigger className="h-8 w-[70px]">
+              <SelectTrigger className="h-8 w-17.5">
                 <SelectValue
                   placeholder={
                     isServerSide
@@ -303,7 +307,7 @@ export function DataTable<TData, TValue>({
           </div>
 
           {/* Page Info */}
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+          <div className="flex w-25 items-center justify-center text-sm font-medium">
             {t("common.pagination.page")}{" "}
             {isServerSide
               ? pageNumber

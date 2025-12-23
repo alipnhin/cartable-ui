@@ -27,7 +27,7 @@ export function OfflineIndicator() {
   if (isOnline) return null;
 
   return (
-    <div className="fixed inset-0 z-[9998] flex flex-col items-center justify-center bg-background p-6">
+    <div className="fixed inset-0 z-9998 flex flex-col items-center justify-center bg-background p-6">
       {/* Logo */}
       <div className="mb-8">
         <div className="w-24 h-24 rounded-2xl bg-muted flex items-center justify-center">
@@ -74,7 +74,7 @@ export function OfflineIndicator() {
       <Button
         onClick={() => window.location.reload()}
         size="lg"
-        className="min-w-[200px]"
+        className="min-w-50"
       >
         تلاش مجدد
       </Button>

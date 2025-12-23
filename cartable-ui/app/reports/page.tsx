@@ -25,6 +25,7 @@ import {
 } from "@/hooks/useTransactionsQuery";
 import { getErrorMessage } from "@/lib/error-handler";
 import { PageTitle } from "@/components/common/page-title";
+import { useRegisterRefresh } from "@/contexts/pull-to-refresh-context";
 
 export interface TransactionFiltersType {
   search: string;
@@ -160,6 +161,9 @@ export default function TransactionReportsPage() {
     filterParams: apiFilters,
   });
 
+  // ثبت refetch برای Pull-to-Refresh
+  useRegisterRefresh(refetch);
+
   // نمایش toast برای خطا
   useEffect(() => {
     if (queryError) {
@@ -293,6 +297,35 @@ export default function TransactionReportsPage() {
     );
   }
 
+  const reportsContent = (
+    <>
+      {/* آمارهای کلی */}
+      {/* <TransactionStats transactions={transactions} /> */}
+
+      {/* فیلترها */}
+      <TransactionFilters
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+      />
+
+      {/* جدول */}
+      <TransactionTable
+        transactions={transactions}
+        totalRecords={totalRecords}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        loading={isLoading}
+        exporting={exporting}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        onExport={handleExport}
+        sortField={sortField}
+        sortDirection={sortDirection}
+        onSort={handleSort}
+      />
+    </>
+  );
+
   return (
     <AppLayout>
       <PageTitle title={t("reports.transactionReports")} />
@@ -302,30 +335,7 @@ export default function TransactionReportsPage() {
           description={t("reports.transactionReportsDesc")}
         />
 
-        {/* آمارهای کلی */}
-        {/* <TransactionStats transactions={transactions} /> */}
-
-        {/* فیلترها */}
-        <TransactionFilters
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-        />
-
-        {/* جدول */}
-        <TransactionTable
-          transactions={transactions}
-          totalRecords={totalRecords}
-          currentPage={currentPage}
-          pageSize={pageSize}
-          loading={isLoading}
-          exporting={exporting}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-          onExport={handleExport}
-          sortField={sortField}
-          sortDirection={sortDirection}
-          onSort={handleSort}
-        />
+        {reportsContent}
       </div>
 
       {/* Export Progress Dialog */}

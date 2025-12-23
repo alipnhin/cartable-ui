@@ -54,6 +54,9 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
               {t("accounts.hasCartable")}
             </TableHead>
             <TableHead className="text-center font-bold">
+              {t("accounts.hasCartableManager")}
+            </TableHead>
+            <TableHead className="text-center font-bold">
               {t("common.status")}
             </TableHead>
             <TableHead className="text-center font-bold">
@@ -94,6 +97,18 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
                     appearance="light"
                   >
                     {account.hasCartable ? t("common.yes") : t("common.no")}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-center">
+                  <Badge
+                    variant={
+                      account.hasCartableManager ? "success" : "secondary"
+                    }
+                    appearance="light"
+                  >
+                    {account.hasCartableManager
+                      ? t("common.yes")
+                      : t("common.no")}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-center">

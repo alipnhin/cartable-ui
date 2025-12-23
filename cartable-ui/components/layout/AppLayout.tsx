@@ -6,6 +6,8 @@ import { Sidebar } from "./Sidebar";
 import { BottomDock } from "./BottomDock";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { PullToRefresh } from "@/components/common/pull-to-refresh";
+import { usePullToRefresh } from "@/contexts/pull-to-refresh-context";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -28,8 +30,21 @@ export function AppLayout({
   });
 
   const isMobile = useIsMobile();
+  const { triggerRefresh } = usePullToRefresh();
 
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
+
+  // Main content element
+  const mainContent = (
+    <main
+      className={cn(
+        "flex-1 overflow-y-auto overflow-x-hidden",
+        isMobile ? "pb-20" : "pb-0" // فضای bottom nav
+      )}
+    >
+      <div className="px-4 md:px-6 py-6">{children}</div>
+    </main>
+  );
 
   return (
     <div className="relative h-screen bg-background text-foreground flex flex-col overflow-hidden">
@@ -53,15 +68,14 @@ export function AppLayout({
           />
         )}
 
-        {/* Main Content - Scrollable */}
-        <main
-          className={cn(
-            "flex-1 overflow-y-auto overflow-x-hidden",
-            isMobile ? "pb-20" : "pb-0" // فضای bottom nav
-          )}
-        >
-          <div className="px-4 md:px-6 py-6">{children}</div>
-        </main>
+        {/* Main Content - Scrollable با PullToRefresh در موبایل */}
+        {isMobile ? (
+          <PullToRefresh onRefresh={triggerRefresh} attachToScrollContainer>
+            {mainContent}
+          </PullToRefresh>
+        ) : (
+          mainContent
+        )}
       </div>
 
       {/* Bottom Dock (فقط موبایل) - Fixed در پایین */}

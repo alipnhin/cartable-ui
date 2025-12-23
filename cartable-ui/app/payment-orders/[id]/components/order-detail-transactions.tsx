@@ -51,13 +51,14 @@ import {
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Label } from "@/components/ui/label";
 import { TransactionDetailDialog } from "./transaction-detail-dialog";
 import { BankLogo } from "@/components/common/bank-logo";
@@ -256,10 +257,10 @@ export function OrderDetailTransactions({
                 <Button
                   variant="outline"
                   onClick={onExport}
-                  className="gap-2 h-9"
+                  className="gap-2 h-9 min-w-27.5"
                 >
                   <Download className="h-4 w-4" />
-                  {!isMobile && t("transactions.export")}
+                  {t("transactions.export")}
                 </Button>
               )}
 
@@ -268,34 +269,35 @@ export function OrderDetailTransactions({
                 variant="outline"
                 onClick={onRefresh}
                 disabled={isLoading}
-                className="gap-2 h-9"
+                className="gap-2 h-9 min-w-27.5"
               >
                 <RefreshCw
                   className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
                 />
-                {!isMobile && t("transactions.refresh")}
+                {t("transactions.refresh")}
               </Button>
 
               {/* Filter Button - Only on mobile */}
               {isMobile && (
-                <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" className="gap-2 relative h-9">
+                <Drawer open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                  <DrawerTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="gap-2 relative h-9 min-w-27.5"
+                    >
                       <FilterIcon className="h-4 w-4" />
+                      {t("transactions.filter")}
                       {activeFiltersCount > 0 && (
                         <span className="absolute -top-1 -left-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium">
                           {activeFiltersCount}
                         </span>
                       )}
                     </Button>
-                  </SheetTrigger>
-                  <SheetContent
-                    side="left"
-                    className="w-full sm:max-w-md overflow-y-auto"
-                  >
-                    <SheetHeader>
-                      <SheetTitle>{t("transactions.filterTitle")}</SheetTitle>
-                    </SheetHeader>
+                  </DrawerTrigger>
+                  <DrawerContent className="p-4">
+                    <DrawerHeader>
+                      <DrawerTitle>{t("transactions.filterTitle")}</DrawerTitle>
+                    </DrawerHeader>
 
                     <div className="space-y-6 py-6">
                       {/* Search */}
@@ -327,7 +329,7 @@ export function OrderDetailTransactions({
                             )
                           }
                         >
-                          <SelectTrigger className="h-10">
+                          <SelectTrigger className="h-12">
                             <SelectValue
                               placeholder={t("transactions.allStatuses")}
                             />
@@ -400,7 +402,7 @@ export function OrderDetailTransactions({
                           value={paymentTypeFilter}
                           onValueChange={(v) => setPaymentTypeFilter(v as any)}
                         >
-                          <SelectTrigger className="h-10">
+                          <SelectTrigger className="h-12">
                             <SelectValue
                               placeholder={t("transactions.allTypes")}
                             />
@@ -429,7 +431,7 @@ export function OrderDetailTransactions({
                           value={reasonCodeFilter}
                           onValueChange={(v) => setReasonCodeFilter(v as any)}
                         >
-                          <SelectTrigger className="h-10">
+                          <SelectTrigger className="h-12">
                             <SelectValue
                               placeholder={t("transactions.allReasonCodes")}
                             />
@@ -555,23 +557,27 @@ export function OrderDetailTransactions({
                       </div>
                     </div>
 
-                    <SheetFooter className="gap-2">
+                    <DrawerFooter className="flex-row gap-2 mb-8">
                       <Button
                         variant="outline"
                         onClick={handleResetFilters}
-                        className="flex-1 h-10"
+                        className="flex-1 gap-2"
                       >
+                        <X className="h-4 w-4" />
                         {t("transactions.clearFilters")}
                       </Button>
-                      <Button
-                        onClick={handleApplyFilters}
-                        className="flex-1 h-10"
-                      >
-                        {t("transactions.applyFilters")}
-                      </Button>
-                    </SheetFooter>
-                  </SheetContent>
-                </Sheet>
+                      <DrawerClose asChild>
+                        <Button
+                          onClick={handleApplyFilters}
+                          className="flex-1 gap-2"
+                        >
+                          <Search className="h-4 w-4" />
+                          {t("transactions.applyFilters")}
+                        </Button>
+                      </DrawerClose>
+                    </DrawerFooter>
+                  </DrawerContent>
+                </Drawer>
               )}
             </div>
           </div>
@@ -580,7 +586,7 @@ export function OrderDetailTransactions({
           {!isMobile && (
             <div className="flex flex-wrap items-center gap-3 p-4 border-b bg-muted/20">
               {/* Search */}
-              <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+              <div className="relative flex-1 min-w-50 max-w-75">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={t("transactions.searchPlaceholder")}
@@ -599,7 +605,7 @@ export function OrderDetailTransactions({
                   )
                 }
               >
-                <SelectTrigger className="w-[180px] h-9">
+                <SelectTrigger className="w-45 h-10">
                   <SelectValue placeholder={t("transactions.allStatuses")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -649,7 +655,7 @@ export function OrderDetailTransactions({
                 value={paymentTypeFilter}
                 onValueChange={(v) => setPaymentTypeFilter(v as any)}
               >
-                <SelectTrigger className="w-40 h-9">
+                <SelectTrigger className="w-40 h-10">
                   <SelectValue placeholder={t("transactions.allTypes")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -673,7 +679,7 @@ export function OrderDetailTransactions({
                 value={reasonCodeFilter}
                 onValueChange={(v) => setReasonCodeFilter(v as any)}
               >
-                <SelectTrigger className="w-[200px] h-9">
+                <SelectTrigger className="w-50 h-10">
                   <SelectValue placeholder={t("transactions.allReasonCodes")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -850,10 +856,7 @@ export function OrderDetailTransactions({
                       transaction.destinationIban
                     );
                     const canInquiry =
-                      transaction.status ===
-                        PaymentItemStatusEnum.WaitForBank ||
-                      transaction.status ===
-                        PaymentItemStatusEnum.WaitForExecution;
+                      transaction.status === PaymentItemStatusEnum.WaitForBank;
                     const isInquiring =
                       inquiringTransactionId === transaction.id;
 
@@ -1003,6 +1006,8 @@ export function OrderDetailTransactions({
                     <MobilePagination
                       currentPage={pageNumber}
                       totalPages={totalPages}
+                      totalItems={totalItems}
+                      pageSize={pageSize}
                       onPageChange={onPageChange}
                     />
                   )}
@@ -1061,9 +1066,7 @@ export function OrderDetailTransactions({
                         );
                         const canInquiry =
                           transaction.status ===
-                            PaymentItemStatusEnum.WaitForBank ||
-                          transaction.status ===
-                            PaymentItemStatusEnum.WaitForExecution;
+                          PaymentItemStatusEnum.WaitForBank;
                         const isInquiring =
                           inquiringTransactionId === transaction.id;
 

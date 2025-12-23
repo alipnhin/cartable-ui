@@ -121,7 +121,7 @@ function MinimalBottomDock({ menuItems }: { menuItems: MenuItem[] }) {
                 onClick={() => handleNavigation(item.route)}
                 disabled={isPending}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-[72px] min-h-14 transition-all duration-300 ease-out group",
+                  "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-18 min-h-14 transition-all duration-300 ease-out group",
                   "active:scale-90",
                   "after:content-[''] after:absolute after:-inset-2",
                   isPending && !isPendingThis && "opacity-40"
@@ -266,7 +266,7 @@ function FloatingBottomDock({
           }
           className={cn(
             "absolute -top-4 left-1/2 -translate-x-1/2",
-            "w-[68px] h-[68px] min-w-[68px] min-h-[68px] rounded-xl bg-primary text-primary-foreground",
+            "w-17 h-17 min-w-17 min-h-17 rounded-xl bg-primary text-primary-foreground",
             "flex items-center justify-center",
             "hover:scale-110 active:scale-95",
             "transition-transform duration-200",
@@ -421,7 +421,7 @@ function MinimalV2BottomDock({ menuItems }: { menuItems: MenuItem[] }) {
                 onClick={() => handleNavigation(item.route)}
                 disabled={isPending}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-[72px] min-h-14 transition-all duration-300 ease-out group",
+                  "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-18 min-h-14 transition-all duration-300 ease-out group",
                   "active:scale-90",
                   "after:content-[''] after:absolute after:inset-2",
                   isPending && !isPendingThis && "opacity-40"
@@ -528,10 +528,10 @@ const DockItem = memo(
           onClick={onClick}
           disabled={isPending}
           className={cn(
-            "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-[68px] min-h-[56px]",
+            "relative flex flex-col items-center justify-center gap-2 py-2.5 min-w-17 min-h-14",
             "transition-colors duration-200",
             "active:scale-95",
-            "after:content-[''] after:absolute after:inset-[-8px]",
+            "after:content-[''] after:absolute after:-inset-2",
             isActive ? "text-primary" : "text-muted-foreground",
             isPending && "opacity-70"
           )}
@@ -583,10 +583,10 @@ const DockItem = memo(
           onClick={onClick}
           disabled={isPending}
           className={cn(
-            "relative flex flex-col items-center justify-center gap-2 px-3 py-2.5 min-w-[68px] min-h-[56px]",
+            "relative flex flex-col items-center justify-center gap-2 px-3 py-2.5 min-w-17 min-h-14",
             "transition-colors duration-200",
             "active:scale-95 hover:scale-105",
-            "after:content-[''] after:absolute after:inset-[-8px]",
+            "after:content-[''] after:absolute after:-inset-2",
             isActive ? "text-primary" : "text-muted-foreground",
             isPending && "opacity-70"
           )}
