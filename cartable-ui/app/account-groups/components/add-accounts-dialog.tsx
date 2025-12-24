@@ -55,7 +55,7 @@ export function AddAccountsDialog({
 
       setIsLoadingAccounts(true);
       try {
-        const data = await getAccountsList(session.accessToken);
+        const data = await getAccountsList();
         setAccounts(data);
       } catch (error) {
         console.error("Error fetching accounts:", error);
@@ -107,13 +107,10 @@ export function AddAccountsDialog({
 
     setIsAdding(true);
     try {
-      await addGroupAccounts(
-        {
-          groupId,
-          bankGatewayIds: selectedIds,
-        },
-        session.accessToken
-      );
+      await addGroupAccounts({
+        groupId,
+        bankGatewayIds: selectedIds,
+      });
       toast({
         title: t("toast.success"),
         description: `${selectedIds.length} حساب با موفقیت اضافه شد`,

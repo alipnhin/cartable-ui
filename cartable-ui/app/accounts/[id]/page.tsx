@@ -67,7 +67,7 @@ export default function AccountDetailPage() {
     setError(null);
 
     try {
-      const data = await getAccountDetail(accountId, session.accessToken);
+      const data = await getAccountDetail(accountId);
       setAccount(data);
     } catch (err) {
       const errorMessage = getErrorMessage(err);
@@ -90,13 +90,10 @@ export default function AccountDetailPage() {
 
     setIsUpdating(true);
     try {
-      await changeMinimumSignature(
-        {
-          minimumSignature: value,
-          bankGatewayId: account.id,
-        },
-        session.accessToken
-      );
+      await changeMinimumSignature({
+        minimumSignature: value,
+        bankGatewayId: account.id,
+      });
       toast({
         title: t("toast.success"),
         description: "حداقل امضا با موفقیت تغییر کرد",
@@ -130,14 +127,14 @@ export default function AccountDetailPage() {
       // Status 1 or "Enable" = active, so we disable it
       // Status 2 or "Disable" or 4 or "Rejected" = inactive, so we enable it
       if (currentStatus === 1 || currentStatus === "Enable") {
-        await disableSigner(signerId, session.accessToken);
+        await disableSigner(signerId);
         toast({
           title: t("toast.success"),
           description: "درخواست غیرفعال‌سازی ثبت شد",
           variant: "success",
         });
       } else {
-        await enableSigner(signerId, session.accessToken);
+        await enableSigner(signerId);
         toast({
           title: t("toast.success"),
           description: "درخواست فعال‌سازی ثبت شد",

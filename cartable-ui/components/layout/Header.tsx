@@ -15,16 +15,12 @@ interface HeaderProps {
   onMenuToggle?: () => void;
   showMenuButton?: boolean;
   showAccountGroupSwitcher?: boolean;
-  selectedAccountGroup?: string;
-  onAccountGroupChange?: (groupId: string) => void;
 }
 
 export function Header({
   onMenuToggle,
   showMenuButton = true,
   showAccountGroupSwitcher = true,
-  selectedAccountGroup,
-  onAccountGroupChange,
 }: HeaderProps) {
   const router = useRouter();
   const isMobile = useIsMobile();
@@ -77,11 +73,7 @@ export function Header({
         {/* Account Group Switcher - فقط موبایل */}
         {showAccountGroupSwitcher && isMobile && (
           <div className="shrink-0">
-            <AccountGroupSwitcher
-              value={selectedAccountGroup}
-              onChange={onAccountGroupChange}
-              compact
-            />
+            <AccountGroupSwitcher compact />
           </div>
         )}
 

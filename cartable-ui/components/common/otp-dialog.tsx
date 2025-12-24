@@ -329,6 +329,7 @@ interface OtpInputProps {
  * - پشتیبانی از Paste (چسباندن کد کامل)
  * - فقط ارقام مجاز هستند (اعتبارسنجی با regex)
  * - کیبورد عددی در موبایل (inputMode="numeric")
+ * - Web OTP API: خواندن خودکار کد از پیامک (Chrome Android)
  */
 function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
   const [inputs, setInputs] = useState<string[]>(Array(length).fill(""));
@@ -343,6 +344,51 @@ function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
     }
     setInputs(newInputs);
   }, [value, length]);
+
+  /**
+   * Web OTP API: خواندن خودکار کد OTP از پیامک
+   * این ویژگی فقط در Chrome Android و برخی مرورگرهای دیگر کار می‌کند
+   * فرمت پیامک باید استاندارد باشد (توضیحات در کامنت زیر)
+   */
+  useEffect(() => {
+    // بررسی پشتیبانی مرورگر از Web OTP API
+    if ("OTPCredential" in window) {
+      const ac = new AbortController();
+
+      // درخواست خودکار کد OTP از سیستم
+      navigator.credentials
+        .get({
+          // @ts-ignore - Web OTP API ممکن است در TypeScript تعریف نشده باشد
+          otp: { transport: ["sms"] },
+          signal: ac.signal,
+        })
+        .then((otp: any) => {
+          if (otp && otp.code) {
+            // پر کردن خودکار کد OTP در فیلدها
+            const otpCode = otp.code.slice(0, length);
+            const newInputs = otpCode.split("");
+            while (newInputs.length < length) {
+              newInputs.push("");
+            }
+            setInputs(newInputs);
+            onChange(otpCode);
+
+            // فوکوس به آخرین خانه
+            const lastInput = document.getElementById(`otp-${length - 1}`);
+            lastInput?.focus();
+          }
+        })
+        .catch((err: any) => {
+          // خطاها را نادیده می‌گیریم (مثلاً اگر کاربر لغو کند یا API پشتیبانی نشود)
+          console.log("Web OTP API error (این طبیعی است):", err);
+        });
+
+      // پاکسازی هنگام unmount
+      return () => {
+        ac.abort();
+      };
+    }
+  }, [length, onChange]);
 
   /**
    * مدیریت تغییر مقدار یک خانه
@@ -417,7 +463,7 @@ function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
           onKeyDown={(e) => handleKeyDown(index, e)}
           onPaste={handlePaste}
           className="w-14 h-14 text-center text-lg font-semibold"
-          autoComplete="off"
+          autoComplete={index === 0 ? "one-time-code" : "off"}
           autoFocus={index === 0}
         />
       ))}

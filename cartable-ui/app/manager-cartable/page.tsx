@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { AppLayout, PageHeader } from "@/components/layout";
 import { OrderCard, OrderCardSkeleton } from "./components/order-card";
 import { DataTable } from "./components/data-table";
+import { MobilePagination } from "./components/mobile-pagination";
 import { createColumns } from "./components/columns";
 import { Button } from "@/components/ui/button";
 import {
@@ -298,6 +299,13 @@ export default function ManagerCartablePage() {
                     {t("managerCartable.noOrdersDescription")}
                   </p>
                 </div>
+              )}
+              {orders.length > 0 && (
+                <MobilePagination
+                  currentPage={pageNumber}
+                  totalPages={totalPages}
+                  onPageChange={setPageNumber}
+                />
               )}
             </>
           )}

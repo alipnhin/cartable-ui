@@ -10,7 +10,7 @@
 
 "use client";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import {
   DropdownMenu,
@@ -44,14 +44,17 @@ import {
   LucideIcon,
   Building2,
   ChevronsUpDown,
-  Icon,
 } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { cn } from "@/lib/utils";
 import { AccountGroup } from "@/types/account-group-types";
 import { getAccountGroups } from "@/services/accountGroupService";
 import logger from "@/lib/logger";
-import { useAccountGroupStore } from "@/store/account-group-store";
+import {
+  useAccountGroupStore,
+  useAccountGroupStoreHydration,
+} from "@/store/account-group-store";
+
 // نقشه آیکون‌ها - برای تبدیل نام آیکون به کامپوننت
 const ICON_MAP: Record<string, LucideIcon> = {
   Crown,
@@ -98,63 +101,67 @@ export function AccountGroupSwitcher({
   className,
   compact = false,
 }: AccountGroupSwitcherProps) {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const { data: session } = useSession();
-  const [accountGroups, setAccountGroups] = useState<AccountGroup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeGroup, setActiveGroup] = useState<AccountGroup | null>(null);
   const router = useRouter();
 
-  const setGroupId = useAccountGroupStore((s) => s.setGroupId);
+  // Store state
+  const selectedGroup = useAccountGroupStore((s) => s.selectedGroup);
+  const setSelectedGroup = useAccountGroupStore((s) => s.setSelectedGroup);
+  const setUserId = useAccountGroupStore((s) => s.setUserId);
   const refreshKey = useAccountGroupStore((s) => s.refreshKey);
-  // خواندن گروه ذخیره شده از localStorage
+  const isHydrated = useAccountGroupStoreHydration();
+
+  // Local state
+  const [accountGroups, setAccountGroups] = useState<AccountGroup[]>([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const hasInitializedRef = useRef(false);
+
+  // Set userId when session changes
   useEffect(() => {
-    const savedGroupId = localStorage.getItem("selected-account-group");
-    if (savedGroupId && !value) {
-      // اگر گروه ذخیره شده وجود دارد و value مشخص نشده، از آن استفاده کن
+    const userId = session?.user?.id || session?.user?.email || null;
+    if (userId) {
+      setUserId(userId);
+    }
+  }, [session, setUserId]);
+
+  // Fetch account groups
+  useEffect(() => {
+    if (!session?.accessToken || !isHydrated) {
       return;
     }
-  }, []);
 
-  // واکشی گروه‌های حساب از API
-  useEffect(() => {
     const fetchAccountGroups = async () => {
-      if (!session?.accessToken) {
-        setLoading(false);
+      const shouldFetch =
+        isDropdownOpen || (!hasInitializedRef.current && !selectedGroup);
+
+      if (!shouldFetch || isFetching) {
         return;
       }
 
       try {
-        setLoading(true);
-        const groups = await getAccountGroups(session.accessToken);
+        setIsFetching(true);
+        const groups = await getAccountGroups();
         setAccountGroups(groups);
 
-        // اولویت 1: value که از props آمده
-        // اولویت 2: گروه ذخیره شده در localStorage
-        // اولویت 3: گروه "all"
-        // اولویت 4: اولین گروه موجود
-        const savedGroupId = localStorage.getItem("selected-account-group");
-        let selectedGroup: AccountGroup | undefined;
+        if (!hasInitializedRef.current && !selectedGroup) {
+          let groupToSelect: AccountGroup | undefined;
 
-        if (value) {
-          selectedGroup = groups.find((g) => g.id === value);
-        } else if (savedGroupId) {
-          selectedGroup = groups.find((g) => g.id === savedGroupId);
-        }
-
-        if (!selectedGroup) {
-          selectedGroup = groups.find((g) => g.id === "all") || groups[0];
-        }
-
-        if (selectedGroup) {
-          setActiveGroup(selectedGroup);
-          setGroupId(selectedGroup.id);
-          // ذخیره در localStorage
-          localStorage.setItem("selected-account-group", selectedGroup.id);
-          // اطلاع‌رسانی به والد اگر onChange وجود دارد
-          if (onChange && !value) {
-            onChange(selectedGroup.id);
+          if (value) {
+            groupToSelect = groups.find((g) => g.id === value);
           }
+
+          if (!groupToSelect) {
+            groupToSelect = groups.find((g) => g.id === "all") || groups[0];
+          }
+
+          if (groupToSelect) {
+            setSelectedGroup(groupToSelect);
+            onChange?.(groupToSelect.id);
+          }
+
+          hasInitializedRef.current = true;
         }
       } catch (error) {
         logger.error(
@@ -162,102 +169,115 @@ export function AccountGroupSwitcher({
           error instanceof Error ? error : undefined
         );
       } finally {
-        setLoading(false);
+        setIsFetching(false);
       }
     };
 
     fetchAccountGroups();
-  }, [session, value, refreshKey]);
+  }, [
+    session?.accessToken,
+    isDropdownOpen,
+    refreshKey,
+    isHydrated,
+    selectedGroup,
+    value,
+    onChange,
+    isFetching,
+    setSelectedGroup,
+  ]);
+
+  // Reset initialization when user changes
+  useEffect(() => {
+    hasInitializedRef.current = false;
+  }, [session?.user?.id]);
 
   const handleChange = (group: AccountGroup) => {
-    setActiveGroup(group);
-    // ذخیره در localStorage
-    localStorage.setItem("selected-account-group", group.id);
-    setGroupId(group.id);
+    setSelectedGroup(group);
     onChange?.(group.id);
     router.refresh();
   };
 
-  // اگر در حال بارگذاری است یا هیچ گروهی وجود ندارد
-  if (loading || !activeGroup) {
+  if (!isHydrated || !selectedGroup) {
     return (
       <Button
         variant="outline"
         disabled
-        className={cn(
-          compact ? "h-9 px-3 gap-2 max-w-[200px]" : "w-[250px]",
-          className
-        )}
+        className={cn(compact ? "h-9 px-3 gap-2 max-w-50" : "w-62.5", className)}
       >
         <Building2 className="h-4 w-4 shrink-0 animate-pulse" />
         <span className={cn(compact ? "text-xs" : "text-xs")}>
-          {t("common.loading") || "در حال بارگذاری..."}
+          {t("common.loading")}
         </span>
       </Button>
     );
   }
 
-  // دریافت آیکون گروه
-  const GroupIcon = activeGroup.icon
-    ? ICON_MAP[activeGroup.icon] || Building2
+  const GroupIcon = selectedGroup.icon
+    ? ICON_MAP[selectedGroup.icon] || Building2
     : Building2;
 
   if (compact) {
-    // نمایش فشرده برای موبایل
     return (
-      <DropdownMenu>
+      <DropdownMenu onOpenChange={setIsDropdownOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-9 px-3 gap-2 max-w-[250px]">
+          <Button variant="outline" className="h-9 px-3 gap-2 max-w-62.5">
             <GroupIcon className="h-4 w-4 shrink-0" />
             <span className="text-xs font-medium truncate">
-              {activeGroup.title}
+              {selectedGroup.title}
             </span>
             <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[250px]" align="end">
+        <DropdownMenuContent className="w-62.5" align="end">
           <DropdownMenuLabel className="text-xs text-muted-foreground">
-            {t("accountGroup.selectGroup") || "انتخاب گروه حساب"}
+            {t("accountGroup.selectGroup")}
           </DropdownMenuLabel>
-          {accountGroups.map((group) => {
-            const Icon = group.icon
-              ? ICON_MAP[group.icon] || Building2
-              : Building2;
-            return (
-              <DropdownMenuItem
-                key={group.id}
-                onClick={() => handleChange(group)}
-                className={cn(
-                  "gap-2 p-2",
-                  activeGroup.id === group.id && "bg-accent"
-                )}
-              >
-                <div
-                  className="flex h-6 w-6 items-center justify-center rounded-md border bg-background"
-                  style={group.color ? { borderColor: group.color } : undefined}
+          {isFetching && accountGroups.length === 0 ? (
+            <div className="flex items-center justify-center py-4 text-xs text-muted-foreground">
+              {t("common.loading")}
+            </div>
+          ) : (
+            accountGroups.map((group) => {
+              const Icon = group.icon
+                ? ICON_MAP[group.icon] || Building2
+                : Building2;
+              return (
+                <DropdownMenuItem
+                  key={group.id}
+                  onClick={() => handleChange(group)}
+                  className={cn(
+                    "gap-2 p-2",
+                    selectedGroup.id === group.id && "bg-accent"
+                  )}
                 >
-                  <Icon
-                    className="h-3.5 w-3.5"
-                    style={group.color ? { color: group.color } : undefined}
-                  />
-                </div>
-                <div className="flex flex-col flex-1">
-                  <span className="text-sm">{group.title}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {group.accountCount} {t("common.account") || "حساب"}
-                  </span>
-                </div>
-              </DropdownMenuItem>
-            );
-          })}
+                  <div
+                    className="flex h-6 w-6 items-center justify-center rounded-md border bg-background"
+                    style={
+                      group.color ? { borderColor: group.color } : undefined
+                    }
+                  >
+                    <Icon
+                      className="h-3.5 w-3.5"
+                      style={group.color ? { color: group.color } : undefined}
+                    />
+                  </div>
+                  <div className="flex flex-col flex-1">
+                    <span className="text-sm">{group.title}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {group.accountCount} {t("common.account")}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              );
+            })
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     );
   }
 
-  // نمایش کامل برای دسکتاپ
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={setIsDropdownOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
@@ -273,24 +293,24 @@ export function AccountGroupSwitcher({
             <div
               className="flex h-7 w-7 items-center justify-center rounded-md border bg-background shrink-0"
               style={
-                activeGroup.color
-                  ? { borderColor: activeGroup.color }
+                selectedGroup.color
+                  ? { borderColor: selectedGroup.color }
                   : undefined
               }
             >
               <GroupIcon
                 className="h-4.5 w-4.5"
                 style={
-                  activeGroup.color ? { color: activeGroup.color } : undefined
+                  selectedGroup.color ? { color: selectedGroup.color } : undefined
                 }
               />
             </div>
             <div className="flex flex-col items-start flex-1 min-w-0">
               <span className="text-xs text-start font-medium truncate w-full">
-                {activeGroup.title}
+                {selectedGroup.title}
               </span>
               <span className="text-xs text-muted-foreground">
-                {activeGroup.accountCount} {t("common.account") || "حساب"}
+                {selectedGroup.accountCount} {t("common.account")}
               </span>
             </div>
           </div>
@@ -299,37 +319,43 @@ export function AccountGroupSwitcher({
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-full" align="start">
         <DropdownMenuLabel className="text-xs text-muted-foreground">
-          {t("accountGroup.selectGroup") || "انتخاب گروه حساب"}
+          {t("accountGroup.selectGroup")}
         </DropdownMenuLabel>
 
-        {accountGroups.map((group) => {
-          const Icon = group.icon
-            ? ICON_MAP[group.icon] || Building2
-            : Building2;
-          return (
-            <DropdownMenuItem
-              key={group.id}
-              onClick={() => handleChange(group)}
-              className="gap-2 p-2"
-            >
-              <div
-                className="flex h-6 w-6 items-center justify-center rounded-md border bg-background"
-                style={group.color ? { borderColor: group.color } : undefined}
+        {isFetching && accountGroups.length === 0 ? (
+          <div className="flex items-center justify-center py-4 text-xs text-muted-foreground">
+            {t("common.loading")}
+          </div>
+        ) : (
+          accountGroups.map((group) => {
+            const Icon = group.icon
+              ? ICON_MAP[group.icon] || Building2
+              : Building2;
+            return (
+              <DropdownMenuItem
+                key={group.id}
+                onClick={() => handleChange(group)}
+                className="gap-2 p-2"
               >
-                <Icon
-                  className="h-3.5 w-3.5"
-                  style={group.color ? { color: group.color } : undefined}
-                />
-              </div>
-              <div className="flex flex-col flex-1">
-                <span className="text-sm">{group.title}</span>
-                <span className="text-xs text-muted-foreground">
-                  {group.accountCount} {t("common.account") || "حساب"}
-                </span>
-              </div>
-            </DropdownMenuItem>
-          );
-        })}
+                <div
+                  className="flex h-6 w-6 items-center justify-center rounded-md border bg-background"
+                  style={group.color ? { borderColor: group.color } : undefined}
+                >
+                  <Icon
+                    className="h-3.5 w-3.5"
+                    style={group.color ? { color: group.color } : undefined}
+                  />
+                </div>
+                <div className="flex flex-col flex-1">
+                  <span className="text-sm">{group.title}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {group.accountCount} {t("common.account")}
+                  </span>
+                </div>
+              </DropdownMenuItem>
+            );
+          })
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

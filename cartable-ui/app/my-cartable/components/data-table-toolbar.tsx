@@ -7,7 +7,10 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
-import { getAccountsSelectData, AccountSelectData } from "@/services/accountService";
+import {
+  getAccountsSelectData,
+  AccountSelectData,
+} from "@/services/accountService";
 import useTranslation from "@/hooks/useTranslation";
 
 interface DataTableToolbarProps<TData> {
@@ -58,7 +61,7 @@ export function DataTableToolbar<TData>({
           onChange={(event) =>
             table.getColumn("orderNumber")?.setFilterValue(event.target.value)
           }
-          className="h-9 w-[150px] lg:w-[250px]"
+          className="h-9 w-37.5 lg:w-62.5"
         />
         {table.getColumn("accountTitle") && accountOptions.length > 0 && (
           <DataTableFacetedFilter

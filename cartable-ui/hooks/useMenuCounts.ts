@@ -55,7 +55,7 @@ export function useMenuCounts(
     try {
       setIsLoading(true);
       setError(null);
-      const data = await getMenuCounts(session.accessToken);
+      const data = await getMenuCounts();
       setCounts(data);
     } catch (err) {
       logger.error(

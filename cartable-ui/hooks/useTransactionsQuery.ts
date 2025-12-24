@@ -65,33 +65,19 @@ export function useTransactionsQuery({
   enabled = true,
 }: UseTransactionsQueryOptions): UseTransactionsQueryReturn {
   const { data: session } = useSession();
-  const groupId = useAccountGroupStore((s) => s.groupId);
+  const selectedGroup = useAccountGroupStore((s) => s.selectedGroup);
 
-  // خواندن accountGroupId از localStorage
-  const [savedGroupId, setSavedGroupId] = useState<string | null | undefined>(
-    undefined
-  );
-  const [isGroupIdLoaded, setIsGroupIdLoaded] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("selected-account-group");
-      setSavedGroupId(stored);
-      setIsGroupIdLoaded(true);
-    }
-  }, [groupId]);
-
-  // ادغام accountGroupId از localStorage با filterParams
+  // ادغام accountGroupId از store با filterParams
   const finalParams = useMemo(() => {
     const params = { ...filterParams };
 
-    // افزودن accountGroupId از localStorage اگر وجود داشته باشد
-    if (savedGroupId && savedGroupId !== "all" && !params.accountGroupId) {
-      params.accountGroupId = savedGroupId;
+    // افزودن accountGroupId از store اگر وجود داشته باشد
+    if (selectedGroup?.id && selectedGroup.id !== "all" && !params.accountGroupId) {
+      params.accountGroupId = selectedGroup.id;
     }
 
     return params;
-  }, [filterParams, savedGroupId]);
+  }, [filterParams, selectedGroup]);
 
   // استفاده از React Query
   const {
@@ -109,23 +95,14 @@ export function useTransactionsQuery({
         throw new Error("No access token available");
       }
 
-      return await getTransactionsList(finalParams, session.accessToken);
+      return await getTransactionsList(finalParams);
     },
 
-    // query فقط زمانی فعال است که accessToken موجود، enabled=true و groupId از localStorage خوانده شده باشد
-    enabled: enabled && !!session?.accessToken && isGroupIdLoaded,
+    // query فقط زمانی فعال است که accessToken موجود و enabled=true باشد
+    enabled: enabled && !!session?.accessToken,
 
     // اگر mount شد refetch نکند (در صورت داشتن cache)
     refetchOnMount: true,
-
-    // اگر window focus شد refetch نکند (بهینه برای PWA)
-    refetchOnWindowFocus: false,
-
-    // داده‌های تراکنش‌ها بعد از 30 ثانیه قدیمی می‌شوند
-    staleTime: 30 * 1000,
-
-    // کش را برای 5 دقیقه نگه‌داری کن
-    gcTime: 5 * 60 * 1000,
   });
 
   // تابع reload داده‌ها

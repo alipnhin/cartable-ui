@@ -15,13 +15,10 @@ import {
 
 /**
  * واکشی لیست درخواست‌های در انتظار تائید امضادار
- * @param params پارامترهای فیلتر و صفحه‌بندی
- * @param accessToken توکن دسترسی کاربر
- * @returns لیست دستورات پرداخت به صورت صفحه‌بندی شده
+ * @param params پارامترهای فیلتر و صفحه‌بندی * @returns لیست دستورات پرداخت به صورت صفحه‌بندی شده
  */
 export const getApproverCartable = async (
-  params: CartableFilterParams,
-  accessToken: string
+  params: CartableFilterParams
 ): Promise<PaymentListResponse> => {
   const {
     pageNumber = 1,
@@ -43,12 +40,7 @@ export const getApproverCartable = async (
 
   const response = await apiClient.post<PaymentListResponse>(
     `/Cartable/approver-cartable`,
-    requestBody,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
+    requestBody
   );
 
   return response.data;
@@ -56,66 +48,42 @@ export const getApproverCartable = async (
 
 /**
  * ارسال کد OTP برای عملیات تکی (تایید یا رد)
- * @param request درخواست شامل شناسه و نوع عملیات
- * @param accessToken توکن دسترسی کاربر
- * @returns پیام موفقیت
+ * @param request درخواست شامل شناسه و نوع عملیات * @returns پیام موفقیت
  */
 export const sendOperationOtp = async (
-  request: SendOperationOtpRequest,
-  accessToken: string
+  request: SendOperationOtpRequest
 ): Promise<string> => {
-  const response = await apiClient.post<string>(`/Cartable/send-otp`, request, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const response = await apiClient.post<string>(`/Cartable/send-otp`, request);
 
   return response.data;
 };
 
 /**
  * تایید یا رد تکی دستور پرداخت
- * @param request درخواست شامل شناسه، نوع عملیات و کد OTP
- * @param accessToken توکن دسترسی کاربر
- * @returns پیام موفقیت
+ * @param request درخواست شامل شناسه، نوع عملیات و کد OTP * @returns پیام موفقیت
  *
  * توجه: این عملیات ممکن است تا 60 ثانیه زمان ببرد (بسته به سرعت بانک)
  */
 export const approvePayment = async (
-  request: ApproveRequest,
-  accessToken: string
+  request: ApproveRequest
 ): Promise<string> => {
   const response = await apiClient.post<string>(`/Cartable/approve`, request, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
     timeout: 60000, // 60 ثانیه برای عملیات بانکی کند
-    "axios-retry": {
-      retries: 0, // غیرفعال کردن retry برای جلوگیری از ارسال مجدد
-    },
-  } as any);
+  });
 
   return response.data;
 };
 
 /**
  * ارسال کد OTP برای عملیات گروهی (تایید یا رد)
- * @param request درخواست شامل لیست شناسه‌ها و نوع عملیات
- * @param accessToken توکن دسترسی کاربر
- * @returns پیام موفقیت
+ * @param request درخواست شامل لیست شناسه‌ها و نوع عملیات * @returns پیام موفقیت
  */
 export const sendBatchOperationOtp = async (
-  request: SendBatchOperationOtpRequest,
-  accessToken: string
+  request: SendBatchOperationOtpRequest
 ): Promise<string> => {
   const response = await apiClient.post<string>(
     `/Cartable/send-batch-otp`,
-    request,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
+    request
   );
 
   return response.data;
@@ -123,29 +91,20 @@ export const sendBatchOperationOtp = async (
 
 /**
  * تایید یا رد گروهی دستورات پرداخت
- * @param request درخواست شامل لیست شناسه‌ها، نوع عملیات و کد OTP
- * @param accessToken توکن دسترسی کاربر
- * @returns پیام موفقیت
+ * @param request درخواست شامل لیست شناسه‌ها، نوع عملیات و کد OTP * @returns پیام موفقیت
  *
  * توجه: این عملیات ممکن است برای هر دستور تا 40 ثانیه زمان ببرد
  * برای 10 دستور: حدود 400 ثانیه (6-7 دقیقه)
  */
 export const batchApprovePayments = async (
-  request: BatchApproveRequest,
-  accessToken: string
+  request: BatchApproveRequest
 ): Promise<string> => {
   const response = await apiClient.post<string>(
     `/Cartable/batch-approve`,
     request,
     {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
       timeout: 420000, // 7 دقیقه (420 ثانیه) برای عملیات گروهی
-      "axios-retry": {
-        retries: 0, // غیرفعال کردن retry برای جلوگیری از ارسال مجدد
-      },
-    } as any
+    }
   );
 
   return response.data;

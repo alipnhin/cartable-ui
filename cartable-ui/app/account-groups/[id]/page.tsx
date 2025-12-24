@@ -82,8 +82,8 @@ export default function AccountGroupDetailPage() {
 
     try {
       const [groupData, accountsData] = await Promise.all([
-        getAccountGroupById(groupId, session.accessToken),
-        getAccountsList(session.accessToken),
+        getAccountGroupById(groupId),
+        getAccountsList(),
       ]);
       setGroup(groupData);
       setAllAccounts(accountsData);
@@ -110,7 +110,7 @@ export default function AccountGroupDetailPage() {
 
     setIsUpdating(true);
     try {
-      await removeGroupAccount(accountToRemove.id, session.accessToken);
+      await removeGroupAccount(accountToRemove.id);
       toast({
         title: t("toast.success"),
         description: "حساب با موفقیت از گروه حذف شد",

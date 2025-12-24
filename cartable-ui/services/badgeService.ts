@@ -8,9 +8,7 @@ import { MenuCountsResponse } from "@/types/api";
 
 /**
  * دریافت تعداد آیتم‌های منو برای نمایش Badge
- *
- * @param accessToken توکن دسترسی کاربر
- * @returns تعداد آیتم‌های هر منو
+ * * @returns تعداد آیتم‌های هر منو
  *
  * @example
  * const counts = await getMenuCounts(token);
@@ -18,17 +16,10 @@ import { MenuCountsResponse } from "@/types/api";
  * console.log(counts.managerCartableCount); // 3
  * console.log(counts.openPaymentOrdersCount); // 5
  */
-export const getMenuCounts = async (
-  accessToken: string
-): Promise<MenuCountsResponse> => {
+export const getMenuCounts = async (): Promise<MenuCountsResponse> => {
   // TODO: کامنت زیر را بردارید وقتی backend آماده شد
   // const response = await apiClient.get<MenuCountsResponse>(
-  //   `/v1/Badge/MenuCounts`,
-  //   {
-  //     headers: {
-  //       Authorization: `Bearer ${accessToken}`,
-  //     },
-  //   }
+  //   `/v1/Badge/MenuCounts`
   // );
   // return response.data;
 

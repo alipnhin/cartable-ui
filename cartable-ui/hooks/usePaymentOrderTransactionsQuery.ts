@@ -59,7 +59,9 @@ export interface TransactionsResponse {
  * const { items, totalPageCount, totalItemCount } = data;
  * ```
  */
-export function usePaymentOrderTransactionsQuery(params: UseTransactionsParams) {
+export function usePaymentOrderTransactionsQuery(
+  params: UseTransactionsParams
+) {
   const { data: session } = useSession();
 
   const {
@@ -90,23 +92,12 @@ export function usePaymentOrderTransactionsQuery(params: UseTransactionsParams) 
         ...filters,
       };
 
-      return await getWithdrawalTransactions(
-        requestParams,
-        session.accessToken
-      );
+      return await getWithdrawalTransactions(requestParams);
     },
 
     // فقط زمانی که session موجود باشد اجرا شود
     enabled: !!session?.accessToken && !!withdrawalOrderId,
 
-    // زمان اعتبار cache (30 ثانیه)
-    staleTime: 30 * 1000,
-
-    // زمان نگهداری در cache (5 دقیقه)
-    gcTime: 5 * 60 * 1000,
-
-    // عدم refetch خودکار
-    refetchOnWindowFocus: false,
     refetchOnMount: true,
     refetchOnReconnect: true,
 

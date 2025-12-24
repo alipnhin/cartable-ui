@@ -28,16 +28,20 @@ import {
 } from "@/hooks/useDashboardQuery";
 import { PageTitle } from "@/components/common/page-title";
 import { useRegisterRefresh } from "@/contexts/pull-to-refresh-context";
+import { useAccountGroupStore } from "@/store/account-group-store";
 
 export default function DashboardPage() {
   const { t } = useTranslation();
+
+  // چک کردن آمادگی گروه حساب
+  const isAccountGroupReady = useAccountGroupStore((s) => s.isHydrated);
 
   // مدیریت فیلترها
   const [filters, setFilters] = useState<DashboardFilterParams>(
     getDefaultDashboardFilters()
   );
 
-  // استفاده از React Query hook
+  // استفاده از React Query hook - فقط وقتی گروه حساب آماده است
   const {
     data: dashboardData,
     isLoading,
@@ -45,6 +49,7 @@ export default function DashboardPage() {
     refetch,
   } = useDashboardQuery({
     filters,
+    enabled: isAccountGroupReady, // 👈 منتظر آمادگی گروه حساب
   });
 
   // ثبت refetch برای Pull-to-Refresh
@@ -60,7 +65,8 @@ export default function DashboardPage() {
   };
 
   // Show skeleton during loading (both initial and filter changes)
-  if (isLoading) {
+  // یا در حال انتظار برای آمادگی گروه حساب
+  if (isLoading || !isAccountGroupReady) {
     return (
       <AppLayout>
         <PageHeader

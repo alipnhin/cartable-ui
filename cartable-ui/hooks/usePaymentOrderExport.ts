@@ -78,7 +78,6 @@ export function usePaymentOrderExport(): UsePaymentOrderExportReturn {
 
         const blob = await exportOrderTransactionsToExcel(
           orderId,
-          session.accessToken,
           abortControllerRef.current.signal // Pass abort signal
         );
 

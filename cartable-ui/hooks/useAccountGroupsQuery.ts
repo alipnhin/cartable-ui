@@ -63,14 +63,11 @@ export function useAccountGroupsQuery({
         throw new Error("No access token available");
       }
 
-      return await filterAccountGroups(filterParams, session.accessToken);
+      return await filterAccountGroups(filterParams);
     },
 
     enabled: enabled && !!session?.accessToken,
     refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    staleTime: 60 * 1000, // 1 دقیقه
-    gcTime: 10 * 60 * 1000, // 10 دقیقه
   });
 
   const refetch = async () => {
@@ -99,7 +96,7 @@ export function useAccountGroupMutations() {
       if (!session?.accessToken) {
         throw new Error("No access token available");
       }
-      return await createAccountGroup(params, session.accessToken);
+      return await createAccountGroup(params);
     },
     onSuccess: () => {
       // Invalidate کردن تمام queries مربوط به account groups
@@ -115,7 +112,7 @@ export function useAccountGroupMutations() {
       if (!session?.accessToken) {
         throw new Error("No access token available");
       }
-      return await editAccountGroup(params, session.accessToken);
+      return await editAccountGroup(params);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -130,7 +127,7 @@ export function useAccountGroupMutations() {
       if (!session?.accessToken) {
         throw new Error("No access token available");
       }
-      return await deleteAccountGroup(id, session.accessToken);
+      return await deleteAccountGroup(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -145,7 +142,7 @@ export function useAccountGroupMutations() {
       if (!session?.accessToken) {
         throw new Error("No access token available");
       }
-      return await changeAccountGroupStatus(params, session.accessToken);
+      return await changeAccountGroupStatus(params);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

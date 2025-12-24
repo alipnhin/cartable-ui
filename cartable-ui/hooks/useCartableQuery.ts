@@ -8,11 +8,14 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { getApproverCartable } from "@/services/cartableService";
 import { getManagerCartable } from "@/services/managerCartableService";
 import { mapPaymentListDtosToPaymentOrders } from "@/lib/api-mappers";
-import { useAccountGroupStore } from "@/store/account-group-store";
+import {
+  useAccountGroupStore,
+  useAccountGroupStoreHydration,
+} from "@/store/account-group-store";
 import type { CartableFilterParams, PaymentListResponse } from "@/types/api";
 import type { PaymentOrder } from "@/types/order";
 import { queryKeys } from "@/lib/react-query";
@@ -21,8 +24,7 @@ import { queryKeys } from "@/lib/react-query";
  * نوع API function برای fetch کردن داده‌ها
  */
 type CartableFetchFunction = (
-  params: CartableFilterParams,
-  accessToken: string
+  params: CartableFilterParams
 ) => Promise<PaymentListResponse>;
 
 interface UseCartableQueryOptions {
@@ -102,37 +104,24 @@ export function useCartableQuery({
   cartableType,
 }: UseCartableQueryOptions): UseCartableQueryReturn {
   const { data: session } = useSession();
-  const groupId = useAccountGroupStore((s) => s.groupId);
+  const selectedGroup = useAccountGroupStore((s) => s.selectedGroup);
+  const isHydrated = useAccountGroupStoreHydration();
 
   // مدیریت pagination در state
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
-
-  // خواندن groupId از localStorage برای همگام‌سازی
-  const [savedGroupId, setSavedGroupId] = useState<string | null | undefined>(
-    undefined
-  );
-  const [isGroupIdLoaded, setIsGroupIdLoaded] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("selected-account-group");
-      setSavedGroupId(stored);
-      setIsGroupIdLoaded(true);
-    }
-  }, [groupId]);
 
   // ساخت پارامترهای query
   const queryParams: CartableFilterParams = {
     pageNumber,
     pageSize,
     orderBy: "createdDateTime",
-    accountGroupId: savedGroupId || undefined,
+    accountGroupId: selectedGroup?.id || undefined,
   };
 
   // استفاده از React Query
   const {
-    data: response,
+    data: apiResponse,
     isLoading,
     error,
     refetch,
@@ -148,35 +137,29 @@ export function useCartableQuery({
       if (!session?.accessToken) {
         throw new Error("No access token available");
       }
-
-      return await fetchFunction(queryParams, session.accessToken);
+      return await fetchFunction(queryParams);
     },
 
-    // query فقط زمانی فعال است که accessToken موجود باشد و groupId از localStorage خوانده شده باشد
-    enabled: !!session?.accessToken && isGroupIdLoaded,
+    // query فقط زمانی فعال است که:
+    // 1. accessToken موجود باشد
+    // 2. store hydrate شده باشد
+    enabled: !!session?.accessToken && isHydrated,
 
-    // اگر mount شد refetch نکند (در صورت داشتن cache)
-    refetchOnMount: true,
-
-    // اگر window focus شد refetch نکند
-    refetchOnWindowFocus: false,
-
-    // داده‌های کارتابل بعد از 30 ثانیه قدیمی می‌شوند
-    staleTime: 30 * 1000,
-
-    // کش را برای 5 دقیقه نگه‌داری کن
-    gcTime: 5 * 60 * 1000,
+    // Global settings: staleTime: 0, gcTime: 0, refetchOnMount: true, refetchOnWindowFocus: true
   });
-
-  // Map کردن response به PaymentOrder[]
-  const orders: PaymentOrder[] = response?.items
-    ? mapPaymentListDtosToPaymentOrders(response.items)
-    : [];
 
   // تابع reload داده‌ها
   const reloadData = async () => {
     await refetch();
   };
+
+  // استخراج داده‌ها و map کردن
+  const orders = apiResponse?.items
+    ? mapPaymentListDtosToPaymentOrders(apiResponse.items)
+    : [];
+
+  const totalItems = apiResponse?.totalItemCount || 0;
+  const totalPages = Math.ceil(totalItems / pageSize);
 
   return {
     orders,
@@ -184,8 +167,8 @@ export function useCartableQuery({
     error,
     pageNumber,
     pageSize,
-    totalItems: response?.totalItemCount || 0,
-    totalPages: response?.totalPageCount || 0,
+    totalItems,
+    totalPages,
     setPageNumber,
     setPageSize,
     reloadData,

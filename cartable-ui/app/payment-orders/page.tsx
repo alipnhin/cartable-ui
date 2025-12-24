@@ -28,7 +28,8 @@ export default function PaymentOrdersPage() {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const router = useRouter();
-  const groupId = useAccountGroupStore((s) => s.groupId);
+  const groupId = useAccountGroupStore((s) => s.selectedGroup?.id);
+  const isAccountGroupReady = useAccountGroupStore((s) => s.isHydrated);
 
   /**
    * State برای pagination
@@ -75,20 +76,6 @@ export default function PaymentOrdersPage() {
     ]
   );
 
-  // خواندن accountGroupId از localStorage
-  const [savedGroupId, setSavedGroupId] = useState<string | null | undefined>(
-    undefined
-  );
-  const [isGroupIdLoaded, setIsGroupIdLoaded] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("selected-account-group");
-      setSavedGroupId(stored);
-      setIsGroupIdLoaded(true);
-    }
-  }, [groupId]);
-
   // ساخت پارامترهای API
   const apiFilters = useMemo(() => {
     const params: any = {
@@ -96,9 +83,9 @@ export default function PaymentOrdersPage() {
       pageSize,
     };
 
-    // اضافه کردن accountGroupId
-    if (savedGroupId && savedGroupId !== "all") {
-      params.accountGroupId = savedGroupId;
+    // اضافه کردن accountGroupId از store
+    if (groupId && groupId !== "all") {
+      params.accountGroupId = groupId;
     }
 
     // اضافه کردن sorting
@@ -141,7 +128,7 @@ export default function PaymentOrdersPage() {
   }, [
     pageNumber,
     pageSize,
-    savedGroupId,
+    groupId,
     sorting,
     trackingId,
     orderNumber,
@@ -153,6 +140,7 @@ export default function PaymentOrdersPage() {
   ]);
 
   // استفاده از React Query hook
+  // enabled خودش داخل hook چک میشه، پس نیازی به enabled اضافی نیست
   const {
     orders,
     isLoading,
@@ -162,7 +150,6 @@ export default function PaymentOrdersPage() {
     refetch,
   } = usePaymentOrdersQuery({
     filterParams: apiFilters,
-    enabled: isGroupIdLoaded,
   });
 
   // ثبت refetch برای Pull-to-Refresh

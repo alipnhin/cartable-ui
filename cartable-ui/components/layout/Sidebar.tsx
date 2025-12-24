@@ -32,15 +32,11 @@ import { toAbsoluteUrl } from "@/lib/helpers";
 interface SidebarProps {
   isCollapsed: boolean;
   className?: string;
-  selectedAccountGroup?: string;
-  onAccountGroupChange?: (groupId: string) => void;
 }
 
 export function Sidebar({
   isCollapsed,
   className,
-  selectedAccountGroup,
-  onAccountGroupChange,
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -153,11 +149,7 @@ export function Sidebar({
         <div className="border-t p-3 space-y-3">
           {/* Account Group Switcher */}
           <div>
-            <AccountGroupSwitcher
-              value={selectedAccountGroup}
-              onChange={onAccountGroupChange}
-              className="w-full h-10"
-            />
+            <AccountGroupSwitcher className="w-full h-10" />
           </div>
 
           {/* App Info */}

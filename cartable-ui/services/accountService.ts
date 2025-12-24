@@ -95,7 +95,6 @@ export interface AddSignerParams {
  */
 export const getAccountsSelectData = async (
   params: AccountSelectParams,
-  accessToken: string,
   accountGroupId?: string
 ): Promise<AccountSelectResponse> => {
   let url = "/Accounts/AccountSelect";
@@ -109,11 +108,6 @@ export const getAccountsSelectData = async (
       searchTerm: params.searchTerm || "",
       pageSize: params.pageSize || 50,
       pageNum: params.pageNum || 1,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
     }
   );
 
@@ -124,7 +118,6 @@ export const getAccountsSelectData = async (
  * Get list of all accounts
  */
 export const getAccountsList = async (
-  accessToken: string,
   accountGroupId?: string
 ): Promise<AccountListItem[]> => {
   // ساخت query parameters
@@ -136,11 +129,7 @@ export const getAccountsList = async (
     url = `${url}?${queryParams.toString()}`;
   }
 
-  const response = await apiClient.get<AccountListItem[]>(url, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const response = await apiClient.get<AccountListItem[]>(url);
 
   return response.data;
 };
@@ -149,16 +138,10 @@ export const getAccountsList = async (
  * Get account details by ID
  */
 export const getAccountDetail = async (
-  id: string,
-  accessToken: string
+  id: string
 ): Promise<AccountDetailResponse> => {
   const response = await apiClient.get<AccountDetailResponse>(
-    `/Accounts/${id}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
+    `/Accounts/${id}`
   );
 
   return response.data;
@@ -168,16 +151,13 @@ export const getAccountDetail = async (
  * Change minimum signature count for an account
  */
 export const changeMinimumSignature = async (
-  params: ChangeMinimumSignatureParams,
-  accessToken: string
+  params: ChangeMinimumSignatureParams
 ): Promise<string> => {
   const response = await apiClient.post<string>(
     "/Accounts/change-minimum-signature",
     params,
     {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json-patch+json",
+      headers: {"Content-Type": "application/json-patch+json",
       },
     }
   );
@@ -189,16 +169,13 @@ export const changeMinimumSignature = async (
  * Add a new signer to an account
  */
 export const addSigner = async (
-  params: AddSignerParams,
-  accessToken: string
+  params: AddSignerParams
 ): Promise<string> => {
   const response = await apiClient.post<string>(
     "/Accounts/add-signer",
     params,
     {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json-patch+json",
+      headers: {"Content-Type": "application/json-patch+json",
       },
     }
   );
@@ -209,14 +186,8 @@ export const addSigner = async (
 /**
  * Get list of users for signer selection
  */
-export const getUsersList = async (
-  accessToken: string
-): Promise<UserSelectItem[]> => {
-  const response = await apiClient.get<UserSelectItem[]>("/Accounts/users", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+export const getUsersList = async (): Promise<UserSelectItem[]> => {
+  const response = await apiClient.get<UserSelectItem[]>("/Accounts/users");
 
   return response.data;
 };
@@ -225,17 +196,11 @@ export const getUsersList = async (
  * Disable a signer (request deactivation)
  */
 export const disableSigner = async (
-  signerId: string,
-  accessToken: string
+  signerId: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
     `/Accounts/signers/${signerId}/disable`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
+    {}
   );
 
   return response.data;
@@ -245,17 +210,11 @@ export const disableSigner = async (
  * Enable a signer (activate)
  */
 export const enableSigner = async (
-  signerId: string,
-  accessToken: string
+  signerId: string
 ): Promise<string> => {
   const response = await apiClient.post<string>(
     `/Accounts/signers/${signerId}/enable`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
+    {}
   );
 
   return response.data;

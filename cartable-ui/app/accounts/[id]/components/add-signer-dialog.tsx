@@ -58,7 +58,7 @@ export function AddSignerDialog({
 
       setIsLoadingUsers(true);
       try {
-        const data = await getUsersList(session.accessToken);
+        const data = await getUsersList();
         setUsers(data);
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -100,14 +100,11 @@ export function AddSignerDialog({
 
     setIsAdding(true);
     try {
-      await addSigner(
-        {
-          userId: selectedUser.id,
-          bankGatewayId: accountId,
-          fullName: `${selectedUser.firstName} ${selectedUser.lastName}`,
-        },
-        session.accessToken
-      );
+      await addSigner({
+        userId: selectedUser.id,
+        bankGatewayId: accountId,
+        fullName: `${selectedUser.firstName} ${selectedUser.lastName}`,
+      });
       toast({
         title: t("toast.success"),
         description: "امضادار با موفقیت اضافه شد",

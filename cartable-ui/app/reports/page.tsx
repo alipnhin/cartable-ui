@@ -201,10 +201,7 @@ export default function TransactionReportsPage() {
       };
 
       setExportStatus("downloading");
-      const blob = await exportTransactionsToExcel(
-        exportParams,
-        session.accessToken
-      );
+      const blob = await exportTransactionsToExcel(exportParams);
       const filename = `transactions-${
         new Date().toISOString().split("T")[0]
       }.xlsx`;

@@ -97,13 +97,10 @@ export function CreateEditGroupDialog({
     try {
       if (isEditMode && group) {
         // ویرایش
-        await editAccountGroup(
-          {
-            id: group.id,
-            ...formData,
-          },
-          session.accessToken
-        );
+        await editAccountGroup({
+          id: group.id,
+          ...formData,
+        });
         toast({
           title: t("toast.success"),
           description: "گروه با موفقیت ویرایش شد",
@@ -111,10 +108,7 @@ export function CreateEditGroupDialog({
         });
       } else {
         // ایجاد
-        const newGroupId = await createAccountGroup(
-          formData,
-          session.accessToken
-        );
+        const newGroupId = await createAccountGroup(formData);
         toast({
           title: t("toast.success"),
           description: "گروه با موفقیت ایجاد شد",

@@ -77,7 +77,7 @@ export const createColumns = (
       cell: ({ row }) => {
         const bankCode = getBankCodeFromIban(row.original.accountSheba);
         return (
-          <div className="flex items-center grow gap-2.5 min-w-[260px]">
+          <div className="flex items-center grow gap-2.5 min-w-65">
             {row.original.accountSheba && (
               <BankLogo bankCode={bankCode} size="md" />
             )}

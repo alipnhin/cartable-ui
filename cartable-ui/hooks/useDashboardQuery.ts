@@ -13,6 +13,7 @@ import type {
   DashboardFilterParams,
 } from "@/types/dashboard";
 import { queryKeys } from "@/lib/react-query";
+import { useAccountGroupStoreHydration } from "@/store/account-group-store";
 
 interface UseDashboardQueryOptions {
   filters: DashboardFilterParams;
@@ -42,6 +43,7 @@ export function useDashboardQuery({
   enabled = true,
 }: UseDashboardQueryOptions) {
   const { data: session } = useSession();
+  const isHydrated = useAccountGroupStoreHydration();
 
   return useQuery<TransactionProgressResponse, Error>({
     // کلید منحصر به فرد برای این query
@@ -53,25 +55,17 @@ export function useDashboardQuery({
         throw new Error("No access token available");
       }
 
-      return await getTransactionProgress(filters, session.accessToken);
+      return await getTransactionProgress(filters);
     },
 
     // query فقط زمانی فعال است که:
     // 1. enabled: true باشد
     // 2. accessToken موجود باشد
-    enabled: enabled && !!session?.accessToken,
+    // 3. store hydrate شده باشد
+    enabled: enabled && !!session?.accessToken && isHydrated,
 
-    // اگر mount شد refetch نکند (در صورت داشتن cache)
-    refetchOnMount: true,
-
-    // اگر window focus شد refetch نکند
-    refetchOnWindowFocus: false,
-
-    // داده‌های داشبورد بعد از 1 دقیقه قدیمی می‌شوند
-    staleTime: 60 * 1000,
-
-    // کش را برای 5 دقیقه نگه‌داری کن
-    gcTime: 5 * 60 * 1000,
+    // ⚠️ NO CACHE - سیستم مالی (از تنظیمات global استفاده می‌شود)
+    // Global settings: staleTime: 0, gcTime: 0, refetchOnMount: true, refetchOnWindowFocus: true
   });
 }
 

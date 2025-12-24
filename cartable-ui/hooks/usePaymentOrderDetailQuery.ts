@@ -10,10 +10,7 @@ import {
   getWithdrawalStatistics,
 } from "@/services/paymentOrdersService";
 import { queryKeys } from "@/lib/react-query";
-import type {
-  WithdrawalOrderDetails,
-  WithdrawalStatistics,
-} from "@/types/api";
+import type { WithdrawalOrderDetails, WithdrawalStatistics } from "@/types/api";
 
 /**
  * نوع داده‌های برگشتی از hook
@@ -60,8 +57,8 @@ export function usePaymentOrderDetailQuery(orderId: string) {
 
       // واکشی موازی برای بهبود performance
       const [orderDetails, statistics] = await Promise.all([
-        getWithdrawalOrderDetails(orderId, session.accessToken),
-        getWithdrawalStatistics(orderId, session.accessToken),
+        getWithdrawalOrderDetails(orderId),
+        getWithdrawalStatistics(orderId),
       ]);
 
       return {
@@ -73,14 +70,6 @@ export function usePaymentOrderDetailQuery(orderId: string) {
     // فقط زمانی که session موجود باشد اجرا شود
     enabled: !!session?.accessToken && !!orderId,
 
-    // زمان اعتبار cache (30 ثانیه)
-    staleTime: 30 * 1000,
-
-    // زمان نگهداری در cache (5 دقیقه)
-    gcTime: 5 * 60 * 1000,
-
-    // عدم refetch خودکار
-    refetchOnWindowFocus: false,
     refetchOnMount: true,
     refetchOnReconnect: true,
 

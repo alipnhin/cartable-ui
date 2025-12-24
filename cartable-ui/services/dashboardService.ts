@@ -5,8 +5,7 @@ import type {
 } from "@/types/dashboard";
 
 export const getTransactionProgress = async (
-  params: DashboardFilterParams,
-  accessToken: string
+  params: DashboardFilterParams
 ): Promise<TransactionProgressResponse> => {
   // اگر accountGroupId مقدار "all" داشته باشد، null ارسال می‌کنیم
   const accountGroupId =
@@ -21,11 +20,6 @@ export const getTransactionProgress = async (
       accountGroupId,
       fromDate: params.fromDate,
       toDate: params.toDate,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
     }
   );
 

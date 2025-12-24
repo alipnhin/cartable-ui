@@ -6,28 +6,34 @@
 import { QueryClient } from "@tanstack/react-query";
 
 /**
- * QueryClient با تنظیمات بهینه برای PWA
+ * QueryClient با تنظیمات ویژه برای سیستم مالی
  *
- * تنظیمات:
- * - staleTime: 30 ثانیه - داده‌ها بعد از این مدت قدیمی محسوب می‌شوند
- * - gcTime: 5 دقیقه - زمان نگهداری cache غیرفعال
- * - refetchOnWindowFocus: false - جلوگیری از fetch مجدد با focus کردن
- * - refetchOnReconnect: true - fetch مجدد بعد از قطعی اینترنت
- * - retry: false - از axios-retry استفاده می‌کنیم، پس React Query retry نمی‌کند
+ * ⚠️ تنظیمات امنیتی برای اپلیکیشن‌های مالی:
+ * - staleTime: 0 - داده‌ها فوراً قدیمی می‌شوند (NO CACHE)
+ * - gcTime: 0 - هیچ داده‌ای در cache نگهداری نمی‌شود
+ * - refetchOnWindowFocus: true - با focus کردن، داده‌ها refresh می‌شوند
+ * - refetchOnReconnect: true - با reconnect، داده‌ها refresh می‌شوند
+ * - refetchOnMount: true - با mount شدن، داده‌ها refresh می‌شوند
+ * - retry: false - از axios-retry استفاده می‌کنیم
+ *
+ * این تنظیمات تضمین می‌کند که همیشه آخرین داده‌ها از سرور دریافت شود.
  */
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // زمان اعتبار داده‌ها (30 ثانیه)
-      staleTime: 30 * 1000,
+      // ⚠️ CRITICAL: داده‌ها فوراً قدیمی می‌شوند - NO CACHE
+      staleTime: 0,
 
-      // زمان نگهداری در cache (5 دقیقه)
-      gcTime: 5 * 60 * 1000,
+      // ⚠️ CRITICAL: هیچ چیزی در cache نگهداری نشود
+      gcTime: 0,
 
-      // عدم refetch خودکار با focus
-      refetchOnWindowFocus: false,
+      // Refetch در هر mount
+      refetchOnMount: true,
 
-      // refetch بعد از reconnect
+      // Refetch وقتی window focus می‌شود (کاربر برگشته)
+      refetchOnWindowFocus: true,
+
+      // Refetch بعد از reconnect (اتصال اینترنت برقرار شد)
       refetchOnReconnect: true,
 
       // عدم retry (axios-retry این کار را انجام می‌دهد)

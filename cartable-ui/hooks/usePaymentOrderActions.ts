@@ -85,7 +85,7 @@ export function usePaymentOrderActions(orderId: string) {
       if (!session?.accessToken) {
         throw new Error("No access token available");
       }
-      return await inquiryOrderById(orderId, session.accessToken);
+      return await inquiryOrderById(orderId);
     },
     onSuccess: () => {
       // Invalidate جزئیات دستور و تراکنش‌ها
@@ -104,7 +104,7 @@ export function usePaymentOrderActions(orderId: string) {
       if (!session?.accessToken) {
         throw new Error("No access token available");
       }
-      return await inquiryTransactionById(transactionId, session.accessToken);
+      return await inquiryTransactionById(transactionId);
     },
     onSuccess: () => {
       // Invalidate فقط لیست تراکنش‌ها (نه کل جزئیات)
@@ -126,7 +126,7 @@ export function usePaymentOrderActions(orderId: string) {
       if (!session?.accessToken) {
         throw new Error("No access token available");
       }
-      return await sendToBank(orderId, session.accessToken);
+      return await sendToBank(orderId);
     },
     onSuccess: () => {
       // Invalidate کل جزئیات (چون وضعیت تغییر می‌کند)
@@ -145,7 +145,7 @@ export function usePaymentOrderActions(orderId: string) {
       if (!session?.accessToken) {
         throw new Error("No access token available");
       }
-      return await sendOperationOtp(params, session.accessToken);
+      return await sendOperationOtp(params);
     },
   });
 
@@ -158,7 +158,7 @@ export function usePaymentOrderActions(orderId: string) {
       if (!session?.accessToken) {
         throw new Error("No access token available");
       }
-      return await approvePayment(params, session.accessToken);
+      return await approvePayment(params);
     },
     onSuccess: () => {
       // Invalidate کل جزئیات (چون وضعیت تغییر می‌کند)

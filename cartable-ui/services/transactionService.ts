@@ -75,17 +75,11 @@ export interface TransactionsRequest {
  * Get paginated list of transactions
  */
 export const getTransactionsList = async (
-  request: TransactionsRequest,
-  accessToken: string
+  request: TransactionsRequest
 ): Promise<TransactionsResponse> => {
   const response = await apiClient.post<TransactionsResponse>(
     "/transaction/paged",
-    request,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
+    request
   );
   return response.data;
 };
@@ -95,13 +89,9 @@ export const getTransactionsList = async (
  * Returns a blob for file download
  */
 export const exportTransactionsToExcel = async (
-  request: TransactionsRequest,
-  accessToken: string
+  request: TransactionsRequest
 ): Promise<Blob> => {
   const response = await apiClient.post("/transaction/export", request, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
     responseType: "blob",
   });
   return response.data;
