@@ -4,6 +4,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import { isValidationError, extractErrorMessage } from "@/types/api-error";
+import { useAuthStore } from "@/store/auth.store";
 
 /* =========================
    Base Configuration
@@ -27,34 +28,14 @@ const isDev = process.env.NODE_ENV === "development";
 ========================= */
 
 let isRefreshing = false;
-let refreshPromise: Promise<boolean> | null = null;
-let resolveRefresh: ((value: boolean) => void) | null = null;
+let failedQueue: Array<{
+  resolve: (value: unknown) => void;
+  reject: (error: unknown) => void;
+}> = [];
 
-export const notifyTokenRefreshSuccess = () => {
-  if (resolveRefresh) {
-    resolveRefresh(true);
-    resolveRefresh = null;
-  }
-};
-
-export const notifyTokenRefreshFailed = () => {
-  if (resolveRefresh) {
-    resolveRefresh(false);
-    resolveRefresh = null;
-  }
-};
-
-type RefreshTokenCallback = () => Promise<void>;
-let refreshTokenCallback: RefreshTokenCallback | null = null;
-
-export const setRefreshTokenCallback = (callback: RefreshTokenCallback) => {
-  refreshTokenCallback = callback;
-};
-
-let logoutCallback: (() => void) | null = null;
-
-export const setLogoutCallback = (callback: () => void) => {
-  logoutCallback = callback;
+const processQueue = (error: AxiosError | null) => {
+  failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve(null)));
+  failedQueue = [];
 };
 
 /* =========================
@@ -67,8 +48,6 @@ const apiClient: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
-
-    // ❗ سرویس مالی → هیچ کشی مجاز نیست
     "Cache-Control": "no-cache, no-store, must-revalidate",
     Pragma: "no-cache",
     Expires: "0",
@@ -83,38 +62,30 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   config.timeout =
     config.method === "get" ? API_TIMEOUT_GET : API_TIMEOUT_DEFAULT;
 
-  // Authorization Header
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("access_token");
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  // 🔐 Authorization from store (SYNC)
+  const token = useAuthStore.getState().accessToken;
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
-  // X-Request-Id for tracing
+  // X-Request-Id
   if (config.headers) {
     config.headers["X-Request-Id"] = crypto.randomUUID();
   }
 
-  // Idempotency-Key for POST/PUT/PATCH
+  // Idempotency-Key
   const method = config.method?.toLowerCase();
-  if (
-    method &&
-    ["post", "put", "patch"].includes(method) &&
-    config.headers
-  ) {
+  if (method && ["post", "put", "patch"].includes(method) && config.headers) {
     config.headers["Idempotency-Key"] = crypto.randomUUID();
   }
 
-  // HTTPS guard in production
+  // HTTPS guard
   if (
     process.env.NODE_ENV === "production" &&
     config.baseURL &&
     !config.baseURL.startsWith("https://")
   ) {
-    throw new Error(
-      `[SECURITY] Non-HTTPS URL blocked in production: ${config.baseURL}`
-    );
+    throw new Error(`[SECURITY] Non-HTTPS URL blocked: ${config.baseURL}`);
   }
 
   return config;
@@ -124,23 +95,26 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
    Response Interceptor
 ========================= */
 
-apiClient.interceptors.response.use(
-  (response) => response,
+const MAX_RETRIES = 1;
 
+apiClient.interceptors.response.use(
+  (res) => res,
   async (error: AxiosError) => {
     const originalRequest = error.config as
-      | (InternalAxiosRequestConfig & { _retry?: boolean })
+      | (InternalAxiosRequestConfig & {
+          _retry?: boolean;
+          _retryCount?: number;
+        })
       | undefined;
 
-    /* ---------- Response exists ---------- */
+    if (originalRequest) {
+      originalRequest._retryCount ??= 0;
+    }
+
     if (error.response) {
       const { status, data } = error.response;
 
-      if (isDev) {
-        console.error(`API Error [${status}]`);
-      }
-
-      /* ---- 400 (Validation / Bad Request) ---- */
+      /* ---- 400 ---- */
       if (status === 400) {
         if (isValidationError(data)) {
           const parsed = extractErrorMessage(data);
@@ -151,89 +125,72 @@ apiClient.interceptors.response.use(
             clientMessage: parsed.message,
           });
         }
-
         return Promise.reject({
           ...error,
-          clientMessage: (data as any) ?? "درخواست نامعتبر است",
+          clientMessage: (data as any) ?? "درخواست نامعتبر",
         });
       }
 
-      /* ---- 401 Unauthorized ---- */
-      if (status === 401 && originalRequest && !originalRequest._retry) {
+      /* ---- 401 ---- */
+      if (
+        status === 401 &&
+        originalRequest &&
+        !originalRequest._retry &&
+        (originalRequest._retryCount ?? 0) < MAX_RETRIES &&
+        typeof window !== "undefined"
+      ) {
         originalRequest._retry = true;
+        originalRequest._retryCount = (originalRequest._retryCount ?? 0) + 1;
 
-        if (typeof window === "undefined") {
-          return Promise.reject(error);
-        }
-
-        if (isRefreshing && refreshPromise) {
-          return refreshPromise.then((success) =>
-            success ? apiClient(originalRequest) : Promise.reject(error)
-          );
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          }).then(() => apiClient(originalRequest));
         }
 
         isRefreshing = true;
+        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
 
-        refreshPromise = new Promise<boolean>((resolve) => {
-          resolveRefresh = resolve;
-        });
+        return new Promise((resolve, reject) => {
+          const cleanup = () => {
+            window.removeEventListener("auth:token-refreshed", onSuccess);
+            window.removeEventListener("auth:refresh-failed", onFail);
+          };
 
-        if (refreshTokenCallback) {
-          const timeoutId = setTimeout(() => {
+          const onSuccess = () => {
+            cleanup();
             isRefreshing = false;
-            refreshPromise = null;
-            if (resolveRefresh) {
-              resolveRefresh(false);
-              resolveRefresh = null;
-            }
-            logoutCallback?.();
-          }, 30000);
+            processQueue(null);
+            resolve(apiClient(originalRequest));
+          };
 
-          refreshTokenCallback()
-            .then(() => {
-              clearTimeout(timeoutId);
-              notifyTokenRefreshSuccess();
-            })
-            .catch(() => {
-              clearTimeout(timeoutId);
-              notifyTokenRefreshFailed();
-              logoutCallback?.();
-            });
-        } else {
-          isRefreshing = false;
-          refreshPromise = null;
-          if (resolveRefresh) {
-            resolveRefresh(false);
-            resolveRefresh = null;
-          }
-          logoutCallback?.();
-        }
+          const onFail = () => {
+            cleanup();
+            isRefreshing = false;
+            processQueue(error);
+            reject(error);
+          };
 
-        return (refreshPromise ?? Promise.resolve(false)).then((success) =>
-          success ? apiClient(originalRequest) : Promise.reject(error)
-        );
+          window.addEventListener("auth:token-refreshed", onSuccess, {
+            once: true,
+          });
+          window.addEventListener("auth:refresh-failed", onFail, {
+            once: true,
+          });
+
+          setTimeout(onFail, 30000);
+        });
       }
 
-      /* ---- Other HTTP errors ---- */
       return Promise.reject({
         ...error,
         clientMessage: (data as any)?.message ?? `خطای سرور (${status})`,
       });
     }
 
-    /* ---------- No response ---------- */
-    if (error.request) {
-      return Promise.reject({
-        ...error,
-        clientMessage:
-          "ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید.",
-      });
-    }
-
-    /* ---------- Setup error ---------- */
     return Promise.reject({
       ...error,
-      clientMessage: "خطا در ارسال درخواست",
+      clientMessage: "ارتباط با سرور برقرار نشد",
     });
   }
 );

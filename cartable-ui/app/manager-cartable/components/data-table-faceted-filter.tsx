@@ -75,7 +75,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                         key={option.value}
                         className="rounded-sm px-1 font-normal"
                       >
-                        {t(`${option.label}`)}
+                        {option.label}
                       </Badge>
                     ))
                 )}

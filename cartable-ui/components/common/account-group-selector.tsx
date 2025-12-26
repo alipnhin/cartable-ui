@@ -9,8 +9,7 @@
  */
 
 "use client";
-import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
   DropdownMenu,
@@ -103,20 +102,18 @@ export function AccountGroupSwitcher({
 }: AccountGroupSwitcherProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const router = useRouter();
 
   // Store state
   const selectedGroup = useAccountGroupStore((s) => s.selectedGroup);
   const setSelectedGroup = useAccountGroupStore((s) => s.setSelectedGroup);
+  const accountGroups = useAccountGroupStore((s) => s.accountGroups);
+  const setAccountGroups = useAccountGroupStore((s) => s.setAccountGroups);
   const setUserId = useAccountGroupStore((s) => s.setUserId);
   const refreshKey = useAccountGroupStore((s) => s.refreshKey);
   const isHydrated = useAccountGroupStoreHydration();
 
   // Local state
-  const [accountGroups, setAccountGroups] = useState<AccountGroup[]>([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
-  const hasInitializedRef = useRef(false);
 
   // Set userId when session changes
   useEffect(() => {
@@ -126,26 +123,27 @@ export function AccountGroupSwitcher({
     }
   }, [session, setUserId]);
 
-  // Fetch account groups
+  // Fetch account groups - فقط اگر لیست خالی باشه یا refreshKey تغییر کنه
   useEffect(() => {
-    if (!session?.accessToken || !isHydrated) {
+    if (!session?.accessToken || !isHydrated || isFetching) {
+      return;
+    }
+
+    // فقط اگر لیست گروه‌ها خالی باشه یا refresh شده باشه، fetch کن
+    const shouldFetch = accountGroups.length === 0 || refreshKey > 0;
+
+    if (!shouldFetch) {
       return;
     }
 
     const fetchAccountGroups = async () => {
-      const shouldFetch =
-        isDropdownOpen || (!hasInitializedRef.current && !selectedGroup);
-
-      if (!shouldFetch || isFetching) {
-        return;
-      }
-
       try {
         setIsFetching(true);
         const groups = await getAccountGroups();
         setAccountGroups(groups);
 
-        if (!hasInitializedRef.current && !selectedGroup) {
+        // فقط اگر selectedGroup نداریم، گروه پیش‌فرض رو انتخاب کن
+        if (!selectedGroup) {
           let groupToSelect: AccountGroup | undefined;
 
           if (value) {
@@ -160,8 +158,6 @@ export function AccountGroupSwitcher({
             setSelectedGroup(groupToSelect);
             onChange?.(groupToSelect.id);
           }
-
-          hasInitializedRef.current = true;
         }
       } catch (error) {
         logger.error(
@@ -174,27 +170,18 @@ export function AccountGroupSwitcher({
     };
 
     fetchAccountGroups();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     session?.accessToken,
-    isDropdownOpen,
     refreshKey,
     isHydrated,
-    selectedGroup,
-    value,
-    onChange,
-    isFetching,
-    setSelectedGroup,
   ]);
-
-  // Reset initialization when user changes
-  useEffect(() => {
-    hasInitializedRef.current = false;
-  }, [session?.user?.id]);
 
   const handleChange = (group: AccountGroup) => {
     setSelectedGroup(group);
     onChange?.(group.id);
-    router.refresh();
+    // router.refresh() حذف شد - نیازی به refresh کردن صفحه نیست
+    // چون store به‌روزرسانی میشه و کامپوننت‌های وابسته خودشون re-render میشن
   };
 
   if (!isHydrated || !selectedGroup) {
@@ -218,7 +205,7 @@ export function AccountGroupSwitcher({
 
   if (compact) {
     return (
-      <DropdownMenu onOpenChange={setIsDropdownOpen}>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="h-9 px-3 gap-2 max-w-62.5">
             <GroupIcon className="h-4 w-4 shrink-0" />
@@ -277,7 +264,7 @@ export function AccountGroupSwitcher({
   }
 
   return (
-    <DropdownMenu onOpenChange={setIsDropdownOpen}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"

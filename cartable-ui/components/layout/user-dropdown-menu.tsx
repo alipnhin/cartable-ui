@@ -1,10 +1,9 @@
 "use client";
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { I18N_LANGUAGES, Language } from "@/i18n/config";
 import {
-  FileText,
   Globe,
   LogOut,
   Moon,
@@ -33,6 +32,7 @@ import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSession } from "next-auth/react";
 import { useColorTheme } from "@/providers/color-theme-provider";
+import { useUserProfile } from "@/providers/user-profile-provider";
 
 export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const { t } = useTranslation();
@@ -44,58 +44,9 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const { data: session } = useSession();
   const { colorTheme, colorThemeId, setColorTheme, availableThemes } =
     useColorTheme();
-  const [userInfo, setUserInfo] = useState<{
-    fullName: string;
-    email: string;
-    image: string;
-  } | null>(null);
 
-  // دریافت اطلاعات کامل کاربر
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      if (!session?.accessToken) return;
-
-      try {
-        const response = await fetch("/api/user/profile", {
-          method: "GET",
-          cache: "no-store",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUserInfo({
-            fullName:
-              data.given_name && data.family_name
-                ? `${data.given_name} ${data.family_name}`
-                : data.name || session?.user?.name || "کاربر",
-            email: data.email || session?.user?.email || "",
-            image:
-              data.picture ||
-              session?.user?.image ||
-              "/media/avatars/blank.png",
-          });
-        } else {
-          // Fallback به session
-          setUserInfo({
-            fullName: session?.user?.name || "کاربر",
-            email: session?.user?.email || "",
-            image: session?.user?.image || "/media/avatars/blank.png",
-          });
-        }
-      } catch (error) {
-        // Fallback به session
-        setUserInfo({
-          fullName: session?.user?.name || "کاربر",
-          email: session?.user?.email || "",
-          image: session?.user?.image || "/media/avatars/blank.png",
-        });
-      }
-    };
-
-    if (session) {
-      fetchUserInfo();
-    }
-  }, [session]);
+  // استفاده از context به جای fetch مستقیم
+  const { profile } = useUserProfile();
 
   const handleLanguage = (lang: Language) => {
     changeLanguage(lang.code);
@@ -106,10 +57,10 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
     router.push("/auth/logout");
   };
 
-  const userName = userInfo?.fullName || session?.user?.name || "کاربر";
-  const userEmail = userInfo?.email || session?.user?.email || "";
-  const userImage =
-    userInfo?.image || session?.user?.image || "/media/avatars/blank.png";
+  // استفاده از profile context با fallback به session
+  const userName = profile?.fullName || session?.user?.name || "کاربر";
+  const userEmail = profile?.email || session?.user?.email || "";
+  const userImage = profile?.image || session?.user?.image || "/media/avatars/blank.png";
 
   // Mobile Drawer Version
   if (isMobile) {

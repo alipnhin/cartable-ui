@@ -11,12 +11,14 @@ const OLD_STORAGE_KEYS = [
 interface AccountGroupState {
   // State
   selectedGroup: AccountGroup | null;
+  accountGroups: AccountGroup[]; // لیست تمام گروه‌ها
   refreshKey: number;
   isHydrated: boolean;
   userId: string | null;
 
   // Actions
   setSelectedGroup: (group: AccountGroup) => void;
+  setAccountGroups: (groups: AccountGroup[]) => void;
   setUserId: (userId: string | null) => void;
   triggerRefresh: () => void;
   clearStorage: () => void;
@@ -87,6 +89,7 @@ export const useAccountGroupStore = create<AccountGroupState>()(
     (set, get) => ({
       // Initial state
       selectedGroup: null,
+      accountGroups: [],
       refreshKey: 0,
       isHydrated: false,
       userId: null,
@@ -95,6 +98,12 @@ export const useAccountGroupStore = create<AccountGroupState>()(
       setSelectedGroup: (group) => {
         set({
           selectedGroup: group,
+        });
+      },
+
+      setAccountGroups: (groups) => {
+        set({
+          accountGroups: groups,
         });
       },
 
@@ -110,6 +119,7 @@ export const useAccountGroupStore = create<AccountGroupState>()(
           set({
             userId,
             selectedGroup: null,
+            accountGroups: [],
             refreshKey: 0,
           });
 
@@ -122,7 +132,10 @@ export const useAccountGroupStore = create<AccountGroupState>()(
               if (stored) {
                 const parsed = JSON.parse(stored);
                 if (parsed.state?.selectedGroup) {
-                  set({ selectedGroup: parsed.state.selectedGroup });
+                  set({
+                    selectedGroup: parsed.state.selectedGroup,
+                    accountGroups: parsed.state.accountGroups || [],
+                  });
                 }
               }
             } catch (error) {
@@ -144,6 +157,7 @@ export const useAccountGroupStore = create<AccountGroupState>()(
         }
         set({
           selectedGroup: null,
+          accountGroups: [],
           refreshKey: 0,
         });
       },
@@ -162,9 +176,10 @@ export const useAccountGroupStore = create<AccountGroupState>()(
         // پاک کردن کلیدهای قدیمی فقط یک بار، بعد از اولین hydration
         cleanupOldKeys();
       },
-      // فقط selectedGroup را persist کن، بقیه موقتی هستند
+      // selectedGroup و accountGroups را persist کن
       partialize: (state) => ({
         selectedGroup: state.selectedGroup,
+        accountGroups: state.accountGroups,
       }),
     }
   )

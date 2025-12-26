@@ -98,6 +98,7 @@ export const queryKeys = {
     all: ["accounts"] as const,
     list: (params: unknown) => ["accounts", "list", params] as const,
     detail: (id: string) => ["accounts", "detail", id] as const,
+    select: () => ["accounts", "select"] as const,
   },
 
   // User Profile

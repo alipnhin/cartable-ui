@@ -58,8 +58,7 @@ export default function AccountSelector({
 
       try {
         const response = await getAccountsSelectData(
-          { pageSize: 50, pageNum: 1 },
-          session.accessToken
+          { pageSize: 50, pageNum: 1 }
         );
         setAccounts(response.results);
       } catch (err) {
@@ -71,7 +70,7 @@ export default function AccountSelector({
     };
 
     fetchAccounts();
-  }, [session]);
+  }, [session?.accessToken]);
 
   if (loading) {
     return (

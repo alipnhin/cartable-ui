@@ -13,7 +13,10 @@ import type {
   DashboardFilterParams,
 } from "@/types/dashboard";
 import { queryKeys } from "@/lib/react-query";
-import { useAccountGroupStoreHydration } from "@/store/account-group-store";
+import {
+  useAccountGroupStore,
+  useAccountGroupStoreHydration,
+} from "@/store/account-group-store";
 
 interface UseDashboardQueryOptions {
   filters: DashboardFilterParams;
@@ -43,11 +46,18 @@ export function useDashboardQuery({
   enabled = true,
 }: UseDashboardQueryOptions) {
   const { data: session } = useSession();
+  const selectedGroup = useAccountGroupStore((s) => s.selectedGroup);
   const isHydrated = useAccountGroupStoreHydration();
 
+  // ترکیب فیلترها با گروه انتخابی از store
+  const queryParams: DashboardFilterParams = {
+    ...filters,
+    accountGroupId: selectedGroup?.id || undefined,
+  };
+
   return useQuery<TransactionProgressResponse, Error>({
-    // کلید منحصر به فرد برای این query
-    queryKey: queryKeys.dashboard.transactionProgress(filters),
+    // کلید منحصر به فرد برای این query - شامل accountGroupId
+    queryKey: queryKeys.dashboard.transactionProgress(queryParams),
 
     // تابع fetch کردن داده‌ها
     queryFn: async () => {
@@ -55,7 +65,7 @@ export function useDashboardQuery({
         throw new Error("No access token available");
       }
 
-      return await getTransactionProgress(filters);
+      return await getTransactionProgress(queryParams);
     },
 
     // query فقط زمانی فعال است که:

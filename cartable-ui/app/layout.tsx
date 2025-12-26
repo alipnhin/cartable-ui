@@ -17,7 +17,9 @@ import { NavigationProgressProvider } from "@/providers/navigation-progress-prov
 import { QueryProvider } from "@/components/providers/query-provider";
 import ErrorBoundary from "@/components/common/error-boundary";
 import { PullToRefreshProvider } from "@/contexts/pull-to-refresh-context";
+import { UserProfileProvider } from "@/providers/user-profile-provider";
 import localFont from "next/font/local";
+import { AuthBootstrap } from "@/components/auth/AuthBootstrap";
 
 const yekanBakh = localFont({
   src: [
@@ -137,24 +139,27 @@ export default function RootLayout({
         <PWAInstaller />
         <ErrorBoundary>
           <SessionProvider>
+            <AuthBootstrap />
             <UnauthorizedHandler />
             <QueryProvider>
-              <ThemeProvider>
-                <ColorThemeProvider>
-                  <I18nProvider>
-                    <TooltipsProvider>
-                      <DirectionProvider dir="rtl">
-                        <PullToRefreshProvider>
-                          <NavigationProgressProvider>
-                            {children}
-                          </NavigationProgressProvider>
-                        </PullToRefreshProvider>
-                        <Toaster />
-                      </DirectionProvider>
-                    </TooltipsProvider>
-                  </I18nProvider>
-                </ColorThemeProvider>
-              </ThemeProvider>
+              <UserProfileProvider>
+                <ThemeProvider>
+                  <ColorThemeProvider>
+                    <I18nProvider>
+                      <TooltipsProvider>
+                        <DirectionProvider dir="rtl">
+                          <PullToRefreshProvider>
+                            <NavigationProgressProvider>
+                              {children}
+                            </NavigationProgressProvider>
+                          </PullToRefreshProvider>
+                          <Toaster />
+                        </DirectionProvider>
+                      </TooltipsProvider>
+                    </I18nProvider>
+                  </ColorThemeProvider>
+                </ThemeProvider>
+              </UserProfileProvider>
             </QueryProvider>
           </SessionProvider>
         </ErrorBoundary>

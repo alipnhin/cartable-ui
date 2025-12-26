@@ -1,16 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
-import {
-  getAccountsSelectData,
-  AccountSelectData,
-} from "@/services/accountService";
+import { useAccountsSelectQuery } from "@/hooks/useAccountsSelectQuery";
 import useTranslation from "@/hooks/useTranslation";
 
 interface DataTableToolbarProps<TData> {
@@ -20,29 +15,9 @@ interface DataTableToolbarProps<TData> {
 export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
-  const { data: session } = useSession();
   const { t } = useTranslation();
-  const [accounts, setAccounts] = useState<AccountSelectData[]>([]);
+  const { accounts } = useAccountsSelectQuery();
   const isFiltered = table.getState().columnFilters.length > 0;
-
-  // Fetch accounts from API
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      if (!session?.accessToken) return;
-
-      try {
-        const response = await getAccountsSelectData(
-          { pageSize: 50, pageNum: 1 },
-          session.accessToken
-        );
-        setAccounts(response.results);
-      } catch (error) {
-        console.error("Error fetching accounts:", error);
-      }
-    };
-
-    fetchAccounts();
-  }, [session?.accessToken]);
 
   // Convert accounts to options format for faceted filter
   const accountOptions = accounts.map((account) => ({
