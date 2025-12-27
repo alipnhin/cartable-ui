@@ -36,7 +36,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   return (
     <html lang="fa" dir="rtl">
       <body>
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-red-50 to-gray-50 p-4">
+        <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-gray-50 via-red-50 to-gray-50 p-4">
           <div className="w-full max-w-2xl">
             {/* Icon و عنوان */}
             <div className="text-center">

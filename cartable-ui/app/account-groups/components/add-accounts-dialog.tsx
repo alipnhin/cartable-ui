@@ -148,7 +148,7 @@ export function AddAccountsDialog({
           افزودن حساب
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[650px] max-h-[85vh] flex flex-col">
+      <DialogContent className="sm:max-w-162.5 max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
@@ -194,7 +194,7 @@ export function AddAccountsDialog({
           </div>
 
           {/* لیست حساب‌ها */}
-          <div className="space-y-2 overflow-y-auto max-h-[450px] pe-2">
+          <div className="space-y-2 overflow-y-auto max-h-112.5 pe-2">
             {isLoadingAccounts ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="p-3 rounded-lg border">

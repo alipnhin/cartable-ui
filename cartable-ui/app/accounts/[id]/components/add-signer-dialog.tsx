@@ -146,7 +146,7 @@ export function AddSignerDialog({
           {t("accounts.addSigner") || "افزودن امضادار"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-125 max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
@@ -173,7 +173,7 @@ export function AddSignerDialog({
           </div>
 
           {/* لیست کاربران */}
-          <div className="space-y-2 overflow-y-auto max-h-[400px] pe-2">
+          <div className="space-y-2 overflow-y-auto max-h-100 pe-2">
             {isLoadingUsers ? (
               // Loading skeleton
               Array.from({ length: 3 }).map((_, i) => (
@@ -208,7 +208,7 @@ export function AddSignerDialog({
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 flex-shrink-0">
+                    <Avatar className="h-10 w-10 shrink-0">
                       <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                         {getInitials(user.firstName, user.lastName)}
                       </AvatarFallback>
@@ -220,7 +220,7 @@ export function AddSignerDialog({
                           {user.firstName} {user.lastName}
                         </h4>
                         {selected === user.id && (
-                          <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                          <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground truncate">

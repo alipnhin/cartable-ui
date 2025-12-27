@@ -257,7 +257,7 @@ export default function AccountDetailPage() {
       <>
         <FixHeader returnUrl="/accounts" />
         <div className="container mx-auto p-4 md:p-6 mt-14">
-          <div className="flex flex-col items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center justify-center min-h-100">
             <h2 className="text-2xl font-bold mb-2">
               {t("common.messages.notFound")}
             </h2>
@@ -328,12 +328,12 @@ export default function AccountDetailPage() {
                   </div>
                 </div>
                 {activeSignersCount < account.minimumSignature ? (
-                  <Badge variant="destructive" className="gap-1">
+                  <Badge variant="destructive" className="gap-1 py-3">
                     <XCircle className="h-3 w-3" />
                     امضاداران فعال کافی نیست
                   </Badge>
                 ) : (
-                  <Badge className="gap-1 bg-success hover:bg-success/90">
+                  <Badge className="gap-1 bg-success hover:bg-success/90 py-3">
                     <CheckCircle2 className="h-3 w-3" />
                     تعداد کافی است
                   </Badge>

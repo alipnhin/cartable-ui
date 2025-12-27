@@ -63,7 +63,7 @@ export function SignerCard({
   const getInitials = (fullName: string) => {
     const parts = fullName.split(" ");
     if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`;
+      return `${parts[0][0]} ${parts[1][0]}`;
     }
     return fullName.substring(0, 2);
   };

@@ -99,7 +99,7 @@ export function MinimumSignaturesForm({
 
   if (!isEditing) {
     return (
-      <Card className="p-4 bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
+      <Card className="p-4 bg-linear-to-br from-primary/5 to-transparent border-primary/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10">
@@ -121,7 +121,7 @@ export function MinimumSignaturesForm({
           </div>
           <Button
             variant="outline"
-            size="sm"
+            size="lg"
             onClick={handleStartEdit}
             className="gap-2"
             disabled={isLoading}
@@ -151,14 +151,14 @@ export function MinimumSignaturesForm({
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="md"
                   className="h-9 w-10 p-0"
                   onClick={handleDecrement}
                   disabled={value <= 1}
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
-                <div className="flex items-baseline gap-1 min-w-30 justify-center">
+                <div className="flex items-baseline gap-1 min-w-20 justify-center">
                   <span className="text-3xl font-bold text-primary">
                     {value}
                   </span>
@@ -168,7 +168,7 @@ export function MinimumSignaturesForm({
                 </div>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="md"
                   className="h-9 w-10 p-0"
                   onClick={handleIncrement}
                   disabled={value >= maxValue}
@@ -182,6 +182,7 @@ export function MinimumSignaturesForm({
           <div className="flex gap-2">
             <Button
               variant="outline"
+              className="min-w-24"
               size="md"
               onClick={handleCancel}
               disabled={isLoading}
@@ -189,10 +190,10 @@ export function MinimumSignaturesForm({
               {t("common.buttons.cancel") || "لغو"}
             </Button>
             <Button
-              size="sm"
+              size="md"
               onClick={handleSave}
               disabled={isLoading || value === currentValue}
-              className="gap-2"
+              className="gap-2 min-w-24"
             >
               {isLoading ? (
                 <>
@@ -208,7 +209,7 @@ export function MinimumSignaturesForm({
 
         {error && (
           <div className="flex items-start gap-2 text-destructive text-sm bg-destructive/10 p-3 rounded-lg mt-3">
-            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}

@@ -113,6 +113,8 @@
     --selection-foreground: #1E293B;
     --font-yekanbakh: var(--font-yekanbakh), sans-serif;
     --font-sans-latin: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    --home-bg-image: url('/media/tadbirpay-light.png');
+    --home-bg-color: #fdfdfd;
 }
 
 .dark {
@@ -155,6 +157,8 @@
     --code-number: #94A3B8;
     --selection: rgba(34, 211, 238, 0.3);
     --selection-foreground: #F0FDFF;
+    --home-bg-image: url('/media/tadbirpay-dark.png');
+    --home-bg-color: #010009;
 }
 
 @layer base {
@@ -265,7 +269,7 @@
 }
 
 @utility container {
-    @apply 3xl:max-w-screen-2xl mx-auto max-w-[1400px] px-4 lg:px-8;
+    @apply 3xl:max-w-screen-2xl mx-auto max-w-350 px-4 lg:px-8;
 }
 
 @utility no-scrollbar {
@@ -347,7 +351,7 @@
     } */
 
     .input {
-        @apply w-full px-4 py-3 border border-input rounded-md text-base bg-card text-foreground transition-all duration-150 outline-none hover:border-muted-foreground focus:border-primary focus:border-2 focus:px-[calc(1rem-1px)] focus:py-[calc(0.75rem-1px)] disabled:bg-muted disabled:cursor-not-allowed disabled:opacity-60;
+        @apply w-full px-4 py-3 border border-input rounded-md text-base bg-card text-foreground transition-all duration-150 outline-none hover:border-muted-foreground focus:border-primary focus:border-2 focus:px-3.75 focus:py-2.75 disabled:bg-muted disabled:cursor-not-allowed disabled:opacity-60;
         /* جلوگیری از auto-zoom در موبایل - حداقل font-size باید 16px باشد */
         font-size: max(16px, 1rem);
     }
