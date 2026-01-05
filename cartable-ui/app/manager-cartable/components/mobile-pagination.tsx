@@ -52,7 +52,7 @@ export function MobilePagination({
         ) : (
           <ChevronLeft className="h-4 w-4" />
         )}
-        <span className="ms-1">{t("pagination.previousPage")}</span>
+        <span className="ms-1">{t("common.pagination.previousPage")}</span>
       </Button>
 
       {/* Page Info */}
@@ -70,7 +70,7 @@ export function MobilePagination({
         disabled={!canGoNext}
         className="flex-1"
       >
-        <span className="me-1">{t("pagination.nextPage")}</span>
+        <span className="me-1">{t("common.pagination.nextPage")}</span>
         {isRTL ? (
           <ChevronLeft className="h-4 w-4" />
         ) : (

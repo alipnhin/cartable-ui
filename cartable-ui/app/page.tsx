@@ -54,7 +54,7 @@ export default function Home() {
           <div className="w-full max-w-xs">
             <Button
               size="lg"
-              className="text-lg w-full shadow-[0_0_30px_rgba(16,185,129,0.6),0_0_60px_rgba(16,185,129,0.3)] hover:shadow-[0_0_40px_rgba(16,185,129,0.8),0_0_80px_rgba(16,185,129,0.4)] transition-shadoww-full shadow-[0_0_20px_rgba(16,185,129,0.7),_0_0_40px_rgba(16,185,129,0.5),_0_0_80px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.9),0_0_50px_rgba(16,185,129,0.6),0_0_100px_rgba(16,185,129,0.4)] transition-shadow"
+              className="text-lg w-full shadow-[0_0_30px_rgba(16,185,129,0.6),0_0_60px_rgba(16,185,129,0.3)] hover:shadow-[0_0_40px_rgba(16,185,129,0.8),0_0_80px_rgba(16,185,129,0.4)] transition-shadoww-full transition-shadow"
               onClick={handleSignIn}
               disabled={isLoading}
             >
