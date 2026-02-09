@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import {
   Dialog,
@@ -23,12 +23,11 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Search, UserPlus, CheckCircle2, Loader2 } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useToast } from "@/hooks/use-toast";
-import {
-  getUsersList,
-  addSigner,
-  UserSelectItem,
-} from "@/services/accountService";
+import { addSigner } from "@/services/accountService";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useUsersListQuery } from "@/hooks/useUsersListQuery";
+import { useAccountMutations } from "@/hooks/useAccountDetailQuery";
+import { getErrorMessage } from "@/lib/error-handler";
 
 interface AddSignerDialogProps {
   accountId: string;
@@ -47,34 +46,12 @@ export function AddSignerDialog({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
-  const [users, setUsers] = useState<UserSelectItem[]>([]);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
 
-  // واکشی لیست کاربران
-  useEffect(() => {
-    const fetchUsers = async () => {
-      if (!session?.accessToken || !open) return;
+  // استفاده از React Query hook - فقط وقتی dialog باز است
+  const { data: users = [], isLoading: isLoadingUsers } = useUsersListQuery();
 
-      setIsLoadingUsers(true);
-      try {
-        const data = await getUsersList();
-        setUsers(data);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-        toast({
-          title: t("toast.error"),
-          description: "خطا در دریافت لیست کاربران",
-          variant: "error",
-        });
-      } finally {
-        setIsLoadingUsers(false);
-      }
-    };
-
-    fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.accessToken, open]);
+  // استفاده از mutations
+  const mutations = useAccountMutations(accountId);
 
   // فیلتر کاربران: فقط کاربرانی که امضادار نیستند
   const availableUsers = users.filter(
@@ -96,34 +73,36 @@ export function AddSignerDialog({
     : null;
 
   const handleAdd = async () => {
-    if (!selected || !selectedUser || !session?.accessToken) return;
+    if (!selected || !selectedUser) return;
 
-    setIsAdding(true);
-    try {
-      await addSigner({
+    mutations.addSigner.mutate(
+      {
         userId: selectedUser.id,
         bankGatewayId: accountId,
         fullName: `${selectedUser.firstName} ${selectedUser.lastName}`,
-      });
-      toast({
-        title: t("toast.success"),
-        description: "امضادار با موفقیت اضافه شد",
-        variant: "success",
-      });
-      onAdd();
-      setOpen(false);
-      setSelected(null);
-      setSearch("");
-    } catch (error) {
-      console.error("Error adding signer:", error);
-      toast({
-        title: t("toast.error"),
-        description: "خطا در افزودن امضادار",
-        variant: "error",
-      });
-    } finally {
-      setIsAdding(false);
-    }
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: t("toast.success"),
+            description: "امضادار با موفقیت اضافه شد",
+            variant: "success",
+          });
+          onAdd();
+          setOpen(false);
+          setSelected(null);
+          setSearch("");
+        },
+        onError: (error) => {
+          const errorMessage = getErrorMessage(error);
+          toast({
+            title: t("toast.error"),
+            description: errorMessage,
+            variant: "error",
+          });
+        },
+      }
+    );
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -253,10 +232,10 @@ export function AddSignerDialog({
           </Button>
           <Button
             onClick={handleAdd}
-            disabled={!selected || isAdding}
+            disabled={!selected || mutations.addSigner.isPending}
             className="flex-1 gap-2"
           >
-            {isAdding ? (
+            {mutations.addSigner.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 در حال افزودن...

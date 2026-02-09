@@ -1,9 +1,11 @@
 import { useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { OperationTypeEnum } from "@/types/api";
 import { useToast } from "@/hooks/use-toast";
 import useTranslation from "@/hooks/useTranslation";
 import { getErrorMessage } from "@/lib/error-handler";
+import { queryKeys } from "@/lib/react-query";
 
 type OtpFlowType = "approve" | "reject";
 
@@ -141,6 +143,7 @@ export function useCartableOtpFlow({
   const { toast } = useToast();
   const { t } = useTranslation();
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
 
   const [otpDialog, setOtpDialog] = useState<OtpDialogState>({
     open: false,
@@ -315,6 +318,16 @@ export function useCartableOtpFlow({
           orderIds: [],
           isRequestingOtp: false,
           isBatchOperation: false,
+        });
+
+        // Invalidate dashboard چون transaction status تغییر می‌کند
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.dashboard.all,
+        });
+
+        // Invalidate payment orders list
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.paymentOrders.all,
         });
 
         // فراخوانی callback موفقیت

@@ -6,7 +6,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -26,11 +25,9 @@ import { IconPicker } from "./icon-picker";
 import { ColorPicker } from "./color-picker";
 import useTranslation from "@/hooks/useTranslation";
 import { useToast } from "@/hooks/use-toast";
-import {
-  createAccountGroup,
-  editAccountGroup,
-} from "@/services/accountGroupService";
 import type { AccountGroupDetail } from "@/types/account-group-types";
+import { useAccountGroupMutations } from "@/hooks/useAccountGroupsQuery";
+import { getErrorMessage } from "@/lib/error-handler";
 
 interface CreateEditGroupDialogProps {
   group?: AccountGroupDetail | null;
@@ -46,9 +43,10 @@ export function CreateEditGroupDialog({
   const { t } = useTranslation();
   const { toast } = useToast();
   const router = useRouter();
-  const { data: session } = useSession();
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // استفاده از mutations
+  const mutations = useAccountGroupMutations();
 
   const isEditMode = !!group;
 
@@ -91,45 +89,60 @@ export function CreateEditGroupDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate() || !session?.accessToken) return;
+    if (!validate()) return;
 
-    setIsLoading(true);
-    try {
-      if (isEditMode && group) {
-        // ویرایش
-        await editAccountGroup({
+    if (isEditMode && group) {
+      // ویرایش
+      mutations.edit.mutate(
+        {
           id: group.id,
           ...formData,
-        });
-        toast({
-          title: t("toast.success"),
-          description: "گروه با موفقیت ویرایش شد",
-          variant: "success",
-        });
-      } else {
-        // ایجاد
-        const newGroupId = await createAccountGroup(formData);
-        toast({
-          title: t("toast.success"),
-          description: "گروه با موفقیت ایجاد شد",
-          variant: "success",
-        });
-        // انتقال به صفحه جزئیات برای افزودن حساب
-        router.push(`/account-groups/${newGroupId}`);
-      }
-
-      setOpen(false);
-      onSuccess?.();
-      handleReset();
-    } catch (error: any) {
-      console.error("Error saving group:", error);
-      toast({
-        title: t("toast.error"),
-        description: error.response?.data || "خطا در ذخیره گروه",
-        variant: "error",
+        },
+        {
+          onSuccess: () => {
+            toast({
+              title: t("toast.success"),
+              description: "گروه با موفقیت ویرایش شد",
+              variant: "success",
+            });
+            setOpen(false);
+            onSuccess?.();
+            handleReset();
+          },
+          onError: (error) => {
+            const errorMessage = getErrorMessage(error);
+            toast({
+              title: t("toast.error"),
+              description: errorMessage,
+              variant: "error",
+            });
+          },
+        }
+      );
+    } else {
+      // ایجاد
+      mutations.create.mutate(formData, {
+        onSuccess: (newGroupId) => {
+          toast({
+            title: t("toast.success"),
+            description: "گروه با موفقیت ایجاد شد",
+            variant: "success",
+          });
+          setOpen(false);
+          onSuccess?.();
+          handleReset();
+          // انتقال به صفحه جزئیات برای افزودن حساب
+          router.push(`/account-groups/${newGroupId}`);
+        },
+        onError: (error) => {
+          const errorMessage = getErrorMessage(error);
+          toast({
+            title: t("toast.error"),
+            description: errorMessage,
+            variant: "error",
+          });
+        },
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -250,13 +263,17 @@ export function CreateEditGroupDialog({
               type="button"
               variant="outline"
               onClick={() => handleOpenChange(false)}
-              disabled={isLoading}
+              disabled={mutations.create.isPending || mutations.edit.isPending}
               className="flex-1"
             >
               انصراف
             </Button>
-            <Button type="submit" disabled={isLoading} className="flex-1 gap-2">
-              {isLoading ? (
+            <Button
+              type="submit"
+              disabled={mutations.create.isPending || mutations.edit.isPending}
+              className="flex-1 gap-2"
+            >
+              {(mutations.create.isPending || mutations.edit.isPending) ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   در حال ذخیره...

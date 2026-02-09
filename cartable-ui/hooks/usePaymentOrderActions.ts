@@ -92,6 +92,10 @@ export function usePaymentOrderActions(orderId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.paymentOrders.detail(orderId),
       });
+      // Invalidate dashboard چون transaction status ممکن است تغییر کرده باشد
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.dashboard.all,
+      });
     },
   });
 
@@ -133,6 +137,14 @@ export function usePaymentOrderActions(orderId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.paymentOrders.detail(orderId),
       });
+      // Invalidate dashboard چون transaction status تغییر می‌کند
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.dashboard.all,
+      });
+      // Invalidate cartable چون ممکن است در کارتابل تغییر کند
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.cartable.all,
+      });
     },
   });
 
@@ -168,6 +180,14 @@ export function usePaymentOrderActions(orderId: string) {
       // همچنین لیست دستورات پرداخت را هم invalidate کنید
       queryClient.invalidateQueries({
         queryKey: queryKeys.paymentOrders.all,
+      });
+      // Invalidate dashboard چون transaction status تغییر می‌کند
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.dashboard.all,
+      });
+      // Invalidate cartable چون از کارتابل خارج می‌شود یا وضعیت تغییر می‌کند
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.cartable.all,
       });
     },
   });

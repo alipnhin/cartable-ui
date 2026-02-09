@@ -6,17 +6,14 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { FixHeader } from "@/components/layout/Fix-Header";
 import {
-  ArrowLeft,
   Users,
   CheckCircle2,
   XCircle,
   RefreshCw,
-  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,82 +32,64 @@ import {
   CardToolbar,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  getAccountDetail,
-  changeMinimumSignature,
-  enableSigner,
-  disableSigner,
-  AccountDetailResponse,
-} from "@/services/accountService";
 import { getErrorMessage } from "@/lib/error-handler";
+import { useAccountDetailQuery, useAccountMutations } from "@/hooks/useAccountDetailQuery";
+import { useRegisterRefresh } from "@/contexts/pull-to-refresh-context";
+import { ErrorState } from "@/components/common/error-state";
+import { PageTitle } from "@/components/common/page-title";
 
 export default function AccountDetailPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { toast } = useToast();
   const params = useParams();
-  const { data: session } = useSession();
   const accountId = params?.id as string;
 
-  const [account, setAccount] = useState<AccountDetailResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // استفاده از React Query hook
+  const {
+    data: account,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useAccountDetailQuery(accountId);
 
-  /**
-   * واکشی اطلاعات حساب
-   */
-  const fetchAccountDetail = async () => {
-    if (!session?.accessToken || !accountId) return;
+  // استفاده از mutations
+  const mutations = useAccountMutations(accountId);
 
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const data = await getAccountDetail(accountId);
-      setAccount(data);
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      setError(errorMessage);
-      toast({
-        title: t("toast.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // ثبت refetch برای Pull-to-Refresh
+  useRegisterRefresh(async () => {
+    await refetch();
+  });
 
   /**
    * تغییر حداقل امضا
    */
   const handleSaveMinSignatures = async (value: number) => {
-    if (!session?.accessToken || !account) return;
+    if (!account) return;
 
-    setIsUpdating(true);
-    try {
-      await changeMinimumSignature({
+    mutations.changeMinSignature.mutate(
+      {
         minimumSignature: value,
         bankGatewayId: account.id,
-      });
-      toast({
-        title: t("toast.success"),
-        description: "حداقل امضا با موفقیت تغییر کرد",
-        variant: "success",
-      });
-      // Reload data
-      await fetchAccountDetail();
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      toast({
-        title: t("toast.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-    } finally {
-      setIsUpdating(false);
-    }
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: t("toast.success"),
+            description: "حداقل امضا با موفقیت تغییر کرد",
+            variant: "success",
+          });
+        },
+        onError: (err) => {
+          const errorMessage = getErrorMessage(err);
+          toast({
+            title: t("toast.error"),
+            description: errorMessage,
+            variant: "error",
+          });
+        },
+      }
+    );
   };
 
   /**
@@ -120,38 +99,44 @@ export default function AccountDetailPage() {
     signerId: string,
     currentStatus: string | number
   ) => {
-    if (!session?.accessToken) return;
-
-    setIsUpdating(true);
-    try {
-      // Status 1 or "Enable" = active, so we disable it
-      // Status 2 or "Disable" or 4 or "Rejected" = inactive, so we enable it
-      if (currentStatus === 1 || currentStatus === "Enable") {
-        await disableSigner(signerId);
-        toast({
-          title: t("toast.success"),
-          description: "درخواست غیرفعال‌سازی ثبت شد",
-          variant: "success",
-        });
-      } else {
-        await enableSigner(signerId);
-        toast({
-          title: t("toast.success"),
-          description: "درخواست فعال‌سازی ثبت شد",
-          variant: "success",
-        });
-      }
-      // Reload data
-      await fetchAccountDetail();
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      toast({
-        title: t("toast.error"),
-        description: errorMessage,
-        variant: "error",
+    // Status 1 or "Enable" = active, so we disable it
+    // Status 2 or "Disable" or 4 or "Rejected" = inactive, so we enable it
+    if (currentStatus === 1 || currentStatus === "Enable") {
+      mutations.disableSigner.mutate(signerId, {
+        onSuccess: () => {
+          toast({
+            title: t("toast.success"),
+            description: "درخواست غیرفعال‌سازی ثبت شد",
+            variant: "success",
+          });
+        },
+        onError: (err) => {
+          const errorMessage = getErrorMessage(err);
+          toast({
+            title: t("toast.error"),
+            description: errorMessage,
+            variant: "error",
+          });
+        },
       });
-    } finally {
-      setIsUpdating(false);
+    } else {
+      mutations.enableSigner.mutate(signerId, {
+        onSuccess: () => {
+          toast({
+            title: t("toast.success"),
+            description: "درخواست فعال‌سازی ثبت شد",
+            variant: "success",
+          });
+        },
+        onError: (err) => {
+          const errorMessage = getErrorMessage(err);
+          toast({
+            title: t("toast.error"),
+            description: errorMessage,
+            variant: "error",
+          });
+        },
+      });
     }
   };
 
@@ -160,13 +145,11 @@ export default function AccountDetailPage() {
    */
   const handleAddSigner = async () => {
     // Reload data after adding signer
-    await fetchAccountDetail();
+    await refetch();
   };
 
-  // واکشی اولیه داده‌ها
-  useEffect(() => {
-    fetchAccountDetail();
-  }, [accountId, session?.accessToken]);
+  // Error state
+  const error = queryError ? getErrorMessage(queryError) : null;
 
   // تعداد امضاداران فعال
   const activeSignersCount =
@@ -252,7 +235,24 @@ export default function AccountDetailPage() {
   }
 
   // Error state
-  if (error || !account) {
+  if (error && !account) {
+    return (
+      <>
+        <PageTitle title={t("accounts.detailTitle")} />
+        <FixHeader returnUrl="/accounts" />
+        <div className="container mx-auto p-4 md:p-6 mt-14">
+          <ErrorState
+            title={t("common.messages.notFound")}
+            message={error || "حساب مورد نظر یافت نشد"}
+            onRetry={() => refetch()}
+          />
+        </div>
+      </>
+    );
+  }
+
+  // 404 state - Account not found
+  if (!isLoading && !account) {
     return (
       <>
         <FixHeader returnUrl="/accounts" />
@@ -262,7 +262,7 @@ export default function AccountDetailPage() {
               {t("common.messages.notFound")}
             </h2>
             <p className="text-muted-foreground mb-6">
-              {error || "حساب مورد نظر یافت نشد"}
+              حساب مورد نظر یافت نشد
             </p>
             <Button onClick={() => router.push("/accounts")}>
               بازگشت به لیست حساب‌ها
@@ -275,14 +275,15 @@ export default function AccountDetailPage() {
 
   return (
     <>
+      <PageTitle title={account?.title || t("accounts.detailTitle")} />
       <FixHeader returnUrl="/accounts">
         <Button
           variant="dashed"
-          onClick={fetchAccountDetail}
-          disabled={isUpdating}
+          onClick={() => refetch()}
+          disabled={mutations.changeMinSignature.isPending || mutations.enableSigner.isPending || mutations.disableSigner.isPending}
           className="gap-2"
         >
-          <RefreshCw className={`${isUpdating ? "animate-spin" : ""}`} />
+          <RefreshCw className={`${(mutations.changeMinSignature.isPending || mutations.enableSigner.isPending || mutations.disableSigner.isPending) ? "animate-spin" : ""}`} />
           {t("common.refresh")}
         </Button>
       </FixHeader>
@@ -345,7 +346,7 @@ export default function AccountDetailPage() {
                 currentValue={account.minimumSignature}
                 maxValue={account.users?.length ?? 0}
                 onSave={handleSaveMinSignatures}
-                isLoading={isUpdating}
+                isLoading={mutations.changeMinSignature.isPending}
               />
 
               {/* لیست امضاداران */}
@@ -356,7 +357,7 @@ export default function AccountDetailPage() {
                       key={signer.id}
                       signer={signer}
                       onRequestStatusChange={handleRequestStatusChange}
-                      isUpdating={isUpdating}
+                      isUpdating={mutations.enableSigner.isPending || mutations.disableSigner.isPending}
                     />
                   ))}
                 </div>

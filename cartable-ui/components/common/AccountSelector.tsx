@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useState } from "react";
 import {
   Command,
   CommandCheck,
@@ -17,10 +16,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { getAccountsSelectData } from "@/services/accountService";
-import type { AccountSelectData } from "@/services/accountService";
-import { Loader2, Check, ChevronsUpDown } from "lucide-react";
+import { Loader2, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAccountsSelectQuery } from "@/hooks/useAccountsSelectQuery";
+import { getErrorMessage } from "@/lib/error-handler";
 
 interface AccountSelectorProps {
   value?: string;
@@ -32,7 +31,8 @@ interface AccountSelectorProps {
 }
 
 /**
- * Reusable account selector component that fetches accounts from API
+ * Reusable account selector component
+ * Uses React Query for data fetching to prevent duplicate requests
  * Can be used in filters, forms, or anywhere an account selection is needed
  */
 export default function AccountSelector({
@@ -43,36 +43,13 @@ export default function AccountSelector({
   className,
   disabled = false,
 }: AccountSelectorProps) {
-  const { data: session } = useSession();
-  const [accounts, setAccounts] = useState<AccountSelectData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      if (!session?.accessToken) return;
+  // ✅ استفاده از React Query hook به جای fetch مستقیم
+  const { accounts, isLoading, error } = useAccountsSelectQuery();
 
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await getAccountsSelectData(
-          { pageSize: 50, pageNum: 1 }
-        );
-        setAccounts(response.results);
-      } catch (err) {
-        console.error("Error fetching accounts:", err);
-        setError("خطا در دریافت لیست حساب‌ها");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAccounts();
-  }, [session?.accessToken]);
-
-  if (loading) {
+  // نمایش loading state
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-10 border rounded-md bg-background">
         <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
@@ -80,10 +57,12 @@ export default function AccountSelector({
     );
   }
 
+  // نمایش error state
   if (error) {
+    const errorMessage = getErrorMessage(error);
     return (
       <div className="flex items-center justify-center h-10 border rounded-md bg-destructive/10 text-destructive text-sm">
-        {error}
+        {errorMessage}
       </div>
     );
   }

@@ -6,9 +6,8 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { FixHeader } from "@/components/layout/Fix-Header";
 import * as LucideIcons from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,37 +34,44 @@ import { Skeleton } from "@/components/ui/skeleton";
 import useTranslation from "@/hooks/useTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  getAccountGroupById,
-  removeGroupAccount,
-} from "@/services/accountGroupService";
-import { getAccountsList, AccountListItem } from "@/services/accountService";
-import type {
-  AccountGroupDetail,
-  AccountGroupItem,
-} from "@/types/account-group-types";
+import type { AccountGroupItem } from "@/types/account-group-types";
 import { CreateEditGroupDialog } from "../components/create-edit-group-dialog";
 import { AddAccountsDialog } from "../components/add-accounts-dialog";
 import { GroupAccountCard } from "../components/group-account-card";
-import { RefreshCw, Folders, Edit2, Loader2 } from "lucide-react";
+import { RefreshCw, Folders, Loader2 } from "lucide-react";
 import { getErrorMessage } from "@/lib/error-handler";
+import { useAccountGroupDetailQuery, useAccountGroupDetailMutations } from "@/hooks/useAccountGroupDetailQuery";
+import { useRegisterRefresh } from "@/contexts/pull-to-refresh-context";
+import { ErrorState } from "@/components/common/error-state";
+import { PageTitle } from "@/components/common/page-title";
 
 export default function AccountGroupDetailPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { toast } = useToast();
   const params = useParams();
-  const { data: session } = useSession();
   const isMobile = useIsMobile();
   const groupId = params?.id as string;
 
-  const [group, setGroup] = useState<AccountGroupDetail | null>(null);
-  const [allAccounts, setAllAccounts] = useState<AccountListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [accountToRemove, setAccountToRemove] =
     useState<AccountGroupItem | null>(null);
+
+  // استفاده از React Query hook
+  const {
+    group,
+    allAccounts,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useAccountGroupDetailQuery(groupId);
+
+  // استفاده از mutations
+  const mutations = useAccountGroupDetailMutations(groupId);
+
+  // ثبت refetch برای Pull-to-Refresh
+  useRegisterRefresh(async () => {
+    await refetch();
+  });
 
   const getIcon = (iconName?: string) => {
     if (!iconName) return null;
@@ -73,61 +79,28 @@ export default function AccountGroupDetailPage() {
     return Icon ? <Icon className="h-6 w-6" /> : null;
   };
 
-  // واکشی اطلاعات گروه
-  const fetchGroupDetail = async () => {
-    if (!session?.accessToken || !groupId) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const [groupData, accountsData] = await Promise.all([
-        getAccountGroupById(groupId),
-        getAccountsList(),
-      ]);
-      setGroup(groupData);
-      setAllAccounts(accountsData);
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      setError(errorMessage);
-      toast({
-        title: t("toast.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchGroupDetail();
-  }, [groupId, session?.accessToken]);
-
   // حذف حساب از گروه
   const handleRemoveAccount = async () => {
-    if (!accountToRemove || !session?.accessToken) return;
+    if (!accountToRemove) return;
 
-    setIsUpdating(true);
-    try {
-      await removeGroupAccount(accountToRemove.id);
-      toast({
-        title: t("toast.success"),
-        description: "حساب با موفقیت از گروه حذف شد",
-        variant: "success",
-      });
-      await fetchGroupDetail();
-    } catch (error: any) {
-      const errorMessage = getErrorMessage(error);
-      toast({
-        title: t("toast.error"),
-        description: errorMessage,
-        variant: "error",
-      });
-    } finally {
-      setIsUpdating(false);
-      setAccountToRemove(null);
-    }
+    mutations.removeAccount.mutate(accountToRemove.id, {
+      onSuccess: () => {
+        toast({
+          title: t("toast.success"),
+          description: "حساب با موفقیت از گروه حذف شد",
+          variant: "success",
+        });
+        setAccountToRemove(null);
+      },
+      onError: (error) => {
+        const errorMessage = getErrorMessage(error);
+        toast({
+          title: t("toast.error"),
+          description: errorMessage,
+          variant: "error",
+        });
+      },
+    });
   };
 
   // یافتن اطلاعات بانک برای هر حساب
@@ -178,7 +151,26 @@ export default function AccountGroupDetailPage() {
   }
 
   // Error state
-  if (error || !group) {
+  const error = queryError ? getErrorMessage(queryError) : null;
+
+  if (error && !group) {
+    return (
+      <>
+        <PageTitle title={t("accountGroups.detailTitle")} />
+        <FixHeader returnUrl="/account-groups" />
+        <div className="container mx-auto p-4 md:p-6 mt-14">
+          <ErrorState
+            title="گروه یافت نشد"
+            message={error || "گروه مورد نظر یافت نشد"}
+            onRetry={() => refetch()}
+          />
+        </div>
+      </>
+    );
+  }
+
+  // 404 state - Group not found
+  if (!isLoading && !group) {
     return (
       <>
         <FixHeader returnUrl="/account-groups" />
@@ -187,7 +179,7 @@ export default function AccountGroupDetailPage() {
             <Folders className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-2xl font-bold mb-2">گروه یافت نشد</h2>
             <p className="text-muted-foreground mb-6">
-              {error || "گروه مورد نظر یافت نشد"}
+              گروه مورد نظر یافت نشد
             </p>
             <Button onClick={() => router.push("/account-groups")}>
               بازگشت به لیست گروه‌ها
@@ -200,20 +192,21 @@ export default function AccountGroupDetailPage() {
 
   return (
     <>
+      <PageTitle title={group?.title || t("accountGroups.detailTitle")} />
       <FixHeader returnUrl="/account-groups">
         <div className="flex gap-2">
           <Button
             variant="dashed"
-            onClick={fetchGroupDetail}
-            disabled={isUpdating}
+            onClick={() => refetch()}
+            disabled={mutations.removeAccount.isPending}
             className="gap-2"
           >
             <RefreshCw
-              className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`}
+              className={`h-4 w-4 ${mutations.removeAccount.isPending ? "animate-spin" : ""}`}
             />
             {!isMobile && t("common.refresh")}
           </Button>
-          <CreateEditGroupDialog group={group} onSuccess={fetchGroupDetail} />
+          <CreateEditGroupDialog group={group!} onSuccess={() => refetch()} />
         </div>
       </FixHeader>
 
@@ -281,7 +274,7 @@ export default function AccountGroupDetailPage() {
                 existingAccountIds={
                   group.items?.map((item) => item.bankGatewayId) || []
                 }
-                onSuccess={fetchGroupDetail}
+                onSuccess={() => refetch()}
               />
             </CardToolbar>
           </CardHeader>
@@ -311,7 +304,7 @@ export default function AccountGroupDetailPage() {
                 <AddAccountsDialog
                   groupId={groupId}
                   existingAccountIds={[]}
-                  onSuccess={fetchGroupDetail}
+                  onSuccess={() => refetch()}
                 />
               </div>
             )}
@@ -333,13 +326,13 @@ export default function AccountGroupDetailPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isUpdating}>انصراف</AlertDialogCancel>
+            <AlertDialogCancel disabled={mutations.removeAccount.isPending}>انصراف</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRemoveAccount}
-              disabled={isUpdating}
+              disabled={mutations.removeAccount.isPending}
               className="bg-destructive hover:bg-destructive/90"
             >
-              {isUpdating ? (
+              {mutations.removeAccount.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin me-2" />
                   در حال حذف...

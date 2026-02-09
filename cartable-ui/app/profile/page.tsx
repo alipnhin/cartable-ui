@@ -2,7 +2,6 @@
 
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
-import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -15,75 +14,66 @@ import {
   CheckCircle2,
   UserCircle,
   RefreshCw,
-  AlertCircle,
   CreditCard,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { FixHeader } from "@/components/layout/Fix-Header";
-import { UserInfoResponse } from "@/services/userProfileService";
+import { useUserProfileQuery } from "@/hooks/useUserProfileQuery";
+import { useRegisterRefresh } from "@/contexts/pull-to-refresh-context";
+import { PageTitle } from "@/components/common/page-title";
+import { ErrorState } from "@/components/common/error-state";
 
 export default function ProfilePage() {
   const { t } = useTranslation();
   const { data: session, status } = useSession();
-  const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  // تابع دریافت اطلاعات کاربر
-  const fetchUserInfo = async (showRefreshLoading = false) => {
-    if (!session?.accessToken) {
-      setIsLoading(false);
-      return;
-    }
+  // استفاده از React Query hook
+  const {
+    data: userInfo,
+    isLoading,
+    error: queryError,
+    refetch,
+    isRefetching,
+  } = useUserProfileQuery();
 
-    try {
-      if (showRefreshLoading) {
-        setIsRefreshing(true);
-      } else {
-        setIsLoading(true);
-      }
-      setError(null);
+  // ثبت refetch برای Pull-to-Refresh
+  useRegisterRefresh(async () => {
+    await refetch();
+  });
 
-      const response = await fetch("/api/user/profile", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        cache: "no-store",
-      });
+  // Error state
+  const error = queryError ? getErrorMessage(queryError) : null;
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch user info");
-      }
-
-      const data: UserInfoResponse = await response.json();
-      setUserInfo(data);
-    } catch (err) {
-      const errorMessage = getErrorMessage(err);
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  };
-
-  // دریافت اطلاعات در اولین بارگذاری
-  useEffect(() => {
-    if (status === "authenticated") {
-      fetchUserInfo();
-    }
-  }, [status]);
-
+  // Loading state
   if (status === "loading" || isLoading) {
     return (
       <>
+        <PageTitle title={t("profile.pageTitle")} />
         <FixHeader returnUrl="/dashboard" />
         <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
           <div className="container max-w-5xl mx-auto px-4 py-8 mt-14">
             <Skeleton className="h-64 w-full rounded-2xl mb-6" />
             <Skeleton className="h-96 w-full rounded-2xl" />
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Error state
+  if (error && !userInfo) {
+    return (
+      <>
+        <PageTitle title={t("profile.pageTitle")} />
+        <FixHeader returnUrl="/dashboard" />
+        <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
+          <div className="container max-w-5xl mx-auto px-4 py-8 mt-14">
+            <ErrorState
+              title={t("profile.errorTitle")}
+              message={error}
+              onRetry={() => refetch()}
+            />
           </div>
         </div>
       </>
@@ -195,14 +185,14 @@ export default function ProfilePage() {
                 {/* Refresh Button */}
                 <Button
                   variant="outline"
-                  onClick={() => fetchUserInfo(true)}
-                  disabled={isRefreshing}
+                  onClick={() => refetch()}
+                  disabled={isRefetching}
                   className="gap-2 rounded-xl h-11 px-6 border-2 hover:border-primary/50 transition-all"
                 >
                   <RefreshCw
-                    className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
+                    className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`}
                   />
-                  {isRefreshing ? t("common.loading") : t("common.refresh")}
+                  {isRefetching ? t("common.loading") : t("common.refresh")}
                 </Button>
               </div>
             </CardContent>

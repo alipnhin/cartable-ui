@@ -5,8 +5,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,9 +22,10 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Loader2, UserPlus } from "lucide-react";
 import useTranslation from "@/hooks/useTranslation";
 import { useToast } from "@/hooks/use-toast";
-import { getAccountsList, AccountListItem } from "@/services/accountService";
-import { addGroupAccounts } from "@/services/accountGroupService";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAccountsQuery } from "@/hooks/useAccountsQuery";
+import { useAccountGroupDetailMutations } from "@/hooks/useAccountGroupDetailQuery";
+import { getErrorMessage } from "@/lib/error-handler";
 
 interface AddAccountsDialogProps {
   groupId: string;
@@ -40,37 +40,15 @@ export function AddAccountsDialog({
 }: AddAccountsDialogProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [accounts, setAccounts] = useState<AccountListItem[]>([]);
-  const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
 
-  // واکشی لیست حساب‌ها
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      if (!session?.accessToken || !open) return;
+  // استفاده از React Query hook
+  const { accounts, isLoading: isLoadingAccounts } = useAccountsQuery();
 
-      setIsLoadingAccounts(true);
-      try {
-        const data = await getAccountsList();
-        setAccounts(data);
-      } catch (error) {
-        console.error("Error fetching accounts:", error);
-        toast({
-          title: t("toast.error"),
-          description: "خطا در دریافت لیست حساب‌ها",
-          variant: "error",
-        });
-      } finally {
-        setIsLoadingAccounts(false);
-      }
-    };
-
-    fetchAccounts();
-  }, [session?.accessToken, open]);
+  // استفاده از mutations
+  const mutations = useAccountGroupDetailMutations(groupId);
 
   // فیلتر حساب‌ها: فقط حساب‌هایی که در گروه نیستند
   const availableAccounts = accounts.filter(
@@ -103,33 +81,35 @@ export function AddAccountsDialog({
   };
 
   const handleAdd = async () => {
-    if (selectedIds.length === 0 || !session?.accessToken) return;
+    if (selectedIds.length === 0) return;
 
-    setIsAdding(true);
-    try {
-      await addGroupAccounts({
+    mutations.addAccounts.mutate(
+      {
         groupId,
         bankGatewayIds: selectedIds,
-      });
-      toast({
-        title: t("toast.success"),
-        description: `${selectedIds.length} حساب با موفقیت اضافه شد`,
-        variant: "success",
-      });
-      onSuccess();
-      setOpen(false);
-      setSelectedIds([]);
-      setSearch("");
-    } catch (error: any) {
-      console.error("Error adding accounts:", error);
-      toast({
-        title: t("toast.error"),
-        description: error.response?.data || "خطا در افزودن حساب‌ها",
-        variant: "error",
-      });
-    } finally {
-      setIsAdding(false);
-    }
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: t("toast.success"),
+            description: `${selectedIds.length} حساب با موفقیت اضافه شد`,
+            variant: "success",
+          });
+          onSuccess();
+          setOpen(false);
+          setSelectedIds([]);
+          setSearch("");
+        },
+        onError: (error) => {
+          const errorMessage = getErrorMessage(error);
+          toast({
+            title: t("toast.error"),
+            description: errorMessage,
+            variant: "error",
+          });
+        },
+      }
+    );
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -272,10 +252,10 @@ export function AddAccountsDialog({
           </Button>
           <Button
             onClick={handleAdd}
-            disabled={selectedIds.length === 0 || isAdding}
+            disabled={selectedIds.length === 0 || mutations.addAccounts.isPending}
             className="flex-1 gap-2"
           >
-            {isAdding ? (
+            {mutations.addAccounts.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 در حال افزودن...
